@@ -468,12 +468,22 @@ function Pandoc(doc)
             end
             text = text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
             local toc_style = "TOC" .. blk.level
-            -- Use TOC1/TOC2/TOC3 styles (defined in fix_generated_docx with tab stops + dot leaders)
+            -- Use TOC1/TOC2/TOC3 styles with hyperlinks to heading bookmarks (clickable navigation)
             -- Tab triggers the dot leader from the style; page number added when Word updates field
-            toc_entries_xml = toc_entries_xml ..
-              string.format('<w:p><w:pPr><w:pStyle w:val="%s"/></w:pPr>' ..
-              '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r>' ..
-              '<w:r><w:tab/></w:r></w:p>', toc_style, section, text)
+            local anchor = blk.identifier
+            if anchor and anchor ~= "" then
+              toc_entries_xml = toc_entries_xml ..
+                string.format('<w:p><w:pPr><w:pStyle w:val="%s"/></w:pPr>' ..
+                '<w:hyperlink w:anchor="%s">' ..
+                '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r>' ..
+                '<w:r><w:tab/></w:r>' ..
+                '</w:hyperlink></w:p>', toc_style, anchor, section, text)
+            else
+              toc_entries_xml = toc_entries_xml ..
+                string.format('<w:p><w:pPr><w:pStyle w:val="%s"/></w:pPr>' ..
+                '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r>' ..
+                '<w:r><w:tab/></w:r></w:p>', toc_style, section, text)
+            end
           end
         end
         -- TOC field: multi-paragraph structure with cached entries

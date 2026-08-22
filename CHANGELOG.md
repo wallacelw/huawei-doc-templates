@@ -3,6 +3,16 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.6.1 (2026-08-23)
+
+### TOC entries now clickable
+
+- **TOC hyperlinks**: Cached TOC entries now wrap text in `<w:hyperlink
+  w:anchor="...">` pointing to each heading's bookmark. Clicking a TOC entry
+  navigates to the corresponding section. All 11 anchors match pandoc-generated
+  bookmarks (slug-based names like `provision-an-elastic-cloud-server`).
+- No `w:dirty`, no `updateFields` — no security warning on open.
+
 ## v2.6.0 (2026-08-23)
 
 ### DOCX style architecture overhaul — styles-first approach
