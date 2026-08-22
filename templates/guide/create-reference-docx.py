@@ -208,6 +208,17 @@ def fix_generated_docx(docx_path):
 
     root = etree.fromstring(styles_xml)
 
+    # Remove duplicate styleIds (keep first occurrence, remove subsequent)
+    # python-docx's BabelFish lookup can create duplicates; this ensures a clean styles.xml
+    seen_ids = set()
+    for s in root.findall(f"{{{W_NS}}}style"):
+        sid = s.get(f"{{{W_NS}}}styleId")
+        if sid:
+            if sid in seen_ids:
+                root.remove(s)
+            else:
+                seen_ids.add(sid)
+
     for heading_id in ['Heading1', 'Heading2', 'Heading3', 'Heading4']:
         style = None
         for s in root.findall(f"{{{W_NS}}}style"):
@@ -296,6 +307,46 @@ def fix_generated_docx(docx_path):
                 spacing = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
             spacing.set(f"{{{W_NS}}}before", target_spacing[0])
             spacing.set(f"{{{W_NS}}}after", target_spacing[1])
+
+        # Add keepNext and keepLines (prevents heading from separating from next paragraph)
+        pPr = style.find(f"{{{W_NS}}}pPr")
+        if pPr is None:
+            pPr = etree.SubElement(style, f"{{{W_NS}}}pPr")
+        if pPr.find(f"{{{W_NS}}}keepNext") is None:
+            keep_next = etree.Element(f"{{{W_NS}}}keepNext")
+            pPr.insert(0, keep_next)
+        if pPr.find(f"{{{W_NS}}}keepLines") is None:
+            keep_lines = etree.Element(f"{{{W_NS}}}keepLines")
+            pPr.insert(1, keep_lines)
+
+    # Fix Heading5-9: add outlineLvl, qFormat, fix font/color to match Heading1-4 pattern
+    for level in range(5, 10):
+        heading_id = f"Heading{level}"
+        for s in root.findall(f"{{{W_NS}}}style"):
+            if s.get(f"{{{W_NS}}}styleId") == heading_id:
+                pPr = s.find(f"{{{W_NS}}}pPr")
+                if pPr is None:
+                    pPr = etree.SubElement(s, f"{{{W_NS}}}pPr")
+                if pPr.find(f"{{{W_NS}}}outlineLvl") is None:
+                    outline = etree.SubElement(pPr, f"{{{W_NS}}}outlineLvl")
+                    outline.set(f"{{{W_NS}}}val", str(level - 1))
+                if s.find(f"{{{W_NS}}}qFormat") is None:
+                    etree.SubElement(s, f"{{{W_NS}}}qFormat")
+                rPr = s.find(f"{{{W_NS}}}rPr")
+                if rPr is not None:
+                    color = rPr.find(f"{{{W_NS}}}color")
+                    if color is not None:
+                        for attr in list(color.attrib.keys()):
+                            del color.attrib[attr]
+                        color.set(f"{{{W_NS}}}val", "1F2328")
+                    rFonts = rPr.find(f"{{{W_NS}}}rFonts")
+                    if rFonts is not None:
+                        for attr in list(rFonts.attrib.keys()):
+                            if "Theme" in attr or "theme" in attr:
+                                del rFonts.attrib[attr]
+                        rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+                        rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+                break
 
     # Fix Title style (cover page): 36pt, near-black, HarmonyOS Sans
     for s in root.findall(f"{{{W_NS}}}style"):
@@ -480,6 +531,57 @@ def fix_generated_docx(docx_path):
                     spacing.set(f"{{{W_NS}}}line", "280")
                     spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
 
+    # ── Add Caption style for figure/table captions (if not present) ──────
+    has_caption = any(s.get(f"{{{W_NS}}}styleId") == "Caption" for s in root.findall(f"{{{W_NS}}}style"))
+    if not has_caption:
+        cs = etree.SubElement(root, f"{{{W_NS}}}style")
+        cs.set(f"{{{W_NS}}}type", "paragraph")
+        cs.set(f"{{{W_NS}}}styleId", "Caption")
+        etree.SubElement(cs, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "caption")
+        etree.SubElement(cs, f"{{{W_NS}}}basedOn").set(f"{{{W_NS}}}val", "Normal")
+        etree.SubElement(cs, f"{{{W_NS}}}next").set(f"{{{W_NS}}}val", "Caption")
+        etree.SubElement(cs, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", "35")
+        etree.SubElement(cs, f"{{{W_NS}}}qFormat")
+        pPr = etree.SubElement(cs, f"{{{W_NS}}}pPr")
+        sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
+        sp.set(f"{{{W_NS}}}before", "120")
+        sp.set(f"{{{W_NS}}}after", "120")
+        etree.SubElement(pPr, f"{{{W_NS}}}jc").set(f"{{{W_NS}}}val", "center")
+        rPr = etree.SubElement(cs, f"{{{W_NS}}}rPr")
+        rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
+        rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+        rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+        etree.SubElement(rPr, f"{{{W_NS}}}b")
+        etree.SubElement(rPr, f"{{{W_NS}}}sz").set(f"{{{W_NS}}}val", "20")  # 10pt
+        etree.SubElement(rPr, f"{{{W_NS}}}szCs").set(f"{{{W_NS}}}val", "20")
+
+    # ── Add TOC1/TOC2/TOC3 styles (Word built-in TOC entry styles) ───────
+    toc_configs = [
+        ("TOC1", "0",   "9"),
+        ("TOC2", "420", "9"),
+        ("TOC3", "840", "9"),
+    ]
+    for toc_id, indent, ui_pri in toc_configs:
+        has_toc = any(s.get(f"{{{W_NS}}}styleId") == toc_id for s in root.findall(f"{{{W_NS}}}style"))
+        if not has_toc:
+            ts = etree.SubElement(root, f"{{{W_NS}}}style")
+            ts.set(f"{{{W_NS}}}type", "paragraph")
+            ts.set(f"{{{W_NS}}}styleId", toc_id)
+            etree.SubElement(ts, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", toc_id.lower())
+            etree.SubElement(ts, f"{{{W_NS}}}basedOn").set(f"{{{W_NS}}}val", "Normal")
+            etree.SubElement(ts, f"{{{W_NS}}}next").set(f"{{{W_NS}}}val", "Normal")
+            etree.SubElement(ts, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", ui_pri)
+            etree.SubElement(ts, f"{{{W_NS}}}qFormat")
+            pPr = etree.SubElement(ts, f"{{{W_NS}}}pPr")
+            tabs = etree.SubElement(pPr, f"{{{W_NS}}}tabs")
+            tab = etree.SubElement(tabs, f"{{{W_NS}}}tab")
+            tab.set(f"{{{W_NS}}}val", "right")
+            tab.set(f"{{{W_NS}}}leader", "dot")
+            tab.set(f"{{{W_NS}}}pos", "9000")
+            etree.SubElement(pPr, f"{{{W_NS}}}ind").set(f"{{{W_NS}}}left", indent)
+            sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
+            sp.set(f"{{{W_NS}}}after", "40")  # 2pt
+
     modified_xml = etree.tostring(
         root, xml_declaration=True, encoding="UTF-8", standalone=True
     )
@@ -594,21 +696,10 @@ def main():
     pf.space_after = Pt(10)
     set_paragraph_border(style, "bottom", "1.5pt", "000000")
 
-    # ── Heading 1 — black text + red bottom rule (matches PDF) ─────────
-    try:
-        h1 = doc.styles["Heading 1"]
-    except KeyError:
-        h1 = doc.styles.add_style("Heading 1", WD_STYLE_TYPE.PARAGRAPH)
-    set_run_font(h1, "HarmonyOS Sans", 20, color_hex="1F2328", bold=True)
-    set_bottom_border(h1, "C7000B", size_pt=1.5)
-
-    # ── Headings 2-4 — near-black text (matches PDF) ──────────────────
-    for level, size in [("Heading 2", 18), ("Heading 3", 16), ("Heading 4", 14)]:
-        try:
-            h = doc.styles[level]
-        except KeyError:
-            h = doc.styles.add_style(level, WD_STYLE_TYPE.PARAGRAPH)
-        set_run_font(h, "HarmonyOS Sans", size, color_hex="1F2328", bold=False)
+    # NOTE: Heading 1-4 styles are NOT modified here. python-docx's BabelFish
+    # lookup fails on pandoc's reference DOCX (case sensitivity), creating
+    # duplicate styleIds. All heading style fixes are handled by
+    # fix_generated_docx() which modifies styles.xml directly.
 
     # ── Title (cover page) — 36pt, near-black, bold, centered (matches PDF) ──
     try:

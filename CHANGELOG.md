@@ -3,6 +3,47 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.6.0 (2026-08-23)
+
+### DOCX style architecture overhaul — styles-first approach
+
+**Fixes:**
+- **Removed duplicate Heading1-4 styleIds** — `create-reference-docx.py` was
+  creating custom heading styles via `add_style()` when python-docx's BabelFish
+  lookup failed (case sensitivity), producing invalid duplicate styleIds in
+  `styles.xml`. The duplicate styles lacked `outlineLvl`, causing headings to
+  not appear in Word's navigation pane.
+- **Removed `w:dirty="true"` from TOC field** — this was triggering Word's
+  "This document contains fields that may refer to other files" security
+  warning on open.
+- **Confirmed `updateFields` absent** from settings.xml in all generated DOCX.
+
+**New styles added in `fix_generated_docx`:**
+- **Caption** — for figure/table captions: 10pt bold, centered, HarmonyOS Sans
+- **TOC1/TOC2/TOC3** — Word built-in TOC entry styles with tab stops (right,
+  dot leader at 9000 twips) and per-level indentation
+- **Heading5-9** — fixed `outlineLvl` (4-8), `qFormat`, font/color to match
+  Heading1-4 pattern
+- **keepNext + keepLines** on Heading1-4 — prevents headings from separating
+  from following content
+
+**TOC improvements:**
+- Cached TOC entries now use TOC1/TOC2/TOC3 styles (proper indentation + tab
+  stops with5 dot leaders) instead of bare indentation
+- No `w:dirty` attribute — no security warning on open
+- TOC is visible immediately from cached entries; user can right-click →
+  Update Field for page numbers
+
+**Caption improvements:**
+- `\imagecap` now generates a visible caption paragraph with Caption style
+  in DOCX (previously caption was only used as alt text, not visible)
+
+**Architecture:**
+- `create-reference-docx.py` no longer modifies heading styles (removed
+  try/except KeyError blocks that created duplicates)
+- `fix_generated_docx` is the single point of control for all style fixes
+- Added `remove_duplicate_styles()` helper to clean any residual duplicates
+
 ## v2.5.10 (2026-08-22)
 
 ### TOC and navigation fixes

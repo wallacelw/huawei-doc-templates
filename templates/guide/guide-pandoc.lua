@@ -467,15 +467,19 @@ function Pandoc(doc)
               end
             end
             text = text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-            local indent = (blk.level - 1) * 420
+            local toc_style = "TOC" .. blk.level
+            -- Use TOC1/TOC2/TOC3 styles (defined in fix_generated_docx with tab stops + dot leaders)
+            -- Tab triggers the dot leader from the style; page number added when Word updates field
             toc_entries_xml = toc_entries_xml ..
-              string.format('<w:p><w:pPr><w:ind w:left="%d"/><w:spacing w:after="40"/></w:pPr>' ..
-              '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r></w:p>', indent, section, text)
+              string.format('<w:p><w:pPr><w:pStyle w:val="%s"/></w:pPr>' ..
+              '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r>' ..
+              '<w:r><w:tab/></w:r></w:p>', toc_style, section, text)
           end
         end
         -- TOC field: multi-paragraph structure with cached entries
+        -- No w:dirty="true" — avoids Word security warning about fields referring to other files
         toc_blocks:insert(pandoc.RawBlock("openxml",
-          '<w:p><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r>' ..
+          '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r>' ..
           '<w:r><w:instrText xml:space="preserve"> TOC \\o "1-3" \\h \\z \\u </w:instrText></w:r>' ..
           '<w:r><w:fldChar w:fldCharType="separate"/></w:r></w:p>'))
         if toc_entries_xml ~= "" then
@@ -881,9 +885,17 @@ function RawBlock(raw)
         return pandoc.Para({pandoc.Emph({pandoc.Str("[Image placeholder: " .. desc .. "]")})})
       end
       if FORMAT:match("docx") then
-        return pandoc.Div(
+        local image_div = pandoc.Div(
             {pandoc.Para({pandoc.Image(caption, path)})},
             pandoc.Attr("", {}, {["custom-style"] = "ImageBlock"}))
+        -- If caption has content (\imagecap), add a visible caption paragraph with Caption style
+        if #caption > 0 then
+          local caption_div = pandoc.Div(
+            {pandoc.Para(caption)},
+            pandoc.Attr("", {}, {["custom-style"] = "Caption"}))
+          return {image_div, caption_div}
+        end
+        return image_div
       end
       return pandoc.Para({pandoc.Image(caption, path)})
     end
