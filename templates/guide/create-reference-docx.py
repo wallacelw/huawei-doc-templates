@@ -232,15 +232,15 @@ def fix_generated_docx(docx_path):
         if rPr is None:
             rPr = etree.SubElement(style, f"{{{W_NS}}}rPr")
 
-        # Fix color: remove all attributes, set explicit val
+        # Fix color: Huawei red for all headings (matches PDF \color{huaweired})
         color = rPr.find(f"{{{W_NS}}}color")
         if color is not None:
             for attr in list(color.attrib.keys()):
                 del color.attrib[attr]
-            color.set(f"{{{W_NS}}}val", "1F2328")
+            color.set(f"{{{W_NS}}}val", "C7000B")
         else:
             color = etree.SubElement(rPr, f"{{{W_NS}}}color")
-            color.set(f"{{{W_NS}}}val", "1F2328")
+            color.set(f"{{{W_NS}}}val", "C7000B")
 
         # Fix font: remove theme refs, set explicit
         rFonts = rPr.find(f"{{{W_NS}}}rFonts")
@@ -531,29 +531,91 @@ def fix_generated_docx(docx_path):
                     spacing.set(f"{{{W_NS}}}line", "280")
                     spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
 
-    # ── Add Caption style for figure/table captions (if not present) ──────
-    has_caption = any(s.get(f"{{{W_NS}}}styleId") == "Caption" for s in root.findall(f"{{{W_NS}}}style"))
-    if not has_caption:
-        cs = etree.SubElement(root, f"{{{W_NS}}}style")
-        cs.set(f"{{{W_NS}}}type", "paragraph")
-        cs.set(f"{{{W_NS}}}styleId", "Caption")
-        etree.SubElement(cs, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "caption")
-        etree.SubElement(cs, f"{{{W_NS}}}basedOn").set(f"{{{W_NS}}}val", "Normal")
-        etree.SubElement(cs, f"{{{W_NS}}}next").set(f"{{{W_NS}}}val", "Caption")
-        etree.SubElement(cs, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", "35")
-        etree.SubElement(cs, f"{{{W_NS}}}qFormat")
-        pPr = etree.SubElement(cs, f"{{{W_NS}}}pPr")
+    # ── Add/fix Caption style for figure/table captions ─────────────────
+    # PDF: \small (9pt), bold label, centered — ensure properties even if style exists
+    caption_style = None
+    for s in root.findall(f"{{{W_NS}}}style"):
+        if s.get(f"{{{W_NS}}}styleId") == "Caption":
+            caption_style = s
+            break
+    if caption_style is None:
+        caption_style = etree.SubElement(root, f"{{{W_NS}}}style")
+        caption_style.set(f"{{{W_NS}}}type", "paragraph")
+        caption_style.set(f"{{{W_NS}}}styleId", "Caption")
+        etree.SubElement(caption_style, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "caption")
+        etree.SubElement(caption_style, f"{{{W_NS}}}basedOn").set(f"{{{W_NS}}}val", "Normal")
+        etree.SubElement(caption_style, f"{{{W_NS}}}next").set(f"{{{W_NS}}}val", "Caption")
+        etree.SubElement(caption_style, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", "35")
+        etree.SubElement(caption_style, f"{{{W_NS}}}qFormat")
+    # Ensure pPr with spacing + centered
+    pPr = caption_style.find(f"{{{W_NS}}}pPr")
+    if pPr is None:
+        pPr = etree.SubElement(caption_style, f"{{{W_NS}}}pPr")
+    sp = pPr.find(f"{{{W_NS}}}spacing")
+    if sp is None:
         sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
-        sp.set(f"{{{W_NS}}}before", "120")
-        sp.set(f"{{{W_NS}}}after", "120")
-        etree.SubElement(pPr, f"{{{W_NS}}}jc").set(f"{{{W_NS}}}val", "center")
-        rPr = etree.SubElement(cs, f"{{{W_NS}}}rPr")
+    sp.set(f"{{{W_NS}}}before", "120")
+    sp.set(f"{{{W_NS}}}after", "120")
+    jc = pPr.find(f"{{{W_NS}}}jc")
+    if jc is None:
+        jc = etree.SubElement(pPr, f"{{{W_NS}}}jc")
+    jc.set(f"{{{W_NS}}}val", "center")
+    # Ensure rPr with bold + 9pt + HarmonyOS Sans
+    rPr = caption_style.find(f"{{{W_NS}}}rPr")
+    if rPr is None:
+        rPr = etree.SubElement(caption_style, f"{{{W_NS}}}rPr")
+    rf = rPr.find(f"{{{W_NS}}}rFonts")
+    if rf is None:
         rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
-        rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
-        rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+    rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+    rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+    if rPr.find(f"{{{W_NS}}}b") is None:
         etree.SubElement(rPr, f"{{{W_NS}}}b")
-        etree.SubElement(rPr, f"{{{W_NS}}}sz").set(f"{{{W_NS}}}val", "20")  # 10pt
-        etree.SubElement(rPr, f"{{{W_NS}}}szCs").set(f"{{{W_NS}}}val", "20")
+    for tag in ['sz', 'szCs']:
+        elem = rPr.find(f"{{{W_NS}}}{tag}")
+        if elem is None:
+            elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+        elem.set(f"{{{W_NS}}}val", "18")  # 9pt (matches PDF \small)
+
+    # ── Add/fix badge character style (red pill, white bold text) ───────
+    # PDF: bg=huaweired, white bold footnotesize (8pt)
+    badge_style = None
+    for s in root.findall(f"{{{W_NS}}}style"):
+        if s.get(f"{{{W_NS}}}styleId") == "badge":
+            badge_style = s
+            break
+    if badge_style is None:
+        badge_style = etree.SubElement(root, f"{{{W_NS}}}style")
+        badge_style.set(f"{{{W_NS}}}type", "character")
+        badge_style.set(f"{{{W_NS}}}styleId", "badge")
+        etree.SubElement(badge_style, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "Badge")
+        etree.SubElement(badge_style, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", "99")
+    # Ensure rPr with bold + white text + red bg + 8pt + HarmonyOS Sans
+    rPr = badge_style.find(f"{{{W_NS}}}rPr")
+    if rPr is None:
+        rPr = etree.SubElement(badge_style, f"{{{W_NS}}}rPr")
+    rf = rPr.find(f"{{{W_NS}}}rFonts")
+    if rf is None:
+        rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
+    rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+    rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+    if rPr.find(f"{{{W_NS}}}b") is None:
+        etree.SubElement(rPr, f"{{{W_NS}}}b")
+    color = rPr.find(f"{{{W_NS}}}color")
+    if color is None:
+        color = etree.SubElement(rPr, f"{{{W_NS}}}color")
+    color.set(f"{{{W_NS}}}val", "FFFFFF")
+    shd = rPr.find(f"{{{W_NS}}}shd")
+    if shd is None:
+        shd = etree.SubElement(rPr, f"{{{W_NS}}}shd")
+    shd.set(f"{{{W_NS}}}val", "clear")
+    shd.set(f"{{{W_NS}}}color", "auto")
+    shd.set(f"{{{W_NS}}}fill", "C7000B")
+    for tag in ['sz', 'szCs']:
+        elem = rPr.find(f"{{{W_NS}}}{tag}")
+        if elem is None:
+            elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+        elem.set(f"{{{W_NS}}}val", "16")  # 8pt
 
     # ── Add TOC1/TOC2/TOC3 styles (Word built-in TOC entry styles) ───────
     toc_configs = [
@@ -586,14 +648,43 @@ def fix_generated_docx(docx_path):
         root, xml_declaration=True, encoding="UTF-8", standalone=True
     )
 
-    # Replace styles.xml in the DOCX zip
+    # Replace styles.xml + numbering.xml in the DOCX zip
     # (settings.xml left untouched — updateFields triggers a Word security prompt)
+
+    # ── Fix list indentation in numbering.xml (match PDF 1.6em/1.8em) ────
+    modified_numbering = None
+    with zipfile.ZipFile(docx_path, 'r') as z:
+        if 'word/numbering.xml' in z.namelist():
+            numbering_xml = z.read('word/numbering.xml')
+            num_root = etree.fromstring(numbering_xml)
+            # PDF: itemize leftmargin=1.6em ≈ 336tw, enumerate=1.8em ≈ 378tw
+            # Word: left=text position, hanging=distance to bullet
+            # Use left=480/hanging=240 for level 0 (text at 0.85cm, bullet at 0.42cm)
+            indent_configs = [
+                (0, "480", "240"),   # level 0: text=480tw, bullet=240tw
+                (1, "960", "240"),   # level 1: text=960tw, bullet=720tw
+                (2, "1440", "240"),  # level 2: text=1440tw, bullet=1200tw
+            ]
+            for lvl_num, left_val, hang_val in indent_configs:
+                for lvl in num_root.iter(f"{{{W_NS}}}lvl"):
+                    if lvl.get(f"{{{W_NS}}}ilvl") == str(lvl_num):
+                        # w:ind is inside w:pPr inside w:lvl
+                        ind = lvl.find(f"{{{W_NS}}}pPr/{{{W_NS}}}ind")
+                        if ind is not None:
+                            ind.set(f"{{{W_NS}}}left", left_val)
+                            ind.set(f"{{{W_NS}}}hanging", hang_val)
+            modified_numbering = etree.tostring(
+                num_root, xml_declaration=True, encoding="UTF-8", standalone=True
+            )
+
     tmp_path = docx_path + '.tmp'
     with zipfile.ZipFile(docx_path, 'r') as zin:
         with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
                 if item.filename == 'word/styles.xml':
                     zout.writestr(item, modified_xml)
+                elif item.filename == 'word/numbering.xml' and modified_numbering is not None:
+                    zout.writestr(item, modified_numbering)
                 else:
                     zout.writestr(item, zin.read(item.filename))
     shutil.move(tmp_path, docx_path)

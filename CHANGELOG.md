@@ -3,6 +3,32 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.8.0 (2026-08-23)
+
+### DOCX output: match PDF styling across all visual elements
+
+Comprehensive DOCX vs PDF comparison found 11 discrepancies. All fixed:
+
+- **Heading colors**: H1-H4 text now Huawei red (#C7000B), was dark gray (#1F2328).
+- **H1 number size**: Section number now 56pt (sz=112), was 28pt (sz=56).
+- **Callout borders**: Only left border (3pt), top/bottom/right removed.
+- **Callout padding**: Left/right=8pt (160tw), top/bottom=6pt (120tw).
+- **Changelog formatting**: Top/bottom rules (0.5pt black), bold version (left),
+  italic date (right via tab stop at 8504 twips).
+- **Caption style**: 9pt (sz=18) bold centered — always ensured even if pandoc
+  creates a bare style.
+- **Badge style**: 8pt (sz=16) bold white text on Huawei red background —
+  always ensured even if pandoc creates a bare style.
+- **List indentation**: Level 0=480tw, level 1=960tw, level 2=1440tw with
+  240tw hanging indent — matches PDF 1.6em/1.8em.
+- **Note/Param**: Already italic (`pandoc.Emph`) in Lua filter — no change needed.
+- **Code blocks**: Already correct (F6F8FA shading, Cascadia Code 10pt) — no
+  change needed.
+
+Files changed: `create-reference-docx.py` (heading colors, caption/badge style
+enforcement, numbering.xml indentation fix), `guide-pandoc.lua` (H1 number size,
+callout borders/padding, changelog raw OpenXML).
+
 ## v2.7.1 (2026-08-23)
 
 ### DOCX section headings: number left (bigger), title right

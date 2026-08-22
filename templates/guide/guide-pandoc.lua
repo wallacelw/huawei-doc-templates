@@ -250,21 +250,22 @@ local function make_callout(cls, label, content)
     local c = callout_colors[cls] or callout_colors.infobox
     local esc_label = label:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
 
-    -- Single-cell table: thick left border, thin other borders, cell shading
+    -- Single-cell table: thick left border only (matches PDF leftrule=3pt, boxrule=0pt)
+    -- Cell padding: L/R=8pt (160tw), T/B=6pt (120tw) — matches PDF inner padding
     local open_xml = string.format(
       '<w:tbl><w:tblPr><w:tblBorders>' ..
-      '<w:top w:val="single" w:sz="4" w:space="0" w:color="%s"/>' ..
+      '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
       '<w:left w:val="single" w:sz="24" w:space="0" w:color="%s"/>' ..
-      '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="%s"/>' ..
-      '<w:right w:val="single" w:sz="4" w:space="0" w:color="%s"/>' ..
+      '<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
+      '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
       '</w:tblBorders>' ..
-      '<w:tblCellMar><w:top w:w="100" w:type="dxa"/><w:left w:w="200" w:type="dxa"/>' ..
-      '<w:bottom w:w="100" w:type="dxa"/><w:right w:w="200" w:type="dxa"/></w:tblCellMar>' ..
+      '<w:tblCellMar><w:top w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/>' ..
+      '<w:bottom w:w="120" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tblCellMar>' ..
       '</w:tblPr><w:tr><w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="%s"/></w:tcPr>' ..
       '<w:p><w:r><w:rPr><w:rFonts w:ascii="HarmonyOS Sans" w:hAnsi="HarmonyOS Sans"/>' ..
       '<w:b/><w:color w:val="%s"/><w:sz w:val="21"/><w:szCs w:val="21"/></w:rPr>' ..
       '<w:t>%s</w:t></w:r></w:p>',
-      c.border, c.border, c.border, c.border, c.bg, c.label_color, esc_label)
+      c.border, c.bg, c.label_color, esc_label)
 
     local blocks = pandoc.Blocks({
       pandoc.RawBlock("openxml", open_xml),
@@ -758,6 +759,8 @@ local function handle_changelog_env(text)
   local blocks = pandoc.Blocks({})
   blocks:insert(pandoc.Header(1, pandoc.Inlines({pandoc.Str(L("changelog"))})))
 
+  -- Parse all changelog entries
+  local entries = {}
   local pos = 1
   while true do
     local entry_start = body:find("\\changelogentry%s*{", pos)
@@ -774,11 +777,38 @@ local function handle_changelog_env(text)
     if not brace3 then break end
     local items_content, end3 = parse_brace_arg(body, brace3 + 1)
     if not items_content then break end
-    blocks:insert(pandoc.Para({
-      pandoc.Strong({pandoc.Str(version)}), pandoc.Str("  "), pandoc.Emph({pandoc.Str(date_str)}),
-    }))
-    for _, blk in ipairs(parse_latex_blocks(items_content)) do blocks:insert(blk) end
+    entries[#entries+1] = {version = version, date = date_str, content = items_content}
     pos = (end3 or brace3) + 1
+  end
+
+  if FORMAT:match("docx") then
+    -- DOCX: top rule (0.5pt black, matches PDF)
+    blocks:insert(pandoc.RawBlock("openxml",
+      '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="000000"/></w:pBdr>' ..
+      '<w:spacing w:after="120"/></w:pPr></w:p>'))
+    for _, entry in ipairs(entries) do
+      local esc_ver = entry.version:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+      local esc_date = entry.date:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+      -- Bold version (left) + tab + italic date (right) — matches PDF bold version + \hfill italic date
+      blocks:insert(pandoc.RawBlock("openxml",
+        '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="8504"/></w:tabs></w:pPr>' ..
+        '<w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">' .. esc_ver .. '</w:t></w:r>' ..
+        '<w:r><w:tab/></w:r>' ..
+        '<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">' .. esc_date .. '</w:t></w:r>' ..
+        '</w:p>'))
+      for _, blk in ipairs(parse_latex_blocks(entry.content)) do blocks:insert(blk) end
+    end
+    -- Bottom rule (0.5pt black)
+    blocks:insert(pandoc.RawBlock("openxml",
+      '<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="4" w:space="1" w:color="000000"/></w:pBdr></w:pPr></w:p>'))
+  else
+    -- Non-DOCX: pandoc Strong/Emph elements
+    for _, entry in ipairs(entries) do
+      blocks:insert(pandoc.Para({
+        pandoc.Strong({pandoc.Str(entry.version)}), pandoc.Str("  "), pandoc.Emph({pandoc.Str(entry.date)}),
+      }))
+      for _, blk in ipairs(parse_latex_blocks(entry.content)) do blocks:insert(blk) end
+    end
   end
   return blocks
 end
@@ -835,8 +865,8 @@ function Header(el)
   title = title:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
   section = section:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
 
-  -- Number font size (bigger than heading style default): 28pt, 24pt, 22pt, 20pt
-  local number_sz = { [1] = 56, [2] = 48, [3] = 44, [4] = 40 }
+  -- Number font size: H1=56pt (matches PDF), H2-H4 bigger than title
+  local number_sz = { [1] = 112, [2] = 48, [3] = 44, [4] = 40 }
   local nsz = number_sz[el.level] or 40
 
   -- Content width: A4 (11906) - 3cm left (1701) - 3cm right (1701) = 8504 twips
