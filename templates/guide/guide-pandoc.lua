@@ -444,59 +444,22 @@ function Pandoc(doc)
         toc_blocks:insert(pandoc.Div(
             {pandoc.Para({pandoc.Str(toc_title)})},
             pandoc.Attr("", {}, {["custom-style"] = "TOCTitle"})))
-        -- Generate cached TOC entries from document headings (visible before Word updates field)
-        local toc_entries_xml = ""
-        local h1, h2, h3 = 0, 0, 0
-        for _, blk in ipairs(doc.blocks) do
-          if blk.t == "Header" and blk.level <= 3 then
-            local section = ""
-            if blk.level == 1 then
-              h1 = h1 + 1; h2 = 0; h3 = 0
-              section = tostring(h1)
-            elseif blk.level == 2 then
-              h2 = h2 + 1; h3 = 0
-              section = string.format("%d.%d", h1, h2)
-            elseif blk.level == 3 then
-              h3 = h3 + 1
-              section = string.format("%d.%d.%d", h1, h2, h3)
-            end
-            local text = ""
-            for _, il in ipairs(blk.content) do
-              if il.t == "Str" then text = text .. il.text
-              elseif il.t == "Space" then text = text .. " "
-              end
-            end
-            text = text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-            local toc_style = "TOC" .. blk.level
-            -- Use TOC1/TOC2/TOC3 styles with hyperlinks to heading bookmarks (clickable navigation)
-            -- Tab triggers the dot leader from the style; page number added when Word updates field
-            local anchor = blk.identifier
-            if anchor and anchor ~= "" then
-              toc_entries_xml = toc_entries_xml ..
-                string.format('<w:p><w:pPr><w:pStyle w:val="%s"/></w:pPr>' ..
-                '<w:hyperlink w:anchor="%s">' ..
-                '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r>' ..
-                '<w:r><w:tab/></w:r>' ..
-                '</w:hyperlink></w:p>', toc_style, anchor, section, text)
-            else
-              toc_entries_xml = toc_entries_xml ..
-                string.format('<w:p><w:pPr><w:pStyle w:val="%s"/></w:pPr>' ..
-                '<w:r><w:t xml:space="preserve">%s\u{A0}%s</w:t></w:r>' ..
-                '<w:r><w:tab/></w:r></w:p>', toc_style, section, text)
-            end
-          end
-        end
-        -- TOC field: multi-paragraph structure with cached entries
-        -- No w:dirty="true" — avoids Word security warning about fields referring to other files
+        -- Native Word TOC field wrapped in w:sdt (structured document tag)
+        -- w:dirty="true" tells Word to update on open (one-time security warning)
+        -- Word generates all entries: page numbers, hyperlinks, dot leaders, indentation
+        -- TOC1/TOC2/TOC3 styles in reference DOCX control appearance
         toc_blocks:insert(pandoc.RawBlock("openxml",
-          '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r>' ..
-          '<w:r><w:instrText xml:space="preserve"> TOC \\o "1-3" \\h \\z \\u </w:instrText></w:r>' ..
-          '<w:r><w:fldChar w:fldCharType="separate"/></w:r></w:p>'))
-        if toc_entries_xml ~= "" then
-          toc_blocks:insert(pandoc.RawBlock("openxml", toc_entries_xml))
-        end
-        toc_blocks:insert(pandoc.RawBlock("openxml",
-          '<w:p><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>'))
+          '<w:sdt><w:sdtPr><w:docPartObj>' ..
+          '<w:docPartGallery w:val="Table of Contents"/>' ..
+          '<w:docPartUnique/></w:docPartObj></w:sdtPr>' ..
+          '<w:sdtContent>' ..
+          '<w:p><w:r>' ..
+          '<w:fldChar w:fldCharType="begin" w:dirty="true"/>' ..
+          '<w:instrText xml:space="preserve"> TOC \\o "1-3" \\h \\z \\u </w:instrText>' ..
+          '<w:fldChar w:fldCharType="separate"/>' ..
+          '<w:fldChar w:fldCharType="end"/>' ..
+          '</w:r></w:p>' ..
+          '</w:sdtContent></w:sdt>'))
         toc_blocks:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
         for i = #toc_blocks, 1, -1 do doc.blocks:insert(#cb + 1, toc_blocks[i]) end
         doc.meta.date = nil
