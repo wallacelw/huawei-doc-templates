@@ -795,20 +795,94 @@ local block_env_handlers = {
 }
 
 -- =====================================================================
---  Header handler — page break before H1 in DOCX (matches PDF \clearpage)
+--  Header handler — DOCX: section number left (bigger), title right
+--  Uses right-aligned tab stop at content width; heading style preserved
+--  for navigation pane + TOC field.
 -- =====================================================================
 
-local h1_count = 0
+local sec_h1, sec_h2, sec_h3, sec_h4 = 0, 0, 0, 0
+local bookmark_seq = 100  -- avoid conflicts with pandoc's bookmark IDs
+
 function Header(el)
-  if FORMAT:match("docx") and el.level == 1 then
-    h1_count = h1_count + 1
-    if h1_count > 1 then
-      return pandoc.Blocks({
-        pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'),
-        el
-      })
+  if not FORMAT:match("docx") then return nil end
+  if el.level > 4 then return nil end  -- let pandoc handle H5+
+
+  -- Compute section number
+  local section = ""
+  if el.level == 1 then
+    sec_h1 = sec_h1 + 1; sec_h2 = 0; sec_h3 = 0; sec_h4 = 0
+    section = tostring(sec_h1)
+  elseif el.level == 2 then
+    sec_h2 = sec_h2 + 1; sec_h3 = 0; sec_h4 = 0
+    section = string.format("%d.%d", sec_h1, sec_h2)
+  elseif el.level == 3 then
+    sec_h3 = sec_h3 + 1; sec_h4 = 0
+    section = string.format("%d.%d.%d", sec_h1, sec_h2, sec_h3)
+  elseif el.level == 4 then
+    sec_h4 = sec_h4 + 1
+    section = string.format("%d.%d.%d.%d", sec_h1, sec_h2, sec_h3, sec_h4)
+  end
+
+  -- Extract title text from inline content
+  local title = ""
+  for _, il in ipairs(el.content) do
+    if il.t == "Str" then title = title .. il.text
+    elseif il.t == "Space" then title = title .. " "
+    elseif il.t == "Code" then title = title .. il.text
     end
   end
+  -- XML-escape
+  title = title:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+  section = section:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+
+  -- Number font size (bigger than heading style default): 28pt, 24pt, 22pt, 20pt
+  local number_sz = { [1] = 56, [2] = 48, [3] = 44, [4] = 40 }
+  local nsz = number_sz[el.level] or 40
+
+  -- Content width: A4 (11906) - 3cm left (1701) - 3cm right (1701) = 8504 twips
+  local content_width = 8504
+
+  -- Bookmark for cross-references + TOC navigation
+  local bname = el.identifier or ""
+  local bid = bookmark_seq
+  bookmark_seq = bookmark_seq + 1
+
+  -- Build OpenXML: heading style + right tab stop + number (big) + tab + title
+  local xml = string.format(
+    '<w:p><w:pPr><w:pStyle w:val="Heading%d"/>' ..
+    '<w:tabs><w:tab w:val="right" w:pos="%d"/></w:tabs></w:pPr>',
+    el.level, content_width)
+
+  if bname ~= "" then
+    xml = xml .. string.format('<w:bookmarkStart w:id="%d" w:name="%s"/>', bid, bname)
+  end
+
+  -- Number run (bigger font, left-aligned)
+  xml = xml .. string.format(
+    '<w:r><w:rPr><w:sz w:val="%d"/><w:szCs w:val="%d"/></w:rPr>' ..
+    '<w:t xml:space="preserve">%s</w:t></w:r>', nsz, nsz, section)
+
+  -- Tab to right-aligned position
+  xml = xml .. '<w:r><w:tab/></w:r>'
+
+  -- Title run (inherits heading style font size/color)
+  xml = xml .. string.format('<w:r><w:t xml:space="preserve">%s</w:t></w:r>', title)
+
+  if bname ~= "" then
+    xml = xml .. string.format('<w:bookmarkEnd w:id="%d"/>', bid)
+  end
+
+  xml = xml .. '</w:p>'
+
+  -- Page break before H1 (except first, matches PDF \clearpage)
+  if el.level == 1 and sec_h1 > 1 then
+    return pandoc.Blocks({
+      pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'),
+      pandoc.RawBlock("openxml", xml)
+    })
+  end
+
+  return pandoc.RawBlock("openxml", xml)
 end
 
 -- Strip syntax highlighting classes for DOCX (PDF uses monochrome code)

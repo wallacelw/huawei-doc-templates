@@ -3,6 +3,24 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.7.1 (2026-08-23)
+
+### DOCX section headings: number left (bigger), title right
+
+- **Heading layout**: Section headings (H1-H4) in DOCX now have the section
+  number on the far left in a bigger font, and the title on the far right,
+  using a right-aligned tab stop at the content width (8504 twips).
+- **Number font sizes**: H1=28pt, H2=24pt, H3=22pt, H4=20pt (bigger than the
+  heading style default, which is 20/18/16/14pt for the title).
+- **Heading styles preserved**: Paragraphs still use `Heading1`-`Heading4`
+  styles, so they appear in the navigation pane and TOC field.
+- **Bookmarks preserved**: Each heading has a `bookmarkStart`/`bookmarkEnd`
+  with the pandoc-generated identifier, so cross-references and TOC
+  navigation work.
+- **Page breaks**: H1 page breaks (except first) still applied.
+- Non-DOCX formats (Markdown, HTML) unaffected — pandoc's `--number-sections`
+  handles numbering for those.
+
 ## v2.7.0 (2026-08-23)
 
 ### Native Word TOC — replaced manual entries with Word's built-in TOC field
