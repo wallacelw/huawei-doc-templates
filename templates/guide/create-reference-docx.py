@@ -484,27 +484,14 @@ def fix_generated_docx(docx_path):
         root, xml_declaration=True, encoding="UTF-8", standalone=True
     )
 
-    # Add updateFields to settings.xml so Word updates TOC on open
-    with zipfile.ZipFile(docx_path, 'r') as z:
-        settings_xml = z.read('word/settings.xml')
-    settings_root = etree.fromstring(settings_xml)
-    update_fields = settings_root.find(f"{{{W_NS}}}updateFields")
-    if update_fields is None:
-        update_fields = etree.SubElement(settings_root, f"{{{W_NS}}}updateFields")
-    update_fields.set(f"{{{W_NS}}}val", "true")
-    modified_settings = etree.tostring(
-        settings_root, xml_declaration=True, encoding="UTF-8", standalone=True
-    )
-
-    # Replace styles.xml and settings.xml in the DOCX zip
+    # Replace styles.xml in the DOCX zip
+    # (settings.xml left untouched — updateFields triggers a Word security prompt)
     tmp_path = docx_path + '.tmp'
     with zipfile.ZipFile(docx_path, 'r') as zin:
         with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
                 if item.filename == 'word/styles.xml':
                     zout.writestr(item, modified_xml)
-                elif item.filename == 'word/settings.xml':
-                    zout.writestr(item, modified_settings)
                 else:
                     zout.writestr(item, zin.read(item.filename))
     shutil.move(tmp_path, docx_path)
