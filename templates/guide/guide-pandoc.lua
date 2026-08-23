@@ -874,45 +874,36 @@ function Header(el)
   bookmark_seq = bookmark_seq + 1
 
   if el.level == 1 then
-    -- H1: two-column table (number left, title right) + red bottom border
-    -- Matches PDF: 56pt number left, 20pt bold title right, red rule below
-    local num_col_w = 1200
-    local title_col_w = content_width - num_col_w
-
+    -- H1: paragraph with Heading1 style, right tab stop, red bottom border
+    -- Number (56pt) left + tab + title right + 1.5pt red rule below
+    -- Single paragraph preserves navigation pane + TOC field compatibility
     local xml = string.format(
-      '<w:tbl><w:tblPr>' ..
-      '<w:tblW w:w="%d" w:type="dxa"/>' ..
-      '<w:tblBorders>' ..
-      '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
-      '<w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
-      '<w:bottom w:val="single" w:sz="12" w:space="1" w:color="C7000B"/>' ..
-      '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
-      '<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
-      '<w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
-      '</w:tblBorders>' ..
-      '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/>' ..
-      '<w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>' ..
-      '</w:tblPr>' ..
-      '<w:tblGrid><w:gridCol w:w="%d"/><w:gridCol w:w="%d"/></w:tblGrid>' ..
-      '<w:tr>' ..
-      '<w:tc><w:tcPr><w:tcW w:w="%d" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>' ..
-      '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:jc w:val="left"/></w:pPr>' ..
-      '<w:r><w:rPr><w:sz w:val="112"/><w:szCs w:val="112"/></w:rPr>' ..
-      '<w:t xml:space="preserve">%s</w:t></w:r></w:p></w:tc>' ..
-      '<w:tc><w:tcPr><w:tcW w:w="%d" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>' ..
-      '<w:p><w:pPr><w:pStyle w:val="Heading1"/><w:spacing w:before="0" w:after="0"/>' ..
-      '<w:jc w:val="right"/></w:pPr>',
-      content_width, num_col_w, title_col_w, num_col_w, section, title_col_w)
+      '<w:p><w:pPr><w:pStyle w:val="Heading1"/>' ..
+      '<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="2" w:color="C7000B"/></w:pBdr>' ..
+      '<w:tabs><w:tab w:val="right" w:pos="%d"/></w:tabs></w:pPr>',
+      content_width)
 
     if bname ~= "" then
       xml = xml .. string.format('<w:bookmarkStart w:id="%d" w:name="%s"/>', bid, bname)
     end
+
+    -- Number run (56pt = sz=112, left-aligned)
+    xml = xml .. string.format(
+      '<w:r><w:rPr><w:sz w:val="112"/><w:szCs w:val="112"/></w:rPr>' ..
+      '<w:t xml:space="preserve">%s</w:t></w:r>', section)
+
+    -- Tab to right-aligned position
+    xml = xml .. '<w:r><w:tab/></w:r>'
+
+    -- Title run (inherits Heading1 style: 20pt bold black)
     xml = xml .. string.format(
       '<w:r><w:t xml:space="preserve">%s</w:t></w:r>', title)
+
     if bname ~= "" then
       xml = xml .. string.format('<w:bookmarkEnd w:id="%d"/>', bid)
     end
-    xml = xml .. '</w:p></w:tc></w:tr></w:tbl>'
+
+    xml = xml .. '</w:p>'
 
     -- Page break before H1 (except first, matches PDF \clearpage)
     if sec_h1 > 1 then

@@ -3,6 +3,19 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.8.2 (2026-08-23)
+
+### DOCX H1 heading: revert table to paragraph + red bottom border
+
+- **Reverted table approach**: v2.8.1 used a two-column table for H1, but
+  this broke Word's navigation pane and TOC field (Heading1 style was split
+  across cells). Reverted to a single paragraph with Heading1 style.
+- **Red bottom border**: Added 1.5pt red (C7000B) paragraph bottom border
+  to H1, matching the PDF's `\color{huaweired}\titlerule[1.5pt]`.
+- **Layout preserved**: 56pt number left + right tab stop + 20pt bold title
+  right — visually identical to the table approach but navigation-compatible.
+- **H2-H4 unchanged**: Still simple inline (number + space + title).
+
 ## v2.8.1 (2026-08-23)
 
 ### DOCX heading fix: black text + table layout for H1
