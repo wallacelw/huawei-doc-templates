@@ -318,8 +318,16 @@ generate_docx() {
         fi
     fi
 }
-generate_md()   { generate_pandoc_format "Markdown" markdown md; }
-generate_html() { generate_pandoc_format "HTML" html5 html --template="$HTML_TMPL" -s; }
+generate_md() {
+    generate_pandoc_format "Markdown" markdown md
+    # Post-process: embed images as base64 data URIs (self-contained MD)
+    if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.md" ]; then
+        python3 "${REPO_ROOT}/templates/guide/embed-images.py" \
+            "${PROJECT_DIR}/${BASENAME}.md" \
+            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/guide/common-assets" 2>&1 | sed 's/^/  /'
+    fi
+}
+generate_html() { generate_pandoc_format "HTML" html5 html --template="$HTML_TMPL" -s --embed-resources; }
 
 # ── Summary ──────────────────────────────────────────────────────────────
 show_summary() {

@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- ECS + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{2.9.0}
+\setdocversion{2.9.1}
 
 \begin{document}
 
@@ -689,6 +689,9 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{2.9.1}{2026-08-23}{
+    \item HTML and Markdown outputs now embed images as base64 data URIs. HTML uses pandoc \texttt{--embed-resources}, MD uses post-processing with \texttt{embed-images.py}. Outputs are self-contained — no external image files needed.
+  }
   \changelogentry{2.9.0}{2026-08-23}{
     \item DOCX: fix content width (8504→9638tw, margins are 2cm not 3cm). Add footer page numbers. Style TOC heading (22pt bold + rule). Add hutable table width + fixed layout.
   }

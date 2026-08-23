@@ -3,6 +3,22 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.9.1 (2026-08-23)
+
+### HTML + Markdown: embed images as base64 data URIs
+
+Both HTML and Markdown outputs were using relative file paths for images
+(`assets/exemplo-menu.png`), which break when files are moved or opened
+from a different location. Now all images are embedded directly:
+
+- **HTML**: Added pandoc `--embed-resources` flag (pandoc 3.x). All images
+  and CSS are embedded as base64 data URIs — the HTML file is fully
+  self-contained.
+- **Markdown**: Created `embed-images.py` post-processing script that
+  replaces `![caption](path)` with `![caption](data:image/png;base64,...)`.
+  Called after MD generation in `build.sh`.
+- Both formats now load images without any external files.
+
 ## v2.9.0 (2026-08-23)
 
 ### DOCX: fix content width + footer + TOC heading + hutable width
