@@ -3,6 +3,22 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.8.1 (2026-08-23)
+
+### DOCX heading fix: black text + table layout for H1
+
+- **Heading text color**: Reverted to black (#1F2328). v2.8.0 incorrectly
+  changed heading text to Huawei red — PDF uses black text with only the
+  rule below H1 in red.
+- **H1 layout**: Replaced tab-stop approach with a two-column table —
+  column 1 (left-aligned) contains the 56pt section number, column 2
+  (right-aligned) contains the 20pt bold title. Table has a red bottom
+  border (1.5pt C7000B) matching the PDF's `\titlerule`.
+- **H2-H4 layout**: Simplified to inline format — number + space + title
+  in a single paragraph with heading style. Removed the right tab stop
+  that was incorrectly pushing the title to the right edge. Number is
+  now the same font size as the title (matches PDF).
+
 ## v2.8.0 (2026-08-23)
 
 ### DOCX output: match PDF styling across all visual elements

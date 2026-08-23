@@ -865,10 +865,6 @@ function Header(el)
   title = title:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
   section = section:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
 
-  -- Number font size: H1=56pt (matches PDF), H2-H4 bigger than title
-  local number_sz = { [1] = 112, [2] = 48, [3] = 44, [4] = 40 }
-  local nsz = number_sz[el.level] or 40
-
   -- Content width: A4 (11906) - 3cm left (1701) - 3cm right (1701) = 8504 twips
   local content_width = 8504
 
@@ -877,41 +873,79 @@ function Header(el)
   local bid = bookmark_seq
   bookmark_seq = bookmark_seq + 1
 
-  -- Build OpenXML: heading style + right tab stop + number (big) + tab + title
+  if el.level == 1 then
+    -- H1: two-column table (number left, title right) + red bottom border
+    -- Matches PDF: 56pt number left, 20pt bold title right, red rule below
+    local num_col_w = 1200
+    local title_col_w = content_width - num_col_w
+
+    local xml = string.format(
+      '<w:tbl><w:tblPr>' ..
+      '<w:tblW w:w="%d" w:type="dxa"/>' ..
+      '<w:tblBorders>' ..
+      '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
+      '<w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
+      '<w:bottom w:val="single" w:sz="12" w:space="1" w:color="C7000B"/>' ..
+      '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
+      '<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
+      '<w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
+      '</w:tblBorders>' ..
+      '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/>' ..
+      '<w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>' ..
+      '</w:tblPr>' ..
+      '<w:tblGrid><w:gridCol w:w="%d"/><w:gridCol w:w="%d"/></w:tblGrid>' ..
+      '<w:tr>' ..
+      '<w:tc><w:tcPr><w:tcW w:w="%d" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>' ..
+      '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:jc w:val="left"/></w:pPr>' ..
+      '<w:r><w:rPr><w:sz w:val="112"/><w:szCs w:val="112"/></w:rPr>' ..
+      '<w:t xml:space="preserve">%s</w:t></w:r></w:p></w:tc>' ..
+      '<w:tc><w:tcPr><w:tcW w:w="%d" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>' ..
+      '<w:p><w:pPr><w:pStyle w:val="Heading1"/><w:spacing w:before="0" w:after="0"/>' ..
+      '<w:jc w:val="right"/></w:pPr>',
+      content_width, num_col_w, title_col_w, num_col_w, section, title_col_w)
+
+    if bname ~= "" then
+      xml = xml .. string.format('<w:bookmarkStart w:id="%d" w:name="%s"/>', bid, bname)
+    end
+    xml = xml .. string.format(
+      '<w:r><w:t xml:space="preserve">%s</w:t></w:r>', title)
+    if bname ~= "" then
+      xml = xml .. string.format('<w:bookmarkEnd w:id="%d"/>', bid)
+    end
+    xml = xml .. '</w:p></w:tc></w:tr></w:tbl>'
+
+    -- Page break before H1 (except first, matches PDF \clearpage)
+    if sec_h1 > 1 then
+      return pandoc.Blocks({
+        pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'),
+        pandoc.RawBlock("openxml", xml)
+      })
+    end
+    return pandoc.RawBlock("openxml", xml)
+  end
+
+  -- H2-H4: simple paragraph with heading style, number + space + title
+  -- PDF: number and title same font size, separated by 0.4em
   local xml = string.format(
-    '<w:p><w:pPr><w:pStyle w:val="Heading%d"/>' ..
-    '<w:tabs><w:tab w:val="right" w:pos="%d"/></w:tabs></w:pPr>',
-    el.level, content_width)
+    '<w:p><w:pPr><w:pStyle w:val="Heading%d"/></w:pPr>', el.level)
 
   if bname ~= "" then
     xml = xml .. string.format('<w:bookmarkStart w:id="%d" w:name="%s"/>', bid, bname)
   end
 
-  -- Number run (bigger font, left-aligned)
+  -- Number run (inherits heading style font size)
   xml = xml .. string.format(
-    '<w:r><w:rPr><w:sz w:val="%d"/><w:szCs w:val="%d"/></w:rPr>' ..
-    '<w:t xml:space="preserve">%s</w:t></w:r>', nsz, nsz, section)
+    '<w:r><w:t xml:space="preserve">%s</w:t></w:r>', section)
 
-  -- Tab to right-aligned position
-  xml = xml .. '<w:r><w:tab/></w:r>'
-
-  -- Title run (inherits heading style font size/color)
-  xml = xml .. string.format('<w:r><w:t xml:space="preserve">%s</w:t></w:r>', title)
+  -- Space + title (inherits heading style)
+  xml = xml .. string.format(
+    '<w:r><w:t xml:space="preserve"> %s</w:t></w:r>', title)
 
   if bname ~= "" then
     xml = xml .. string.format('<w:bookmarkEnd w:id="%d"/>', bid)
   end
 
   xml = xml .. '</w:p>'
-
-  -- Page break before H1 (except first, matches PDF \clearpage)
-  if el.level == 1 and sec_h1 > 1 then
-    return pandoc.Blocks({
-      pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'),
-      pandoc.RawBlock("openxml", xml)
-    })
-  end
-
   return pandoc.RawBlock("openxml", xml)
 end
 

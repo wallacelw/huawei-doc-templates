@@ -232,15 +232,16 @@ def fix_generated_docx(docx_path):
         if rPr is None:
             rPr = etree.SubElement(style, f"{{{W_NS}}}rPr")
 
-        # Fix color: Huawei red for all headings (matches PDF \color{huaweired})
+        # Fix color: black for heading text (PDF uses default = black; red is only
+        # for the rule below H1, handled in the Lua filter via table border)
         color = rPr.find(f"{{{W_NS}}}color")
         if color is not None:
             for attr in list(color.attrib.keys()):
                 del color.attrib[attr]
-            color.set(f"{{{W_NS}}}val", "C7000B")
+            color.set(f"{{{W_NS}}}val", "1F2328")
         else:
             color = etree.SubElement(rPr, f"{{{W_NS}}}color")
-            color.set(f"{{{W_NS}}}val", "C7000B")
+            color.set(f"{{{W_NS}}}val", "1F2328")
 
         # Fix font: remove theme refs, set explicit
         rFonts = rPr.find(f"{{{W_NS}}}rFonts")
