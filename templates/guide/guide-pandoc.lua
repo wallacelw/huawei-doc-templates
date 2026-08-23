@@ -253,7 +253,7 @@ local function make_callout(cls, label, content)
     -- Single-cell table: thick left border only (matches PDF leftrule=3pt, boxrule=0pt)
     -- Cell padding: L/R=8pt (160tw), T/B=6pt (120tw) — matches PDF inner padding
     local open_xml = string.format(
-      '<w:tbl><w:tblPr><w:tblW w:w="8504" w:type="dxa"/>' ..
+      '<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>' ..
       '<w:tblLayout w:type="fixed"/>' ..
       '<w:tblBorders>' ..
       '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
@@ -263,7 +263,7 @@ local function make_callout(cls, label, content)
       '</w:tblBorders>' ..
       '<w:tblCellMar><w:top w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/>' ..
       '<w:bottom w:w="120" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tblCellMar>' ..
-      '</w:tblPr><w:tr><w:tc><w:tcPr><w:tcW w:w="8504" w:type="dxa"/>' ..
+      '</w:tblPr><w:tr><w:tc><w:tcPr><w:tcW w:w="9638" w:type="dxa"/>' ..
       '<w:shd w:val="clear" w:color="auto" w:fill="%s"/></w:tcPr>' ..
       '<w:p><w:r><w:rPr><w:rFonts w:ascii="HarmonyOS Sans" w:hAnsi="HarmonyOS Sans"/>' ..
       '<w:b/><w:color w:val="%s"/><w:sz w:val="21"/><w:szCs w:val="21"/></w:rPr>' ..
@@ -714,7 +714,8 @@ local function handle_hutable_env(text)
       end
       local parts = {}
       -- Table opening with red borders (all sides + inside)
-      parts[#parts+1] = '<w:tbl><w:tblPr><w:tblBorders>' ..
+      parts[#parts+1] = '<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>' ..
+        '<w:tblLayout w:type="fixed"/><w:tblBorders>' ..
         '<w:top w:val="single" w:sz="4" w:space="0" w:color="C7000B"/>' ..
         '<w:left w:val="single" w:sz="4" w:space="0" w:color="C7000B"/>' ..
         '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="C7000B"/>' ..
@@ -781,7 +782,7 @@ local function handle_changelog_env(text)
     blocks:insert(pandoc.RawBlock("openxml", string.format(
       '<w:p><w:pPr><w:pStyle w:val="Heading1"/>' ..
       '<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="2" w:color="C7000B"/></w:pBdr>' ..
-      '<w:tabs><w:tab w:val="right" w:pos="8504"/></w:tabs></w:pPr>' ..
+      '<w:tabs><w:tab w:val="right" w:pos="9638"/></w:tabs></w:pPr>' ..
       '<w:bookmarkStart w:id="%d" w:name="sec-changelog"/>' ..
       '<w:r><w:rPr><w:sz w:val="112"/><w:szCs w:val="112"/></w:rPr>' ..
       '<w:t xml:space="preserve">%s</w:t></w:r>' ..
@@ -825,7 +826,7 @@ local function handle_changelog_env(text)
       local esc_date = entry.date:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
       -- Bold version (left) + tab + italic date (right) — matches PDF bold version + \hfill italic date
       blocks:insert(pandoc.RawBlock("openxml",
-        '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="8504"/></w:tabs></w:pPr>' ..
+        '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="9638"/></w:tabs></w:pPr>' ..
         '<w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">' .. esc_ver .. '</w:t></w:r>' ..
         '<w:r><w:tab/></w:r>' ..
         '<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">' .. esc_date .. '</w:t></w:r>' ..
@@ -896,8 +897,8 @@ function Header(el)
   title = title:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
   section = section:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
 
-  -- Content width: A4 (11906) - 3cm left (1701) - 3cm right (1701) = 8504 twips
-  local content_width = 8504
+  -- Content width: A4 (11906) - 2cm left (1134) - 2cm right (1134) = 9638 twips
+  local content_width = 9638
 
   -- Bookmark for cross-references + TOC navigation
   local bname = el.identifier or ""

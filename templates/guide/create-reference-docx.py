@@ -645,6 +645,63 @@ def fix_generated_docx(docx_path):
             sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
             sp.set(f"{{{W_NS}}}after", "40")  # 2pt
 
+    # ── Style TOC heading: 22pt bold + bottom rule (matches PDF) ──────────
+    toc_heading = None
+    for s in root.findall(f"{{{W_NS}}}style"):
+        if s.get(f"{{{W_NS}}}styleId") == "TOCHeading":
+            toc_heading = s
+            break
+    if toc_heading is None:
+        toc_heading = etree.SubElement(root, f"{{{W_NS}}}style")
+        toc_heading.set(f"{{{W_NS}}}type", "paragraph")
+        toc_heading.set(f"{{{W_NS}}}styleId", "TOCHeading")
+        etree.SubElement(toc_heading, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "toc heading")
+    rPr = toc_heading.find(f"{{{W_NS}}}rPr")
+    if rPr is None:
+        rPr = etree.SubElement(toc_heading, f"{{{W_NS}}}rPr")
+    # Remove existing bold/bCs (pandoc sets w:b w:val="0" which overrides)
+    for tag in ['b', 'bCs']:
+        for elem in rPr.findall(f"{{{W_NS}}}{tag}"):
+            rPr.remove(elem)
+    etree.SubElement(rPr, f"{{{W_NS}}}b")  # bold = true
+    # Fix color: remove theme refs, set black
+    color = rPr.find(f"{{{W_NS}}}color")
+    if color is not None:
+        rPr.remove(color)
+    color = etree.SubElement(rPr, f"{{{W_NS}}}color")
+    color.set(f"{{{W_NS}}}val", "1F2328")
+    # Fix font: remove theme refs, set explicit
+    rFonts = rPr.find(f"{{{W_NS}}}rFonts")
+    if rFonts is not None:
+        for attr in list(rFonts.attrib.keys()):
+            if "Theme" in attr or "theme" in attr:
+                del rFonts.attrib[attr]
+        rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+        rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+    # 22pt (sz=44)
+    sz = rPr.find(f"{{{W_NS}}}sz")
+    if sz is None:
+        sz = etree.SubElement(rPr, f"{{{W_NS}}}sz")
+    sz.set(f"{{{W_NS}}}val", "44")
+    szCs = rPr.find(f"{{{W_NS}}}szCs")
+    if szCs is None:
+        szCs = etree.SubElement(rPr, f"{{{W_NS}}}szCs")
+    szCs.set(f"{{{W_NS}}}val", "44")
+    # Bottom border (0.5pt black rule)
+    pPr = toc_heading.find(f"{{{W_NS}}}pPr")
+    if pPr is None:
+        pPr = etree.SubElement(toc_heading, f"{{{W_NS}}}pPr")
+    pBdr = pPr.find(f"{{{W_NS}}}pBdr")
+    if pBdr is None:
+        pBdr = etree.SubElement(pPr, f"{{{W_NS}}}pBdr")
+    bottom = pBdr.find(f"{{{W_NS}}}bottom")
+    if bottom is None:
+        bottom = etree.SubElement(pBdr, f"{{{W_NS}}}bottom")
+    bottom.set(f"{{{W_NS}}}val", "single")
+    bottom.set(f"{{{W_NS}}}sz", "4")  # 0.5pt
+    bottom.set(f"{{{W_NS}}}space", "1")
+    bottom.set(f"{{{W_NS}}}color", "000000")
+
     modified_xml = etree.tostring(
         root, xml_declaration=True, encoding="UTF-8", standalone=True
     )
@@ -678,6 +735,22 @@ def fix_generated_docx(docx_path):
                 num_root, xml_declaration=True, encoding="UTF-8", standalone=True
             )
 
+    # ── Footer with page number (pandoc doesn't carry over reference footer) ─
+    footer_xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
+        '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+        '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
+        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+        '<w:t xml:space="preserve">Page </w:t></w:r>'
+        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+        '<w:fldChar w:fldCharType="begin"/></w:r>'
+        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+        '<w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>'
+        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+        '<w:fldChar w:fldCharType="end"/></w:r>'
+        '</w:p></w:ftr>'
+    )
+
     tmp_path = docx_path + '.tmp'
     with zipfile.ZipFile(docx_path, 'r') as zin:
         with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
@@ -686,6 +759,8 @@ def fix_generated_docx(docx_path):
                     zout.writestr(item, modified_xml)
                 elif item.filename == 'word/numbering.xml' and modified_numbering is not None:
                     zout.writestr(item, modified_numbering)
+                elif item.filename.startswith('word/footer') and item.filename.endswith('.xml'):
+                    zout.writestr(item, footer_xml)
                 else:
                     zout.writestr(item, zin.read(item.filename))
     shutil.move(tmp_path, docx_path)

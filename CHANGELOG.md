@@ -3,6 +3,24 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.9.0 (2026-08-23)
+
+### DOCX: fix content width + footer + TOC heading + hutable width
+
+Comprehensive DOCX vs PDF comparison found 4 remaining discrepancies:
+
+- **Content width fix**: Was using 8504tw (calculated with 3cm margins) but
+  actual left/right margins are 2cm (1134tw), so content width = 9638tw.
+  This was causing H1 tab stop, callout tables, and changelog tab to stop
+  2cm short of the right margin. Fixed all 6 occurrences of 8504 → 9638.
+- **Footer page numbers**: Pandoc doesn't carry over the reference DOCX's
+  footer. Added page number field ("Page N") to footer in `fix_generated_docx`.
+- **TOC heading style**: Pandoc's default TOCHeading had bold OFF (`w:val="0"`),
+  theme blue color (365F91), and theme font refs. Fixed to 22pt bold, black
+  text (1F2328), explicit HarmonyOS Sans font, + 0.5pt black bottom rule.
+- **hutable table width**: Added `tblW=9638` + `tblLayout=fixed` to prevent
+  auto-width rendering.
+
 ## v2.8.3 (2026-08-23)
 
 ### DOCX fix: callout table width + changelog heading format
