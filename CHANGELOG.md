@@ -3,6 +3,21 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.8.3 (2026-08-23)
+
+### DOCX fix: callout table width + changelog heading format
+
+- **Callout tables**: Added explicit table width (8504tw = content width)
+  and fixed table layout (`w:tblLayout w:type="fixed"`). Without these,
+  Word rendered callouts at auto width, causing inconsistent sizing.
+- **Changelog heading**: Was using pandoc's default heading format
+  (SectionNumber style) because `pandoc.Header` returned from `RawBlock`
+  is not re-processed by the `Header` function. Now generates raw OpenXML
+  directly — 56pt number, right tab stop, red bottom border — matching
+  the custom H1 format used for content headings.
+- **Variable scope fix**: Moved `sec_h1`/`bookmark_seq` declarations before
+  `handle_changelog_env` to fix nil error.
+
 ## v2.8.2 (2026-08-23)
 
 ### DOCX H1 heading: revert table to paragraph + red bottom border

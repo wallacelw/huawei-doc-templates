@@ -253,7 +253,9 @@ local function make_callout(cls, label, content)
     -- Single-cell table: thick left border only (matches PDF leftrule=3pt, boxrule=0pt)
     -- Cell padding: L/R=8pt (160tw), T/B=6pt (120tw) — matches PDF inner padding
     local open_xml = string.format(
-      '<w:tbl><w:tblPr><w:tblBorders>' ..
+      '<w:tbl><w:tblPr><w:tblW w:w="8504" w:type="dxa"/>' ..
+      '<w:tblLayout w:type="fixed"/>' ..
+      '<w:tblBorders>' ..
       '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
       '<w:left w:val="single" w:sz="24" w:space="0" w:color="%s"/>' ..
       '<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
@@ -261,7 +263,8 @@ local function make_callout(cls, label, content)
       '</w:tblBorders>' ..
       '<w:tblCellMar><w:top w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/>' ..
       '<w:bottom w:w="120" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tblCellMar>' ..
-      '</w:tblPr><w:tr><w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="%s"/></w:tcPr>' ..
+      '</w:tblPr><w:tr><w:tc><w:tcPr><w:tcW w:w="8504" w:type="dxa"/>' ..
+      '<w:shd w:val="clear" w:color="auto" w:fill="%s"/></w:tcPr>' ..
       '<w:p><w:r><w:rPr><w:rFonts w:ascii="HarmonyOS Sans" w:hAnsi="HarmonyOS Sans"/>' ..
       '<w:b/><w:color w:val="%s"/><w:sz w:val="21"/><w:szCs w:val="21"/></w:rPr>' ..
       '<w:t>%s</w:t></w:r></w:p>',
@@ -753,11 +756,42 @@ local function handle_hutable_env(text)
   return pandoc.CodeBlock(md_table)
 end
 
+-- Section number counters + bookmark ID counter (used by Header function
+-- and handle_changelog_env for DOCX heading generation)
+local sec_h1, sec_h2, sec_h3, sec_h4 = 0, 0, 0, 0
+local bookmark_seq = 100  -- avoid conflicts with pandoc's bookmark IDs
+
 local function handle_changelog_env(text)
   local body = text:match("\\begin%s*{changelog}%s*(.-)%s*\\end%s*{changelog}")
   if not body then return nil end
   local blocks = pandoc.Blocks({})
-  blocks:insert(pandoc.Header(1, pandoc.Inlines({pandoc.Str(L("changelog"))})))
+  if FORMAT:match("docx") then
+    -- DOCX: generate H1 heading as raw OpenXML (pandoc doesn't re-process
+    -- blocks returned from RawBlock through the Header function, so a
+    -- pandoc.Header here would use pandoc's default format, not our custom
+    -- 56pt number + red border layout)
+    sec_h1 = sec_h1 + 1; sec_h2 = 0; sec_h3 = 0; sec_h4 = 0
+    local section = tostring(sec_h1)
+    local heading_text = L("changelog"):gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+    local bid = bookmark_seq
+    bookmark_seq = bookmark_seq + 1
+    -- Page break before (matches PDF \clearpage)
+    blocks:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+    -- H1: 56pt number left + right tab + title right + red bottom border
+    blocks:insert(pandoc.RawBlock("openxml", string.format(
+      '<w:p><w:pPr><w:pStyle w:val="Heading1"/>' ..
+      '<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="2" w:color="C7000B"/></w:pBdr>' ..
+      '<w:tabs><w:tab w:val="right" w:pos="8504"/></w:tabs></w:pPr>' ..
+      '<w:bookmarkStart w:id="%d" w:name="sec-changelog"/>' ..
+      '<w:r><w:rPr><w:sz w:val="112"/><w:szCs w:val="112"/></w:rPr>' ..
+      '<w:t xml:space="preserve">%s</w:t></w:r>' ..
+      '<w:r><w:tab/></w:r>' ..
+      '<w:r><w:t xml:space="preserve">%s</w:t></w:r>' ..
+      '<w:bookmarkEnd w:id="%d"/>' ..
+      '</w:p>', bid, section, heading_text, bid)))
+  else
+    blocks:insert(pandoc.Header(1, pandoc.Inlines({pandoc.Str(L("changelog"))})))
+  end
 
   -- Parse all changelog entries
   local entries = {}
@@ -825,13 +859,10 @@ local block_env_handlers = {
 }
 
 -- =====================================================================
---  Header handler — DOCX: section number left (bigger), title right
+--  DOCX Header function — custom OpenXML for section headings
 --  Uses right-aligned tab stop at content width; heading style preserved
 --  for navigation pane + TOC field.
 -- =====================================================================
-
-local sec_h1, sec_h2, sec_h3, sec_h4 = 0, 0, 0, 0
-local bookmark_seq = 100  -- avoid conflicts with pandoc's bookmark IDs
 
 function Header(el)
   if not FORMAT:match("docx") then return nil end
