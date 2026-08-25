@@ -10,6 +10,8 @@
 PT_DIR = examples/guide/pt
 EN_DIR = examples/guide/en
 SG_DIR = examples/setup-guide
+PPT_PT = examples/ppt/pt-br
+PPT_EN = examples/ppt/en
 
 # ============================================================================
 ##@ Help
@@ -28,11 +30,13 @@ help: ## Show this help message
 ##@ Build (PDF via XeLaTeX)
 # ============================================================================
 
-all: samples examples all-formats ## Compile everything (samples + setup-guide + all formats)
+all: samples examples ppt-samples all-formats ## Compile everything (samples + setup-guide + PPT + all formats)
 
 samples: pt en ## Compile both guide samples (PT + EN)
 
 examples: setup-guide ## Compile the setup-guide and copy its PDF to repo root
+
+ppt-samples: ppt-pt ppt-en ## Generate PPT sample decks (PT + EN)
 
 pt: ## Compile the Portuguese sample
 	cd $(PT_DIR)/src && latexmk main.tex
@@ -43,6 +47,20 @@ en: ## Compile the English sample
 setup-guide: ## Compile the setup-guide and copy its PDF to repo root
 	cd $(SG_DIR)/src && latexmk setup-guide.tex
 	cp $(SG_DIR)/setup-guide.pdf setup-guide.pdf
+
+# ============================================================================
+##@ PPT (slide decks via python-pptx)
+# ============================================================================
+
+ppt-pt: ## Generate the Portuguese PPT sample deck
+	cd $(PPT_PT) && python3 generate.py
+
+ppt-en: ## Generate the English PPT sample deck
+	cd $(PPT_EN) && python3 generate.py
+
+slides: ## Generate a PPT deck (make slides DIR=<path-with-generate.py>)
+	@if [ -z "$(DIR)" ]; then echo "Usage: make slides DIR=<path-with-generate.py>"; exit 1; fi
+	@cd $(DIR) && python3 generate.py
 
 project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.tex])
 	@if [ -z "$(DIR)" ]; then echo "Usage: make project DIR=<path> [FILE=<name>.tex]"; exit 1; fi
@@ -124,5 +142,6 @@ clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=
 # ============================================================================
 
 .PHONY: help all samples examples pt en setup-guide project menu
+.PHONY: ppt-samples ppt-pt ppt-en slides
 .PHONY: docx docx-pt docx-en docx-sg md md-pt md-en md-sg html html-pt html-en html-sg all-formats
 .PHONY: clean clean-samples clean-examples clean-pt clean-en clean-setup-guide clean-project clean-formats
