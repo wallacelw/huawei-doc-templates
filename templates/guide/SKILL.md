@@ -461,12 +461,12 @@ rendered, but the content remains in the `.tex` file for future reference.
 | `linkblue` | `#0000FF` | Links |
 | `huaweired` | `#C7000B` | Brand red (H1 chapter rules, accents, badge) |
 | `ruleblack` | `#000000` | Horizontal rules (TOC, objectives) |
-| `warningbg` | `#FFF8E1` | Warning box background |
-| `warningfg` | `#F57C00` | Warning box border |
-| `tipbg` | `#E8F5E9` | Tip box background |
-| `tipfg` | `#2E7D32` | Tip box border |
-| `infobg` | `#E3F2FD` | Info box background |
-| `infofg` | `#1565C0` | Info box border |
+| `warningbg` | `#FDF8EE` | Warning box background (muted warm white) |
+| `warningfg` | `#D4A72C` | Warning box border (muted gold) |
+| `tipbg` | `#EDF6ED` | Tip box background (muted green tint) |
+| `tipfg` | `#5BA85B` | Tip box border (muted sage) |
+| `infobg` | `#EDF3F9` | Info box background (muted blue tint) |
+| `infofg` | `#4A8BB5` | Info box border (muted slate) |
 
 ---
 

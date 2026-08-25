@@ -243,9 +243,9 @@ local function make_callout(cls, label, content)
   if FORMAT:match("docx") then
     -- Callout colors: border, background, label color
     local callout_colors = {
-      warning = {border = "F57C00", bg = "FFF8E1", label_color = "C7000B"},
-      tip     = {border = "2E7D32", bg = "E8F5E9", label_color = "2E7D32"},
-      infobox = {border = "1565C0", bg = "E3F2FD", label_color = "1565C0"},
+      warning = {border = "D4A72C", bg = "FDF8EE", label_color = "C7000B"},
+      tip     = {border = "5BA85B", bg = "EDF6ED", label_color = "5BA85B"},
+      infobox = {border = "4A8BB5", bg = "EDF3F9", label_color = "4A8BB5"},
     }
     local c = callout_colors[cls] or callout_colors.infobox
     local esc_label = label:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
