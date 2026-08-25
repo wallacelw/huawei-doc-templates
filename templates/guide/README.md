@@ -65,9 +65,9 @@ and environments.
 | Code text color | `#1F2328` |
 | Link color | `#0000FF` (no underline) |
 | Brand red | `#C7000B` (`huaweired` — H1 chapter rules, accents, badge) |
-| Warning box | `#FFF8E1` bg / `#F57C00` border |
-| Tip box | `#E8F5E9` bg / `#2E7D32` border |
-| Info box | `#E3F2FD` bg / `#1565C0` border |
+| Warning box | `#FDF8EE` bg / `#D4A72C` border (muted gold) |
+| Tip box | `#EDF6ED` bg / `#5BA85B` border (muted sage) |
+| Info box | `#EDF3F9` bg / `#4A8BB5` border (muted slate) |
 
 Colors are defined in `templates/_base/huawei-colors.sty` and fonts in
 `templates/_base/huawei-fonts.sty`. Both are reusable via `\textcolor{name}{...}`

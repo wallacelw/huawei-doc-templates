@@ -57,7 +57,7 @@ approval. Changing them breaks existing documents and reproducibility.
 ### L9. Colors are hardcoded to Huawei brand
 - `huaweired` (`#C7000B`), `codebg` (`#F6F8FA`), `codetext` (`#1F2328`),
   `linkblue` (`#0000FF`), `ruleblack` (`#000000`).
-- Callout colors: `warningbg/fg` (amber), `tipbg/fg` (green), `infobg/fg` (blue).
+- Callout colors: `warningbg/fg` (muted gold), `tipbg/fg` (muted sage), `infobg/fg` (muted slate).
 - Do not change these values. They match the Huawei house style.
 
 ### L11. Auto-version on every AI-assisted change
