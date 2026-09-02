@@ -3,7 +3,7 @@
 %%  LaTeX class for Huawei Cloud guides
 %%  Requires XeLaTeX or LuaLaTeX (due to fontspec).
 %%
-%%  v2.0.3 — Decomposed into shared modules (templates/_base/huawei-*.sty):
+%%  v2.10.0 — Decomposed into shared modules (templates/_base/huawei-*.sty):
 %%    huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
 %%    huawei-code, huawei-callouts, huawei-images, huawei-changelog,
 %%    huawei-shared.
@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{guide}[2026/08/20 Huawei Guide template v2.0.3]
+\ProvidesClass{guide}[2026/08/24 Huawei Guide template v2.13.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

@@ -82,6 +82,16 @@ html-en:   ; ./build.sh --html examples/guide/en
 html-sg:   ; ./build.sh --html $(SG_DIR)
 
 # ============================================================================
+##@ Testing
+# ============================================================================
+
+test: ## Run all tests (filter units, round-trip, DOCX fix, version sync)
+	./tests/test-filter.sh
+	./tests/round-trip.sh
+	./tests/test-docx-fix.sh
+	./tests/test-sync.sh
+
+# ============================================================================
 ##@ Cleanup
 # ============================================================================
 
@@ -125,4 +135,5 @@ clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=
 
 .PHONY: help all samples examples pt en setup-guide project menu
 .PHONY: docx docx-pt docx-en docx-sg md md-pt md-en md-sg html html-pt html-en html-sg all-formats
+.PHONY: test
 .PHONY: clean clean-samples clean-examples clean-pt clean-en clean-setup-guide clean-project clean-formats

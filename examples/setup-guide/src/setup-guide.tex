@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- ECS + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{2.9.1}
+\setdocversion{2.13.0}
 
 \begin{document}
 
@@ -689,6 +689,18 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{2.13.0}{2026-08-24}{
+    \item Foundation refactoring Phase 4: make DOCX \texttt{--fix} post-processing robust. Replaced all silent-skip guards in \texttt{create-reference-docx.py} with loud \texttt{RuntimeError} assertions for expected XML elements (Heading1-4, Title, VerbatimChar, Normal, docDefaults, numbering indentation). Added pandoc version pin (3.1.0--3.2.0) to catch output-structure regressions on upgrade. Extended \texttt{test-docx-fix.sh} with version check and 4 loud-failure tests (missing style $\to$ non-zero exit).
+  }
+  \changelogentry{2.12.0}{2026-08-24}{
+    \item Foundation refactoring Phase 3: introduce \texttt{parse\_preamble()} in the Lua filter, extracting all class options (\texttt{portuguese}, \texttt{indentbody}, \texttt{notime}, \texttt{nochangelog}) and all \texttt{\textbackslash set*} command values into a single preamble state object. Fixes 6 L18 divergences at root cause: English TOC label (``Table of Contents'' $\to$ ``Contents''), \texttt{[notime]} now gates time in DOCX/HTML, \texttt{[nochangelog]} now suppresses changelog in non-PDF formats, \texttt{\textbackslash setcoverlogo} honored instead of hardcoded, \texttt{\textbackslash setheaderlogo} warns if set in non-PDF, \texttt{\textbackslash note} renders as italic in all formats (matching PDF). Any future preamble command or class option now flows through automatically.
+  }
+  \changelogentry{2.11.0}{2026-08-24}{
+    \item Foundation refactoring Phase 2: extend test matrix to cover all 3 output formats $\times$ 3 documents (9 cells). \texttt{round-trip.sh} now generates DOCX, counts structures in \texttt{word/document.xml}, and checks cross-format consistency (headings, images, code blocks, tables, callouts, 0 raw LaTeX across MD+DOCX+HTML). Added \texttt{test-docx-fix.sh} smoke test asserting H1 red border, heading colors, list indentation, and footer PAGE field in patched \texttt{styles.xml}.
+  }
+  \changelogentry{2.10.0}{2026-08-24}{
+    \item Foundation refactoring Phase 1: sync cls version to project tag, fix stale doc references (L16 output count, L-range, setup-guide feature claim), add test-sync.sh for version consistency checking.
+  }
   \changelogentry{2.9.1}{2026-08-23}{
     \item HTML and Markdown outputs now embed images as base64 data URIs. HTML uses pandoc \texttt{--embed-resources}, MD uses post-processing with \texttt{embed-images.py}. Outputs are self-contained — no external image files needed.
   }

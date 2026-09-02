@@ -28,7 +28,7 @@ project context:
 2. **`README.md`** (repo root) — project setup, compilation instructions,
    install steps, and project layout. Needed to understand the toolchain and
    folder conventions.
-3. **`AGENTS.md`** (repo root) — locked decisions (L1–L17), file editing
+3. **`AGENTS.md`** (repo root) — locked decisions (see AGENTS.md), file editing
    rules, versioning workflow, and project standards. These are mandatory
    constraints that must not be violated.
 4. **`templates/guide/README.md`** — human-readable template overview (class

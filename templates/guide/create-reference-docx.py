@@ -12,6 +12,8 @@ Requires: python-docx (pip install python-docx)
 """
 
 import sys
+import subprocess
+import re
 from docx import Document
 from docx.shared import Pt, Cm, Mm, RGBColor, Emu
 from docx.oxml import parse_xml, OxmlElement
@@ -19,6 +21,41 @@ from docx.oxml.ns import nsdecls, qn
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from lxml import etree
+
+
+# ── Pandoc version pin ────────────────────────────────────────────────────
+# The --fix post-processing depends on pandoc's XML output structure.
+# If pandoc changes its DOCX generation, the assertions below will catch it.
+SUPPORTED_PANDOC_RANGE = ((3, 1, 0), (3, 2, 0))  # >=3.1.0, <3.2.0
+
+
+def check_pandoc_version():
+    """Verify pandoc version is in the supported range."""
+    try:
+        result = subprocess.run(
+            ['pandoc', '--version'], capture_output=True, text=True, check=True
+        )
+        version_line = result.stdout.split('\n')[0]
+        match = re.match(r'pandoc (\d+)\.(\d+)(?:\.(\d+))?', version_line)
+        if not match:
+            raise RuntimeError(f"Could not parse pandoc version from: {version_line}")
+        major, minor = int(match.group(1)), int(match.group(2))
+        patch = int(match.group(3) or 0)
+        version = (major, minor, patch)
+        min_ver, max_ver = SUPPORTED_PANDOC_RANGE
+        if version < min_ver or version >= max_ver:
+            raise RuntimeError(
+                f"pandoc {major}.{minor}.{patch} is outside supported range "
+                f"({min_ver[0]}.{min_ver[1]}.{min_ver[2]}–{max_ver[0]}.{max_ver[1]}.{max_ver[2]}). "
+                f"The DOCX --fix post-processing depends on pandoc's XML output structure."
+            )
+    except FileNotFoundError:
+        raise RuntimeError("pandoc not found — required for DOCX --fix version check")
+
+
+def log_warn(msg):
+    """Print a warning to stderr (non-fatal, but visible)."""
+    print(f"WARNING: {msg}", file=sys.stderr)
 
 
 def add_or_get_paragraph_style(doc, name, base_style=None):
@@ -199,7 +236,11 @@ def fix_generated_docx(docx_path):
 
     Bypasses python-docx entirely — modifies styles.xml in the zip directly,
     because python-docx's save() overwrites any part blob modifications.
+
+    Raises RuntimeError if expected XML elements are missing (pandoc output
+    structure has changed) or if pandoc version is outside supported range.
     """
+    check_pandoc_version()
     import zipfile, shutil
     W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -226,7 +267,10 @@ def fix_generated_docx(docx_path):
                 style = s
                 break
         if style is None:
-            continue
+            raise RuntimeError(
+                f"Expected style '{heading_id}' not found in styles.xml — "
+                f"pandoc output structure may have changed"
+            )
 
         rPr = style.find(f"{{{W_NS}}}rPr")
         if rPr is None:
@@ -245,12 +289,16 @@ def fix_generated_docx(docx_path):
 
         # Fix font: remove theme refs, set explicit
         rFonts = rPr.find(f"{{{W_NS}}}rFonts")
-        if rFonts is not None:
-            for attr in list(rFonts.attrib.keys()):
-                if "Theme" in attr or "theme" in attr:
-                    del rFonts.attrib[attr]
-            rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
-            rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+        if rFonts is None:
+            raise RuntimeError(
+                f"Expected w:rFonts in style '{heading_id}' not found in styles.xml — "
+                f"pandoc output structure may have changed"
+            )
+        for attr in list(rFonts.attrib.keys()):
+            if "Theme" in attr or "theme" in attr:
+                del rFonts.attrib[attr]
+        rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+        rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
 
         # Add bottom border to Heading 1
         # Fix bold: H2-H4 should be regular weight (matches PDF \normalfont)
@@ -334,14 +382,25 @@ def fix_generated_docx(docx_path):
                 if s.find(f"{{{W_NS}}}qFormat") is None:
                     etree.SubElement(s, f"{{{W_NS}}}qFormat")
                 rPr = s.find(f"{{{W_NS}}}rPr")
-                if rPr is not None:
+                if rPr is None:
+                    # Heading5-9 are optional styles; if they exist, rPr is expected
+                    log_warn(
+                        f"Style '{heading_id}' exists but has no w:rPr — "
+                        f"cannot fix color/font for this heading level"
+                    )
+                else:
                     color = rPr.find(f"{{{W_NS}}}color")
                     if color is not None:
                         for attr in list(color.attrib.keys()):
                             del color.attrib[attr]
                         color.set(f"{{{W_NS}}}val", "1F2328")
                     rFonts = rPr.find(f"{{{W_NS}}}rFonts")
-                    if rFonts is not None:
+                    if rFonts is None:
+                        log_warn(
+                            f"Style '{heading_id}' has rPr but no w:rFonts — "
+                            f"cannot fix font for this heading level"
+                        )
+                    else:
                         for attr in list(rFonts.attrib.keys()):
                             if "Theme" in attr or "theme" in attr:
                                 del rFonts.attrib[attr]
@@ -350,55 +409,85 @@ def fix_generated_docx(docx_path):
                 break
 
     # Fix Title style (cover page): 36pt, near-black, HarmonyOS Sans
+    title_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "Title":
+            title_found = True
             rPr = s.find(f"{{{W_NS}}}rPr")
-            if rPr is not None:
-                color = rPr.find(f"{{{W_NS}}}color")
-                if color is not None:
-                    for attr in list(color.attrib.keys()):
-                        del color.attrib[attr]
-                    color.set(f"{{{W_NS}}}val", "1F2328")
-                rFonts = rPr.find(f"{{{W_NS}}}rFonts")
-                if rFonts is not None:
-                    for attr in list(rFonts.attrib.keys()):
-                        if "Theme" in attr or "theme" in attr:
-                            del rFonts.attrib[attr]
-                    rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
-                    rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
-                for tag in ['sz', 'szCs']:
-                    sz = rPr.find(f"{{{W_NS}}}{tag}")
-                    if sz is not None:
-                        sz.set(f"{{{W_NS}}}val", "72")
-                # Fix Title spacing for cover page (matches PDF guide.cls)
-                # before=62pt (~2.2cm), after=128pt (~4.5cm)
-                pPr = s.find(f"{{{W_NS}}}pPr")
-                if pPr is None:
-                    pPr = etree.SubElement(s, f"{{{W_NS}}}pPr")
-                spacing = pPr.find(f"{{{W_NS}}}spacing")
-                if spacing is None:
-                    spacing = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
-                spacing.set(f"{{{W_NS}}}before", "1248")  # 62pt
-                spacing.set(f"{{{W_NS}}}after", "2560")    # 128pt
+            if rPr is None:
+                raise RuntimeError(
+                    "Expected w:rPr in 'Title' style not found in styles.xml — "
+                    "pandoc output structure may have changed"
+                )
+            color = rPr.find(f"{{{W_NS}}}color")
+            if color is not None:
+                for attr in list(color.attrib.keys()):
+                    del color.attrib[attr]
+                color.set(f"{{{W_NS}}}val", "1F2328")
+            rFonts = rPr.find(f"{{{W_NS}}}rFonts")
+            if rFonts is None:
+                raise RuntimeError(
+                    "Expected w:rFonts in 'Title' style not found in styles.xml — "
+                    "pandoc output structure may have changed"
+                )
+            for attr in list(rFonts.attrib.keys()):
+                if "Theme" in attr or "theme" in attr:
+                    del rFonts.attrib[attr]
+            rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+            rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+            for tag in ['sz', 'szCs']:
+                sz = rPr.find(f"{{{W_NS}}}{tag}")
+                if sz is not None:
+                    sz.set(f"{{{W_NS}}}val", "72")
+            # Fix Title spacing for cover page (matches PDF guide.cls)
+            # before=62pt (~2.2cm), after=128pt (~4.5cm)
+            pPr = s.find(f"{{{W_NS}}}pPr")
+            if pPr is None:
+                pPr = etree.SubElement(s, f"{{{W_NS}}}pPr")
+            spacing = pPr.find(f"{{{W_NS}}}spacing")
+            if spacing is None:
+                spacing = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
+            spacing.set(f"{{{W_NS}}}before", "1248")  # 62pt
+            spacing.set(f"{{{W_NS}}}after", "2560")    # 128pt
             break
+    if not title_found:
+        raise RuntimeError(
+            "Expected style 'Title' not found in styles.xml — "
+            "pandoc output structure may have changed"
+        )
 
     # Fix VerbatimChar style: Consolas → Cascadia Code, 11pt → 10pt (matches PDF)
+    verbatim_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "VerbatimChar":
+            verbatim_found = True
             rPr = s.find(f"{{{W_NS}}}rPr")
-            if rPr is not None:
-                rFonts = rPr.find(f"{{{W_NS}}}rFonts")
-                if rFonts is not None:
-                    rFonts.set(f"{{{W_NS}}}ascii", "Cascadia Code")
-                    rFonts.set(f"{{{W_NS}}}hAnsi", "Cascadia Code")
-                for tag in ['sz', 'szCs']:
-                    sz = rPr.find(f"{{{W_NS}}}{tag}")
-                    if sz is not None:
-                        sz.set(f"{{{W_NS}}}val", "20")
-                    else:
-                        sz = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
-                        sz.set(f"{{{W_NS}}}val", "20")
+            if rPr is None:
+                raise RuntimeError(
+                    "Expected w:rPr in 'VerbatimChar' style not found in styles.xml — "
+                    "pandoc output structure may have changed"
+                )
+            rFonts = rPr.find(f"{{{W_NS}}}rFonts")
+            if rFonts is None:
+                raise RuntimeError(
+                    "Expected w:rFonts in 'VerbatimChar' style not found in styles.xml — "
+                    "pandoc output structure may have changed"
+                )
+            rFonts.set(f"{{{W_NS}}}ascii", "Cascadia Code")
+            rFonts.set(f"{{{W_NS}}}hAnsi", "Cascadia Code")
+            for tag in ['sz', 'szCs']:
+                sz = rPr.find(f"{{{W_NS}}}{tag}")
+                if sz is not None:
+                    sz.set(f"{{{W_NS}}}val", "20")
+                else:
+                    sz = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+                    sz.set(f"{{{W_NS}}}val", "20")
             break
+    if not verbatim_found:
+        raise RuntimeError(
+            "Expected style 'VerbatimChar' not found in styles.xml — "
+            "pandoc output structure may have changed"
+        )
 
     # Fix SourceCode style: add left/right indentation + szCs (matches PDF code block)
     for s in root.findall(f"{{{W_NS}}}style"):
@@ -418,11 +507,15 @@ def fix_generated_docx(docx_path):
             ind.set(f"{{{W_NS}}}right", "284")   # 0.5cm
             # Add szCs for complex script consistency
             rPr = s.find(f"{{{W_NS}}}rPr")
-            if rPr is not None:
-                szCs = rPr.find(f"{{{W_NS}}}szCs")
-                if szCs is None:
-                    szCs = etree.SubElement(rPr, f"{{{W_NS}}}szCs")
-                szCs.set(f"{{{W_NS}}}val", "20")
+            if rPr is None:
+                raise RuntimeError(
+                    "Expected w:rPr in 'SourceCode' style not found in styles.xml — "
+                    "pandoc output structure may have changed"
+                )
+            szCs = rPr.find(f"{{{W_NS}}}szCs")
+            if szCs is None:
+                szCs = etree.SubElement(rPr, f"{{{W_NS}}}szCs")
+            szCs.set(f"{{{W_NS}}}val", "20")
             break
 
     # Fix callout and code style spacing: 6pt before, 6pt after (matches PDF)
@@ -465,22 +558,29 @@ def fix_generated_docx(docx_path):
         for s in root.findall(f"{{{W_NS}}}style"):
             if s.get(f"{{{W_NS}}}styleId") == sid:
                 pPr = s.find(f"{{{W_NS}}}pPr")
-                if pPr is not None:
-                    spacing = pPr.find(f"{{{W_NS}}}spacing")
-                    if spacing is not None:
-                        spacing.set(f"{{{W_NS}}}after", "80")
-                        spacing.set(f"{{{W_NS}}}before", "0")
+                if pPr is None:
+                    pPr = etree.SubElement(s, f"{{{W_NS}}}pPr")
+                spacing = pPr.find(f"{{{W_NS}}}spacing")
+                if spacing is None:
+                    spacing = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
+                spacing.set(f"{{{W_NS}}}after", "80")
+                spacing.set(f"{{{W_NS}}}before", "0")
                 break
 
     # Fix all styles: add explicit font names alongside theme references
     # Prevents Word from falling back to Cambria when HarmonyOS Sans
     # is not installed (theme refs alone don't provide a fallback name)
+    # NOTE: rPr and rFonts are genuinely optional here — some styles have
+    # only pPr (no run properties). Skip with warning if missing.
     for style in root.findall(f"{{{W_NS}}}style"):
+        style_id = style.get(f"{{{W_NS}}}styleId", "<unnamed>")
         rPr = style.find(f"{{{W_NS}}}rPr")
         if rPr is None:
+            # Optional: styles with only pPr (e.g. table styles) have no rPr
             continue
         rFonts = rPr.find(f"{{{W_NS}}}rFonts")
         if rFonts is None:
+            # Optional: some styles have rPr but no rFonts (e.g. only sz/color)
             continue
         if rFonts.get(f"{{{W_NS}}}asciiTheme") and not rFonts.get(f"{{{W_NS}}}ascii"):
             rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
@@ -488,49 +588,83 @@ def fix_generated_docx(docx_path):
             rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
 
     # Fix Normal style: 10.5pt (sz=21) to match PDF body text (10.5pt/14pt leading)
+    normal_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "Normal":
+            normal_found = True
             rPr = s.find(f"{{{W_NS}}}rPr")
-            if rPr is not None:
-                for tag in ['sz', 'szCs']:
-                    sz = rPr.find(f"{{{W_NS}}}{tag}")
-                    if sz is not None:
-                        sz.set(f"{{{W_NS}}}val", "21")
-                    else:
-                        sz = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
-                        sz.set(f"{{{W_NS}}}val", "21")
+            if rPr is None:
+                rPr = etree.SubElement(s, f"{{{W_NS}}}rPr")
+            for tag in ['sz', 'szCs']:
+                sz = rPr.find(f"{{{W_NS}}}{tag}")
+                if sz is not None:
+                    sz.set(f"{{{W_NS}}}val", "21")
+                else:
+                    sz = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+                    sz.set(f"{{{W_NS}}}val", "21")
             pPr = s.find(f"{{{W_NS}}}pPr")
-            if pPr is not None:
-                spacing = pPr.find(f"{{{W_NS}}}spacing")
-                if spacing is not None:
-                    spacing.set(f"{{{W_NS}}}after", "80")
-                    spacing.set(f"{{{W_NS}}}line", "280")
-                    spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
+            if pPr is None:
+                pPr = etree.SubElement(s, f"{{{W_NS}}}pPr")
+            spacing = pPr.find(f"{{{W_NS}}}spacing")
+            if spacing is None:
+                spacing = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
+            spacing.set(f"{{{W_NS}}}after", "80")
+            spacing.set(f"{{{W_NS}}}line", "280")
+            spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
             break
+    if not normal_found:
+        raise RuntimeError(
+            "Expected style 'Normal' not found in styles.xml — "
+            "pandoc output structure may have changed"
+        )
 
     # Fix docDefaults: 10.5pt (sz=21), spacing after=80 (4pt parskip)
     docDefaults = root.find(f"{{{W_NS}}}docDefaults")
-    if docDefaults is not None:
-        rPrDefault = docDefaults.find(f"{{{W_NS}}}rPrDefault")
-        if rPrDefault is not None:
-            rPr = rPrDefault.find(f"{{{W_NS}}}rPr")
-            if rPr is not None:
-                for tag in ['sz', 'szCs']:
-                    sz = rPr.find(f"{{{W_NS}}}{tag}")
-                    if sz is not None:
-                        sz.set(f"{{{W_NS}}}val", "21")
-                    else:
-                        sz = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
-                        sz.set(f"{{{W_NS}}}val", "21")
-        pPrDefault = docDefaults.find(f"{{{W_NS}}}pPrDefault")
-        if pPrDefault is not None:
-            pPr = pPrDefault.find(f"{{{W_NS}}}pPr")
-            if pPr is not None:
-                spacing = pPr.find(f"{{{W_NS}}}spacing")
-                if spacing is not None:
-                    spacing.set(f"{{{W_NS}}}after", "80")
-                    spacing.set(f"{{{W_NS}}}line", "280")
-                    spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
+    if docDefaults is None:
+        raise RuntimeError(
+            "Expected w:docDefaults not found in styles.xml — "
+            "pandoc output structure may have changed"
+        )
+    rPrDefault = docDefaults.find(f"{{{W_NS}}}rPrDefault")
+    if rPrDefault is None:
+        raise RuntimeError(
+            "Expected w:rPrDefault not found in docDefaults — "
+            "pandoc output structure may have changed"
+        )
+    rPr = rPrDefault.find(f"{{{W_NS}}}rPr")
+    if rPr is None:
+        raise RuntimeError(
+            "Expected w:rPr not found in rPrDefault — "
+            "pandoc output structure may have changed"
+        )
+    for tag in ['sz', 'szCs']:
+        sz = rPr.find(f"{{{W_NS}}}{tag}")
+        if sz is not None:
+            sz.set(f"{{{W_NS}}}val", "21")
+        else:
+            sz = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+            sz.set(f"{{{W_NS}}}val", "21")
+    pPrDefault = docDefaults.find(f"{{{W_NS}}}pPrDefault")
+    if pPrDefault is None:
+        raise RuntimeError(
+            "Expected w:pPrDefault not found in docDefaults — "
+            "pandoc output structure may have changed"
+        )
+    pPr = pPrDefault.find(f"{{{W_NS}}}pPr")
+    if pPr is None:
+        raise RuntimeError(
+            "Expected w:pPr not found in pPrDefault — "
+            "pandoc output structure may have changed"
+        )
+    spacing = pPr.find(f"{{{W_NS}}}spacing")
+    if spacing is None:
+        raise RuntimeError(
+            "Expected w:spacing not found in pPrDefault pPr — "
+            "pandoc output structure may have changed"
+        )
+    spacing.set(f"{{{W_NS}}}after", "80")
+    spacing.set(f"{{{W_NS}}}line", "280")
+    spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
 
     # ── Add/fix Caption style for figure/table captions ─────────────────
     # PDF: \small (9pt), bold label, centered — ensure properties even if style exists
@@ -728,11 +862,21 @@ def fix_generated_docx(docx_path):
                     if lvl.get(f"{{{W_NS}}}ilvl") == str(lvl_num):
                         # w:ind is inside w:pPr inside w:lvl
                         ind = lvl.find(f"{{{W_NS}}}pPr/{{{W_NS}}}ind")
-                        if ind is not None:
-                            ind.set(f"{{{W_NS}}}left", left_val)
-                            ind.set(f"{{{W_NS}}}hanging", hang_val)
+                        if ind is None:
+                            raise RuntimeError(
+                                f"Expected w:ind in numbering.xml level {lvl_num} "
+                                f"not found — pandoc output structure may have changed"
+                            )
+                        ind.set(f"{{{W_NS}}}left", left_val)
+                        ind.set(f"{{{W_NS}}}hanging", hang_val)
             modified_numbering = etree.tostring(
                 num_root, xml_declaration=True, encoding="UTF-8", standalone=True
+            )
+        else:
+            # numbering.xml is genuinely optional — only present if document has lists
+            log_warn(
+                "word/numbering.xml not found in DOCX — "
+                "list indentation fix skipped (document may have no lists)"
             )
 
     # ── Footer with page number (pandoc doesn't carry over reference footer) ─

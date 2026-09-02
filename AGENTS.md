@@ -114,7 +114,7 @@ approval. Changing them breaks existing documents and reproducibility.
 - The filter uses **global functions** (`Pandoc`, `RawBlock`, `RawInline`) —
   do NOT add a `return` table at the end; return tables silently fail.
 - Format check is `raw.format ~= "latex"` (not `"tex"`).
-- `make all-formats` generates all 6 outputs (MD + DOCX + HTML for pt + en).
+- `make all-formats` generates all 9 outputs (MD + DOCX + HTML for pt + en + setup-guide).
 - Generated outputs are gitignored (build artifacts). Only the filter, reference
   DOCX, HTML template, and Python script are committed.
 
@@ -122,8 +122,8 @@ approval. Changing them breaks existing documents and reproducibility.
 - After every change (bug fix, feature, docs edit), create a new git version tag
   (e.g., `v2.0.1`, `v2.0.2`, `v2.1.0`).
 - Before tagging, validate: compile all samples (`make samples`), run all tests
-  (`./tests/test-filter.sh` and `./tests/round-trip.sh`), and verify 0 raw LaTeX
-  blocks in output.
+  (`make test`, which runs `test-filter.sh`, `round-trip.sh`, `test-docx-fix.sh`,
+  and `test-sync.sh`), and verify 0 raw LaTeX blocks in output.
 - Tag format: `v<major>.<minor>.<patch>` — patch for fixes, minor for features,
   major for breaking changes.
 - Push the tag: `git push --tags`.
@@ -199,8 +199,9 @@ See [README.md "Project layout"](README.md) for the full tree.
   first page explaining which template it uses and what it demonstrates.
 - **Setup guide is additional**: `examples/setup-guide/` is not a sample — it
   is a real-world document used for validation and actual installation
-  instructions. It exercises features the samples don't (e.g. `\menu`,
-  `\badge`, multi-entry changelog).
+  instructions. Its multi-entry changelog (23 entries vs 14/12 in samples)
+  exercises versioning in depth, and it demonstrates features in a
+  practical context.
 - **Setup guide PDF in root**: `make examples` copies `setup-guide.pdf` to the
   repo root for easy reading. The copy is gitignored (build artifact).
 - **Self-contained**: each sample/example has its own `.latexmkrc` with

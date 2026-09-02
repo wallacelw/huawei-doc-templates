@@ -184,10 +184,12 @@ and environment reference.
 │       │   └── .latexmkrc   # TEXINPUTS → ../../templates/_base/ + ../../templates/guide/; $out_dir='..'
 │       └── assets/           # project-specific images
 ├── tests/
-│   ├── cases/          # Lua filter test cases
-│   ├── expected/       # expected filter output (.md.expected)
-│   ├── test-filter.sh  # Lua filter unit tests
-│   └── round-trip.sh   # cross-format validation
+│   ├── cases/           # Lua filter test cases
+│   ├── expected/        # expected filter output (.md.expected)
+│   ├── test-filter.sh   # Lua filter unit tests
+│   ├── round-trip.sh    # cross-format validation (MD + DOCX + HTML)
+│   ├── test-docx-fix.sh # DOCX --fix post-processing smoke test
+│   └── test-sync.sh     # version + doc consistency check
 └── examples/                 # all examples, samples, and output screenshots
     ├── gallery/             # screenshots of sample output
     ├── guide/               # samples for the guide template

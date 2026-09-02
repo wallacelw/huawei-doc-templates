@@ -25,7 +25,7 @@ local labels = {
     genobj = "General Objective:", obj = "Objective:",
     prereq = "Prerequisites:", stepbystep = "Step by step:",
     changelog = "Changelog",
-    toc = "Table of Contents",
+    toc = "Contents",
   },
   pt = {
     warning = "Importante", tip = "Dica", infobox = "Informação",
@@ -36,9 +36,10 @@ local labels = {
   },
 }
 
--- Active language: "en" or "pt" (set by documentclass option detection)
-local lang = "en"
-local function L(key) return labels[lang][key] or key end
+-- Preamble state (forward-declared; populated after parse_preamble is defined).
+-- Contains: lang, options (portuguese/indentbody/notime/nochangelog), commands.
+local preamble = { lang = "en", options = {}, commands = {} }
+local function L(key) return labels[preamble.lang][key] or key end
 
 local function log_warn(msg)
   io.stderr:write("WARNING: " .. msg .. "\n")
@@ -60,19 +61,17 @@ local function read_file(path)
   return content
 end
 
--- Detect language at filter load time (before AST walk).
+-- Read source file at filter load time (before AST walk).
 -- RawBlock/RawInline handlers run during the walk, before Pandoc(),
--- so lang must be set before any handler that calls L().
+-- so preamble must be set before any handler that calls L().
+local _source_text = nil
 do
   local _sp = nil
   if PANDOC_STATE and PANDOC_STATE.input_files then
     for _, f in ipairs(PANDOC_STATE.input_files) do _sp = f; break end
   end
   if _sp then
-    local _src = read_file(_sp)
-    if _src and _src:find("\\documentclass%s*%[.*portuguese.*%]%s*{guide}") then
-      lang = "pt"
-    end
+    _source_text = read_file(_sp)
   end
 end
 
@@ -160,6 +159,40 @@ local function is_strip_cmd(text)
   end
   return false
 end
+
+-- Parse preamble: extract language, class options, and command values from source.
+local function parse_preamble(source_text)
+  local p = {
+    lang = "en",
+    options = { portuguese = false, indentbody = false, notime = false, nochangelog = false },
+    commands = {},
+  }
+  if not source_text then return p end
+
+  -- Parse \documentclass[opts]{guide}
+  local opts = source_text:match("\\documentclass%s*%[(.-)%]%s*{guide}")
+  if opts then
+    for opt in opts:gmatch("([^,]+)") do
+      opt = trim(opt)
+      if opt == "portuguese" then p.lang = "pt"; p.options.portuguese = true
+      elseif opt == "indentbody" then p.options.indentbody = true
+      elseif opt == "notime" then p.options.notime = true
+      elseif opt == "nochangelog" then p.options.nochangelog = true
+      end
+    end
+  end
+
+  -- Extract all \set* command values using find_cmd_arg
+  for cmd, _ in pairs(strip_commands) do
+    local val = find_cmd_arg(source_text, cmd)
+    if val then p.commands[cmd] = val end
+  end
+
+  return p
+end
+
+-- Populate preamble from source text (before any AST walk)
+preamble = parse_preamble(_source_text)
 
 -- Forward declaration: set after RawInline/RawBlock are defined.
 local inner_filter = nil
@@ -392,83 +425,85 @@ end
 -- =====================================================================
 
 function Pandoc(doc)
-  -- Detect language from source file
-  local source_path = nil
-  if PANDOC_STATE and PANDOC_STATE.input_files then
-    for _, f in ipairs(PANDOC_STATE.input_files) do source_path = f; break end
+  -- Warn about PDF-only commands
+  if preamble.commands.setheaderlogo and not FORMAT:match("latex") then
+    log_warn("setheaderlogo is PDF-only; ignored in " .. FORMAT .. " output")
   end
 
-  if source_path then
-    local src = read_file(source_path)
-    if src then
-      -- Set doc.meta.lang so the HTML template's $lang$ variable works
-      doc.meta.lang = (lang == "pt") and "pt" or "en"
-      local title = find_cmd_arg(src, "setguidetitle")
-      if title then
-        local current_title = doc.meta.title
-        if not current_title or (type(current_title) == "table" and #current_title == 0) then
-          doc.meta.title = pandoc.Inlines({pandoc.Str(title)})
-        end
-      end
-      local version = find_cmd_arg(src, "setdocversion")
-      if version then doc.meta["doc-version"] = version end
-      local date = find_cmd_arg(src, "setdocdate")
-      if date then doc.meta.date = date:gsub("\\today", os.date("%Y-%m-%d")) end
+  -- Set doc.meta.lang so the HTML template's $lang$ variable works
+  doc.meta.lang = (preamble.lang == "pt") and "pt" or "en"
 
-      -- For DOCX: add cover page content (cover text + version/date + page break)
-      -- The title is rendered by pandoc via doc.meta.title (Title style).
-      if FORMAT:match("docx") then
-        local ct = find_cmd_arg(src, "setcovertext") or "Huawei Technologies CO., LTD"
-        local meta_parts = {}
-        if version and version ~= "" then table.insert(meta_parts, "v" .. version) end
-        if date then
-          local ds = date:gsub("\\today", os.date("%Y-%m-%d"))
+  -- Use preamble.commands for all preamble values (already parsed at load time)
+  local title = preamble.commands.setguidetitle
+  if title then
+    local current_title = doc.meta.title
+    if not current_title or (type(current_title) == "table" and #current_title == 0) then
+      doc.meta.title = pandoc.Inlines({pandoc.Str(title)})
+    end
+  end
+  local version = preamble.commands.setdocversion
+  if version then doc.meta["doc-version"] = version end
+  local date = preamble.commands.setdocdate
+  if date then doc.meta.date = date:gsub("\\today", os.date("%Y-%m-%d")) end
+
+  -- For DOCX: add cover page content (cover text + version/date + page break)
+  -- The title is rendered by pandoc via doc.meta.title (Title style).
+  if FORMAT:match("docx") then
+    local ct = preamble.commands.setcovertext or "Huawei Technologies CO., LTD"
+    local meta_parts = {}
+    -- Per guide.cls: cover meta (version + date + time) only shown when changelog is enabled
+    if not preamble.options.nochangelog then
+      if version and version ~= "" then table.insert(meta_parts, "v" .. version) end
+      if date then
+        local ds = date:gsub("\\today", os.date("%Y-%m-%d"))
+        if not preamble.options.notime then
           ds = ds .. " " .. os.date("%H:%M")
-          if ds ~= "" then table.insert(meta_parts, ds) end
         end
-        local mt = table.concat(meta_parts, " — ")
-        local cb = pandoc.Blocks({})
-        -- Cover logo (centered, 3.6cm wide — matches PDF)
-        cb:insert(pandoc.Div(
-            {pandoc.Para({pandoc.Image(pandoc.Inlines({}), "huawei-logo-cover.png", "", pandoc.Attr("", {}, {width = "3.6cm"}))})},
-            pandoc.Attr("", {}, {["custom-style"] = "CoverLogo"})))
-        cb:insert(pandoc.Div(
-            {pandoc.Para({pandoc.Str(ct)})},
-            pandoc.Attr("", {}, {["custom-style"] = "CoverText"})))
-        if mt ~= "" then
-          cb:insert(pandoc.Div(
-              {pandoc.Para({pandoc.Str(mt)})},
-              pandoc.Attr("", {}, {["custom-style"] = "CoverMeta"})))
-        end
-        cb:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
-        for i = #cb, 1, -1 do doc.blocks:insert(1, cb[i]) end
-        -- Word TOC field (right-aligned 22pt heading + TOC + page break)
-        local toc_title = L("toc")
-        local toc_blocks = pandoc.Blocks({})
-        toc_blocks:insert(pandoc.Div(
-            {pandoc.Para({pandoc.Str(toc_title)})},
-            pandoc.Attr("", {}, {["custom-style"] = "TOCTitle"})))
-        -- Native Word TOC field wrapped in w:sdt (structured document tag)
-        -- w:dirty="true" tells Word to update on open (one-time security warning)
-        -- Word generates all entries: page numbers, hyperlinks, dot leaders, indentation
-        -- TOC1/TOC2/TOC3 styles in reference DOCX control appearance
-        toc_blocks:insert(pandoc.RawBlock("openxml",
-          '<w:sdt><w:sdtPr><w:docPartObj>' ..
-          '<w:docPartGallery w:val="Table of Contents"/>' ..
-          '<w:docPartUnique/></w:docPartObj></w:sdtPr>' ..
-          '<w:sdtContent>' ..
-          '<w:p><w:r>' ..
-          '<w:fldChar w:fldCharType="begin" w:dirty="true"/>' ..
-          '<w:instrText xml:space="preserve"> TOC \\o "1-3" \\h \\z \\u </w:instrText>' ..
-          '<w:fldChar w:fldCharType="separate"/>' ..
-          '<w:fldChar w:fldCharType="end"/>' ..
-          '</w:r></w:p>' ..
-          '</w:sdtContent></w:sdt>'))
-        toc_blocks:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
-        for i = #toc_blocks, 1, -1 do doc.blocks:insert(#cb + 1, toc_blocks[i]) end
-        doc.meta.date = nil
+        if ds ~= "" then table.insert(meta_parts, ds) end
       end
     end
+    local mt = table.concat(meta_parts, " — ")
+    local cb = pandoc.Blocks({})
+    -- Cover logo (centered, 3.6cm wide — matches PDF)
+    local cover_logo = preamble.commands.setcoverlogo or "huawei-logo-cover.png"
+    cb:insert(pandoc.Div(
+        {pandoc.Para({pandoc.Image(pandoc.Inlines({}), cover_logo, "", pandoc.Attr("", {}, {width = "3.6cm"}))})},
+        pandoc.Attr("", {}, {["custom-style"] = "CoverLogo"})))
+    cb:insert(pandoc.Div(
+        {pandoc.Para({pandoc.Str(ct)})},
+        pandoc.Attr("", {}, {["custom-style"] = "CoverText"})))
+    if mt ~= "" then
+      cb:insert(pandoc.Div(
+          {pandoc.Para({pandoc.Str(mt)})},
+          pandoc.Attr("", {}, {["custom-style"] = "CoverMeta"})))
+    end
+    cb:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+    for i = #cb, 1, -1 do doc.blocks:insert(1, cb[i]) end
+    -- Word TOC field (right-aligned 22pt heading + TOC + page break)
+    local toc_title = L("toc")
+    local toc_blocks = pandoc.Blocks({})
+    toc_blocks:insert(pandoc.Div(
+        {pandoc.Para({pandoc.Str(toc_title)})},
+        pandoc.Attr("", {}, {["custom-style"] = "TOCTitle"})))
+    -- Native Word TOC field wrapped in w:sdt (structured document tag)
+    -- w:dirty="true" tells Word to update on open (one-time security warning)
+    -- Word generates all entries: page numbers, hyperlinks, dot leaders, indentation
+    -- TOC1/TOC2/TOC3 styles in reference DOCX control appearance
+    toc_blocks:insert(pandoc.RawBlock("openxml",
+      '<w:sdt><w:sdtPr><w:docPartObj>' ..
+      '<w:docPartGallery w:val="Table of Contents"/>' ..
+      '<w:docPartUnique/></w:docPartObj></w:sdtPr>' ..
+      '<w:sdtContent>' ..
+      '<w:p><w:r>' ..
+      '<w:fldChar w:fldCharType="begin" w:dirty="true"/>' ..
+      '<w:instrText xml:space="preserve"> TOC \\o "1-3" \\h \\z \\u </w:instrText>' ..
+      '<w:fldChar w:fldCharType="separate"/>' ..
+      '<w:fldChar w:fldCharType="end"/>' ..
+      '</w:r></w:p>' ..
+      '</w:sdtContent></w:sdt>'))
+    toc_blocks:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+    for i = #toc_blocks, 1, -1 do doc.blocks:insert(#cb + 1, toc_blocks[i]) end
+    doc.meta.date = nil
   end
 
   -- Strip structural/preamble commands from the body
@@ -763,6 +798,7 @@ local sec_h1, sec_h2, sec_h3, sec_h4 = 0, 0, 0, 0
 local bookmark_seq = 100  -- avoid conflicts with pandoc's bookmark IDs
 
 local function handle_changelog_env(text)
+  if preamble.options.nochangelog then return pandoc.Blocks({}) end
   local body = text:match("\\begin%s*{changelog}%s*(.-)%s*\\end%s*{changelog}")
   if not body then return nil end
   local blocks = pandoc.Blocks({})
@@ -1035,14 +1071,17 @@ function RawBlock(raw)
     end
   end
 
-  -- \note{...}  →  italic text (PDF: \textit); DOCX: plain italic, not callout
+  -- \note{...}  →  italic text (PDF: \textit); not a callout box
   do
     local arg = text:match("\\note%s*(%b{})")
     if arg then
       if FORMAT:match("docx") then
         return pandoc.Para({pandoc.Emph(parse_latex_inlines(arg:sub(2, -2)))})
       else
-        return make_callout("infobox", "Note", parse_latex_blocks(arg:sub(2, -2)))
+        -- Match PDF: \textit{Note: ...} (not a callout box)
+        local inlines = pandoc.Inlines({pandoc.Str("Note: ")})
+        inlines:extend(parse_latex_inlines(arg:sub(2, -2)))
+        return pandoc.Para({pandoc.Emph(inlines)})
       end
     end
   end
