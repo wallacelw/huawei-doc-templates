@@ -1,0 +1,89 @@
+\documentclass[portuguese]{technical}
+
+\setreporttitle{[Relatório de Análise] A lista de projetos empresariais não é %
+  exibida na página de criação do ECS na 8.5.1 no site do Brasil}
+\setreportversion{HCS 8.5.1}
+\setreportdate{2025-08-13}
+\setreportscenario{Cenário Padrão}
+\setheadertitle{Huawei Cloud --- Relatório Técnico}
+
+\begin{document}
+\makecover
+\maketoc
+\startbody
+
+\begin{problem}
+No site do Brasil do HCS 8.5.1, o projeto empresarial padrão
+não é exibido na página de criação do ECS. Isso impede que os
+usuários selecionem o projeto empresarial correto ao provisionar
+novas instâncias ECS.
+\end{problem}
+
+\begin{rootcauseanalysis}
+\begin{enumerate}
+  \item Analisadas as permissões do usuário que não visualiza o
+    projeto empresarial padrão
+  \item Verificado o comportamento do campo \texttt{auth\_action} na versão 8.5.1
+  \item Confirmado que a função Server Administrator não possui
+    permissões de ação refinadas
+\end{enumerate}
+\end{rootcauseanalysis}
+
+\begin{rootcause}
+Na versão 8.5.1, o cenário de permissão refinada foi otimizado.
+Quando um ECS é provisionado, apenas os projetos empresariais com
+as permissões apropriadas são listados. A função Server
+Administrator não inclui ECS FullAccess.
+\end{rootcause}
+
+\begin{triggercondition}
+Ocorre quando um usuário com apenas a função Server Administrator
+tenta criar uma instância ECS no HCS 8.5.1.
+\end{triggercondition}
+
+\begin{workaround}
+
+  \begin{impact}
+  Para conceder ECS FullAccess a um usuário, é necessário modificar
+  a permissão do grupo de usuários. Esta permissão é a permissão de
+  administrador do ECS e está incluída na permissão do Server
+  Administrator.
+  \end{impact}
+
+  \begin{backupdata}
+  N/A --- nenhuma modificação de dados necessária.
+  \end{backupdata}
+
+  \begin{workaroundsteps}
+  \begin{enumerate}
+    \item Faça login no plano de locatário e encontre o grupo de
+      usuários associado ao usuário afetado
+    \item Adicione a permissão ECS FullAccess ao grupo de usuários
+    \item Verifique se a permissão foi aplicada corretamente
+  \end{enumerate}
+  \end{workaroundsteps}
+
+  \begin{verification}
+  Faça login na página de locatário novamente, vá para a página do
+  ECS, crie um ECS e verifique se a lista de projetos empresariais
+  agora é exibida.
+  \end{verification}
+
+  \begin{rollback}
+  Remova a permissão ECS FullAccess do grupo de usuários.
+  \end{rollback}
+
+  \begin{cleanup}
+  Nenhuma limpeza necessária.
+  \end{cleanup}
+
+\end{workaround}
+
+% --- Histórico de versões ---
+\begin{changelog}
+  \changelogentry{1.0.0}{\today}{
+    \item Versão inicial.
+  }
+\end{changelog}
+
+\end{document}

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html$if(lang)$ lang="$lang$"$endif$>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+$for(author-meta)$
+  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$
+  <meta name="date" content="$date-meta$" />
+$endif$
+$if(keywords)$
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+$endif$
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <style>
+    /* ── Huawei Brand Colors ──────────────────────────────────── */
+    :root {
+      --huawei-red: #C7000B;
+      --code-bg: #F6F8FA;
+      --code-text: #1F2328;
+      --link-blue: #0000FF;
+      --warning-bg: #FFF8E1;
+      --warning-border: #F57C00;
+      --tip-bg: #E8F5E9;
+      --tip-border: #2E7D32;
+      --info-bg: #E3F2FD;
+      --info-border: #1565C0;
+      --body-text: #1F2328;
+      --rule-black: #000000;
+    }
+
+    /* ── Base / Body ──────────────────────────────────────────── */
+    body {
+      font-family: "HarmonyOS Sans", "Liberation Sans", sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.6;
+      color: var(--body-text);
+      max-width: 210mm; /* A4 */
+      margin: 0 auto;
+      padding: 2cm 2.5cm;
+      background: #fff;
+    }
+
+    /* ── Headings ─────────────────────────────────────────────── */
+    h1 {
+      font-size: 20pt;
+      font-weight: 700;
+      color: var(--body-text);
+      border-bottom: 2pt solid var(--huawei-red);
+      padding-bottom: 4pt;
+      margin-top: 24pt;
+      margin-bottom: 12pt;
+    }
+
+    h2 {
+      font-size: 18pt;
+      font-weight: 400;
+      color: var(--body-text);
+      margin-top: 20pt;
+      margin-bottom: 10pt;
+    }
+
+    h3 {
+      font-size: 16pt;
+      font-weight: 400;
+      color: var(--body-text);
+      margin-top: 16pt;
+      margin-bottom: 8pt;
+    }
+
+    h4 {
+      font-size: 14pt;
+      font-weight: 400;
+      color: var(--body-text);
+      margin-top: 14pt;
+      margin-bottom: 6pt;
+    }
+
+    /* ── Links ────────────────────────────────────────────────── */
+    a {
+      color: var(--link-blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Code / Pre ───────────────────────────────────────────── */
+    code {
+      font-family: "Cascadia Code", "DejaVu Sans Mono", monospace;
+      font-size: 9pt;
+      font-variant-ligatures: none;
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1pt 3pt;
+      border-radius: 2pt;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 10pt 12pt;
+      border-radius: 3pt;
+      overflow-x: auto;
+      font-variant-ligatures: none;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      font-size: 9pt;
+    }
+
+    /* ── Callout boxes ────────────────────────────────────────── */
+    /* Note: ARIA roles (role="note"/"alert") and aria-label attributes
+       are set by the Lua filter (guide-pandoc.lua) on each callout Div,
+       not here in CSS. This ensures screen readers announce callouts
+       with the correct semantics (warning=alert, tip/infobox=note). */
+    .callout {
+      padding: 10pt 14pt 10pt 14pt;
+      margin: 10pt 0;
+      border-left: 3pt solid var(--rule-black);
+      border-radius: 0 3pt 3pt 0;
+    }
+
+    .callout.warning {
+      background-color: var(--warning-bg);
+      border-left-color: var(--warning-border);
+    }
+
+    .callout.tip {
+      background-color: var(--tip-bg);
+      border-left-color: var(--tip-border);
+    }
+
+    .callout.infobox {
+      background-color: var(--info-bg);
+      border-left-color: var(--info-border);
+    }
+
+    /* Callout label colors — match PDF (warning=red, tip=green, infobox=blue) */
+    .callout.warning > p:first-child strong {
+      color: var(--huawei-red);
+    }
+    .callout.tip > p:first-child strong {
+      color: var(--tip-border);
+    }
+    .callout.infobox > p:first-child strong {
+      color: var(--info-border);
+    }
+
+    /* ── Objectives ───────────────────────────────────────────── */
+    .objectives {
+      margin: 10pt 0;
+      padding-bottom: 8pt;
+      border-bottom: 1.5pt solid var(--rule-black);
+    }
+
+    /* ── Tables (hutable style) ───────────────────────────────── */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10pt 0;
+    }
+
+    th, td {
+      border: 1pt solid var(--huawei-red);
+      padding: 5pt 8pt;
+      text-align: left;
+    }
+
+    thead th {
+      background-color: var(--huawei-red);
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--code-bg);
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #FFFFFF;
+    }
+
+    /* ── Badge ────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      background-color: var(--huawei-red);
+      color: #FFFFFF;
+      font-size: 9pt;
+      font-weight: 700;
+      padding: 1pt 6pt;
+      border-radius: 2pt;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+
+    /* ── Changelog ────────────────────────────────────────────── */
+    .changelog {
+      margin: 12pt 0;
+      padding: 8pt 0;
+      border-top: 0.5pt solid var(--rule-black);
+      border-bottom: 0.5pt solid var(--rule-black);
+    }
+
+    /* ── Images ───────────────────────────────────────────────── */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── Horizontal rule ──────────────────────────────────────── */
+    hr {
+      border: none;
+      border-top: 1pt solid var(--rule-black);
+      margin: 16pt 0;
+    }
+
+    /* ── Blockquote ───────────────────────────────────────────── */
+    blockquote {
+      margin: 10pt 0;
+      padding: 6pt 14pt;
+      border-left: 3pt solid #CCC;
+      color: #555;
+    }
+
+    /* ── Version ─────────────────────────────────────────────── */
+    .version {
+      font-size: 9pt;
+      color: #888;
+      margin-top: 2pt;
+      margin-bottom: 0;
+    }
+
+    /* ── Lists ────────────────────────────────────────────────── */
+    ul, ol {
+      margin: 6pt 0;
+      padding-left: 24pt;
+    }
+
+    li {
+      margin-bottom: 3pt;
+    }
+
+    /* ── Print styles ─────────────────────────────────────────── */
+    @media print {
+      body {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      h1 {
+        page-break-before: always;
+        border-bottom: 2pt solid var(--huawei-red);
+      }
+
+      h1:first-of-type {
+        page-break-before: avoid;
+      }
+
+      table, img, pre {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: var(--link-blue);
+        text-decoration: none;
+      }
+
+      .badge {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      thead th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      tbody tr:nth-child(even) {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .callout {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 12pt 16pt;
+        font-size: 11pt;
+      }
+
+      h1 { font-size: 18pt; }
+      h2 { font-size: 16pt; }
+      h3 { font-size: 14pt; }
+      h4 { font-size: 12pt; }
+
+      table {
+        font-size: 9pt;
+      }
+
+      th, td {
+        padding: 3pt 5pt;
+      }
+
+      pre {
+        padding: 8pt;
+        font-size: 8pt;
+      }
+
+      code {
+        font-size: 8pt;
+      }
+    }
+  </style>
+$for(css)$
+  <link rel="stylesheet" href="$css$" />
+$endfor$
+</head>
+<body>
+$if(title)$
+  <h1 class="title">$title$</h1>
+$endif$
+$if(subtitle)$
+  <p class="subtitle">$subtitle$</p>
+$endif$
+$for(author)$
+  <p class="author">$author$</p>
+$endfor$
+$if(date)$
+  <p class="date">$date$</p>
+$endif$
+$if(doc-version)$<p class="version">v$doc-version$</p>$endif$
+$if(toc)$
+  <nav id="toc">
+    $toc$
+  </nav>
+$endif$
+$body$
+</body>
+</html>

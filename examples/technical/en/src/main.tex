@@ -1,0 +1,87 @@
+\documentclass{technical}
+
+\setreporttitle{[Analysis Report] The Enterprise Project List Is Not Displayed %
+  on the ECS Creation Page in 8.5.1 at the Brazil Site}
+\setreportversion{HCS 8.5.1}
+\setreportdate{2025-08-13}
+\setreportscenario{Standard Scenario}
+\setheadertitle{Huawei Cloud --- Technical Report}
+
+\begin{document}
+\makecover
+\maketoc
+\startbody
+
+\begin{problem}
+At the Brazil site of HCS 8.5.1, the default enterprise project
+is not displayed on the ECS creation page. This prevents users from
+selecting the correct enterprise project when provisioning new ECS
+instances.
+\end{problem}
+
+\begin{rootcauseanalysis}
+\begin{enumerate}
+  \item Analyzed the permissions of the user who cannot view the
+    default enterprise project
+  \item Verified the \texttt{auth\_action} field behavior in version 8.5.1
+  \item Confirmed the Server Administrator role lacks fine-grained
+    action permissions
+\end{enumerate}
+\end{rootcauseanalysis}
+
+\begin{rootcause}
+In version 8.5.1, the fine-grained permission scenario was optimized.
+When an ECS is provisioned, only enterprise projects with the appropriate
+permissions are listed. The Server Administrator role does not include
+ECS FullAccess.
+\end{rootcause}
+
+\begin{triggercondition}
+Occurs when a user with only the Server Administrator role attempts
+to create an ECS instance in HCS 8.5.1.
+\end{triggercondition}
+
+\begin{workaround}
+
+  \begin{impact}
+  To grant ECS FullAccess to a user, you need to modify the user group
+  permission. This permission is the ECS administrator permission
+  and is included in the Server Administrator permission.
+  \end{impact}
+
+  \begin{backupdata}
+  N/A --- no data modification required.
+  \end{backupdata}
+
+  \begin{workaroundsteps}
+  \begin{enumerate}
+    \item Log in to the tenant plane and find the user group associated
+      with the affected user
+    \item Add the ECS FullAccess permission to the user group
+    \item Verify the permission is applied correctly
+  \end{enumerate}
+  \end{workaroundsteps}
+
+  \begin{verification}
+  Log in to the tenant page again, go to the ECS page, create an
+  ECS, and verify the enterprise project list is now displayed.
+  \end{verification}
+
+  \begin{rollback}
+  Remove the ECS FullAccess permission from the user group.
+  \end{rollback}
+
+  \begin{cleanup}
+  No cleanup required.
+  \end{cleanup}
+
+\end{workaround}
+
+% --- Changelog ---
+\begin{changelog}
+  \changelogentry{1.0.0}{\today}{
+    \item Initial version.
+  }
+\end{changelog}
+
+\end{document}

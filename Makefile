@@ -30,13 +30,13 @@ help: ## Show this help message
 ##@ Build (PDF via XeLaTeX)
 # ============================================================================
 
-all: samples examples technical-samples all-formats ## Compile everything (samples + setup-guide + technical reports + all formats)
+all: samples examples technical-samples all-formats ## Compile everything (samples + setup-guide + technical reports (PDF) + all formats)
 
 samples: pt en ## Compile both guide samples (PT + EN)
 
 examples: setup-guide ## Compile the setup-guide and copy its PDF to repo root
 
-technical-samples: technical-pt technical-en ## Generate technical report samples (PT + EN, DOCX)
+technical-samples: technical-pt technical-en ## Generate technical report samples (PT + EN, PDF)
 
 pt: ## Compile the Portuguese sample
 	cd $(PT_DIR)/src && latexmk main.tex
@@ -49,18 +49,18 @@ setup-guide: ## Compile the setup-guide and copy its PDF to repo root
 	cp $(SG_DIR)/setup-guide.pdf setup-guide.pdf
 
 # ============================================================================
-##@ Technical reports (DOCX via python-docx)
+##@ Technical reports (PDF via XeLaTeX)
 # ============================================================================
 
-technical-pt: ## Generate the Portuguese technical report (DOCX)
-	cd $(TECHNICAL_PT) && python3 generate.py
+technical-pt: ## Compile the Portuguese technical report (PDF)
+	cd $(TECHNICAL_PT)/src && latexmk main.tex
 
-technical-en: ## Generate the English technical report (DOCX)
-	cd $(TECHNICAL_EN) && python3 generate.py
+technical-en: ## Compile the English technical report (PDF)
+	cd $(TECHNICAL_EN)/src && latexmk main.tex
 
-technical: ## Generate a technical report (make technical DIR=<path-with-generate.py>)
-	@if [ -z "$(DIR)" ]; then echo "Usage: make technical DIR=<path-with-generate.py>"; exit 1; fi
-	@cd $(DIR) && python3 generate.py
+technical: ## Compile a specific technical report (make technical DIR=<path-with-src>)
+	@if [ -z "$(DIR)" ]; then echo "Usage: make technical DIR=<path-with-src>"; exit 1; fi
+	@cd $(DIR)/src && latexmk main.tex
 
 project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.tex])
 	@if [ -z "$(DIR)" ]; then echo "Usage: make project DIR=<path> [FILE=<name>.tex]"; exit 1; fi
@@ -82,7 +82,7 @@ menu: ## Interactive format menu (delegates to build.sh)
 ##@ Multi-format output (DOCX, Markdown, HTML via Pandoc)
 # ============================================================================
 
-all-formats: docx md html ## Generate all formats (DOCX+MD+HTML) for samples + setup-guide
+all-formats: docx md html technical-formats ## Generate all formats (DOCX+MD+HTML) for all samples + setup-guide
 
 md:   md-pt md-en md-sg   ## Markdown for both samples + setup-guide
 docx: docx-pt docx-en docx-sg ## DOCX for both samples + setup-guide
@@ -98,6 +98,24 @@ docx-sg:   ; ./build.sh --docx $(SG_DIR)
 html-pt:   ; ./build.sh --html examples/guide/pt
 html-en:   ; ./build.sh --html examples/guide/en
 html-sg:   ; ./build.sh --html $(SG_DIR)
+
+# Technical report multi-format targets (use technical-pandoc.lua + technical-template.html)
+TECH_FILTER = templates/technical/technical-pandoc.lua
+TECH_REFDOCX = templates/technical/technical-reference.docx
+TECH_HTML = templates/technical/technical-template.html
+
+technical-formats: technical-docx technical-md technical-html ## Generate all formats (DOCX+MD+HTML) for technical samples
+
+technical-md: technical-md-pt technical-md-en ## Markdown for both technical samples
+technical-docx: technical-docx-pt technical-docx-en ## DOCX for both technical samples
+technical-html: technical-html-pt technical-html-en ## HTML for both technical samples
+
+technical-md-pt:    ; pandoc --lua-filter=$(TECH_FILTER) -f latex+raw_tex -t markdown examples/technical/pt/src/main.tex -o examples/technical/pt/main.md
+technical-md-en:    ; pandoc --lua-filter=$(TECH_FILTER) -f latex+raw_tex -t markdown examples/technical/en/src/main.tex -o examples/technical/en/main.md
+technical-docx-pt:  ; pandoc --lua-filter=$(TECH_FILTER) --reference-doc=$(TECH_REFDOCX) -f latex+raw_tex -t docx examples/technical/pt/src/main.tex -o examples/technical/pt/main.docx
+technical-docx-en:  ; pandoc --lua-filter=$(TECH_FILTER) --reference-doc=$(TECH_REFDOCX) -f latex+raw_tex -t docx examples/technical/en/src/main.tex -o examples/technical/en/main.docx
+technical-html-pt:  ; pandoc --lua-filter=$(TECH_FILTER) --template=$(TECH_HTML) -f latex+raw_tex -t html5 --standalone examples/technical/pt/src/main.tex -o examples/technical/pt/main.html
+technical-html-en:  ; pandoc --lua-filter=$(TECH_FILTER) --template=$(TECH_HTML) -f latex+raw_tex -t html5 --standalone examples/technical/en/src/main.tex -o examples/technical/en/main.html
 
 # ============================================================================
 ##@ Testing
@@ -135,6 +153,8 @@ clean-formats: ## Remove generated multi-format files (DOCX/MD/HTML)
 	rm -f examples/guide/pt/main.docx examples/guide/pt/main.md examples/guide/pt/main.html
 	rm -f examples/guide/en/main.docx examples/guide/en/main.md examples/guide/en/main.html
 	rm -f $(SG_DIR)/setup-guide.docx $(SG_DIR)/setup-guide.md $(SG_DIR)/setup-guide.html
+	rm -f examples/technical/pt/main.docx examples/technical/pt/main.md examples/technical/pt/main.html
+	rm -f examples/technical/en/main.docx examples/technical/en/main.md examples/technical/en/main.html
 
 clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=<name>.tex])
 	@if [ -z "$(DIR)" ]; then echo "Usage: make clean-project DIR=<path> [FILE=<name>.tex]"; exit 1; fi
@@ -153,6 +173,8 @@ clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=
 
 .PHONY: help all samples examples pt en setup-guide project menu
 .PHONY: technical-samples technical-pt technical-en technical
+.PHONY: technical-formats technical-docx technical-md technical-html
+.PHONY: technical-docx-pt technical-docx-en technical-md-pt technical-md-en technical-html-pt technical-html-en
 .PHONY: docx docx-pt docx-en docx-sg md md-pt md-en md-sg html html-pt html-en html-sg all-formats
 .PHONY: test
 .PHONY: clean clean-samples clean-examples clean-pt clean-en clean-setup-guide clean-project clean-formats

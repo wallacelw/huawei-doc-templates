@@ -3,6 +3,25 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.15.0 (2026-09-04)
+
+### Technical template: rebuilt as LaTeX-based (replaces python-docx)
+
+The technical report template has been rebuilt to follow the same
+LaTeX-based architecture as the guide template (L16/L18 compliance).
+
+- **`technical.cls`** — LaTeX class loading all `_base` modules, with
+  technical-specific cover page (version info table) and 6-section
+  environments (`problem`, `rootcauseanalysis`, `rootcause`,
+  `triggercondition`, `workaround` with 6 subsections).
+- **Samples** — `.tex` files compiled with XeLaTeX → PDF (replaces
+  python-docx `generate.py` scripts).
+- **Multi-format** — Pandoc + Lua filter pipeline for DOCX/MD/HTML
+  output (same as guide template).
+- **Removed** — `huawei_technical.py`, `technical-report-template.docx`,
+  `requirements.txt`, `generate.py` samples (python-docx approach).
+- **install.sh+ makefile targets now use `latexmk` instead of `python3 generate.py`.
+
 ## v2.14.0 (2026-09-03)
 
 ### New template: technical report (DOCX via python-docx)

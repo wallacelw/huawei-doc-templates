@@ -63,8 +63,8 @@ make samples         # compile PT + EN samples
 make examples        # compile setup-guide, copy PDF to repo root
 make pt              # compile Portuguese sample only
 make en              # compile English sample only
-make technical-samples # generate technical report samples (PT + EN, DOCX)
-make technical DIR=documents/my-report  # generate a technical report (runs generate.py)
+make technical-samples # compile technical report samples (PT + EN, PDF)
+make technical DIR=documents/my-report  # compile a technical report (latexmk in src/)
 make setup-guide     # compile setup guide only
 make project DIR=examples/my-guide   # compile a specific project (auto-detects .tex)
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
@@ -147,11 +147,11 @@ extension, open the repo root, and save any `.tex` file to auto-compile.
 | Template | Skill | Description |
 |---|---|---|
 | [`guide`](templates/guide/) | `/skill huawei-template-guide` | Huawei Cloud guide — branded cover, header, TOC, giant chapter numbers, objectives block, code blocks, tables, callout boxes, badges, changelog. English (default) and Portuguese. |
-| [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — branded cover, TOC, section headings, tables, callout boxes, code blocks. Generated directly as DOCX via python-docx (no LaTeX required). Portuguese and English. |
+| [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — 6-section structure (problem → root cause → trigger → workaround), branded cover with version info table, TOC, callout boxes, tables, code blocks. PDF via XeLaTeX; DOCX/MD/HTML via Pandoc. Portuguese and English. |
 
 See [`templates/guide/SKILL.md`](templates/guide/SKILL.md) for the full command
 and environment reference. See [`templates/technical/SKILL.md`](templates/technical/SKILL.md)
-for the technical report template API.
+for the technical report template command reference.
 
 ## Project layout
 
@@ -180,12 +180,16 @@ for the technical report template API.
 │   │   ├── create-reference-docx.py  # regenerate guide-reference.docx
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
 │   │   └── common-assets/      # logos, sample images, example scripts
-│   └── technical/             # technical report template + skill (DOCX)
-│       ├── SKILL.md          # opencode skill + technical report API reference
+│   └── technical/             # technical report template + skill (LaTeX/PDF)
+│       ├── technical.cls       # LaTeX class (6-section environments, cover page)
+│       ├── technical-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
+│       ├── technical-template.html  # HTML template for Pandoc
+│       ├── create-technical-reference-docx.py  # DOCX reference style generator
+│       ├── technical-reference.docx  # reference DOCX with Huawei styles
+│       ├── SKILL.md          # opencode skill + command reference
 │       ├── README.md         # template-specific details (brief)
-│       ├── huawei_technical.py  # python-docx library (branded reports)
-│       ├── requirements.txt  # Python dependencies (python-docx, lxml)
-│       └── common-assets/    # template DOCX, logos
+│       ├── .latexmkrc        # latexmk config (XeLaTeX)
+│       └── common-assets/    # logos
 ├── documents/               # user-created documents (one subfolder per doc)
 │   ├── README.md            # folder description and structure
 │   └── my-guide/            # example: a new document project
@@ -215,11 +219,15 @@ for the technical report template API.
     │       └── assets/       # project-specific images
     ├── technical/            # samples for the technical report template
     │   ├── pt/               # Portuguese technical report
-    │   │   ├── generate.py    # report generator (uses huawei_technical)
-    │   │   └── sample-report.docx
+    │   │   ├── src/
+    │   │   │   ├── main.tex
+    │   │   │   └── .latexmkrc
+    │   │   └── main.pdf
     │   └── en/               # English technical report
-    │       ├── generate.py
-    │       └── sample-report.docx
+    │       ├── src/
+    │       │   ├── main.tex
+    │       │   └── .latexmkrc
+    │       └── main.pdf
     └── setup-guide/          # real-world ECS + SSH + MaaS gateway guide
         ├── src/
         │   ├── setup-guide.tex

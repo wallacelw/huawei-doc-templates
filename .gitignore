@@ -29,6 +29,8 @@
 !examples/guide/pt/main.pdf
 !examples/guide/en/main.pdf
 !examples/setup-guide/setup-guide.pdf
+!examples/technical/pt/main.pdf
+!examples/technical/en/main.pdf
 # editor / os cruft
 .DS_Store
 *.swp
@@ -36,6 +38,9 @@
 examples/guide/*/main.md
 examples/guide/*/main.docx
 examples/guide/*/main.html
+examples/technical/*/main.md
+examples/technical/*/main.docx
+examples/technical/*/main.html
 examples/setup-guide/setup-guide.md
 examples/setup-guide/setup-guide.docx
 examples/setup-guide/setup-guide.html
