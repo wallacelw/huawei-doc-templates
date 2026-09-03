@@ -178,9 +178,9 @@ additional content after filling.
 
 | Kind | Background | Border | Label | Use |
 |---|---|---|---|---|
-| `'warning'` | Amber `#FFF8E1` | Amber `#FFC107` | **Important** | Warning / caution — potential pitfalls |
-| `'tip'` | Green `#E8F5E9` | Green `#28A745` | **Tip** | Tip / suggestion — best practices |
-| `'infobox'` | Blue `#E3F2FD` | Blue `#17A2B8` | **Info** | Informational note — helpful context |
+| `'warning'` | Amber `#FFF8E1` | Amber `#F57C00` | **Important** | Warning / caution — potential pitfalls |
+| `'tip'` | Green `#E8F5E9` | Green `#2E7D32` | **Tip** | Tip / suggestion — best practices |
+| `'infobox'` | Blue `#E3F2FD` | Blue `#1565C0` | **Info** | Informational note — helpful context |
 
 ---
 
@@ -196,9 +196,9 @@ additional content after filling.
 | `WHITE` | `#FFFFFF` | White |
 | `DARK` | `#1F2328` | Body text |
 | `GRAY_BG` | `#F6F8FA` | Alternating table row background |
-| `WARNING_BG/FG/BD` | `#FDF8EE` / `#8A6D00` / `#D4A72C` | Warning callout (muted gold) |
-| `TIP_BG/FG/BD` | `#EDF6ED` / `#2E6B2E` / `#5BA85B` | Tip callout (muted sage) |
-| `INFO_BG/FG/BD` | `#EDF3F9` / `#1B5170` / `#4A8BB5` | Infobox callout (muted slate) |
+| `WARNING_BG/FG/BD` | `#FFF8E1` / `#F57C00` / `#F57C00` | Warning callout (amber) |
+| `TIP_BG/FG/BD` | `#E8F5E9` / `#2E7D32` / `#2E7D32` | Tip callout (green) |
+| `INFO_BG/FG/BD` | `#E3F2FD` / `#1565C0` / `#1565C0` | Infobox callout (blue) |
 
 ---
 

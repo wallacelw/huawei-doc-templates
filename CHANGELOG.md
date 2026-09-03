@@ -3,6 +3,26 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.14.0 (2026-09-03)
+
+### New template: technical report (DOCX via python-docx)
+
+Added a standalone technical report template that generates Huawei-branded
+`.docx` files directly via `python-docx` — no LaTeX required.
+
+- **`templates/technical/huawei_technical.py`** — reusable library with
+  branded cover page, TOC, section headings, tables (hutable style), callout
+  boxes (warning/tip/infobox), and a `{{PLACEHOLDER}}` replacement system.
+- **`templates/technical/SKILL.md`** — opencode skill definition + full API
+  reference (`huawei-template-technical`).
+- **`examples/technical/{pt,en}/`** — Portuguese and English sample reports.
+- **Makefile** — `technical-samples`, `technical-pt`, `technical-en`,
+  `technical` targets.
+- **install.sh** — `python3-lxml` and `libreoffice` added for DOCX generation
+  and optional PDF export.
+- Callout colors aligned to L9 Material Design palette (matching
+  `huawei-colors.sty`), not muted tones.
+
 ## v2.9.1 (2026-08-23)
 
 ### HTML + Markdown: embed images as base64 data URIs

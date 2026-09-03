@@ -37,20 +37,19 @@ WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 DARK = RGBColor(0x1F, 0x23, 0x28)
 GRAY_BG = RGBColor(0xF6, 0xF8, 0xFA)
 
-# ── Callout colors (corporate-muted — AGENTS.md L3 names) ──────────
-# Toned down from Bootstrap/Material alert palette to muted, enterprise tones.
-# Warning (amber → muted gold)
-WARNING_BG = RGBColor(0xFD, 0xF8, 0xEE)
-WARNING_FG = RGBColor(0x8A, 0x6D, 0x00)
-WARNING_BD = RGBColor(0xD4, 0xA7, 0x2C)
-# Tip (green → muted sage)
-TIP_BG = RGBColor(0xED, 0xF6, 0xED)
-TIP_FG = RGBColor(0x2E, 0x6B, 0x2E)
-TIP_BD = RGBColor(0x5B, 0xA8, 0x5B)
-# Infobox (blue → muted slate)
-INFO_BG = RGBColor(0xED, 0xF3, 0xF9)
-INFO_FG = RGBColor(0x1B, 0x51, 0x70)
-INFO_BD = RGBColor(0x4A, 0x8B, 0xB5)
+# ── Callout colors (Material Design — AGENTS.md L9, matches huawei-colors.sty)
+# Warning (amber)
+WARNING_BG = RGBColor(0xFF, 0xF8, 0xE1)
+WARNING_FG = RGBColor(0xF5, 0x7C, 0x00)
+WARNING_BD = RGBColor(0xF5, 0x7C, 0x00)
+# Tip (green)
+TIP_BG = RGBColor(0xE8, 0xF5, 0xE9)
+TIP_FG = RGBColor(0x2E, 0x7D, 0x32)
+TIP_BD = RGBColor(0x2E, 0x7D, 0x32)
+# Infobox (blue)
+INFO_BG = RGBColor(0xE3, 0xF2, 0xFD)
+INFO_FG = RGBColor(0x15, 0x65, 0xC0)
+INFO_BD = RGBColor(0x15, 0x65, 0xC0)
 
 # Convenience aliases matching the PPT library naming
 AMBER_BG = WARNING_BG
