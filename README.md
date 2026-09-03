@@ -32,6 +32,13 @@ Then open the project in [opencode](https://opencode.ai) and run:
 
 to create a new guide document.
 
+You can also use the scaffolder script:
+
+```
+./new-doc.sh                              # interactive — choose template and options
+./new-doc.sh --type guide --title "ECS Setup" --lang en --name ecs-setup
+```
+
 ## Requirements
 
 - **OS:** Ubuntu 22.04+ (WSL or native)
@@ -156,6 +163,7 @@ and environment reference.
 ├── AGENTS.md               # project standards and locked decisions
 ├── CHANGELOG.md            # version history
 ├── install.sh               # one-command setup (clone + install + verify)
+├── new-doc.sh               # document scaffolder (interactive or flag-driven)
 ├── Makefile                 # build convenience (make samples/examples/clean)
 ├── build.sh                # interactive format selection menu
 ├── opencode.json            # skill discovery: scans templates/ for SKILL.md
