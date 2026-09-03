@@ -84,12 +84,13 @@ echo -e "${C_BOLD}${C_CYAN}║  ${_banner_text}  ║${C_RESET}"
 echo -e "${C_BOLD}${C_CYAN}╚${_banner_border}╝${C_RESET}"
 echo ""
 
-echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX templates for Huawei Cloud guides (XeLaTeX + latexmk)"
+echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX + PPTX templates for Huawei Cloud guides (XeLaTeX + latexmk + python-pptx)"
 echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
 log_dim "• XeLaTeX + latexmk + LaTeX packages"
 log_dim "• HarmonyOS Sans (body font, free commercial use)"
 log_dim "• Cascadia Code (code font, open source)"
+log_dim "• python-pptx (PPT slide deck generation)"
 log_dim "• opencode skill (/skill huawei-template-guide)"
 log_dim "• VS Code LaTeX Workshop (local + remote config)"
 echo ""
@@ -103,7 +104,7 @@ echo ""
 if [[ "$AUTO_YES" != true ]]; then
     echo ""
     echo "This script will:"
-    echo "  1. Install apt packages: texlive-xetex, texlive-latex-extra, texlive-lang-portuguese, latexmk, fonts-liberation, fonts-cascadia-code, poppler-utils, pandoc, python3-docx"
+    echo "  1. Install apt packages: texlive-xetex, texlive-latex-extra, texlive-lang-portuguese, latexmk, fonts-liberation, fonts-cascadia-code, poppler-utils, pandoc, python3-docx, python3-pptx, python3-lxml"
     echo "  2. Update fvextra from CTAN if version < 1.5 (backgroundcolor support)"
     echo "  3. Download and install HarmonyOS Sans font (.deb from GitHub releases)"
     echo "  4. Update font cache (fc-cache)"
@@ -156,9 +157,11 @@ $SUDO apt-get install -y \
     poppler-utils \
     pandoc \
     python3-docx \
+    python3-pptx \
+    python3-lxml \
     2>&1 | tail -3
 
-log_done "TeX Live packages installed"
+log_done "TeX Live + PPT packages installed"
 
 # ── Update fvextra for backgroundcolor support ──
 # fvextra >= 1.5 introduced the backgroundcolor option (TeX Live 2024+).

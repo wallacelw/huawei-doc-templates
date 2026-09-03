@@ -58,11 +58,13 @@ to create a new guide document.
 
 ```bash
 make                 # show help (list all available targets)
-make all             # compile everything: samples + setup-guide + all formats
+make all             # compile everything: samples + setup-guide + PPT + all formats
 make samples         # compile PT + EN samples
 make examples        # compile setup-guide, copy PDF to repo root
 make pt              # compile Portuguese sample only
 make en              # compile English sample only
+make ppt-samples     # generate PPT sample decks (PT + EN)
+make slides DIR=documents/my-slides  # generate a PPT deck (runs generate.py)
 make setup-guide     # compile setup guide only
 make project DIR=examples/my-guide   # compile a specific project (auto-detects .tex)
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
@@ -145,9 +147,11 @@ extension, open the repo root, and save any `.tex` file to auto-compile.
 | Template | Skill | Description |
 |---|---|---|
 | [`guide`](templates/guide/) | `/skill huawei-template-guide` | Huawei Cloud guide — branded cover, header, TOC, giant chapter numbers, objectives block, code blocks, tables, callout boxes, badges, changelog. English (default) and Portuguese. |
+| [`ppt`](templates/ppt/) | `/skill huawei-template-ppt` | Huawei Cloud slide decks — branded title slide, agenda, content slides with code blocks, tables, callout boxes, flowcharts, authorship/thank-you slides. Generated via python-pptx. Portuguese and English. |
 
 See [`templates/guide/SKILL.md`](templates/guide/SKILL.md) for the full command
-and environment reference.
+and environment reference. See [`templates/ppt/SKILL.md`](templates/ppt/SKILL.md)
+for the PPT template API.
 
 ## Project layout
 
@@ -166,16 +170,22 @@ and environment reference.
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
 │   ├── _base/               # shared formatting modules (huawei-*.sty)
-│   └── guide/               # self-contained template + skill
-│       ├── SKILL.md          # opencode skill + agent command reference
+│   ├── guide/               # self-contained template + skill
+│   │   ├── SKILL.md          # opencode skill + agent command reference
+│   │   ├── README.md         # template-specific details (brief)
+│   │   ├── guide.cls         # guide-specific formatting (cover, TOC, titles)
+│   │   ├── guide-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
+│   │   ├── guide-reference.docx  # custom DOCX styles for Pandoc
+│   │   ├── guide-template.html   # HTML5 template with Huawei brand CSS
+│   │   ├── create-reference-docx.py  # regenerate guide-reference.docx
+│   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
+│   │   └── common-assets/      # logos, sample images, example scripts
+│   └── ppt/                  # PPT slide deck template + skill
+│       ├── SKILL.md          # opencode skill + PPT API reference
 │       ├── README.md         # template-specific details (brief)
-│       ├── guide.cls         # guide-specific formatting (cover, TOC, titles)
-│       ├── guide-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
-│       ├── guide-reference.docx  # custom DOCX styles for Pandoc
-│       ├── guide-template.html   # HTML5 template with Huawei brand CSS
-│       ├── create-reference-docx.py  # regenerate guide-reference.docx
-│       ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
-│       └── common-assets/      # logos, sample images, example scripts
+│       ├── huawei_ppt.py     # python-pptx library (branded slides, tables, callouts)
+│       ├── requirements.txt  # Python dependencies (python-pptx, lxml)
+│       └── common-assets/    # template PPTX, logos
 ├── documents/               # user-created documents (one subfolder per doc)
 │   ├── README.md            # folder description and structure
 │   └── my-guide/            # example: a new document project
@@ -203,6 +213,13 @@ and environment reference.
     │       │   ├── main.tex
     │       │   └── .latexmkrc
     │       └── assets/       # project-specific images
+    ├── ppt/                  # samples for the PPT template
+    │   ├── pt-br/             # Portuguese slide deck
+    │   │   ├── generate.py    # deck generator (uses huawei_ppt)
+    │   │   └── sample-pt-br.pptx
+    │   └── en/               # English slide deck
+    │       ├── generate.py
+    │       └── sample-en.pptx
     └── setup-guide/          # real-world ECS + SSH + MaaS gateway guide
         ├── src/
         │   ├── setup-guide.tex
