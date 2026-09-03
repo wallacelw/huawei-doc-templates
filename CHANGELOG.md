@@ -3,6 +3,25 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.15.1 (2026-09-04)
+
+### Audit fixes for v2.15.0
+
+- **P0 fix:** PDF metadata title was "Guide" in technical PDFs —
+  `huawei-page.sty` references `\lg@guidetitle`; `technical.cls` now
+  aliases it to `\lg@reporttitle`.
+- **High fix:** `templates/technical/.latexmkrc` had invalid `xelatex*`
+  flag and "examples5" typo — both corrected.
+- **Medium fixes:** Removed dead `handle_objectives_env` (40 lines) from
+  `technical-pandoc.lua`; added `clean-technical-*` Makefile targets;
+  updated `all-formats` descriptions to include technical; fixed
+  `create-technical-reference-docx.py` docstring; fixed CHANGELOG typo;
+  fixed "Per guide.cls" comment in Lua filter.
+- **Low fixes:** Added `assets/` directories for technical samples;
+  added `/skill huawei-template-technical` to `documents/README.md`.
+- All 58 tests pass; both samples compile to 8-page PDFs with correct
+  metadata titles.
+
 ## v2.15.0 (2026-09-04)
 
 ### Technical template: rebuilt as LaTeX-based (replaces python-docx)
@@ -20,7 +39,7 @@ LaTeX-based architecture as the guide template (L16/L18 compliance).
   output (same as guide template).
 - **Removed** — `huawei_technical.py`, `technical-report-template.docx`,
   `requirements.txt`, `generate.py` samples (python-docx approach).
-- **install.sh+ makefile targets now use `latexmk` instead of `python3 generate.py`.
+- **install.sh** + **Makefile** targets now use `latexmk` instead of `python3 generate.py`.
 
 ## v2.14.0 (2026-09-03)
 

@@ -493,7 +493,7 @@ function Pandoc(doc)
   if FORMAT:match("docx") then
     local ct = "Huawei Technologies CO., LTD"
     local meta_parts = {}
-    -- Per guide.cls: cover meta (version + date + time) only shown when changelog is enabled
+    -- Per technical.cls: cover meta (version + date + time) only shown when changelog is enabled
     if not preamble.options.nochangelog then
       if version and version ~= "" then table.insert(meta_parts, "v" .. version) end
       if date then
@@ -668,48 +668,6 @@ local function handle_callout_env(cls, label_key)
     local body = text:match("\\begin%s*{" .. cls .. "}%s*(.-)%s*\\end%s*{" .. cls .. "}")
     if not body then return nil end
     return make_callout(cls, L(label_key), parse_latex_blocks(body))
-  end
-end
-
-local function handle_objectives_env(text)
-  local body = text:match("\\begin%s*{objectives}%s*(.-)%s*\\end%s*{objectives}")
-  if not body then return nil end
-  local blocks = pandoc.Blocks({})
-
-  local function add_labeled_para(label_text, content_text)
-    local inlines = pandoc.Inlines({pandoc.Strong({pandoc.Str(label_text)}), pandoc.Space()})
-    if content_text and content_text ~= "" then inlines:extend(parse_latex_inlines(content_text)) end
-    blocks:insert(pandoc.Para(inlines))
-  end
-
-  local genobj = find_cmd_arg(body, "generalobjective")
-  if genobj then add_labeled_para(L("genobj"), genobj) end
-  for _, arg in ipairs(find_all_cmd_args(body, "objective")) do
-    add_labeled_para(L("obj"), arg)
-  end
-
-  if body:find("\\prerequisites") then
-    add_labeled_para(L("prereq"), nil)
-    local after = body:match("\\prerequisites%s*(.*)")
-    if after then for _, blk in ipairs(parse_latex_blocks(after)) do blocks:insert(blk) end end
-  end
-  if body:find("\\stepbystep") then
-    add_labeled_para(L("stepbystep"), nil)
-    local after = body:match("\\stepbystep%s*(.*)")
-    if after then for _, blk in ipairs(parse_latex_blocks(after)) do blocks:insert(blk) end end
-  end
-
-  if #blocks == 0 then blocks = parse_latex_blocks(body) end
-  if FORMAT:match("docx") then
-    -- Add bottom rule via named style (matches PDF \hrulefill after objectives)
-    blocks:insert(pandoc.Div(
-        {pandoc.Para({pandoc.Str("\u{200B}")})},
-        pandoc.Attr("", {}, {["custom-style"] = "ObjectivesRule"})))
-    return pandoc.Div(blocks, pandoc.Attr("", {"objectives"}, {}))
-  elseif FORMAT:match("html5") then
-    return pandoc.Div(blocks, pandoc.Attr("", {"objectives"}, {}))
-  else
-    return pandoc.BlockQuote(blocks)
   end
 end
 

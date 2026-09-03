@@ -68,7 +68,7 @@ make technical DIR=documents/my-report  # compile a technical report (latexmk in
 make setup-guide     # compile setup guide only
 make project DIR=examples/my-guide   # compile a specific project (auto-detects .tex)
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
-make all-formats     # generate DOCX + MD + HTML for both samples
+make all-formats     # generate DOCX + MD + HTML for all samples + technical
 make clean           # remove all build artifacts
 make clean-formats   # remove generated multi-format files
 ```
@@ -124,7 +124,7 @@ commands to Pandoc AST elements.
 ### Usage
 
 ```bash
-make all-formats    # MD + DOCX + HTML for both pt and en samples
+make all-formats    # MD + DOCX + HTML for all samples + technical reports
 make md             # Markdown only (pt + en)
 make docx           # DOCX only (pt + en)
 make html           # HTML only (pt + en)

@@ -82,7 +82,7 @@ menu: ## Interactive format menu (delegates to build.sh)
 ##@ Multi-format output (DOCX, Markdown, HTML via Pandoc)
 # ============================================================================
 
-all-formats: docx md html technical-formats ## Generate all formats (DOCX+MD+HTML) for all samples + setup-guide
+all-formats: docx md html technical-formats ## Generate all formats (DOCX+MD+HTML) for all samples + setup-guide + technical
 
 md:   md-pt md-en md-sg   ## Markdown for both samples + setup-guide
 docx: docx-pt docx-en docx-sg ## DOCX for both samples + setup-guide
@@ -131,11 +131,21 @@ test: ## Run all tests (filter units, round-trip, DOCX fix, version sync)
 ##@ Cleanup
 # ============================================================================
 
-clean: clean-samples clean-examples clean-formats ## Remove all build artifacts
+clean: clean-samples clean-examples clean-technical-samples clean-formats ## Remove all build artifacts
 
 clean-samples: clean-pt clean-en ## Clean both guide samples
 
 clean-examples: clean-setup-guide ## Clean the setup-guide
+
+clean-technical-samples: clean-technical-pt clean-technical-en ## Clean both technical samples
+
+clean-technical-pt: ## Clean the Portuguese technical sample
+	cd $(TECHNICAL_PT)/src && latexmk -C main.tex
+	rm -f $(TECHNICAL_PT)/main.pdf
+
+clean-technical-en: ## Clean the English technical sample
+	cd $(TECHNICAL_EN)/src && latexmk -C main.tex
+	rm -f $(TECHNICAL_EN)/main.pdf
 
 clean-pt: ## Clean the Portuguese sample
 	cd $(PT_DIR)/src && latexmk -C main.tex
@@ -173,6 +183,7 @@ clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=
 
 .PHONY: help all samples examples pt en setup-guide project menu
 .PHONY: technical-samples technical-pt technical-en technical
+.PHONY: clean-technical-samples clean-technical-pt clean-technical-en
 .PHONY: technical-formats technical-docx technical-md technical-html
 .PHONY: technical-docx-pt technical-docx-en technical-md-pt technical-md-en technical-html-pt technical-html-en
 .PHONY: docx docx-pt docx-en docx-sg md md-pt md-en md-sg html html-pt html-en html-sg all-formats

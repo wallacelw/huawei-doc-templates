@@ -4,9 +4,9 @@ Add custom Huawei styles to a pandoc reference DOCX.
 
 Usage:
     # Step 1: Generate the base reference doc from pandoc
-    pandoc -o guide-reference.docx --print-default-data-file reference.docx
+    pandoc -o technical-reference.docx --print-default-data-file reference.docx
     # Step 2: Add Huawei styles
-    python3 create-reference-docx.py guide-reference.docx
+    python3 create-technical-reference-docx.py technical-reference.docx
 
 Requires: python-docx (pip install python-docx)
 """

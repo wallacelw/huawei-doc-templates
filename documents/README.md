@@ -9,7 +9,8 @@ reference.
 
 1. Run the skill for the template you want to use:
    ```
-   /skill huawei-template-guide
+   /skill huawei-template-guide         # for guides (how-to, training)
+   /skill huawei-template-technical     # for technical reports (incident analysis)
    ```
 2. The skill will create a subfolder here, e.g. `documents/my-guide/`,
    with all necessary files (`.tex`, `.latexmkrc`, `assets/`).

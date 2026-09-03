@@ -155,6 +155,10 @@
 \newcommand{\lg@reporttype}{Technical Report}
 \newcommand{\setreporttype}[1]{\renewcommand{\lg@reporttype}{#1}}
 
+% Fix: huawei-page.sty references \lg@guidetitle for PDF metadata.
+% Alias it to the report title so technical PDFs don't show "Guide" as pdftitle.
+\renewcommand{\lg@guidetitle}{\lg@reporttitle}
+
 % =====================================================================
 %  LANGUAGE-AWARE SECTION LABELS
 % =====================================================================
