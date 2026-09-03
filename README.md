@@ -58,11 +58,13 @@ to create a new guide document.
 
 ```bash
 make                 # show help (list all available targets)
-make all             # compile everything: samples + setup-guide + all formats
+make all             # compile everything: samples + setup-guide + technical reports + all formats
 make samples         # compile PT + EN samples
 make examples        # compile setup-guide, copy PDF to repo root
 make pt              # compile Portuguese sample only
 make en              # compile English sample only
+make technical-samples # generate technical report samples (PT + EN, DOCX)
+make technical DIR=documents/my-report  # generate a technical report (runs generate.py)
 make setup-guide     # compile setup guide only
 make project DIR=examples/my-guide   # compile a specific project (auto-detects .tex)
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
@@ -145,9 +147,11 @@ extension, open the repo root, and save any `.tex` file to auto-compile.
 | Template | Skill | Description |
 |---|---|---|
 | [`guide`](templates/guide/) | `/skill huawei-template-guide` | Huawei Cloud guide — branded cover, header, TOC, giant chapter numbers, objectives block, code blocks, tables, callout boxes, badges, changelog. English (default) and Portuguese. |
+| [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — branded cover, TOC, section headings, tables, callout boxes, code blocks. Generated directly as DOCX via python-docx (no LaTeX required). Portuguese and English. |
 
 See [`templates/guide/SKILL.md`](templates/guide/SKILL.md) for the full command
-and environment reference.
+and environment reference. See [`templates/technical/SKILL.md`](templates/technical/SKILL.md)
+for the technical report template API.
 
 ## Project layout
 
@@ -166,16 +170,22 @@ and environment reference.
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
 │   ├── _base/               # shared formatting modules (huawei-*.sty)
-│   └── guide/               # self-contained template + skill
-│       ├── SKILL.md          # opencode skill + agent command reference
+│   ├── guide/               # self-contained template + skill
+│   │   ├── SKILL.md          # opencode skill + agent command reference
+│   │   ├── README.md         # template-specific details (brief)
+│   │   ├── guide.cls         # guide-specific formatting (cover, TOC, titles)
+│   │   ├── guide-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
+│   │   ├── guide-reference.docx  # custom DOCX styles for Pandoc
+│   │   ├── guide-template.html   # HTML5 template with Huawei brand CSS
+│   │   ├── create-reference-docx.py  # regenerate guide-reference.docx
+│   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
+│   │   └── common-assets/      # logos, sample images, example scripts
+│   └── technical/             # technical report template + skill (DOCX)
+│       ├── SKILL.md          # opencode skill + technical report API reference
 │       ├── README.md         # template-specific details (brief)
-│       ├── guide.cls         # guide-specific formatting (cover, TOC, titles)
-│       ├── guide-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
-│       ├── guide-reference.docx  # custom DOCX styles for Pandoc
-│       ├── guide-template.html   # HTML5 template with Huawei brand CSS
-│       ├── create-reference-docx.py  # regenerate guide-reference.docx
-│       ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
-│       └── common-assets/      # logos, sample images, example scripts
+│       ├── huawei_technical.py  # python-docx library (branded reports)
+│       ├── requirements.txt  # Python dependencies (python-docx, lxml)
+│       └── common-assets/    # template DOCX, logos
 ├── documents/               # user-created documents (one subfolder per doc)
 │   ├── README.md            # folder description and structure
 │   └── my-guide/            # example: a new document project
@@ -203,6 +213,13 @@ and environment reference.
     │       │   ├── main.tex
     │       │   └── .latexmkrc
     │       └── assets/       # project-specific images
+    ├── technical/            # samples for the technical report template
+    │   ├── pt/               # Portuguese technical report
+    │   │   ├── generate.py    # report generator (uses huawei_technical)
+    │   │   └── sample-report.docx
+    │   └── en/               # English technical report
+    │       ├── generate.py
+    │       └── sample-report.docx
     └── setup-guide/          # real-world ECS + SSH + MaaS gateway guide
         ├── src/
         │   ├── setup-guide.tex

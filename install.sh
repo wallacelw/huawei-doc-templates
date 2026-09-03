@@ -84,12 +84,14 @@ echo -e "${C_BOLD}${C_CYAN}║  ${_banner_text}  ║${C_RESET}"
 echo -e "${C_BOLD}${C_CYAN}╚${_banner_border}╝${C_RESET}"
 echo ""
 
-echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX templates for Huawei Cloud guides (XeLaTeX + latexmk)"
+echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX + DOCX templates for Huawei Cloud guides (XeLaTeX + latexmk + python-docx)"
 echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
 log_dim "• XeLaTeX + latexmk + LaTeX packages"
 log_dim "• HarmonyOS Sans (body font, free commercial use)"
 log_dim "• Cascadia Code (code font, open source)"
+log_dim "• python-docx (technical report generation)"
+log_dim "• LibreOffice (DOCX → PDF export)"
 log_dim "• opencode skill (/skill huawei-template-guide)"
 log_dim "• VS Code LaTeX Workshop (local + remote config)"
 echo ""
@@ -156,9 +158,11 @@ $SUDO apt-get install -y \
     poppler-utils \
     pandoc \
     python3-docx \
+    python3-lxml \
+    libreoffice \
     2>&1 | tail -3
 
-log_done "TeX Live packages installed"
+log_done "TeX Live + DOCX packages installed"
 
 # ── Update fvextra for backgroundcolor support ──
 # fvextra >= 1.5 introduced the backgroundcolor option (TeX Live 2024+).

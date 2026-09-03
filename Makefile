@@ -10,6 +10,8 @@
 PT_DIR = examples/guide/pt
 EN_DIR = examples/guide/en
 SG_DIR = examples/setup-guide
+TECHNICAL_PT = examples/technical/pt
+TECHNICAL_EN = examples/technical/en
 
 # ============================================================================
 ##@ Help
@@ -28,11 +30,13 @@ help: ## Show this help message
 ##@ Build (PDF via XeLaTeX)
 # ============================================================================
 
-all: samples examples all-formats ## Compile everything (samples + setup-guide + all formats)
+all: samples examples technical-samples all-formats ## Compile everything (samples + setup-guide + technical reports + all formats)
 
 samples: pt en ## Compile both guide samples (PT + EN)
 
 examples: setup-guide ## Compile the setup-guide and copy its PDF to repo root
+
+technical-samples: technical-pt technical-en ## Generate technical report samples (PT + EN, DOCX)
 
 pt: ## Compile the Portuguese sample
 	cd $(PT_DIR)/src && latexmk main.tex
@@ -43,6 +47,20 @@ en: ## Compile the English sample
 setup-guide: ## Compile the setup-guide and copy its PDF to repo root
 	cd $(SG_DIR)/src && latexmk setup-guide.tex
 	cp $(SG_DIR)/setup-guide.pdf setup-guide.pdf
+
+# ============================================================================
+##@ Technical reports (DOCX via python-docx)
+# ============================================================================
+
+technical-pt: ## Generate the Portuguese technical report (DOCX)
+	cd $(TECHNICAL_PT) && python3 generate.py
+
+technical-en: ## Generate the English technical report (DOCX)
+	cd $(TECHNICAL_EN) && python3 generate.py
+
+technical: ## Generate a technical report (make technical DIR=<path-with-generate.py>)
+	@if [ -z "$(DIR)" ]; then echo "Usage: make technical DIR=<path-with-generate.py>"; exit 1; fi
+	@cd $(DIR) && python3 generate.py
 
 project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.tex])
 	@if [ -z "$(DIR)" ]; then echo "Usage: make project DIR=<path> [FILE=<name>.tex]"; exit 1; fi
@@ -134,6 +152,7 @@ clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=
 # ============================================================================
 
 .PHONY: help all samples examples pt en setup-guide project menu
+.PHONY: technical-samples technical-pt technical-en technical
 .PHONY: docx docx-pt docx-en docx-sg md md-pt md-en md-sg html html-pt html-en html-sg all-formats
 .PHONY: test
 .PHONY: clean clean-samples clean-examples clean-pt clean-en clean-setup-guide clean-project clean-formats
