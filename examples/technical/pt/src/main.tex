@@ -12,6 +12,12 @@
 \maketoc
 \startbody
 
+\begin{infobox}
+Este documento é uma amostra do \textbf{modelo de Relatório Técnico Huawei} (\inlinecode{technical.cls}).
+Ele demonstra a estrutura de 5 seções (problema, análise de causa raiz, causa raiz, condição de gatilho, solução alternativa)
+junto com comandos de formatação compartilhados: caixas de destaque, blocos de código, tabelas, imagens e comandos inline.
+\end{infobox}
+
 \begin{problem}
 No site do Brasil do HCS 8.5.1, o projeto empresarial padrão
 não é exibido na página de criação do ECS. Isso impede que os
@@ -23,7 +29,7 @@ novas instâncias ECS.
 \begin{enumerate}
   \item Analisadas as permissões do usuário que não visualiza o
     projeto empresarial padrão
-  \item Verificado o comportamento do campo \texttt{auth\_action} na versão 8.5.1
+  \item Verificado o comportamento do campo \inlinecode{auth\_action} na versão 8.5.1
   \item Confirmado que a função Server Administrator não possui
     permissões de ação refinadas
 \end{enumerate}
@@ -79,8 +85,62 @@ tenta criar uma instância ECS no HCS 8.5.1.
 
 \end{workaround}
 
+\section{Exemplos adicionais de formatação}
+
+Esta seção demonstra comandos de formatação compartilhados disponíveis no modelo técnico.
+
+\subsection{Caixas de destaque}
+
+\begin{warning}
+Esta é uma caixa de aviso. Use-a para destacar precauções importantes ou problemas potenciais.
+\end{warning}
+
+\begin{tip}
+Esta é uma caixa de dica. Use-a para sugerir melhores práticas ou conselhos úteis.
+\end{tip}
+
+\begin{infobox}
+Esta é uma caixa de informação. Use-a para informações gerais ou notas.
+\end{infobox}
+
+\subsection{Blocos de código}
+
+\begin{code}[bash]
+# Script de exemplo para verificação
+kubectl get pods -n production
+kubectl logs -f deployment/api-gateway -n production
+\end{code}
+
+\inlinecode{kubectl describe pod} para inspeção detalhada do pod.
+
+\subsection{Tabelas}
+
+\begin{hutable}{|l|c|c|}
+\rowcolor{huaweired}
+\thd{Componente} & \thd{Versão} & \thd{Status} \\
+\tbody
+API Gateway & 2.4.1 & OK \\
+Banco de dados & 8.5.1 & OK \\
+Cache & 7.0 & Degradado \\
+\end{hutable}
+
+\subsection{Comandos inline}
+
+\note{Sempre verifique o backup antes de iniciar a solução alternativa.}
+
+Referência: \weblink{https://docs.huaweicloud.com}{Documentação Huawei Cloud}
+
+Navegação: \menu{Console > ECS > Instâncias}
+
+Status: \badge{Verificado}
+
+Parâmetro: \param{timeout} deve ser definido como 300 segundos.
+
 % --- Histórico de versões ---
 \begin{changelog}
+  \changelogentry{1.1.0}{\today}{
+    \item Adicionada explicação em infobox e demonstrações de comandos de formatação compartilhados (caixas de destaque, código, tabelas, comandos inline).
+  }
   \changelogentry{1.0.0}{\today}{
     \item Versão inicial.
   }

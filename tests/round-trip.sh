@@ -233,6 +233,8 @@ SAMPLES=(
   "examples/guide/en main"
   "examples/guide/pt main"
   "examples/setup-guide setup-guide"
+  "examples/technical/en main"
+  "examples/technical/pt main"
 )
 
 # ── Main loop ──────────────────────────────────────────────────────────────

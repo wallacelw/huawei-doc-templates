@@ -232,12 +232,34 @@ end
 --- Walks the result with inner_filter to process any raw LaTeX inside.
 local function parse_latex_blocks(content)
   content = preprocess_latex(content)
-  local ok, result = pcall(pandoc.read, content, "latex")
+  local ok, result = pcall(pandoc.read, content, "latex+raw_tex")
   if ok and result then
     if inner_filter then
       local walked = pandoc.Blocks({})
       for _, blk in ipairs(result.blocks) do
-        walked:insert(pandoc.walk_block(blk, inner_filter))
+        -- Directly apply RawBlock filter to RawBlock elements.
+        -- pandoc.walk_block walks children, not the block itself,
+        -- so RawBlock elements (which have no children) pass through
+        -- unprocessed unless we handle them explicitly.
+        if blk.t == "RawBlock" then
+          local result_blk = RawBlock(blk)
+          if result_blk then
+            if type(result_blk) == "table" and result_blk.t == nil then
+              for _, b in ipairs(result_blk) do walked:insert(b) end
+            else
+              walked:insert(result_blk)
+            end
+          else
+            walked:insert(blk)
+          end
+        else
+          local result_blk = pandoc.walk_block(blk, inner_filter)
+          if type(result_blk) == "table" and result_blk.t == nil then
+            for _, b in ipairs(result_blk) do walked:insert(b) end
+          else
+            walked:insert(result_blk)
+          end
+        end
       end
       return walked
     end
@@ -844,6 +866,7 @@ local function handle_changelog_env(text)
     if not brace2 then break end
     local date_str, end2 = parse_brace_arg(body, brace2 + 1)
     if not date_str then break end
+    date_str = date_str:gsub("\\today", os.date("%Y-%m-%d"))
     local brace3 = body:find("{", end2 + 1)
     if not brace3 then break end
     local items_content, end3 = parse_brace_arg(body, brace3 + 1)
@@ -1026,7 +1049,7 @@ function RawBlock(raw)
 
   -- Try environment handlers via dispatch table
   for env, handler in pairs(block_env_handlers) do
-    if text:find("\\begin%s*{" .. env .. "}") then
+    if text:find("^%s*\\begin%s*{" .. env .. "}") then
       local result = handler(text)
       if result then return result end
     end

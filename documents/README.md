@@ -20,7 +20,7 @@ reference.
    ```
    Or from inside the project folder:
    ```
-   cd documents/my-guide
+   cd documents/my-guide/src
    latexmk main.tex
    ```
 
@@ -31,8 +31,9 @@ Each document is self-contained in its own subfolder:
 ```
 documents/
 +-- my-guide/
-    +-- main.tex           # the document
-    +-- .latexmkrc         # XeLaTeX + TEXINPUTS → templates/_base/ + templates/guide/
+    +-- src/
+    |   +-- main.tex       # the document
+    |   +-- .latexmkrc     # XeLaTeX + TEXINPUTS → templates/_base/ + templates/guide/
     +-- assets/            # project-specific images
 ```
 

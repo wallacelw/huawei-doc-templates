@@ -1,8 +1,8 @@
 # Huawei Cloud Technical Report Template
 
 LaTeX class (`technical.cls`) for generating Huawei-branded technical
-reports with a fixed 6-section structure (problem → root cause → trigger
-→ workaround). Output is PDF via XeLaTeX; DOCX, Markdown, and HTML via
+reports with a fixed 5-section structure (problem → root cause analysis →
+root cause → trigger condition → workaround). Output is PDF via XeLaTeX; DOCX, Markdown, and HTML via
 Pandoc.
 
 ## Setup

@@ -147,7 +147,7 @@ extension, open the repo root, and save any `.tex` file to auto-compile.
 | Template | Skill | Description |
 |---|---|---|
 | [`guide`](templates/guide/) | `/skill huawei-template-guide` | Huawei Cloud guide — branded cover, header, TOC, giant chapter numbers, objectives block, code blocks, tables, callout boxes, badges, changelog. English (default) and Portuguese. |
-| [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — 6-section structure (problem → root cause → trigger → workaround), branded cover with version info table, TOC, callout boxes, tables, code blocks. PDF via XeLaTeX; DOCX/MD/HTML via Pandoc. Portuguese and English. |
+| [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — 5-section structure (problem → root cause analysis → root cause → trigger condition → workaround), branded cover with version info table, TOC, callout boxes, tables, code blocks. PDF via XeLaTeX; DOCX/MD/HTML via Pandoc. Portuguese and English. |
 
 See [`templates/guide/SKILL.md`](templates/guide/SKILL.md) for the full command
 and environment reference. See [`templates/technical/SKILL.md`](templates/technical/SKILL.md)
@@ -178,10 +178,11 @@ for the technical report template command reference.
 │   │   ├── guide-reference.docx  # custom DOCX styles for Pandoc
 │   │   ├── guide-template.html   # HTML5 template with Huawei brand CSS
 │   │   ├── create-reference-docx.py  # regenerate guide-reference.docx
+│   │   ├── embed-images.py      # image embedding for self-contained Markdown
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
 │   │   └── common-assets/      # logos, sample images, example scripts
 │   └── technical/             # technical report template + skill (LaTeX/PDF)
-│       ├── technical.cls       # LaTeX class (6-section environments, cover page)
+│       ├── technical.cls       # LaTeX class (5-section environments, cover page)
 │       ├── technical-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
 │       ├── technical-template.html  # HTML template for Pandoc
 │       ├── create-technical-reference-docx.py  # DOCX reference style generator

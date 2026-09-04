@@ -44,7 +44,7 @@ approval. Changing them breaks existing documents and reproducibility.
   `.latexmkrc`) go in a `src/` subfolder; generated outputs (PDF, DOCX,
   MD, HTML) go in the document root.
 - Never scatter `.tex` files directly in the workspace root.
-- The `.latexmkrc` sets `TEXINPUTS` pointing to `templates/guide/`.
+- The `.latexmkrc` sets `TEXINPUTS` pointing to `templates/<name>/` and `templates/_base/`.
 
 ### L8. Font fallback chain
 - Main font: HarmonyOS Sans -> Liberation Sans (sole fallback).
@@ -109,19 +109,20 @@ approval. Changing them breaks existing documents and reproducibility.
 ### L16. Multi-format output via Pandoc + Lua filter
 - LaTeX remains the single source of truth. DOCX, Markdown, and HTML are
   generated outputs, not hand-edited.
-- The Lua filter `templates/guide/guide-pandoc.lua` translates all custom
+- The Lua filters `templates/guide/guide-pandoc.lua` and
+  `templates/technical/technical-pandoc.lua` translate all custom
   commands and environments to Pandoc AST elements.
 - The filter uses **global functions** (`Pandoc`, `RawBlock`, `RawInline`) —
   do NOT add a `return` table at the end; return tables silently fail.
 - Format check is `raw.format ~= "latex"` (not `"tex"`).
-- `make all-formats` generates all 9 outputs (MD + DOCX + HTML for pt + en + setup-guide).
+- `make all-formats` generates all 15 outputs (MD + DOCX + HTML for guide pt/en + setup-guide + technical pt/en).
 - Generated outputs are gitignored (build artifacts). Only the filter, reference
   DOCX, HTML template, and Python script are committed.
 
 ### L17. Version tag + validation after each change
 - After every change (bug fix, feature, docs edit), create a new git version tag
   (e.g., `v2.0.1`, `v2.0.2`, `v2.1.0`).
-- Before tagging, validate: compile all samples (`make samples`), run all tests
+- Before tagging, validate: compile all samples (`make samples`, which includes guide and technical samples), run all tests
   (`make test`, which runs `test-filter.sh`, `round-trip.sh`, `test-docx-fix.sh`,
   and `test-sync.sh`), and verify 0 raw LaTeX blocks in output.
 - Tag format: `v<major>.<minor>.<patch>` — patch for fixes, minor for features,
@@ -137,7 +138,7 @@ approval. Changing them breaks existing documents and reproducibility.
   table styling, heading appearance, and spacing.
 - When adding or changing any visual element, update all formats to
   match the PDF. The Lua filter, reference DOCX, and HTML template must
-  stay in sync with `guide.cls`.
+  stay in sync with `guide.cls` and `technical.cls`.
 
 ---
 
@@ -146,17 +147,18 @@ approval. Changing them breaks existing documents and reproducibility.
 These are stable naming and structural conventions. Changing them would be a
 major version bump, not a violation of a locked decision.
 
-### Class name: `guide`
-- `\documentclass{guide}` or `\documentclass[portuguese]{guide}`.
+### Class name: `guide` or `technical` (L2)
+- Guide: `\documentclass{guide}` or `\documentclass[portuguese]{guide}`.
+- Technical: `\documentclass{technical}` or `\documentclass[portuguese]{technical}`.
 
-### Callout box names: `warning`, `tip`, `infobox`
+### Callout box names: `warning`, `tip`, `infobox` (L3)
 - Never reintroduce `aviso`, `dica`, or `info` environments.
 
-### Skill prefix: `huawei-template-`
+### Skill prefix: `huawei-template-` (L7)
 - All skills are named `huawei-template-<name>` (e.g. `huawei-template-guide`).
 - The prefix is set in the SKILL.md frontmatter `name` field.
 
-### Body order
+### Body order (L10)
 - `\makecover` -> `\maketoc` -> `\startbody` -> sections -> `changelog` -> `\end{document}`.
 - `\startbody` resets page numbering to 1.
 
@@ -199,7 +201,7 @@ See [README.md "Project layout"](README.md) for the full tree.
   first page explaining which template it uses and what it demonstrates.
 - **Setup guide is additional**: `examples/setup-guide/` is not a sample — it
   is a real-world document used for validation and actual installation
-  instructions. Its multi-entry changelog (23 entries vs 14/12 in samples)
+  instructions. Its multi-entry changelog (27 entries vs 15/13 in samples)
   exercises versioning in depth, and it demonstrates features in a
   practical context.
 - **Setup guide PDF in root**: `make examples` copies `setup-guide.pdf` to the
@@ -253,7 +255,7 @@ at the repo root registers `templates/` as a discovery path.
 
 ### Skill naming rules
 - Prefix: `huawei-template-` (see Conventions)
-- Examples: `huawei-template-guide`, `huawei-template-report`
+- Examples: `huawei-template-guide`, `huawei-template-technical`
 - The skill name in frontmatter must match the directory name under `templates/`
   minus the `huawei-template-` prefix.
 
@@ -261,8 +263,8 @@ at the repo root registers `templates/` as a discovery path.
 
 ## How to extend the existing template
 
-### Adding a new command to `guide.cls`
-1. Define the command in `guide.cls` with a `\newcommand`.
+### Adding a new command to `guide.cls` or `technical.cls`
+1. Define the command in the appropriate `.cls` file (`guide.cls` or `technical.cls`) with a `\newcommand`.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the command to the reference tables in `SKILL.md` and `README.md`.
 4. Demonstrate the command in both samples (`examples/guide/pt/` and `examples/guide/en/`).
@@ -286,6 +288,7 @@ at the repo root registers `templates/` as a discovery path.
 - **`guide.cls`** — guide-specific formatting (cover, TOC, titles). Shared
   formatting lives in `templates/_base/huawei-*.sty` modules. Changes here
   affect every document. Test with both samples before committing.
+- **`technical.cls`** — technical-report-specific formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
 - **`.tex` files** — content only. No formatting overrides, no `\usepackage`,
   no `\renewcommand`. All look-and-feel comes from `guide.cls`. After any
   AI-assisted edit, bump version and add changelog entry (see L11).
@@ -313,7 +316,8 @@ at the repo root registers `templates/` as a discovery path.
 - Never commit build artifacts (`.aux`, `.log`, `.out`, `.toc`,
   `.xdv`, `.fls`, `.fdb_latexmk`, `.synctex.gz`). They are in `.gitignore`.
 - **Compiled PDFs are committed**: `examples/guide/pt/main.pdf`,
-  `examples/guide/en/main.pdf`, and `examples/setup-guide/setup-guide.pdf`
+  `examples/guide/en/main.pdf`, `examples/setup-guide/setup-guide.pdf`,
+  `examples/technical/pt/main.pdf`, and `examples/technical/en/main.pdf`
   are committed to git for validation. All other PDFs are gitignored.
   Always recompile and commit updated PDFs when `.tex` or `.cls` files change.
 - A commit that breaks sample compilation must not be pushed to `main`.

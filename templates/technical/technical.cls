@@ -26,9 +26,9 @@
 %%                   and hides version/date/time on the cover page.
 %%                   (default: show changelog)
 %%    <any>       -> passed to the article class.
-%% =================================================================B
+%% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/04 Huawei Technical Report template v2.15.0]
+\ProvidesClass{technical}[2026/09/05 Huawei Technical Report template v2.16.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

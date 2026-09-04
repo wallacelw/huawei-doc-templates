@@ -12,9 +12,9 @@ from LaTeX; DOCX, Markdown, and HTML are generated via Pandoc.
 ## When to use
 
 Use this skill when the task is to **write, extend, or fix a Huawei Cloud
-technical report**. Technical reports follow a fixed 6-section structure
-(problem → root cause analysis → root cause → trigger condition →
-workaround). The output is a PDF compiled from LaTeX. Content defaults to
+technical report**. Technical reports follow a fixed 5-section structure
+(with 6 subsections in workaround) (problem → root cause analysis → root
+cause → trigger condition → workaround). The output is a PDF compiled from LaTeX. Content defaults to
 English; pass the `portuguese` class option for Portuguese labels. Do
 **not** use this for general LaTeX documents — the formatting is
 hard-coded to the Huawei house style (AGENTS.md L9).
@@ -26,7 +26,7 @@ project context:
 
 1. **`templates/technical/technical.cls`** — the class file. Shared formatting
    lives in `templates/_base/huawei-*.sty` modules. Technical-specific
-   formatting (cover page, 6-section environments) lives in `technical.cls`.
+   formatting (cover page, 5-section environments) lives in `technical.cls`.
 2. **`README.md`** (repo root) — project setup, compilation instructions,
    install steps, and project layout.
 3. **`AGENTS.md`** (repo root) — locked decisions, file editing rules,
@@ -163,7 +163,7 @@ Body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections.
 
 ```
 templates/technical/
-├── technical.cls                    # technical-specific formatting (cover, 6-section envs)
+├── technical.cls                    # technical-specific formatting (cover, 5-section envs)
 ├── technical-pandoc.lua             # Lua filter for DOCX/MD/HTML output
 ├── technical-template.html          # HTML template for Pandoc
 ├── create-technical-reference-docx.py  # DOCX reference style generator
@@ -224,9 +224,10 @@ goes in `technical.cls`. Do not inline formatting overrides in the document.
 | `\maketoc` | Render the TOC and page-break. |
 | `\startbody` | Mark body start; resets page numbering to 1 and restores header. |
 
-### 6-section environments (the core structure)
+### 5-section environments (the core structure)
 
-All six sections are mandatory in a technical report. They produce
+All five sections are mandatory in a technical report (with 6 subsections
+in workaround). They produce
 language-aware section headings automatically.
 
 | Environment | Level | English label | Portuguese label |
@@ -291,6 +292,54 @@ body rows). Do not use raw `tabular` with manual rules.
 ```
 The `changelog` environment emits its own section heading. Use the
 `nochangelog` class option to suppress it.
+
+### Inherited commands (from shared modules)
+
+These commands and environments are defined in `templates/_base/huawei-*.sty`
+modules and are available in technical documents.
+
+#### Header logo
+| Command | Purpose |
+|---|---|
+| `\setheaderlogo{path}` | Header logo image path (default `common-assets/huawei-logo-header.png`). Inherited from `huawei-page.sty`. |
+
+#### Notes & links
+| Command | Result |
+|---|---|
+| `\note{...}` | Italic observation paragraph. Inherited from `huawei-shared.sty`. |
+| `\weblink{url}{text}` | Blue (`#0000FF`), no underline, clickable. Inherited from `huawei-shared.sty`. |
+| `\menu{A, B, C}` | Menu path: **A** → **B** → **C** (bold items joined by arrows). Inherited from `huawei-shared.sty`. |
+
+#### Badge
+| Command | Result |
+|---|---|
+| `\badge{...}` | Inline red label with white text (e.g. `\badge{New}`). Inherited from `huawei-shared.sty`. |
+
+#### Code (additional)
+| Command | Result |
+|---|---|
+| `\param{...}` | Filename/parameter in italic (e.g. `\param{provider.tf}`). Inherited from `huawei-code.sty`. |
+| `\codefont` | Selects the monospace font (Cascadia Code with fallback). Used internally by `code` and `\inlinecode`; available for advanced customization. Inherited from `huawei-fonts.sty`. |
+
+#### Objectives / prerequisites block
+```latex
+\begin{objectives}
+  \generalobjective{<general objective>}
+  \objective{<objective>}
+  \prerequisites
+  \begin{itemize}
+    \item ...
+  \end{itemize}
+\end{objectives}
+```
+Closes with a 1.5pt horizontal rule. Inherited from `huawei-shared.sty`.
+
+| Command | Produces |
+|---|---|
+| `\generalobjective{...}` | **"General Objective:"** / **"Objetivo Geral:"** (bold label) + text. |
+| `\objective{...}` | **"Objective:"** / **"Objetivo:"** + text. |
+| `\prerequisites` | **"Prerequisites:"** / **"Pré-requisitos:"** label (put a list after). |
+| `\stepbystep` | **"Step by step:"** / **"Passo a passo:"** label (put a numbered list after). |
 
 ---
 

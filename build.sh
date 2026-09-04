@@ -13,10 +13,43 @@ set -euo pipefail
 # ── Resolve repo root (where this script lives) ──────────────────────────
 REPO_ROOT="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
 
+# ── Template detection ─────────────────────────────────────────────────────
+TEMPLATE=""  # set by --template flag or auto-detected
+
+# ── Parse arguments (first pass: extract --template) ──────────────────────
+_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --template)
+            if [[ -z "${2:-}" ]]; then
+                echo "Error: --template requires an argument (guide or technical)" >&2
+                exit 1
+            fi
+            TEMPLATE="$2"; shift 2
+            ;;
+        --template=*)
+            TEMPLATE="${1#--template=}"; shift
+            ;;
+        *)
+            _ARGS+=("$1"); shift
+            ;;
+    esac
+done
+set -- "${_ARGS[@]}"
+
 # ── Pandoc resource paths (relative to repo root) ────────────────────────
-LUA_FILTER="${REPO_ROOT}/templates/guide/guide-pandoc.lua"
-REF_DOCX="${REPO_ROOT}/templates/guide/guide-reference.docx"
-HTML_TMPL="${REPO_ROOT}/templates/guide/guide-template.html"
+# Auto-detect template from .latexmkrc if not specified via --template
+if [ -z "$TEMPLATE" ]; then
+    # Will be resolved after PROJECT_DIR is known (see below)
+    _DETECT_TEMPLATE=true
+else
+    _DETECT_TEMPLATE=false
+fi
+
+# Placeholder paths — will be finalized after template is resolved
+LUA_FILTER=""
+REF_DOCX=""
+HTML_TMPL=""
 
 # ── Color support ─────────────────────────────────────────────────────────
 if [ -t 1 ] && command -v tput &>/dev/null && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -58,6 +91,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --html      Generate HTML only"
             echo "  --all       Generate all formats"
             echo "  --dry-run   Show what would be built without building"
+            echo "  --template T  Use template T (guide or technical; auto-detected from .latexmkrc)"
             echo "  -h, --help  Show this help message"
             echo ""
             echo "Examples:"
@@ -134,6 +168,39 @@ if [ "$SRC_DIR" = "$PROJECT_DIR" ]; then
 else
     TEX_REL="src/$TEX_FILE"
 fi
+
+# ── Auto-detect template from .latexmkrc if not specified ────────────────
+if [ "$_DETECT_TEMPLATE" = true ]; then
+    # Look for .latexmkrc in src/ or project root
+    _LMKRC=""
+    if [ -f "$SRC_DIR/.latexmkrc" ]; then
+        _LMKRC="$SRC_DIR/.latexmkrc"
+    elif [ -f "$PROJECT_DIR/.latexmkrc" ]; then
+        _LMKRC="$PROJECT_DIR/.latexmkrc"
+    fi
+    if [ -n "$_LMKRC" ]; then
+        if grep -q 'templates/technical/' "$_LMKRC" 2>/dev/null; then
+            TEMPLATE="technical"
+        elif grep -q 'templates/guide/' "$_LMKRC" 2>/dev/null; then
+            TEMPLATE="guide"
+        else
+            TEMPLATE="guide"  # default fallback
+        fi
+    else
+        TEMPLATE="guide"  # default fallback
+    fi
+fi
+
+# Validate template
+if [ "$TEMPLATE" != "guide" ] && [ "$TEMPLATE" != "technical" ]; then
+    echo "Error: Unknown template '$TEMPLATE' (must be 'guide' or 'technical')" >&2
+    exit 1
+fi
+
+# Finalize template paths
+LUA_FILTER="${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}-pandoc.lua"
+REF_DOCX="${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}-reference.docx"
+HTML_TMPL="${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}-template.html"
 
 # Display path relative to repo root for readability
 REL_DIR="$(realpath --relative-to="$REPO_ROOT" "$PROJECT_DIR" 2>/dev/null || echo "$PROJECT_DIR")"
@@ -286,7 +353,7 @@ generate_pandoc_format() {
     local err
     err=$(cd "$PROJECT_DIR" && pandoc -f latex+raw_tex \
         --lua-filter="$LUA_FILTER" \
-        --resource-path=".:${REPO_ROOT}/templates/guide/common-assets" \
+        --resource-path=".:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
         --number-sections \
         "${extra_args[@]}" \
         -t "$fmt" "$TEX_REL" -o "$out" 2>&1) || {
@@ -313,7 +380,7 @@ generate_docx() {
     generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
     if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.docx" ]; then
-        if ! python3 "${REPO_ROOT}/templates/guide/create-reference-docx.py" --fix "${PROJECT_DIR}/${BASENAME}.docx" 2>&1; then
+        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/${BASENAME}.docx" 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2
         fi
     fi
@@ -322,9 +389,9 @@ generate_md() {
     generate_pandoc_format "Markdown" markdown md
     # Post-process: embed images as base64 data URIs (self-contained MD)
     if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.md" ]; then
-        python3 "${REPO_ROOT}/templates/guide/embed-images.py" \
+        python3 "${REPO_ROOT}/templates/${TEMPLATE}/embed-images.py" \
             "${PROJECT_DIR}/${BASENAME}.md" \
-            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/guide/common-assets" 2>&1 | sed 's/^/  /'
+            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" 2>&1 | sed 's/^/  /'
     fi
 }
 generate_html() { generate_pandoc_format "HTML" html5 html --template="$HTML_TMPL" -s --embed-resources; }

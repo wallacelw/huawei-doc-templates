@@ -14,36 +14,36 @@
 %   width  — horizontal size (default 0.9\linewidth)
 %   height — vertical size   (default 0.5\textheight)
 % Both are upper bounds; keepaspectratio preserves the image's aspect ratio.
-\define@key{guideimg}{width}{\def\guide@img@width{#1}}
-\define@key{guideimg}{height}{\def\guide@img@height{#1}}
+\define@key{guideimg}{width}{\def\lg@img@width{#1}}
+\define@key{guideimg}{height}{\def\lg@img@height{#1}}
 
 % \image[options]{file}   (no caption)
 % Example: \image[width=0.8\linewidth]{assets/screenshot.png}
 %          \image[height=0.3\textheight]{assets/tall-chart.png}
 %          \image[width=0.9\linewidth, height=0.5\textheight]{assets/big.png}
 \newcommand{\image}[2][]{%
-  \def\guide@img@width{0.9\linewidth}%
-  \def\guide@img@height{0.5\textheight}%
+  \def\lg@img@width{0.9\linewidth}%
+  \def\lg@img@height{0.5\textheight}%
   \setkeys{guideimg}{#1}%
   \IfFileExists{#2}{}{\PackageWarning{huawei-images}{Image "#2" not found.
     Check the path (relative to TEXINPUTS) and that the file exists.}}%
   \par\medskip
   {\leftskip=0pt\rightskip=0pt\parindent=0pt\centering
-   \includegraphics[width=\guide@img@width,height=\guide@img@height,keepaspectratio]{#2}\par}%
+   \includegraphics[width=\lg@img@width,height=\lg@img@height,keepaspectratio]{#2}\par}%
   \medskip}
 
 % \imagecap[options]{file}{caption}  (with numbered caption — Figure N)
 % Same options as \image.  Do not include "Figure N" in the caption —
 % the class adds it automatically.
 \newcommand{\imagecap}[3][]{%
-  \def\guide@img@width{0.9\linewidth}%
-  \def\guide@img@height{0.5\textheight}%
+  \def\lg@img@width{0.9\linewidth}%
+  \def\lg@img@height{0.5\textheight}%
   \setkeys{guideimg}{#1}%
   \IfFileExists{#2}{}{\PackageWarning{huawei-images}{Image "#2" not found.
     Check the path (relative to TEXINPUTS) and that the file exists.}}%
   \par\medskip
   {\leftskip=0pt\rightskip=0pt\parindent=0pt\centering
-   \includegraphics[width=\guide@img@width,height=\guide@img@height,keepaspectratio]{#2}\par
+   \includegraphics[width=\lg@img@width,height=\lg@img@height,keepaspectratio]{#2}\par
    \vspace{2pt}\captionof{figure}{#3}\par}%
   \medskip}
 

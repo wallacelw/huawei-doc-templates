@@ -12,6 +12,12 @@
 \maketoc
 \startbody
 
+\begin{infobox}
+This document is a sample of the \textbf{Huawei Technical Report template} (\inlinecode{technical.cls}).
+It demonstrates the 5-section structure (problem, root cause analysis, root cause, trigger condition, workaround)
+along with shared formatting commands: callout boxes, code blocks, tables, images, and inline commands.
+\end{infobox}
+
 \begin{problem}
 At the Brazil site of HCS 8.5.1, the default enterprise project
 is not displayed on the ECS creation page. This prevents users from
@@ -23,7 +29,7 @@ instances.
 \begin{enumerate}
   \item Analyzed the permissions of the user who cannot view the
     default enterprise project
-  \item Verified the \texttt{auth\_action} field behavior in version 8.5.1
+  \item Verified the \inlinecode{auth\_action} field behavior in version 8.5.1
   \item Confirmed the Server Administrator role lacks fine-grained
     action permissions
 \end{enumerate}
@@ -77,8 +83,62 @@ to create an ECS instance in HCS 8.5.1.
 
 \end{workaround}
 
+\section{Additional formatting examples}
+
+This section demonstrates shared formatting commands available in the technical template.
+
+\subsection{Callout boxes}
+
+\begin{warning}
+This is a warning callout box. Use it to highlight important cautions or potential issues.
+\end{warning}
+
+\begin{tip}
+This is a tip callout box. Use it to suggest best practices or helpful advice.
+\end{tip}
+
+\begin{infobox}
+This is an info callout box. Use it for general information or notes.
+\end{infobox}
+
+\subsection{Code blocks}
+
+\begin{code}[bash]
+# Example script for verification
+kubectl get pods -n production
+kubectl logs -f deployment/api-gateway -n production
+\end{code}
+
+\inlinecode{kubectl describe pod} for detailed pod inspection.
+
+\subsection{Tables}
+
+\begin{hutable}{|l|c|c|}
+\rowcolor{huaweired}
+\thd{Component} & \thd{Version} & \thd{Status} \\
+\tbody
+API Gateway & 2.4.1 & OK \\
+Database & 8.5.1 & OK \\
+Cache & 7.0 & Degraded \\
+\end{hutable}
+
+\subsection{Inline commands}
+
+\note{Always verify the backup before starting the workaround.}
+
+Reference: \weblink{https://docs.huaweicloud.com}{Huawei Cloud Documentation}
+
+Navigation: \menu{Console > ECS > Instances}
+
+Status: \badge{Verified}
+
+Parameter: \param{timeout} should be set to 300 seconds.
+
 % --- Changelog ---
 \begin{changelog}
+  \changelogentry{1.1.0}{\today}{
+    \item Added infobox explanation and demonstrations of shared formatting commands (callouts, code, tables, inline commands).
+  }
   \changelogentry{1.0.0}{\today}{
     \item Initial version.
   }

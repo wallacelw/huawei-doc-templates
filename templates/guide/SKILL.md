@@ -167,6 +167,11 @@ here. Run this check after every sample compile — the grep is the only extra s
 ```
 templates/guide/
 ├── guide.cls          # guide-specific formatting (cover, TOC, titles)
+├── guide-pandoc.lua   # Lua filter for Pandoc multi-format output
+├── guide-reference.docx  # reference DOCX with Huawei styles
+├── guide-template.html   # HTML template for Pandoc
+├── create-reference-docx.py  # DOCX reference creation/fix script
+├── embed-images.py    # image embedding for self-contained Markdown
 ├── README.md           # human docs (brief — see root README for setup)
 ├── SKILL.md            # this file (opencode skill)
 ├── .latexmkrc          # latexmk config (XeLaTeX by default)
@@ -487,6 +492,29 @@ Or `cd src/ && latexmk main.tex` from inside the project folder. See [README.md]
 for the full Makefile reference and multi-format output options.
 
 **Never use pdflatex** — the class loads `fontspec` which requires XeLaTeX.
+
+---
+
+## Multi-format output
+
+LaTeX → PDF is the primary output. DOCX, Markdown, and HTML are generated
+via Pandoc + the Lua filter:
+
+```bash
+# Markdown
+pandoc --lua-filter=templates/guide/guide-pandoc.lua \
+  -f latex+raw_tex -t markdown -o output.md input.tex
+
+# HTML
+pandoc --lua-filter=templates/guide/guide-pandoc.lua \
+  --template=templates/guide/guide-template.html \
+  -f latex+raw_tex -t html5 --standalone -o output.html input.tex
+
+# DOCX
+pandoc --lua-filter=templates/guide/guide-pandoc.lua \
+  --reference-doc=templates/guide/guide-reference.docx \
+  -f latex+raw_tex -t docx -o output.docx input.tex
+```
 
 ---
 

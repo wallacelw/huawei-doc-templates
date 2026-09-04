@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- ECS + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{2.13.0}
+\setdocversion{2.16.0}
 
 \begin{document}
 
@@ -689,6 +689,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{2.16.0}{\today}{\item Updated to match template v2.16.0 — Lua filter fixes, build system updates, and technical template parity improvements.}
   \changelogentry{2.13.0}{2026-08-24}{
     \item Foundation refactoring Phase 4: make DOCX \texttt{--fix} post-processing robust. Replaced all silent-skip guards in \texttt{create-reference-docx.py} with loud \texttt{RuntimeError} assertions for expected XML elements (Heading1-4, Title, VerbatimChar, Normal, docDefaults, numbering indentation). Added pandoc version pin (3.1.0--3.2.0) to catch output-structure regressions on upgrade. Extended \texttt{test-docx-fix.sh} with version check and 4 loud-failure tests (missing style $\to$ non-zero exit).
   }

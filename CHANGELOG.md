@@ -3,6 +3,44 @@
 All notable changes to the huawei-doc-templates project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v2.16.0 (2026-09-05)
+
+### Breaking changes
+- None
+
+### Features
+- `technical/SKILL.md` now documents all inherited commands from shared modules (`\note`, `\weblink`, `\menu`, `\badge`, `\param`, `\codefont`, `objectives` environment, `\generalobjective`, `\objective`, `\prerequisites`, `\stepbystep`, `\setheaderlogo`)
+- `guide/SKILL.md` now includes a "Multi-format output" section with Pandoc commands
+- Technical samples (pt/en) now demonstrate all shared commands (callouts, code, tables, inline commands) with explanatory infobox
+- `build.sh` is now template-aware — auto-detects guide vs technical from `.latexmkrc`, supports `--template` flag
+- `make samples` now compiles both guide and technical samples
+- `install.sh` now verifies technical template compilation
+- Test suite now covers technical template (test-filter.sh, round-trip.sh, test-sync.sh)
+
+### Fixes
+- **guide-pandoc.lua**: Added start anchor `^%s*` to RawBlock environment dispatch (prevents nested environment misfire)
+- **guide-pandoc.lua**: Changed `pandoc.read` format to `"latex+raw_tex"` (preserves raw TeX for nested processing)
+- **guide-pandoc.lua**: Added explicit RawBlock handling in `parse_latex_blocks` (was silently dropping nested raw blocks)
+- **guide-pandoc.lua**: Added `\today` expansion in changelog date parsing
+- **technical-pandoc.lua**: Added `setheaderlogo` to `strip_commands` (was leaking as raw LaTeX in output)
+- **technical-pandoc.lua**: Added `objectives` environment handler
+- **Makefile**: Added `--fix` post-processing to technical DOCX targets
+- **Makefile**: Added `--embed-resources` to technical HTML targets
+- **test-sync.sh**: Format count updated from 9 to 15; tag drift now fails instead of warning
+- **huawei-images.sty**: Renamed `\guide@img@` prefix to `\lg@img@` per convention
+- **technical.cls**: Fixed `====B` typo in comment border
+
+### Documentation
+- **AGENTS.md**: Updated for two-template reality — acknowledges `technical` throughout (L6, L16, L17, conventions, file editing rules, skill examples, changelog counts, committed PDFs)
+- **AGENTS.md**: L2, L3, L7, L10 labels added to Conventions section for traceability
+- **AGENTS.md**: L16 output count corrected from 9 to 15
+- **AGENTS.md**: Changelog entry counts corrected (27/15/13, was 23/14/12)
+- **documents/README.md**: Fixed structure diagram to show `src/` subfolder (L13 compliance)
+- **documents/README.md**: Fixed compile instruction to `cd documents/my-guide/src`
+- "6-section structure" corrected to "5-section structure" consistently across all docs
+- `guide/SKILL.md` project layout updated with multi-format files
+- `README.md` project layout updated with `embed-images.py`
+
 ## v2.15.1 (2026-09-04)
 
 ### Audit fixes for v2.15.0

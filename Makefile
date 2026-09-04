@@ -32,7 +32,7 @@ help: ## Show this help message
 
 all: samples examples technical-samples all-formats ## Compile everything (samples + setup-guide + technical reports (PDF) + all formats)
 
-samples: pt en ## Compile both guide samples (PT + EN)
+samples: pt en technical-samples ## Compile all samples (guide + technical, PT + EN)
 
 examples: setup-guide ## Compile the setup-guide and copy its PDF to repo root
 
@@ -112,10 +112,10 @@ technical-html: technical-html-pt technical-html-en ## HTML for both technical s
 
 technical-md-pt:    ; pandoc --lua-filter=$(TECH_FILTER) -f latex+raw_tex -t markdown examples/technical/pt/src/main.tex -o examples/technical/pt/main.md
 technical-md-en:    ; pandoc --lua-filter=$(TECH_FILTER) -f latex+raw_tex -t markdown examples/technical/en/src/main.tex -o examples/technical/en/main.md
-technical-docx-pt:  ; pandoc --lua-filter=$(TECH_FILTER) --reference-doc=$(TECH_REFDOCX) -f latex+raw_tex -t docx examples/technical/pt/src/main.tex -o examples/technical/pt/main.docx
-technical-docx-en:  ; pandoc --lua-filter=$(TECH_FILTER) --reference-doc=$(TECH_REFDOCX) -f latex+raw_tex -t docx examples/technical/en/src/main.tex -o examples/technical/en/main.docx
-technical-html-pt:  ; pandoc --lua-filter=$(TECH_FILTER) --template=$(TECH_HTML) -f latex+raw_tex -t html5 --standalone examples/technical/pt/src/main.tex -o examples/technical/pt/main.html
-technical-html-en:  ; pandoc --lua-filter=$(TECH_FILTER) --template=$(TECH_HTML) -f latex+raw_tex -t html5 --standalone examples/technical/en/src/main.tex -o examples/technical/en/main.html
+technical-docx-pt:  ; pandoc --lua-filter=$(TECH_FILTER) --reference-doc=$(TECH_REFDOCX) -f latex+raw_tex -t docx examples/technical/pt/src/main.tex -o examples/technical/pt/main.docx; python3 templates/technical/create-technical-reference-docx.py --fix examples/technical/pt/main.docx
+technical-docx-en:  ; pandoc --lua-filter=$(TECH_FILTER) --reference-doc=$(TECH_REFDOCX) -f latex+raw_tex -t docx examples/technical/en/src/main.tex -o examples/technical/en/main.docx; python3 templates/technical/create-technical-reference-docx.py --fix examples/technical/en/main.docx
+technical-html-pt:  ; pandoc --lua-filter=$(TECH_FILTER) --template=$(TECH_HTML) -f latex+raw_tex -t html5 --standalone --embed-resources examples/technical/pt/src/main.tex -o examples/technical/pt/main.html
+technical-html-en:  ; pandoc --lua-filter=$(TECH_FILTER) --template=$(TECH_HTML) -f latex+raw_tex -t html5 --standalone --embed-resources examples/technical/en/src/main.tex -o examples/technical/en/main.html
 
 # ============================================================================
 ##@ Testing
