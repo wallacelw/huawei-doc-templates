@@ -7,13 +7,25 @@ reference.
 
 ## Creating a new document
 
+**Easiest way — use the scaffolder:**
+
+```bash
+./new-doc.sh                 # interactive — picks a template and scaffolds the folder
+./new-doc.sh --type guide --title "ECS Setup" --lang en --name ecs-setup
+./new-doc.sh --list          # list available templates
+```
+
+This creates a self-contained subfolder here with the right skeleton files.
+
+**Or use a skill directly:**
+
 1. Run the skill for the template you want to use:
    ```
    /skill huawei-template-guide         # for guides (how-to, training)
    /skill huawei-template-technical     # for technical reports (incident analysis)
    ```
 2. The skill will create a subfolder here, e.g. `documents/my-guide/`,
-   with all necessary files (`.tex`, `.latexmkrc`, `assets/`).
+   with all necessary files (`src/main.tex`, `src/.latexmkrc`, `assets/`).
 3. Compile from the repo root:
    ```
    make project DIR=documents/my-guide
