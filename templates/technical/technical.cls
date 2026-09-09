@@ -9,13 +9,13 @@
 %%    huawei-code, huawei-callouts, huawei-images, huawei-changelog,
 %%    huawei-shared.
 %%
-%%  Provides a 6-section structure for formal incident/analysis reports:
+%%  Provides a 5-section structure for formal incident/analysis reports:
 %%    1. Problem Description and Impact
 %%    2. Root Cause Analysis
 %%    3. Root Cause
 %%    4. Trigger Condition
-%%    5. Workaround and Impact (with 6 subsections)
-%%    6. (Changelog — optional)
+%%  5. Workaround and Impact (with 6 subsections)
+%%    6. Changelog (optional)
 %%
 %%  Class options:
 %%    portuguese  -> uses Portuguese for predefined labels and babel.
@@ -28,7 +28,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/05 Huawei Technical Report template v3.0.0]
+\ProvidesClass{technical}[2026/09/10 Huawei Technical Report template v3.0.1]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -189,7 +189,7 @@
 \fi
 
 % =====================================================================
-%  6-SECTION ENVIRONMENTS
+%  5-SECTION ENVIRONMENTS
 % =====================================================================
 % Each environment creates a section/subsection with a fixed, language-aware
 % title. The structure is enforced — users just fill in the content.

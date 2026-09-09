@@ -18,6 +18,9 @@ end
 -- Ensure C locale for consistent pattern matching
 os.setlocale('C')
 
+-- Note: pandoc must invoke this filter with a full path (e.g.,
+-- --lua-filter=templates/technical/technical-pandoc.lua, not just technical-pandoc.lua).
+-- A bare filename causes debug.getinfo to return nil for the path.
 -- Load shared filter factory
 local C = dofile(debug.getinfo(1, 'S').source:match('@(.*/)')
     .. '../_base/pandoc-common.lua')
@@ -97,7 +100,7 @@ local config = {
     end
 
     return {
-      -- Technical report 6-section environments (level 1 = section)
+      -- Technical report 5-section environments (level 1 = section)
       problem           = handle_section_env("problem", "problem", 1),
       rootcauseanalysis = handle_section_env("rootcauseanalysis", "rootcauseanalysis", 1),
       rootcause         = handle_section_env("rootcause", "rootcause", 1),

@@ -108,9 +108,9 @@ html-sg: ; ./build.sh --html examples/setup-guide
 
 all-formats: $(TEMPLATE_FORMATS) md-sg docx-sg html-sg ## Generate all formats (DOCX+MD+HTML) for all samples + setup-guide
 
-md:   md-pt md-en md-sg   ## Markdown for both guide samples + setup-guide
-docx: docx-pt docx-en docx-sg ## DOCX for both guide samples + setup-guide
-html: html-pt html-en html-sg ## HTML for both guide samples + setup-guide
+md:   md-pt md-en md-sg   ## Markdown for guide samples + setup-guide (use all-formats for all templates)
+docx: docx-pt docx-en docx-sg ## DOCX for guide samples + setup-guide (use all-formats for all templates)
+html: html-pt html-en html-sg ## HTML for guide samples + setup-guide (use all-formats for all templates)
 
 # ============================================================================
 ##@ Generic project compilation

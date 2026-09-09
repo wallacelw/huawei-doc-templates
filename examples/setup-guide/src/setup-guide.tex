@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- ECS + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.0.0}
+\setdocversion{3.0.1}
 
 \begin{document}
 
@@ -638,13 +638,15 @@ Objectives block (closes with a horizontal rule):
 \end{objectives}
 \end{code}
 
-Callout boxes and inline commands:
+Callout boxes (environment syntax):
 
-\begin{code}
-\begin{warning} ... \end{warning}     % amber warning box
-\begin{tip}  ... \end{tip}      % green tip box
-\begin{infobox} ... \end{infobox} % blue info box
-\end{code}
+\begin{itemize}
+  \item \inlinecode{warning} --- amber warning box
+  \item \inlinecode{tip} --- green tip box
+  \item \inlinecode{infobox} --- blue info box
+\end{itemize}
+
+Inline commands:
 
 \begin{code}
 \inlinecode{inline code}                % inline monospace
@@ -689,6 +691,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.0.1}{\today}{\item Minor fixes: test-filter.sh auto-discovery, build.sh help text, Makefile aggregate descriptions, 5-section comment correction, CHANGELOG version gap note, callout-in-code fix, CI font auto-discovery, dofile path comment, test-sync.sh header.}
   \changelogentry{3.0.0}{\today}{\item Modular pipeline refactoring: shared Lua filter factory, shared DOCX fix logic, build system auto-discovery, unified format pipeline, GitHub Actions CI.}
   \changelogentry{2.16.0}{\today}{\item Updated to match template v2.16.0 — Lua filter fixes, build system updates, and technical template parity improvements.}
   \changelogentry{2.13.0}{2026-08-24}{

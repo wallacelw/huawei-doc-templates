@@ -59,10 +59,10 @@ to create a new guide document.
 ```bash
 make                 # show help (list all available targets)
 make all             # compile everything: samples + setup-guide + technical reports + all formats
-make samples         # compile PT + EN samples
+make samples         # compile all template samples (guide + technical, PT + EN)
 make examples        # compile setup-guide, copy PDF to repo root
-make pt              # compile Portuguese sample only
-make en              # compile English sample only
+make pt              # compile Portuguese sample only (guide-only legacy alias)
+make en              # compile English sample only (guide-only legacy alias)
 make technical-samples # compile technical report samples (PT + EN, PDF)
 make technical DIR=documents/my-report  # compile a technical report (latexmk in src/)
 make setup-guide     # compile setup guide only
@@ -125,13 +125,13 @@ commands to Pandoc AST elements.
 
 ```bash
 make all-formats    # MD + DOCX + HTML for all samples + technical reports
-make md             # Markdown only (pt + en)
-make docx           # DOCX only (pt + en)
-make html           # HTML only (pt + en)
+make md             # Markdown only (guide pt + en + setup-guide)
+make docx           # DOCX only (guide pt + en + setup-guide)
+make html           # HTML only (guide pt + en + setup-guide)
 make clean-formats  # remove generated multi-format files
 ```
 
-The Lua filter (`templates/guide/guide-pandoc.lua`) is a thin wrapper that calls the shared factory in `templates/_base/pandoc-common.lua`. It handles all custom commands (see [`SKILL.md`](templates/guide/SKILL.md) for the full reference). DOCX uses custom styles from `guide-reference.docx` (theme fonts: HarmonyOS Sans); HTML uses `guide-template.html` with Huawei brand CSS.
+Each template's Lua filter (e.g. `guide-pandoc.lua`, `technical-pandoc.lua`) is a thin wrapper that calls the shared factory in `templates/_base/pandoc-common.lua`. It handles all custom commands (see [`SKILL.md`](templates/guide/SKILL.md) for the full reference). DOCX uses custom styles from each template's reference DOCX (theme fonts: HarmonyOS Sans); HTML uses each template's HTML template with Huawei brand CSS.
 
 Generated outputs are gitignored (build artifacts). Only the filter, reference
 DOCX, HTML template, and Python script are committed.
@@ -181,7 +181,6 @@ for the technical report template command reference.
 │   │   ├── guide-reference.docx  # custom DOCX styles for Pandoc
 │   │   ├── guide-template.html   # HTML5 template with Huawei brand CSS
 │   │   ├── create-guide-reference-docx.py  # regenerate guide-reference.docx
-│   │   ├── embed-images.py      # image embedding for self-contained Markdown
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
 │   │   └── common-assets/      # logos, sample images, example scripts
 │   └── technical/             # technical report template + skill (LaTeX/PDF)

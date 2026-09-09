@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test-docx-fix.sh — Smoke test for DOCX post-processing (create-guide-reference-docx.py --fix)
+# test-docx-fix.sh — Smoke test for DOCX post-processing for all templates
 # Verifies that the --fix pipeline produces correct heading styles,
 # list indentation, and footer page numbers in the generated DOCX.
 # Also verifies pandoc version pin and loud-failure assertions.

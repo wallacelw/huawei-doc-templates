@@ -3,6 +3,20 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.0.1 (2026-09-10)
+
+### Fixes
+
+- **test-filter.sh**: Replaced hardcoded guide/technical sections with auto-discovery loop over `templates/*/`. New templates are tested automatically without code changes.
+- **build.sh**: Updated `--template` error and help text to not hardcode template names.
+- **Makefile**: Updated `md`/`docx`/`html` aggregate help text to note guide-only scope and point to `all-formats`.
+- **technical.cls / technical-pandoc.lua**: Corrected "6-section" to "5-section" in comments.
+- **CHANGELOG.md**: Added note about v2.10.0–v2.13.0 internal development gap.
+- **setup-guide.tex**: Moved callout syntax examples out of `\begin{code}` block to prevent raw LaTeX leaking into MD/HTML output.
+- **test.yml**: Replaced hardcoded font directory paths with auto-discovery loop.
+- **guide-pandoc.lua / technical-pandoc.lua**: Added comment documenting `dofile` path resolution limitation with bare filenames.
+- **test-sync.sh**: Updated header comment to use dynamic language instead of "exactly 15".
+
 ## v3.0.0 (2026-09-05)
 
 ### Major: Modular template pipeline refactoring
@@ -124,6 +138,8 @@ Added a standalone technical report template that generates Huawei-branded
   `huawei-colors.sty`), not muted tones.
 
 ## v2.9.1 (2026-08-23)
+
+> **Note**: Versions v2.10.0 through v2.13.0 were internal development iterations not separately released.
 
 ### HTML + Markdown: embed images as base64 data URIs
 

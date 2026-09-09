@@ -6,7 +6,7 @@ set -euo pipefail
 #   1. guide.cls version == setup-guide \setdocversion
 #   2. guide.cls version == latest git tag (if tags exist)
 #   3. All template .cls versions match guide.cls version
-#   4. Makefile has format targets for all templates
+#   4. Makefile has format targets for each template
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLS_FILE="$REPO_ROOT/templates/guide/guide.cls"

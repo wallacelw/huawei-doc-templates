@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --template)
             if [[ -z "${2:-}" ]]; then
-                echo "Error: --template requires an argument (guide or technical)" >&2
+                echo "Error: --template requires an argument (template name, e.g. guide, technical)" >&2
                 exit 1
             fi
             TEMPLATE="$2"; shift 2
@@ -91,7 +91,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --html      Generate HTML only"
             echo "  --all       Generate all formats"
             echo "  --dry-run   Show what would be built without building"
-            echo "  --template T  Use template T (guide or technical; auto-detected from .latexmkrc)"
+            echo "  --template T  Use template T (auto-detected from .latexmkrc if omitted)"
             echo "  -h, --help  Show this help message"
             echo ""
             echo "Examples:"

@@ -171,7 +171,6 @@ templates/guide/
 ├── guide-reference.docx  # reference DOCX with Huawei styles
 ├── guide-template.html   # HTML template for Pandoc
 ├── create-guide-reference-docx.py  # DOCX reference creation/fix script (calls _base/docx_fix.py)
-├── embed-images.py    # image embedding for self-contained Markdown (calls _base/embed-images.py)
 ├── README.md           # human docs (brief — see root README for setup)
 ├── SKILL.md            # this file (opencode skill)
 ├── .latexmkrc          # latexmk config (XeLaTeX by default)

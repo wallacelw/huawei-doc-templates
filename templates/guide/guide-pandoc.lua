@@ -18,6 +18,9 @@ end
 -- Ensure C locale for consistent pattern matching
 os.setlocale('C')
 
+-- Note: pandoc must invoke this filter with a full path (e.g.,
+-- --lua-filter=templates/guide/guide-pandoc.lua, not just guide-pandoc.lua).
+-- A bare filename causes debug.getinfo to return nil for the path.
 -- Load shared filter factory
 local C = dofile(debug.getinfo(1, 'S').source:match('@(.*/)')
     .. '../_base/pandoc-common.lua')

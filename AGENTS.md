@@ -266,20 +266,20 @@ at the repo root registers `templates/` as a discovery path.
 ## How to extend the existing template
 
 ### Adding a new command to `guide.cls` or `technical.cls`
-1. Define the command in the appropriate `.cls` file (`guide.cls` or `technical.cls`) with a `\newcommand`.
+1. Define the command in the appropriate `.cls` file (`guide.cls` or `technical.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the command to the reference tables in `SKILL.md` and `README.md`.
-4. Demonstrate the command in both samples (`examples/guide/pt/` and `examples/guide/en/`).
+4. Demonstrate the command in all template samples (`examples/guide/pt/`, `examples/guide/en/`, `examples/technical/pt/`, `examples/technical/en/`).
 5. Compile both samples to verify: `make samples`.
 6. Commit only if both samples compile without errors.
 
 ### Adding a new environment
 - Same steps as above, but use `\newenvironment` or `tcolorbox`.
-- If using `tcolorbox`, add colors to the COLORS section with `\definecolor`.
+- If using `tcolorbox`, add colors to `templates/_base/huawei-colors.sty` with `\definecolor`.
 - Document the environment's color, border, and breakability.
 
 ### Adding a new color
-- Define in the COLORS section of `guide.cls` with `\definecolor`.
+- Define in `templates/_base/huawei-colors.sty` with `\definecolor`.
 - Use HTML hex values: `\definecolor{name}{HTML}{RRGGBB}`.
 - Do not change existing color values (locked, see L9).
 
@@ -335,10 +335,10 @@ The naming convention is critical:
   affect ALL templates' Markdown output. Test with `make all-formats` before
   committing.
 - **`.tex` files** — content only. No formatting overrides, no `\usepackage`,
-  no `\renewcommand`. All look-and-feel comes from `guide.cls`. After any
+  no `\renewcommand`. All look-and-feel comes from the template `.cls` file and `templates/_base/` shared modules. After any
   AI-assisted edit, bump version and add changelog entry (see L11).
 - **`SKILL.md`** — canonical command and environment reference. Must stay in
-  sync with `guide.cls`. Every command in the class must be documented here.
+  sync with all template class files and `templates/_base/` modules. Every command in the class must be documented here.
   Every locked decision must be respected.
 - **`README.md`** (root) — comprehensive installation, setup, and project info
   for all templates. The single source of truth for environment setup,

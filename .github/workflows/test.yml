@@ -18,14 +18,10 @@ jobs:
           sudo apt-get install -y pandoc python3-docx python3-lxml
       - name: Install fonts
         run: |
-          # Install HarmonyOS Sans and Cascadia Code fonts
           mkdir -p ~/.fonts
-          if [ -d templates/guide/common-assets/fonts ]; then
-            cp templates/guide/common-assets/fonts/* ~/.fonts/ 2>/dev/null || true
-          fi
-          if [ -d templates/technical/common-assets/fonts ]; then
-            cp templates/technical/common-assets/fonts/* ~/.fonts/ 2>/dev/null || true
-          fi
+          for font_dir in templates/*/common-assets/fonts; do
+            [ -d "$font_dir" ] && cp "$font_dir"/* ~/.fonts/ 2>/dev/null || true
+          done
           fc-cache -f
       - name: Run tests
         run: make test
