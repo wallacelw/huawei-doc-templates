@@ -36,10 +36,27 @@ Per-document changelogs are maintained via `\changelogentry` in each `.tex` file
 - **Template-aware test framework**: `round-trip.sh` auto-discovers samples.
   `test-sync.sh` validates structure dynamically. `test-docx-fix.sh` tests
   both templates. Technical-specific test cases added.
-- **GitHub Actions CI**: Added `.github/workflows/test.yml` for automated
-  testing on push.
 - **Renamed**: `create-reference-docx.py` → `create-guide-reference-docx.py`
   (convention alignment).
+
+## v3.0.1 (2026-09-10)
+
+### Patch: Smaller fixes + test coverage
+
+- Fixed `test-filter.sh` to auto-discover templates (no hardcoded paths).
+- Fixed "6-section" → "5-section" comments in technical template.
+- Moved callout examples out of code block in setup-guide (fixes MD leak).
+- Updated README.md, AGENTS.md, SKILL.md for modular architecture accuracy.
+- Added 6 technical test cases: rootcauseanalysis, triggercondition, backupdata,
+  workaroundsteps, rollback, cleanup.
+- Documented `dofile` path resolution limitation in Lua wrappers.
+
+## v3.0.2 (2026-09-10)
+
+### Patch: Remove CI integration
+
+- Removed `.github/workflows/test.yml` (CI jobs were failing due to environment
+  differences). Tests remain runnable locally via `make test`.
 
 ## v2.16.0 (2026-09-05)
 
