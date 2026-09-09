@@ -102,6 +102,8 @@ approval. Changing them breaks existing documents and reproducibility.
 - All template classes load shared `.sty` modules from `templates/_base/`.
 - Modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
   huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared.
+- Shared code modules: pandoc-common.lua (Lua filter factory), docx_fix.py (DOCX
+  post-processing), embed-images.py (MD image embedding).
 - Template-specific code (cover, TOC, section styling) stays in the template `.cls` file.
 - Do not add `\RequirePackage` calls inside `.sty` modules — all packages are loaded
   by the template class file.
@@ -110,9 +112,9 @@ approval. Changing them breaks existing documents and reproducibility.
 - LaTeX remains the single source of truth. DOCX, Markdown, and HTML are
   generated outputs, not hand-edited.
 - The Lua filters `templates/guide/guide-pandoc.lua` and
-  `templates/technical/technical-pandoc.lua` translate all custom
-  commands and environments to Pandoc AST elements.
-- The filter uses **global functions** (`Pandoc`, `RawBlock`, `RawInline`) —
+  `templates/technical/technical-pandoc.lua` are thin wrappers that call a shared
+  factory in `templates/_base/pandoc-common.lua`.
+- The factory uses **global functions** (`Pandoc`, `RawBlock`, `RawInline`) —
   do NOT add a `return` table at the end; return tables silently fail.
 - Format check is `raw.format ~= "latex"` (not `"tex"`).
 - `make all-formats` generates all 15 outputs (MD + DOCX + HTML for guide pt/en + setup-guide + technical pt/en).
@@ -281,6 +283,41 @@ at the repo root registers `templates/` as a discovery path.
 - Use HTML hex values: `\definecolor{name}{HTML}{RRGGBB}`.
 - Do not change existing color values (locked, see L9).
 
+### Adding a new shared module
+- Shared code (Lua, Python) lives in `templates/_base/`.
+- `pandoc-common.lua` exports a `make_filter(config)` factory function.
+- `docx_fix.py` exports a `main(argv, reference_name)` function.
+- Template-specific wrappers in `templates/<name>/` call the shared functions.
+
+---
+
+## How to add a new template
+
+1. **Create the template directory** `templates/<name>/` with:
+   - `<name>.cls` — the LaTeX class file
+   - `<name>-pandoc.lua` — thin wrapper (~80-125 lines) that calls the shared
+     factory in `templates/_base/pandoc-common.lua`
+   - `create-<name>-reference-docx.py` — thin wrapper (~16 lines) that imports
+     `templates/_base/docx_fix.py`
+   - `<name>-reference.docx` — reference DOCX for Pandoc
+   - `<name>-template.html` — HTML template for Pandoc
+   - `SKILL.md`, `README.md`, `.latexmkrc`, `common-assets/`
+
+2. **Create samples** in `examples/<name>/pt/` and `examples/<name>/en/`
+
+3. **Done** — no changes needed to:
+   - Makefile (auto-discovers via `$(wildcard templates/*/)` + `eval`)
+   - build.sh (auto-detects template from `.latexmkrc` TEXINPUTS)
+   - install.sh (auto-discovers template sample dirs)
+   - test-sync.sh, test-docx-fix.sh, round-trip.sh (auto-discover templates and samples). test-filter.sh needs a one-line addition per template (filter path).
+
+The naming convention is critical:
+- Filter: `templates/<name>/<name>-pandoc.lua`
+- DOCX fix: `templates/<name>/create-<name>-reference-docx.py`
+- Reference DOCX: `templates/<name>/<name>-reference.docx`
+- HTML template: `templates/<name>/<name>-template.html`
+- Samples: `examples/<name>/{pt,en}/src/main.tex`
+
 ---
 
 ## File editing rules
@@ -289,6 +326,14 @@ at the repo root registers `templates/` as a discovery path.
   formatting lives in `templates/_base/huawei-*.sty` modules. Changes here
   affect every document. Test with both samples before committing.
 - **`technical.cls`** — technical-report-specific formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
+- **`templates/_base/pandoc-common.lua`** — shared Lua filter factory. Changes
+  affect ALL templates' multi-format output. Test with `make test` and
+  `make all-formats` before committing.
+- **`templates/_base/docx_fix.py`** — shared DOCX post-processing. Changes
+  affect ALL templates' DOCX output. Test with `make test` before committing.
+- **`templates/_base/embed-images.py`** — shared MD image embedding. Changes
+  affect ALL templates' Markdown output. Test with `make all-formats` before
+  committing.
 - **`.tex` files** — content only. No formatting overrides, no `\usepackage`,
   no `\renewcommand`. All look-and-feel comes from `guide.cls`. After any
   AI-assisted edit, bump version and add changelog entry (see L11).

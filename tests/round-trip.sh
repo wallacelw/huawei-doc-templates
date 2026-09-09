@@ -7,11 +7,24 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-FILTER="$REPO_ROOT/templates/guide/guide-pandoc.lua"
-HTML_TMPL="$REPO_ROOT/templates/guide/guide-template.html"
-REF_DOCX="$REPO_ROOT/templates/guide/guide-reference.docx"
-FIX_SCRIPT="$REPO_ROOT/templates/guide/create-reference-docx.py"
 PASS=0; FAIL=0
+
+# ── Template-aware path resolution ──────────────────────────────────────────
+get_template_paths() {
+    local sample_dir="$1"
+    # Extract template from path: examples/<template>/<lang>
+    local template
+    template=$(basename "$(dirname "$sample_dir")")
+    # Validate: check templates/${template}/${template}.cls exists
+    if [ ! -f "$REPO_ROOT/templates/${template}/${template}.cls" ]; then
+        template="guide"  # fallback
+    fi
+    FILTER="$REPO_ROOT/templates/${template}/${template}-pandoc.lua"
+    HTML_TMPL="$REPO_ROOT/templates/${template}/${template}-template.html"
+    REF_DOCX="$REPO_ROOT/templates/${template}/${template}-reference.docx"
+    FIX_SCRIPT="$REPO_ROOT/templates/${template}/create-${template}-reference-docx.py"
+    TEMPLATE_NAME="$template"
+}
 
 # Temp directory (cleaned up on exit)
 RT_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/rt-roundtrip.XXXXXX")"
@@ -228,14 +241,26 @@ print(raw_count)
 PYEOF
 }
 
-# ── Sample list ────────────────────────────────────────────────────────────
-SAMPLES=(
-  "examples/guide/en main"
-  "examples/guide/pt main"
-  "examples/setup-guide setup-guide"
-  "examples/technical/en main"
-  "examples/technical/pt main"
-)
+# ── Sample list (auto-discovered) ────────────────────────────────────────────
+SAMPLES=()
+for tmpl_dir in "$REPO_ROOT"/templates/*/; do
+    tmpl_name=$(basename "$tmpl_dir")
+    [ "$tmpl_name" = "_base" ] && continue
+    [ ! -f "$tmpl_dir/${tmpl_name}.cls" ] && continue
+
+    for lang_dir in "$REPO_ROOT/examples/$tmpl_name"/*/; do
+        [ ! -d "$lang_dir" ] && continue
+        lang_name=$(basename "$lang_dir")
+        # Check if there's a .tex file in src/
+        if [ -f "$lang_dir/src/main.tex" ]; then
+            SAMPLES+=("examples/$tmpl_name/$lang_name main")
+        fi
+    done
+done
+# Setup guide (special case — uses guide template, different filename)
+if [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.tex" ]; then
+    SAMPLES+=("examples/setup-guide setup-guide")
+fi
 
 # ── Main loop ──────────────────────────────────────────────────────────────
 for entry in "${SAMPLES[@]}"; do
@@ -248,6 +273,9 @@ for entry in "${SAMPLES[@]}"; do
     echo "  SKIP: $tex_file not found"
     continue
   fi
+
+  # ── Resolve template-specific paths ────────────────────────────────────
+  get_template_paths "$sample"
 
   # ── Generate Markdown ──────────────────────────────────────────────────
   pandoc -f latex+raw_tex --lua-filter="$FILTER" -t markdown --wrap=none \
@@ -263,7 +291,7 @@ for entry in "${SAMPLES[@]}"; do
   mkdir -p "$docx_outdir"
   pandoc -f latex+raw_tex --lua-filter="$FILTER" \
     --reference-doc="$REF_DOCX" --number-sections \
-    --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/guide/common-assets" \
+    --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}/common-assets" \
     -t docx "$tex_file" -o "$docx_outdir/${basename}.docx" 2>/dev/null
   # Post-process with --fix (same pipeline as build.sh)
   if [ -f "$docx_outdir/${basename}.docx" ]; then

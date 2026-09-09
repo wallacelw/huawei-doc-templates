@@ -428,10 +428,6 @@ fi
 # ── Test compilation ──
 log_step "Test compilation"
 
-PT_DIR="$SCRIPT_DIR/examples/guide/pt"
-EN_DIR="$SCRIPT_DIR/examples/guide/en"
-SG_DIR="$SCRIPT_DIR/examples/setup-guide"
-
 compile_sample() {
     local dir="$1" label="$2" file="${3:-main.tex}"
     if [[ -f "$dir/$file" ]]; then
@@ -450,14 +446,21 @@ compile_sample() {
     fi
 }
 
-compile_sample "$PT_DIR" "Portuguese sample"
-compile_sample "$EN_DIR" "English sample"
-compile_sample "$SG_DIR" "Setup guide" "setup-guide.tex"
+# Compile all template samples (auto-discover)
+for tmpl_dir in "$SCRIPT_DIR"/templates/*/; do
+    tmpl_name=$(basename "$tmpl_dir")
+    [ "$tmpl_name" = "_base" ] && continue
+    [ ! -f "$tmpl_dir/${tmpl_name}.cls" ] && continue
 
-TECH_PT_DIR="$SCRIPT_DIR/examples/technical/pt"
-TECH_EN_DIR="$SCRIPT_DIR/examples/technical/en"
-compile_sample "$TECH_PT_DIR" "Technical Portuguese sample"
-compile_sample "$TECH_EN_DIR" "Technical English sample"
+    for lang_dir in "$SCRIPT_DIR/examples/$tmpl_name"/*/; do
+        [ ! -d "$lang_dir" ] && continue
+        lang_name=$(basename "$lang_dir")
+        compile_sample "$lang_dir" "${tmpl_name} ${lang_name} sample"
+    done
+done
+
+# Setup guide (special case — uses guide template)
+compile_sample "$SCRIPT_DIR/examples/setup-guide" "Setup guide" "setup-guide.tex"
 
 # ── Summary ──
 echo ""

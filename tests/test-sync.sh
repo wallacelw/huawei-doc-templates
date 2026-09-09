@@ -5,8 +5,8 @@ set -euo pipefail
 # Checks:
 #   1. guide.cls version == setup-guide \setdocversion
 #   2. guide.cls version == latest git tag (if tags exist)
-#   3. technical.cls version is valid and matches guide.cls version
-#   4. Makefile has exactly 15 individual format targets
+#   3. All template .cls versions match guide.cls version
+#   4. Makefile has format targets for all templates
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLS_FILE="$REPO_ROOT/templates/guide/guide.cls"
@@ -49,24 +49,53 @@ elif [ "$cls_version" != "$tag_version" ]; then
   exit 1
 fi
 
-# --- Count individual format targets in Makefile ---
-format_count=$(grep -cE '^(md-pt|md-en|md-sg|docx-pt|docx-en|docx-sg|html-pt|html-en|html-sg|technical-md-pt|technical-md-en|technical-docx-pt|technical-docx-en|technical-html-pt|technical-html-en):' "$MAKEFILE")
-if [ "$format_count" -ne 15 ]; then
-  echo "FAIL: expected 15 format targets, found $format_count"
-  exit 1
-fi
+# --- Validate format targets exist for each template's samples ---
+# Auto-discover templates from templates/*/ directories
+# Use make -n to check targets (eval-generated rules aren't visible via grep)
+format_target_count=0
+for tmpl_dir in "$REPO_ROOT"/templates/*/; do
+    tmpl=$(basename "$tmpl_dir")
+    [ "$tmpl" = "_base" ] && continue
+    [ ! -f "$tmpl_dir/${tmpl}.cls" ] && continue
 
-# --- Check technical.cls version ---
-TECH_CLS_FILE="$REPO_ROOT/templates/technical/technical.cls"
-tech_cls_version=$(grep -oP '\\ProvidesClass\{technical\}\[.*?v\K[0-9]+\.[0-9]+\.[0-9]+' "$TECH_CLS_FILE")
-if [ -z "$tech_cls_version" ]; then
-  echo "FAIL: could not extract version from $TECH_CLS_FILE"
-  exit 1
-fi
-if [ "$tech_cls_version" != "$cls_version" ]; then
-  echo "FAIL: technical.cls version ($tech_cls_version) != guide.cls version ($cls_version)"
-  exit 1
-fi
+    for fmt in md docx html; do
+        for lang in pt en; do
+            target="${tmpl}-${fmt}-${lang}"
+            if ! make -C "$REPO_ROOT" -n "$target" >/dev/null 2>&1; then
+                echo "FAIL: missing format target '$target' in Makefile"
+                exit 1
+            fi
+            format_target_count=$((format_target_count + 1))
+        done
+    done
+done
+
+# Setup-guide targets (no prefix, -sg suffix)
+for fmt in md docx html; do
+    target="${fmt}-sg"
+    if ! make -C "$REPO_ROOT" -n "$target" >/dev/null 2>&1; then
+        echo "FAIL: missing setup-guide format target '$target' in Makefile"
+        exit 1
+    fi
+    format_target_count=$((format_target_count + 1))
+done
+
+# --- Check all template .cls versions match ---
+for tmpl_dir in "$REPO_ROOT"/templates/*/; do
+    tmpl_name=$(basename "$tmpl_dir")
+    [ "$tmpl_name" = "_base" ] && continue
+    [ ! -f "$tmpl_dir/${tmpl_name}.cls" ] && continue
+
+    tmpl_cls_version=$(grep -oP '\\ProvidesClass\{'"${tmpl_name}"'\}\[.*?v\K[0-9]+\.[0-9]+\.[0-9]+' "$tmpl_dir/${tmpl_name}.cls")
+    if [ -z "$tmpl_cls_version" ]; then
+        echo "FAIL: could not extract version from $tmpl_dir/${tmpl_name}.cls"
+        exit 1
+    fi
+    if [ "$tmpl_cls_version" != "$cls_version" ]; then
+        echo "FAIL: ${tmpl_name}.cls version ($tmpl_cls_version) != guide.cls version ($cls_version)"
+        exit 1
+    fi
+done
 
 # --- Success ---
-echo "OK: versions synchronized (cls=$cls_version, technical.cls=$tech_cls_version, setup-guide=$sg_version, tag=$tag_status, format targets=15)"
+echo "OK: versions synchronized (cls=$cls_version, setup-guide=$sg_version, tag=$tag_status, format targets=$format_target_count)"

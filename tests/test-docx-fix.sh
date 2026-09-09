@@ -1,24 +1,26 @@
 #!/usr/bin/env bash
-# test-docx-fix.sh — Smoke test for DOCX post-processing (create-reference-docx.py --fix)
+# test-docx-fix.sh — Smoke test for DOCX post-processing (create-guide-reference-docx.py --fix)
 # Verifies that the --fix pipeline produces correct heading styles,
 # list indentation, and footer page numbers in the generated DOCX.
 # Also verifies pandoc version pin and loud-failure assertions.
+# Tests both guide and technical templates.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-FIX_SCRIPT="$REPO_ROOT/templates/guide/create-reference-docx.py"
-FILTER="$REPO_ROOT/templates/guide/guide-pandoc.lua"
-REF_DOCX="$REPO_ROOT/templates/guide/guide-reference.docx"
 
 # Temp directory (cleaned up on exit)
 TMPDIR_FIX="$(mktemp -d "${TMPDIR:-/tmp}/rt-docx-fix.XXXXXX")"
 trap 'rm -rf "$TMPDIR_FIX"' EXIT
 
-echo "=== DOCX --fix smoke test ==="
+PASS=0; FAIL=0
+
+fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
+pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
 
 # ── Pandoc version check ──────────────────────────────────────────────────
 # Must be in supported range >=3.1.0, <3.2.0 (matches SUPPORTED_PANDOC_RANGE
-# in create-reference-docx.py)
+# in docx-fix.py)
+echo "=== Pandoc version check ==="
 PANDOC_VERSION_LINE="$(pandoc --version | head -1)"
 PANDOC_VERSION="$(echo "$PANDOC_VERSION_LINE" | sed -n 's/^pandoc \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p')"
 if [ -z "$PANDOC_VERSION" ]; then
@@ -38,44 +40,50 @@ if [ "$PANDOC_NUM" -lt "$MIN_NUM" ] || [ "$PANDOC_NUM" -ge "$MAX_NUM" ]; then
 fi
 echo "  pandoc version: $PANDOC_VERSION (in supported range 3.1.0–3.2.0)"
 
-# ── Generate DOCX from en sample ───────────────────────────────────────────
-SAMPLE_DIR="$REPO_ROOT/examples/guide/en"
-TEX_FILE="$SAMPLE_DIR/src/main.tex"
-DOCX_OUT="$TMPDIR_FIX/main.docx"
+# ── Template test function ────────────────────────────────────────────────
+# run_template_tests <template_name> <fix_script> <filter> <ref_docx> <sample_dir> <common_assets>
+run_template_tests() {
+  local TEMPLATE_NAME="$1"
+  local FIX_SCRIPT="$2"
+  local FILTER="$3"
+  local REF_DOCX="$4"
+  local SAMPLE_DIR="$5"
+  local COMMON_ASSETS="$6"
 
-echo "Generating DOCX..."
-pandoc -f latex+raw_tex --lua-filter="$FILTER" \
-  --reference-doc="$REF_DOCX" --number-sections \
-  --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/guide/common-assets" \
-  -t docx "$TEX_FILE" -o "$DOCX_OUT" 2>/dev/null
+  local TEX_FILE="$SAMPLE_DIR/src/main.tex"
+  local DOCX_OUT="$TMPDIR_FIX/${TEMPLATE_NAME}-main.docx"
 
-echo "Running --fix..."
-python3 "$FIX_SCRIPT" --fix "$DOCX_OUT" 2>/dev/null
+  echo ""
+  echo "=== DOCX --fix smoke test: $TEMPLATE_NAME ==="
 
-# ── Unzip for inspection ───────────────────────────────────────────────────
-UNZIP_DIR="$TMPDIR_FIX/unzipped"
-unzip -o -q "$DOCX_OUT" -d "$UNZIP_DIR"
+  # ── Generate DOCX from en sample ───────────────────────────────────────
+  echo "Generating DOCX..."
+  pandoc -f latex+raw_tex --lua-filter="$FILTER" \
+    --reference-doc="$REF_DOCX" --number-sections \
+    --resource-path="$SAMPLE_DIR:$COMMON_ASSETS" \
+    -t docx "$TEX_FILE" -o "$DOCX_OUT" 2>/dev/null
 
-STYLES_XML="$UNZIP_DIR/word/styles.xml"
-NUMBERING_XML="$UNZIP_DIR/word/numbering.xml"
+  echo "Running --fix..."
+  python3 "$FIX_SCRIPT" --fix "$DOCX_OUT" 2>/dev/null
 
-PASS=0; FAIL=0
+  # ── Unzip for inspection ───────────────────────────────────────────────
+  local UNZIP_DIR="$TMPDIR_FIX/${TEMPLATE_NAME}-unzipped"
+  unzip -o -q "$DOCX_OUT" -d "$UNZIP_DIR"
 
-fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
-pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
+  local STYLES_XML="$UNZIP_DIR/word/styles.xml"
+  local NUMBERING_XML="$UNZIP_DIR/word/numbering.xml"
 
-# ── Inspect styles.xml ─────────────────────────────────────────────────────
+  # ── Inspect styles.xml ─────────────────────────────────────────────────
 
-# 1. Heading1 style exists
-if grep -q 'w:styleId="Heading1"' "$STYLES_XML"; then
-  pass "Heading1 style exists"
-else
-  fail "Heading1 style not found"
-fi
+  # 1. Heading1 style exists
+  if grep -q 'w:styleId="Heading1"' "$STYLES_XML"; then
+    pass "$TEMPLATE_NAME: Heading1 style exists"
+  else
+    fail "$TEMPLATE_NAME: Heading1 style not found"
+  fi
 
-# 2. Heading1 has a non-default color (not theme-based auto)
-# Look for w:color with a val attribute near Heading1
-if python3 - "$STYLES_XML" << 'PYEOF' 2>/dev/null; then
+  # 2. Heading1 has a non-default color (not theme-based auto)
+  if python3 - "$STYLES_XML" << 'PYEOF' 2>/dev/null; then
 import xml.etree.ElementTree as ET, sys
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 tree = ET.parse(sys.argv[1])
@@ -87,19 +95,18 @@ for s in root.findall(f"{{{W}}}style"):
             color = rPr.find(f"{{{W}}}color")
             if color is not None:
                 val = color.get(f"{{{W}}}val", "")
-                # val should be a hex color like 1F2328, not empty
                 if val and val != "auto":
                     sys.exit(0)
         break
 sys.exit(1)
 PYEOF
-  pass "Heading1 has explicit color"
-else
-  fail "Heading1 color is missing or auto"
-fi
+    pass "$TEMPLATE_NAME: Heading1 has explicit color"
+  else
+    fail "$TEMPLATE_NAME: Heading1 color is missing or auto"
+  fi
 
-# 3. Heading1 has a bottom border with red color C7000B
-if python3 - "$STYLES_XML" << 'PYEOF' 2>/dev/null; then
+  # 3. Heading1 has a bottom border with red color C7000B
+  if python3 - "$STYLES_XML" << 'PYEOF' 2>/dev/null; then
 import xml.etree.ElementTree as ET, sys
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 tree = ET.parse(sys.argv[1])
@@ -118,29 +125,28 @@ for s in root.findall(f"{{{W}}}style"):
         break
 sys.exit(1)
 PYEOF
-  pass "Heading1 bottom border is C7000B"
-else
-  fail "Heading1 bottom border is not C7000B"
-fi
+    pass "$TEMPLATE_NAME: Heading1 bottom border is C7000B"
+  else
+    fail "$TEMPLATE_NAME: Heading1 bottom border is not C7000B"
+  fi
 
-# 4. No duplicate styleId values
-dup_count=$(grep -o 'w:styleId="[^"]*"' "$STYLES_XML" | sort | uniq -d | wc -l)
-if [ "$dup_count" -eq 0 ]; then
-  pass "No duplicate styleId values"
-else
-  fail "Duplicate styleId values found ($dup_count)"
-fi
+  # 4. No duplicate styleId values
+  dup_count=$(grep -o 'w:styleId="[^"]*"' "$STYLES_XML" | sort | uniq -d | wc -l)
+  if [ "$dup_count" -eq 0 ]; then
+    pass "$TEMPLATE_NAME: No duplicate styleId values"
+  else
+    fail "$TEMPLATE_NAME: Duplicate styleId values found ($dup_count)"
+  fi
 
-# ── Inspect numbering.xml ──────────────────────────────────────────────────
+  # ── Inspect numbering.xml ──────────────────────────────────────────────
 
-if [ -f "$NUMBERING_XML" ]; then
-  # 5. List level 0 has indentation attributes (w:ind with w:left and w:hanging)
-  if python3 - "$NUMBERING_XML" << 'PYEOF' 2>/dev/null; then
+  if [ -f "$NUMBERING_XML" ]; then
+    # 5. List level 0 has indentation attributes
+    if python3 - "$NUMBERING_XML" << 'PYEOF' 2>/dev/null; then
 import xml.etree.ElementTree as ET, sys
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 tree = ET.parse(sys.argv[1])
 root = tree.getroot()
-# Check at least one level 0 has w:ind with w:left and w:hanging
 for lvl in root.iter(f"{{{W}}}lvl"):
     if lvl.get(f"{{{W}}}ilvl") == "0":
         ind = lvl.find(f"{{{W}}}pPr/{{{W}}}ind")
@@ -151,50 +157,46 @@ for lvl in root.iter(f"{{{W}}}lvl"):
                 sys.exit(0)
 sys.exit(1)
 PYEOF
-    pass "Level 0 list has indentation (w:left + w:hanging)"
-  else
-    fail "Level 0 list missing indentation attributes"
-  fi
-else
-  echo "  SKIP: numbering.xml not found"
-fi
-
-# ── Inspect footer XML ─────────────────────────────────────────────────────
-
-# 6. At least one footer exists
-footer_files=("$UNZIP_DIR"/word/footer*.xml)
-if [ ${#footer_files[@]} -gt 0 ] && [ -f "${footer_files[0]}" ]; then
-  pass "Footer XML exists"
-
-  # 7. Footer contains a PAGE field
-  found_page=0
-  for f in "${footer_files[@]}"; do
-    if grep -q 'PAGE' "$f"; then
-      found_page=1
-      break
+      pass "$TEMPLATE_NAME: Level 0 list has indentation (w:left + w:hanging)"
+    else
+      fail "$TEMPLATE_NAME: Level 0 list missing indentation attributes"
     fi
-  done
-  if [ "$found_page" -eq 1 ]; then
-    pass "Footer contains PAGE field"
   else
-    fail "Footer missing PAGE field"
+    echo "  SKIP: $TEMPLATE_NAME: numbering.xml not found"
   fi
-else
-  fail "No footer XML found"
-fi
 
-# ── Loud-failure assertions ────────────────────────────────────────────────
-# Verify that --fix fails loudly (non-zero exit + RuntimeError) when expected
-# XML elements are missing, instead of silently succeeding with wrong styling.
+  # ── Inspect footer XML ─────────────────────────────────────────────────
 
-echo ""
-echo "=== Loud-failure assertion tests ==="
+  # 6. At least one footer exists
+  footer_files=("$UNZIP_DIR"/word/footer*.xml)
+  if [ ${#footer_files[@]} -gt 0 ] && [ -f "${footer_files[0]}" ]; then
+    pass "$TEMPLATE_NAME: Footer XML exists"
 
-# 8. Missing Heading1 style → RuntimeError
-BROKEN_DOCX="$TMPDIR_FIX/broken_heading1.docx"
-cp "$DOCX_OUT" "$BROKEN_DOCX"
-# Remove Heading1 style from styles.xml
-python3 - "$BROKEN_DOCX" << 'PYEOF'
+    # 7. Footer contains a PAGE field
+    found_page=0
+    for f in "${footer_files[@]}"; do
+      if grep -q 'PAGE' "$f"; then
+        found_page=1
+        break
+      fi
+    done
+    if [ "$found_page" -eq 1 ]; then
+      pass "$TEMPLATE_NAME: Footer contains PAGE field"
+    else
+      fail "$TEMPLATE_NAME: Footer missing PAGE field"
+    fi
+  else
+    fail "$TEMPLATE_NAME: No footer XML found"
+  fi
+
+  # ── Loud-failure assertions ────────────────────────────────────────────
+  echo ""
+  echo "=== Loud-failure assertion tests: $TEMPLATE_NAME ==="
+
+  # 8. Missing Heading1 style → RuntimeError
+  BROKEN_DOCX="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_heading1.docx"
+  cp "$DOCX_OUT" "$BROKEN_DOCX"
+  python3 - "$BROKEN_DOCX" << 'PYEOF'
 import sys, zipfile, shutil, tempfile, os
 from lxml import etree
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -218,16 +220,16 @@ with zipfile.ZipFile(docx_path, 'r') as zin:
 shutil.move(tmp_path, docx_path)
 PYEOF
 
-if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX" 2>/dev/null; then
-  fail "Missing Heading1 style did not cause --fix to fail (should raise RuntimeError)"
-else
-  pass "Missing Heading1 style causes --fix to fail with non-zero exit"
-fi
+  if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX" 2>/dev/null; then
+    fail "$TEMPLATE_NAME: Missing Heading1 style did not cause --fix to fail"
+  else
+    pass "$TEMPLATE_NAME: Missing Heading1 style causes --fix to fail with non-zero exit"
+  fi
 
-# 9. Missing Title style → RuntimeError
-BROKEN_DOCX2="$TMPDIR_FIX/broken_title.docx"
-cp "$DOCX_OUT" "$BROKEN_DOCX2"
-python3 - "$BROKEN_DOCX2" << 'PYEOF'
+  # 9. Missing Title style → RuntimeError
+  BROKEN_DOCX2="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_title.docx"
+  cp "$DOCX_OUT" "$BROKEN_DOCX2"
+  python3 - "$BROKEN_DOCX2" << 'PYEOF'
 import sys, zipfile, shutil
 from lxml import etree
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -251,16 +253,16 @@ with zipfile.ZipFile(docx_path, 'r') as zin:
 shutil.move(tmp_path, docx_path)
 PYEOF
 
-if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX2" 2>/dev/null; then
-  fail "Missing Title style did not cause --fix to fail (should raise RuntimeError)"
-else
-  pass "Missing Title style causes --fix to fail with non-zero exit"
-fi
+  if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX2" 2>/dev/null; then
+    fail "$TEMPLATE_NAME: Missing Title style did not cause --fix to fail"
+  else
+    pass "$TEMPLATE_NAME: Missing Title style causes --fix to fail with non-zero exit"
+  fi
 
-# 10. Missing Normal style → RuntimeError
-BROKEN_DOCX3="$TMPDIR_FIX/broken_normal.docx"
-cp "$DOCX_OUT" "$BROKEN_DOCX3"
-python3 - "$BROKEN_DOCX3" << 'PYEOF'
+  # 10. Missing Normal style → RuntimeError
+  BROKEN_DOCX3="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_normal.docx"
+  cp "$DOCX_OUT" "$BROKEN_DOCX3"
+  python3 - "$BROKEN_DOCX3" << 'PYEOF'
 import sys, zipfile, shutil
 from lxml import etree
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -284,16 +286,16 @@ with zipfile.ZipFile(docx_path, 'r') as zin:
 shutil.move(tmp_path, docx_path)
 PYEOF
 
-if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX3" 2>/dev/null; then
-  fail "Missing Normal style did not cause --fix to fail (should raise RuntimeError)"
-else
-  pass "Missing Normal style causes --fix to fail with non-zero exit"
-fi
+  if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX3" 2>/dev/null; then
+    fail "$TEMPLATE_NAME: Missing Normal style did not cause --fix to fail"
+  else
+    pass "$TEMPLATE_NAME: Missing Normal style causes --fix to fail with non-zero exit"
+  fi
 
-# 11. Missing VerbatimChar style → RuntimeError
-BROKEN_DOCX4="$TMPDIR_FIX/broken_verbatim.docx"
-cp "$DOCX_OUT" "$BROKEN_DOCX4"
-python3 - "$BROKEN_DOCX4" << 'PYEOF'
+  # 11. Missing VerbatimChar style → RuntimeError
+  BROKEN_DOCX4="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_verbatim.docx"
+  cp "$DOCX_OUT" "$BROKEN_DOCX4"
+  python3 - "$BROKEN_DOCX4" << 'PYEOF'
 import sys, zipfile, shutil
 from lxml import etree
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -317,16 +319,34 @@ with zipfile.ZipFile(docx_path, 'r') as zin:
 shutil.move(tmp_path, docx_path)
 PYEOF
 
-if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX4" 2>/dev/null; then
-  fail "Missing VerbatimChar style did not cause --fix to fail (should raise RuntimeError)"
-else
-  pass "Missing VerbatimChar style causes --fix to fail with non-zero exit"
-fi
+  if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX4" 2>/dev/null; then
+    fail "$TEMPLATE_NAME: Missing VerbatimChar style did not cause --fix to fail"
+  else
+    pass "$TEMPLATE_NAME: Missing VerbatimChar style causes --fix to fail with non-zero exit"
+  fi
+}
+
+# ── Auto-discover templates and run DOCX fix tests for each ──────────────
+for tmpl_dir in "$REPO_ROOT"/templates/*/; do
+    tmpl_name=$(basename "$tmpl_dir")
+    [ "$tmpl_name" = "_base" ] && continue
+    [ ! -f "$tmpl_dir/${tmpl_name}.cls" ] && continue
+
+    fix_script="$REPO_ROOT/templates/${tmpl_name}/create-${tmpl_name}-reference-docx.py"
+    filter="$REPO_ROOT/templates/${tmpl_name}/${tmpl_name}-pandoc.lua"
+    ref_docx="$REPO_ROOT/templates/${tmpl_name}/${tmpl_name}-reference.docx"
+    sample_dir="$REPO_ROOT/examples/${tmpl_name}/en"
+    common_assets="$REPO_ROOT/templates/${tmpl_name}/common-assets"
+
+    if [ -f "$fix_script" ] && [ -f "$filter" ] && [ -f "$ref_docx" ]; then
+        run_template_tests "$tmpl_name" "$fix_script" "$filter" "$ref_docx" "$sample_dir" "$common_assets"
+    fi
+done
 
 # ── Summary ────────────────────────────────────────────────────────────────
 echo ""
 if [ "$FAIL" -eq 0 ]; then
-  echo "OK: DOCX --fix verified ($PASS checks passed)"
+  echo "OK: DOCX --fix verified for all templates ($PASS checks passed)"
 else
   echo "FAIL: $FAIL check(s) failed, $PASS passed"
 fi

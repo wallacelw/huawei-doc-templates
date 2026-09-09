@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
-Add custom Huawei styles to a pandoc reference DOCX.
+Shared DOCX post-processing logic for Huawei document templates.
 
-Usage:
-    # Step 1: Generate the base reference doc from pandoc
-    pandoc -o guide-reference.docx --print-default-data-file reference.docx
-    # Step 2: Add Huawei styles
-    python3 create-reference-docx.py guide-reference.docx
+Provides two operations:
+  1. --fix <file.docx>  — Post-process a pandoc-generated DOCX to fix heading
+     styles, list indentation, footers, and other styling to match the PDF.
+  2. <reference.docx>   — Add custom Huawei styles to a pandoc reference DOCX.
+
+This module is imported by the thin wrapper scripts in each template directory
+(templates/guide/create-guide-reference-docx.py and
+templates/technical/create-technical-reference-docx.py).
 
 Requires: python-docx (pip install python-docx)
 """
@@ -911,18 +914,13 @@ def fix_generated_docx(docx_path):
     print(f"✓ Fixed heading styles in {docx_path}")
 
 
-def main():
-    if len(sys.argv) >= 2 and sys.argv[1] == "--fix":
-        if len(sys.argv) < 3:
-            print(f"Usage: {sys.argv[0]} --fix <generated.docx>")
-            sys.exit(1)
-        fix_generated_docx(sys.argv[2])
-        return
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <reference.docx>")
-        sys.exit(1)
+def regenerate_reference(docx_path):
+    """Add custom Huawei styles to a pandoc reference DOCX.
 
-    docx_path = sys.argv[1]
+    This is the "Step 2" operation: take a base reference DOCX generated
+    by `pandoc --print-default-data-file reference.docx` and add all the
+    custom Huawei styles (callouts, code, cover, TOC, etc.).
+    """
     doc = Document(docx_path)
 
     # ── Warning callout ──────────────────────────────────────────────
@@ -1106,6 +1104,36 @@ def main():
     # ── Save ─────────────────────────────────────────────────────────
     doc.save(docx_path)
     print(f"✓ Huawei styles added to {docx_path}")
+
+
+def main(argv=None, reference_name=None):
+    """Entry point for the DOCX fix script.
+
+    Args:
+        argv: Command-line arguments (list of strings). Defaults to sys.argv[1:].
+        reference_name: Default reference DOCX filename (e.g. 'guide-reference.docx').
+            Used when no filename argument is provided.
+    """
+    if argv is None:
+        argv = sys.argv[1:]
+
+    if len(argv) >= 1 and argv[0] == "--fix":
+        if len(argv) < 2:
+            print(f"Usage: {sys.argv[0]} --fix <generated.docx>")
+            sys.exit(1)
+        fix_generated_docx(argv[1])
+        return
+    if len(argv) < 1:
+        if reference_name:
+            print(f"Usage: {sys.argv[0]} --fix <generated.docx>")
+            print(f"       {sys.argv[0]} {reference_name}")
+        else:
+            print(f"Usage: {sys.argv[0]} --fix <generated.docx>")
+            print(f"       {sys.argv[0]} <reference.docx>")
+        sys.exit(1)
+
+    docx_path = argv[0]
+    regenerate_reference(docx_path)
 
 
 if __name__ == "__main__":

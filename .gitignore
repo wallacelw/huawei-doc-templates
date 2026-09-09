@@ -48,3 +48,5 @@ examples/setup-guide/setup-guide.html
 documents/*
 !documents/README.md
 __pycache__/
+# Deepwork state (git-local, OpenCode-readable)
+.slim/deepwork/

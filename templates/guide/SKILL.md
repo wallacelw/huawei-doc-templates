@@ -167,11 +167,11 @@ here. Run this check after every sample compile — the grep is the only extra s
 ```
 templates/guide/
 ├── guide.cls          # guide-specific formatting (cover, TOC, titles)
-├── guide-pandoc.lua   # Lua filter for Pandoc multi-format output
+├── guide-pandoc.lua   # Lua filter wrapper (calls _base/pandoc-common.lua factory)
 ├── guide-reference.docx  # reference DOCX with Huawei styles
 ├── guide-template.html   # HTML template for Pandoc
-├── create-reference-docx.py  # DOCX reference creation/fix script
-├── embed-images.py    # image embedding for self-contained Markdown
+├── create-guide-reference-docx.py  # DOCX reference creation/fix script (calls _base/docx_fix.py)
+├── embed-images.py    # image embedding for self-contained Markdown (calls _base/embed-images.py)
 ├── README.md           # human docs (brief — see root README for setup)
 ├── SKILL.md            # this file (opencode skill)
 ├── .latexmkrc          # latexmk config (XeLaTeX by default)

@@ -1,5 +1,5 @@
--- luacheck config for guide-pandoc.lua
--- Run: luacheck templates/guide/guide-pandoc.lua
+-- luacheck config for Huawei Pandoc Lua filters
+-- Run: luacheck templates/_base/pandoc-common.lua templates/*/*-pandoc.lua
 std = "lua54"
 globals = {
   "PANDOC_VERSION", "PANDOC_STATE", "FORMAT",

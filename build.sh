@@ -179,11 +179,10 @@ if [ "$_DETECT_TEMPLATE" = true ]; then
         _LMKRC="$PROJECT_DIR/.latexmkrc"
     fi
     if [ -n "$_LMKRC" ]; then
-        if grep -q 'templates/technical/' "$_LMKRC" 2>/dev/null; then
-            TEMPLATE="technical"
-        elif grep -q 'templates/guide/' "$_LMKRC" 2>/dev/null; then
-            TEMPLATE="guide"
-        else
+        # Extract template name from TEXINPUTS path in .latexmkrc
+        # The .latexmkrc contains: $ENV{TEXINPUTS} = "...:templates/<name>/:templates/_base/:..."
+        TEMPLATE=$(grep -oP 'templates/\K[^/]+(?=/)' "$_LMKRC" 2>/dev/null | grep -v '^_base$' | head -1)
+        if [ -z "$TEMPLATE" ]; then
             TEMPLATE="guide"  # default fallback
         fi
     else
@@ -191,9 +190,9 @@ if [ "$_DETECT_TEMPLATE" = true ]; then
     fi
 fi
 
-# Validate template
-if [ "$TEMPLATE" != "guide" ] && [ "$TEMPLATE" != "technical" ]; then
-    echo "Error: Unknown template '$TEMPLATE' (must be 'guide' or 'technical')" >&2
+# Validate template exists
+if [ ! -f "${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}.cls" ]; then
+    echo "Error: Template '$TEMPLATE' not found (templates/${TEMPLATE}/${TEMPLATE}.cls does not exist)" >&2
     exit 1
 fi
 
@@ -389,7 +388,7 @@ generate_md() {
     generate_pandoc_format "Markdown" markdown md
     # Post-process: embed images as base64 data URIs (self-contained MD)
     if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.md" ]; then
-        python3 "${REPO_ROOT}/templates/${TEMPLATE}/embed-images.py" \
+        python3 "${REPO_ROOT}/templates/_base/embed-images.py" \
             "${PROJECT_DIR}/${BASENAME}.md" \
             --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" 2>&1 | sed 's/^/  /'
     fi

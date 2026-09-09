@@ -1,7 +1,31 @@
 # Changelog
 
-All notable changes to the huawei-doc-templates project are documented here.
+All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
+
+## v3.0.0 (2026-09-05)
+
+### Major: Modular template pipeline refactoring
+
+- **Shared Lua filter factory**: Extracted ~1084 duplicated lines into
+  `templates/_base/pandoc-common.lua` as a `make_filter(config)` factory.
+  Template filters are now thin wrappers (68/125 lines, down from 1259/1308).
+- **Shared DOCX fix logic**: Extracted 1110 duplicated lines into
+  `templates/_base/docx_fix.py`. Template scripts are now 16-line wrappers.
+- **Shared embed-images.py**: Moved to `templates/_base/` (template-agnostic).
+- **Build system generalization**: Makefile auto-discovers templates via
+  `$(wildcard)` + `eval`. `build.sh` auto-detects template from `.latexmkrc`.
+  `install.sh` auto-discovers sample dirs.   Adding a template requires zero changes to Makefile, build.sh, install.sh, round-trip.sh, test-sync.sh, and test-docx-fix.sh. test-filter.sh needs a one-line addition per template.
+- **Unified format pipeline**: Technical template now uses `build.sh` for all
+  formats (was calling pandoc directly). Both templates produce consistent
+  output with `--number-sections`, `--resource-path`, and image embedding.
+- **Template-aware test framework**: `round-trip.sh` auto-discovers samples.
+  `test-sync.sh` validates structure dynamically. `test-docx-fix.sh` tests
+  both templates. Technical-specific test cases added.
+- **GitHub Actions CI**: Added `.github/workflows/test.yml` for automated
+  testing on push.
+- **Renamed**: `create-reference-docx.py` → `create-guide-reference-docx.py`
+  (convention alignment).
 
 ## v2.16.0 (2026-09-05)
 

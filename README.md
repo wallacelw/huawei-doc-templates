@@ -131,7 +131,7 @@ make html           # HTML only (pt + en)
 make clean-formats  # remove generated multi-format files
 ```
 
-The Lua filter (`templates/guide/guide-pandoc.lua`) handles all custom commands (see [`SKILL.md`](templates/guide/SKILL.md) for the full reference). DOCX uses custom styles from `guide-reference.docx` (theme fonts: HarmonyOS Sans); HTML uses `guide-template.html` with Huawei brand CSS.
+The Lua filter (`templates/guide/guide-pandoc.lua`) is a thin wrapper that calls the shared factory in `templates/_base/pandoc-common.lua`. It handles all custom commands (see [`SKILL.md`](templates/guide/SKILL.md) for the full reference). DOCX uses custom styles from `guide-reference.docx` (theme fonts: HarmonyOS Sans); HTML uses `guide-template.html` with Huawei brand CSS.
 
 Generated outputs are gitignored (build artifacts). Only the filter, reference
 DOCX, HTML template, and Python script are committed.
@@ -170,6 +170,9 @@ for the technical report template command reference.
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
 │   ├── _base/               # shared formatting modules (huawei-*.sty)
+│   │   ├── pandoc-common.lua  # shared Lua filter factory (DOCX/MD/HTML)
+│   │   ├── docx_fix.py        # shared DOCX post-processing
+│   │   └── embed-images.py    # shared MD image embedding
 │   ├── guide/               # self-contained template + skill
 │   │   ├── SKILL.md          # opencode skill + agent command reference
 │   │   ├── README.md         # template-specific details (brief)
@@ -177,7 +180,7 @@ for the technical report template command reference.
 │   │   ├── guide-pandoc.lua  # Pandoc Lua filter (DOCX/MD/HTML output)
 │   │   ├── guide-reference.docx  # custom DOCX styles for Pandoc
 │   │   ├── guide-template.html   # HTML5 template with Huawei brand CSS
-│   │   ├── create-reference-docx.py  # regenerate guide-reference.docx
+│   │   ├── create-guide-reference-docx.py  # regenerate guide-reference.docx
 │   │   ├── embed-images.py      # image embedding for self-contained Markdown
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
 │   │   └── common-assets/      # logos, sample images, example scripts
@@ -239,6 +242,8 @@ for the technical report template command reference.
 ## Adding a new template
 
 See [`AGENTS.md`](AGENTS.md) for the full guide on creating templates and skills.
+Adding a template requires zero changes to the Makefile, `build.sh`, `install.sh`,
+or test scripts — all auto-discover templates and samples.
 
 ## License
 

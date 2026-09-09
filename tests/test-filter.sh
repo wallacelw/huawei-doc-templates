@@ -16,6 +16,10 @@ for tex_file in "$TESTS_DIR/cases/"*.tex; do
     echo "SKIP: $name (no expected output)"
     continue
   fi
+  if head -1 "$tex_file" | grep -q '% tech-only'; then
+    echo "SKIP: $name (tech-only)"
+    continue
+  fi
   actual=$(pandoc -f latex+raw_tex --lua-filter="$GUIDE_FILTER" -t markdown --wrap=none "$tex_file" 2>/dev/null)
   if [ "$actual" = "$(cat "$expected")" ]; then
     echo "PASS: $name"
@@ -43,6 +47,10 @@ for tex_file in "$TESTS_DIR/cases/"*.tex; do
   expected="$TESTS_DIR/expected/$name.md.expected"
   if [ ! -f "$expected" ]; then
     echo "SKIP: $name (no expected output)"
+    continue
+  fi
+  if head -1 "$tex_file" | grep -q '% guide-only'; then
+    echo "SKIP: $name (guide-only)"
     continue
   fi
   actual=$(pandoc -f latex+raw_tex --lua-filter="$TECH_FILTER" -t markdown --wrap=none "$tex_file" 2>/dev/null)

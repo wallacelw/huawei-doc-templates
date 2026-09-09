@@ -164,9 +164,9 @@ Body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections.
 ```
 templates/technical/
 ├── technical.cls                    # technical-specific formatting (cover, 5-section envs)
-├── technical-pandoc.lua             # Lua filter for DOCX/MD/HTML output
+├── technical-pandoc.lua             # Lua filter wrapper (calls _base/pandoc-common.lua factory)
 ├── technical-template.html          # HTML template for Pandoc
-├── create-technical-reference-docx.py  # DOCX reference style generator
+├── create-technical-reference-docx.py  # DOCX reference style generator (calls _base/docx_fix.py)
 ├── technical-reference.docx         # reference DOCX with Huawei styles
 ├── README.md                        # human docs (brief)
 ├── SKILL.md                         # this file (opencode skill)
