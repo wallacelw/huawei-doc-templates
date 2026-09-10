@@ -144,12 +144,26 @@ log_dim "• VS Code CLI (code)                 (optional — for extension inst
 echo ""
 
 # ── Confirmation ──
+INSTALL_SKILLS=true
+INSTALL_VSCODE=true
+
 if [[ "$AUTO_YES" != true ]]; then
     echo -ne "  ${C_BOLD}Proceed with installation?${C_RESET} [y/N] "
     read -r response
     if [[ ! "$response" =~ ^[Yy]$ ]]; then
         echo -e "  ${C_DIM}Aborted.${C_RESET}"
         exit 0
+    fi
+    # Optional components (default yes)
+    echo -ne "  ${C_BOLD}Install opencode skills?${C_RESET} [Y/n] "
+    read -r response
+    if [[ "$response" =~ ^[Nn]$ ]]; then
+        INSTALL_SKILLS=false
+    fi
+    echo -ne "  ${C_BOLD}Configure VS Code LaTeX Workshop?${C_RESET} [Y/n] "
+    read -r response
+    if [[ "$response" =~ ^[Nn]$ ]]; then
+        INSTALL_VSCODE=false
     fi
 fi
 
@@ -318,27 +332,32 @@ check_font "Cascadia Code"     "code font (required)"      "DejaVu Sans Mono"
 check_font "DejaVu Sans Mono"  "code fallback"             "(preinstalled on most distros)"
 
 # ── Install opencode skills ──
-log_step "Installing opencode skills"
+if [[ "$INSTALL_SKILLS" == true ]]; then
+    log_step "Installing opencode skills"
 
-GLOBAL_SKILLS_DIR="$HOME/.config/opencode/skills"
-SKILL_COUNT=0
+    GLOBAL_SKILLS_DIR="$HOME/.config/opencode/skills"
+    SKILL_COUNT=0
 
-for skill_file in "$SCRIPT_DIR"/templates/*/SKILL.md; do
-    if [[ -f "$skill_file" ]]; then
-        skill_name=$(awk 'FNR==1 && /^---$/{f=1; next} f && /^---$/{f=0} f && /^name:/{print $2; exit}' "$skill_file")
-        skill_dst_dir="$GLOBAL_SKILLS_DIR/$skill_name"
-        mkdir -p "$skill_dst_dir"
-        cp "$skill_file" "$skill_dst_dir/SKILL.md"
-        log_ok "Skill '$skill_name' → $skill_dst_dir/SKILL.md"
-        SKILL_COUNT=$((SKILL_COUNT + 1))
+    for skill_file in "$SCRIPT_DIR"/templates/*/SKILL.md; do
+        if [[ -f "$skill_file" ]]; then
+            skill_name=$(awk 'FNR==1 && /^---$/{f=1; next} f && /^---$/{f=0} f && /^name:/{print $2; exit}' "$skill_file")
+            skill_dst_dir="$GLOBAL_SKILLS_DIR/$skill_name"
+            mkdir -p "$skill_dst_dir"
+            cp "$skill_file" "$skill_dst_dir/SKILL.md"
+            log_ok "Skill '$skill_name' → $skill_dst_dir/SKILL.md"
+            SKILL_COUNT=$((SKILL_COUNT + 1))
+        fi
+    done
+
+    if [[ $SKILL_COUNT -eq 0 ]]; then
+        log_warn "No skills found in templates/*/SKILL.md — skipping"
+    else
+        log_dim "$SKILL_COUNT skill(s) installed — restart opencode to discover them"
+        log_dim "Project-level discovery also works via opencode.json (skills.paths)"
     fi
-done
-
-if [[ $SKILL_COUNT -eq 0 ]]; then
-    log_warn "No skills found in templates/*/SKILL.md — skipping"
 else
-    log_dim "$SKILL_COUNT skill(s) installed — restart opencode to discover them"
-    log_dim "Project-level discovery also works via opencode.json (skills.paths)"
+    log_step "opencode skills"
+    log_dim "Skipped by user"
 fi
 
 # ── Fix system-wide latexmk default ──
@@ -357,16 +376,17 @@ else
 fi
 
 # ── Configure VS Code (local + remote) ──
-log_step "Configuring VS Code"
+if [[ "$INSTALL_VSCODE" == true ]]; then
+    log_step "Configuring VS Code"
 
-# LaTeX Workshop settings for XeLaTeX via latexmk
-merge_vscode_settings() {
-    local settings_path="$1"
-    local settings_dir
-    settings_dir="$(dirname "$settings_path")"
-    mkdir -p "$settings_dir"
+    # LaTeX Workshop settings for XeLaTeX via latexmk
+    merge_vscode_settings() {
+        local settings_path="$1"
+        local settings_dir
+        settings_dir="$(dirname "$settings_path")"
+        mkdir -p "$settings_dir"
 
-    python3 - "$settings_path" <<'PYEOF'
+        python3 - "$settings_path" <<'PYEOF'
 import json, sys, os
 
 settings_path = sys.argv[1]
@@ -421,46 +441,40 @@ if changed:
 else:
     print(f"  \033[32m✓\033[0m {settings_path} already configured")
 PYEOF
-}
+    }
 
-# Local VS Code (desktop)
-VSCODE_LOCAL="$HOME/.config/Code/User/settings.json"
-merge_vscode_settings "$VSCODE_LOCAL"
-log_dim "Local: $VSCODE_LOCAL"
+    # Local VS Code (desktop)
+    VSCODE_LOCAL="$HOME/.config/Code/User/settings.json"
+    merge_vscode_settings "$VSCODE_LOCAL"
+    log_dim "Local: $VSCODE_LOCAL"
 
-# VS Code Remote (vscode-server) — machine-level settings
-VSCODE_REMOTE="$HOME/.vscode-server/data/Machine/settings.json"
-if [[ -d "$HOME/.vscode-server" ]]; then
-    merge_vscode_settings "$VSCODE_REMOTE"
-    log_dim "Remote: $VSCODE_REMOTE"
-else
-    log_dim "Remote: not detected (no ~/.vscode-server)"
-fi
-
-# Install LaTeX Workshop extension if VS Code CLI is available
-if command -v code &>/dev/null; then
-    log_desc "VS Code CLI: $(command -v code)"
-
-    # LaTeX Workshop (required)
-    lw_out=$(code --install-extension James-Yu.latex-workshop --force 2>&1)
-    if echo "$lw_out" | grep -q "successfully installed"; then
-        log_ok "Extension: LaTeX Workshop (James-Yu.latex-workshop)"
+    # VS Code Remote (vscode-server) — machine-level settings
+    VSCODE_REMOTE="$HOME/.vscode-server/data/Machine/settings.json"
+    if [[ -d "$HOME/.vscode-server" ]]; then
+        merge_vscode_settings "$VSCODE_REMOTE"
+        log_dim "Remote: $VSCODE_REMOTE"
     else
-        log_warn "Failed to install LaTeX Workshop extension"
-        log_dim "$(echo "$lw_out" | tail -2)"
+        log_dim "Remote: not detected (no ~/.vscode-server)"
     fi
 
-    # Optional: LTeX for spell/grammar checking
-    ltex_out=$(code --install-extension valentjn.vscode-ltex --force 2>&1)
-    if echo "$ltex_out" | grep -q "successfully installed"; then
-        log_ok "Extension: LTeX (valentjn.vscode-ltex)"
+    # Install LaTeX Workshop extension if VS Code CLI is available
+    if command -v code &>/dev/null; then
+        log_desc "VS Code CLI: $(command -v code)"
+        lw_out=$(code --install-extension James-Yu.latex-workshop --force 2>&1)
+        if echo "$lw_out" | grep -q "successfully installed"; then
+            log_ok "Extension: LaTeX Workshop (James-Yu.latex-workshop)"
+        else
+            log_warn "Failed to install LaTeX Workshop extension"
+            log_dim "$(echo "$lw_out" | tail -2)"
+        fi
     else
-        log_warn "LTeX extension not available (optional — spell/grammar checking)"
+        log_warn "VS Code CLI (code) not found — extensions not installed"
+        log_dim "Settings were still written to the paths above"
+        log_dim "To install manually: https://code.visualstudio.com/ → LaTeX Workshop"
     fi
 else
-    log_warn "VS Code CLI (code) not found — extensions not installed"
-    log_dim "Settings were still written to the paths above"
-    log_dim "To install manually: https://code.visualstudio.com/ → LaTeX Workshop"
+    log_step "VS Code LaTeX Workshop"
+    log_dim "Skipped by user"
 fi
 
 # ── Test compilation ──

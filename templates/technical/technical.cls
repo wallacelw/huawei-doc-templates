@@ -28,7 +28,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/11 Huawei Technical Report template v3.3.2]
+\ProvidesClass{technical}[2026/09/11 Huawei Technical Report template v3.4.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

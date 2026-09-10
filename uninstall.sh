@@ -334,7 +334,6 @@ PYEOF
             code --uninstall-extension James-Yu.latex-workshop 2>/dev/null && \
                 log_ok "Uninstalled: LaTeX Workshop extension" || \
                 log_dim "LaTeX Workshop extension not installed"
-            code --uninstall-extension valentjn.vscode-ltex 2>/dev/null || true
         fi
     else
         log_dim "VS Code CLI not found — extensions not removed"

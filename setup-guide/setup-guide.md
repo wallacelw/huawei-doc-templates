@@ -767,9 +767,15 @@ LiteLLM.
 
     > **Info:** The script installs XeLaTeX, latexmk, fonts (HarmonyOS
     > Sans + Cascadia Code), the opencode skills, and configures VS Code
-    > LaTeX Workshop. It is idempotent --- safe to re-run. It runs
-    > `apt-get install` for TeX Live packages; if you do not have sudo
-    > access, ask your administrator to install them.
+    > LaTeX Workshop. When run interactively (`./install.sh`), it
+    > prompts for optional components (skills and VS Code --- both
+    > default to yes). When run via one-liner, all components are
+    > installed automatically. It is idempotent --- safe to re-run.
+
+    > **Info:** If an existing installation is detected, the one-liner
+    > prompts to update: `Update v3.3.6 → v3.3.7? [Y/n]`. It pulls the
+    > latest version and re-runs the installer. No need to `git pull`
+    > manually.
 
 2.  Verify the LaTeX toolchain:
 
@@ -943,16 +949,16 @@ To update the Huawei document templates project:
 
 **Step by step:**
 
-1.  Pull the latest changes and re-run the installer (idempotent):
+1.  Re-run the one-liner --- it detects the existing installation and
+    prompts to update:
 
     ``` bash
-    cd /home/huawei-doc-templates
-    git pull
-    ./install.sh --yes
+    curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
     ```
 
-2.  The installer skips components that are already up to date. New
-    templates, commands, or modules are installed automatically.
+2.  The script pulls the latest version, shows the version change
+    (`v3.3.6 → v3.3.7`), and re-runs the installer. New templates,
+    commands, or modules are installed automatically.
 
 ## Uninstalling the MaaS Gateway
 
@@ -984,23 +990,41 @@ To remove the Huawei document templates installation:
 
 **Step by step:**
 
-1.  Run the uninstall script:
+1.  Run the uninstall script (interactive menu with 5 options):
 
     ``` bash
     cd /home/huawei-doc-templates
-    ./uninstall.sh --all --yes
+    ./uninstall.sh
     ```
 
-2.  This removes: opencode skills, `.sty` modules from TDS, HarmonyOS
-    Sans font, `/etc/LatexMk` fix, and VS Code settings + extensions.
+2.  Or use the one-liner:
 
-3.  To preview what would be removed before running:
+    ``` bash
+    curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh | bash
+    ```
+
+3.  The interactive menu offers:
+
+    -   Option 1: All installed components (skills, modules, font, VS
+        Code)
+
+    -   Option 2: Everything + apt packages (WARNING: breaks other TeX)
+
+    -   Option 3: Delete repository directory (all files, guides,
+        documents)
+
+    -   Option 4: Remove 100% --- everything + apt + repo (nuclear
+        option)
+
+    -   Option 5: Choose specific components individually
+
+4.  To preview what would be removed before running:
 
     ``` bash
     ./uninstall.sh --all --dry-run
     ```
 
-4.  To also remove apt packages (texlive, latexmk, fonts, pandoc):
+5.  To also remove apt packages (texlive, latexmk, fonts, pandoc):
 
     ``` bash
     ./uninstall.sh --all --packages --yes
@@ -1053,10 +1077,20 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
-**3.3.2**  *2026-09-11*
+**3.4.0**  *2026-09-11*
 
-Replaced manual `git clone` + `./install.sh` steps in Chapter 6 with
-one-liner `curl | bash` command.
+`install.sh`: opencode skills and VS Code LaTeX Workshop are now
+optional prompts (default yes). Removed LTeX extension (was failing to
+install). One-liner detects existing installation and prompts to update
+with version display (`v3.3.6 → v3.3.7`). Uses absolute paths to prevent
+nested clones.
+
+`uninstall.sh`: Added one-liner support (`curl | bash`). Added "Remove
+100%" nuclear option (option 4) to interactive menu. Added `–repo` flag.
+
+Updated Chapter 6 with optional component prompts and update detection.
+Updated Chapter 7 with one-liner update/uninstall and full menu
+documentation.
 
 **3.3.0**  *2026-09-11*
 

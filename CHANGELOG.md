@@ -3,6 +3,29 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.4.0 (2026-09-11)
+
+### Features
+
+- **install.sh**: opencode skills and VS Code LaTeX Workshop are now optional
+  prompts (default yes) when run interactively. One-liner installs all
+  automatically.
+- **install.sh**: One-liner detects existing installation and prompts to update
+  with version display (`Update v3.3.6 → v3.3.7? [Y/n]`). Uses absolute paths
+  to prevent nested clones when run from inside the repo.
+- **uninstall.sh**: Added one-liner support (`curl | bash`). Added "Remove 100%"
+  nuclear option (option 4) to interactive menu. Added `--repo` flag.
+- **setup-guide.tex**: Updated Chapter 6 with optional component prompts and
+  update detection. Updated Chapter 7 with one-liner update/uninstall and full
+  menu documentation.
+- **README.md**: Updated Quick start and Uninstalling sections.
+- **guide.cls / technical.cls**: Bumped to v3.4.0.
+
+### Fixes
+
+- **install.sh**: Removed LTeX extension (was failing to install, added noise).
+- **uninstall.sh**: Removed LTeX uninstall line.
+
 ## v3.3.2 (2026-09-11)
 
 ### Fixes

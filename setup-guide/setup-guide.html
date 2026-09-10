@@ -273,7 +273,7 @@ font-size: 8pt;
 <body>
   <h1 class="title">Guide: Environment Setup for Huawei Cloud
 Development</h1>
-<p class="version">v3.3.2</p>
+<p class="version">v3.4.0</p>
 <h1 data-number="1" id="provision-a-flexus-x-instance-on-huawei-cloud"><span class="header-section-number">1</span> Provision a Flexus X Instance on
 Huawei Cloud</h1>
 <div class="objectives">
@@ -1219,9 +1219,17 @@ project</h2>
 <p><strong>Info</strong> </p>
 <p>The script installs XeLaTeX, latexmk, fonts (HarmonyOS Sans +
 Cascadia Code), the opencode skills, and configures VS Code LaTeX
-Workshop. It is idempotent — safe to re-run. It runs
-<code>apt-get install</code> for TeX Live packages; if you do not have
-sudo access, ask your administrator to install them.</p>
+Workshop. When run interactively (<code>./install.sh</code>), it prompts
+for optional components (skills and VS Code — both default to yes). When
+run via one-liner, all components are installed automatically. It is
+idempotent — safe to re-run.</p>
+</div>
+<div class="callout infobox" role="note" aria-label="Info">
+<p><strong>Info</strong> </p>
+<p>If an existing installation is detected, the one-liner prompts to
+update: <code>Update v3.3.6 → v3.3.7? [Y/n]</code>. It pulls the latest
+version and re-runs the installer. No need to <code>git pull</code>
+manually.</p>
 </div></li>
 <li><p>Verify the LaTeX toolchain:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xelatex</span> <span class="at">--version</span></span>
@@ -1396,12 +1404,11 @@ Templates</h2>
 <p>To update the Huawei document templates project:</p>
 <p><strong>Step by step:</strong></p>
 <ol>
-<li><p>Pull the latest changes and re-run the installer
-(idempotent):</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./install.sh</span> <span class="at">--yes</span></span></code></pre></div></li>
-<li><p>The installer skips components that are already up to date. New
+<li><p>Re-run the one-liner — it detects the existing installation and
+prompts to update:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<li><p>The script pulls the latest version, shows the version change
+(<code>v3.3.6 → v3.3.7</code>), and re-runs the installer. New
 templates, commands, or modules are installed automatically.</p></li>
 </ol>
 <h2 data-number="7.3" id="uninstalling-the-maas-gateway"><span class="header-section-number">7.3</span> Uninstalling the MaaS
@@ -1424,17 +1431,28 @@ Templates</h2>
 <p>To remove the Huawei document templates installation:</p>
 <p><strong>Step by step:</strong></p>
 <ol>
-<li><p>Run the uninstall script:</p>
+<li><p>Run the uninstall script (interactive menu with 5 options):</p>
 <div class="sourceCode" id="cb34"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--yes</span></span></code></pre></div></li>
-<li><p>This removes: opencode skills, <code>.sty</code> modules from
-TDS, HarmonyOS Sans font, <code>/etc/LatexMk</code> fix, and VS Code
-settings + extensions.</p></li>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span></span></code></pre></div></li>
+<li><p>Or use the one-liner:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<li><p>The interactive menu offers:</p>
+<ul>
+<li><p>Option 1: All installed components (skills, modules, font, VS
+Code)</p></li>
+<li><p>Option 2: Everything + apt packages (WARNING: breaks other
+TeX)</p></li>
+<li><p>Option 3: Delete repository directory (all files, guides,
+documents)</p></li>
+<li><p>Option 4: Remove 100% — everything + apt + repo (nuclear
+option)</p></li>
+<li><p>Option 5: Choose specific components individually</p></li>
+</ul></li>
 <li><p>To preview what would be removed before running:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
 <li><p>To also remove apt packages (texlive, latexmk, fonts,
 pandoc):</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
 <div class="callout warning" role="alert" aria-label="Warning">
 <p><strong>Important</strong> </p>
 <p>Removing apt packages will break any other LaTeX documents on the
@@ -1522,9 +1540,18 @@ or run <code>/skill huawei-template-guide</code> in your coding
 agent.</em></p>
 <h1 data-number="8"><span class="header-section-number">8</span>
 Changelog</h1>
-<p><strong>3.3.2</strong>  <em>2026-09-11</em></p>
-<p>Replaced manual <code>git clone</code> + <code>./install.sh</code>
-steps in Chapter 6 with one-liner <code>curl | bash</code> command.</p>
+<p><strong>3.4.0</strong>  <em>2026-09-11</em></p>
+<p><code>install.sh</code>: opencode skills and VS Code LaTeX Workshop
+are now optional prompts (default yes). Removed LTeX extension (was
+failing to install). One-liner detects existing installation and prompts
+to update with version display (<code>v3.3.6 → v3.3.7</code>). Uses
+absolute paths to prevent nested clones.</p>
+<p><code>uninstall.sh</code>: Added one-liner support
+(<code>curl | bash</code>). Added “Remove 100%” nuclear option (option
+4) to interactive menu. Added <code>–repo</code> flag.</p>
+<p>Updated Chapter 6 with optional component prompts and update
+detection. Updated Chapter 7 with one-liner update/uninstall and full
+menu documentation.</p>
 <p><strong>3.3.0</strong>  <em>2026-09-11</em></p>
 <p>Moved pre-compiled setup guide to <code>setup-guide/</code> folder in
 repo root with all four formats (PDF, MD, DOCX, HTML). Users can read

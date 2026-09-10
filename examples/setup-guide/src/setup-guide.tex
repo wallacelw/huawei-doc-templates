@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.3.2}
+\setdocversion{3.4.0}
 
 \begin{document}
 
@@ -886,9 +886,16 @@ curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main
 
   \begin{infobox}
   The script installs XeLaTeX, latexmk, fonts (HarmonyOS Sans + Cascadia Code),
-  the opencode skills, and configures VS Code LaTeX Workshop. It is idempotent
-  --- safe to re-run. It runs \inlinecode{apt-get install} for TeX Live packages;
-  if you do not have sudo access, ask your administrator to install them.
+  the opencode skills, and configures VS Code LaTeX Workshop. When run
+  interactively (\inlinecode{./install.sh}), it prompts for optional components
+  (skills and VS Code --- both default to yes). When run via one-liner, all
+  components are installed automatically. It is idempotent --- safe to re-run.
+  \end{infobox}
+
+  \begin{infobox}
+  If an existing installation is detected, the one-liner prompts to update:
+  \inlinecode{Update v3.3.6 → v3.3.7? [Y/n]}. It pulls the latest version and
+  re-runs the installer. No need to \inlinecode{git pull} manually.
   \end{infobox}
 
   \item Verify the LaTeX toolchain:
@@ -1086,13 +1093,13 @@ To update the Huawei document templates project:
 
 \stepbystep
 \begin{enumerate}
-  \item Pull the latest changes and re-run the installer (idempotent):
+  \item Re-run the one-liner --- it detects the existing installation and
+        prompts to update:
   \begin{code}[bash]
-cd /home/huawei-doc-templates
-git pull
-./install.sh --yes
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
   \end{code}
-  \item The installer skips components that are already up to date. New
+  \item The script pulls the latest version, shows the version change
+        (\inlinecode{v3.3.6 → v3.3.7}), and re-runs the installer. New
         templates, commands, or modules are installed automatically.
 \end{enumerate}
 
@@ -1123,14 +1130,23 @@ To remove the Huawei document templates installation:
 
 \stepbystep
 \begin{enumerate}
-  \item Run the uninstall script:
+  \item Run the uninstall script (interactive menu with 5 options):
   \begin{code}[bash]
 cd /home/huawei-doc-templates
-./uninstall.sh --all --yes
+./uninstall.sh
   \end{code}
-  \item This removes: opencode skills, \inlinecode{.sty} modules from TDS,
-        HarmonyOS Sans font, \inlinecode{/etc/LatexMk} fix, and VS Code
-        settings + extensions.
+  \item Or use the one-liner:
+  \begin{code}[bash]
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh | bash
+  \end{code}
+  \item The interactive menu offers:
+  \begin{itemize}
+    \item Option 1: All installed components (skills, modules, font, VS Code)
+    \item Option 2: Everything + apt packages (WARNING: breaks other TeX)
+    \item Option 3: Delete repository directory (all files, guides, documents)
+    \item Option 4: Remove 100\% --- everything + apt + repo (nuclear option)
+    \item Option 5: Choose specific components individually
+  \end{itemize}
   \item To preview what would be removed before running:
   \begin{code}[bash]
 ./uninstall.sh --all --dry-run
@@ -1194,7 +1210,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
-  \changelogentry{3.3.2}{\today}{\item Replaced manual \inlinecode{git clone} + \inlinecode{./install.sh} steps in Chapter 6 with one-liner \inlinecode{curl | bash} command.}
+  \changelogentry{3.4.0}{\today}{\item \inlinecode{install.sh}: opencode skills and VS Code LaTeX Workshop are now optional prompts (default yes). Removed LTeX extension (was failing to install). One-liner detects existing installation and prompts to update with version display (\inlinecode{v3.3.6 → v3.3.7}). Uses absolute paths to prevent nested clones. \item \inlinecode{uninstall.sh}: Added one-liner support (\inlinecode{curl | bash}). Added ``Remove 100\%'' nuclear option (option 4) to interactive menu. Added \inlinecode{--repo} flag. \item Updated Chapter 6 with optional component prompts and update detection. Updated Chapter 7 with one-liner update/uninstall and full menu documentation.}
   \changelogentry{3.3.0}{\today}{\item Moved pre-compiled setup guide to \inlinecode{setup-guide/} folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to understand the installation process. \item Updated Makefile \inlinecode{setup-guide} target to generate and copy all four formats. \item Updated README with pre-compiled setup guide section and format comparison table. \item Updated .gitignore to track all four formats in \inlinecode{setup-guide/}.}
   \changelogentry{3.2.1}{\today}{\item Renamed Chapter 7 from ``Clean Up'' to ``Operations and Maintenance''. Added subsections for updating and uninstalling both the MaaS Gateway and the document templates. Added cloud resource cleanup as an optional subsection.}
   \changelogentry{3.2.0}{\today}{\item Added \inlinecode{uninstall.sh} script with interactive menu, \inlinecode{--all}, \inlinecode{--yes}, and \inlinecode{--dry-run} flags. Removes opencode skills, .sty modules, HarmonyOS Sans font, /etc/LatexMk fix, and VS Code settings. \item Fixed \inlinecode{install.sh}: show apt-get output (was hidden), suppress fvextra build noise, fix font detection (\inlinecode{fc-list : family}), fix test compilation paths (\inlinecode{src/} subdirectory), fix LTeX extension success/failure reporting. \item Updated Chapter 7 with uninstall instructions.}

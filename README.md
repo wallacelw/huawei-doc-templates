@@ -16,6 +16,9 @@ and changelog.
 curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
 ```
 
+If an existing installation is detected, the one-liner prompts to update
+(`Update v3.3.6 → v3.3.7? [Y/n]`) and pulls the latest version.
+
 **Or step by step:**
 
 ```bash
@@ -23,6 +26,14 @@ git clone https://github.com/wallacelw/huawei-doc-templates.git
 cd huawei-doc-templates
 ./install.sh
 ```
+
+When run interactively (`./install.sh`), you'll be prompted for optional
+components (default yes):
+
+- Install opencode skills? `[Y/n]`
+- Configure VS Code LaTeX Workshop? `[Y/n]`
+
+When run via one-liner, all components are installed automatically.
 
 Then open the project in [opencode](https://opencode.ai) and run:
 
@@ -70,16 +81,34 @@ to create a new guide document.
 
 ### Uninstalling
 
+**One-liner:**
+
 ```bash
-./uninstall.sh                  # interactive menu
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh | bash
+```
+
+**Or from the repo:**
+
+```bash
+./uninstall.sh                  # interactive menu (5 options)
 ./uninstall.sh --all            # remove everything except apt packages
 ./uninstall.sh --all --packages # also remove apt packages (WARNING: breaks other TeX)
+./uninstall.sh --all --repo     # also delete the repo directory
 ./uninstall.sh --all --dry-run  # preview what would be removed
 ```
 
+Interactive menu options:
+
+1. All installed components (skills, modules, font, VS Code) — safe
+2. Everything + apt packages (WARNING: breaks other TeX)
+3. Delete repository directory (all files, guides, documents)
+4. Remove 100% — everything + apt + repo (nuclear option)
+5. Choose specific components individually
+
 `uninstall.sh` removes: opencode skills, `.sty` modules from TDS, HarmonyOS Sans
 font, `/etc/LatexMk` xelatex fix, VS Code settings + extensions. Use `--packages`
-to also remove apt packages (texlive, latexmk, fonts, pandoc).
+to also remove apt packages (texlive, latexmk, fonts, pandoc). Use `--repo` to
+also delete the repository directory (requires typing `yes` to confirm).
 
 ## Building documents
 
