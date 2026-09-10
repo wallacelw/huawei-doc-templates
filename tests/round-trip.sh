@@ -360,7 +360,7 @@ for entry in "${SAMPLES[@]}"; do
   html_tc=$((html_tables + html_callouts))
   docx_tc=$docx_tables
   tc_tol=5
-  if [ "$name" = "examples/setup-guide" ]; then tc_tol=15; fi
+  if [ "$name" = "examples/setup-guide" ]; then tc_tol=20; fi
   check_tol3 "Tables+Callouts (MD/HTML/DOCX)" "$md_tc" "$html_tc" "$docx_tc" "$tc_tol"
 
   # ── Summary table ──────────────────────────────────────────────────────

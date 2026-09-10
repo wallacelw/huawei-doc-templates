@@ -3,6 +3,39 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.1.0 (2026-09-11)
+
+### Major: Setup guide rewrite — ECS to Flexus X, ncat proxy, chapter restructure
+
+- **setup-guide.tex**: Complete rewrite of all 7 chapters:
+  - Migrated from ECS to Flexus X (flavor `x1.4u.16g`, 4 vCPU / 16 GB RAM via
+    slider, Cloud Eye monitoring, instance name `flexusx-dev`).
+  - Replaced `connect.exe` with `ncat` (Nmap 7.991) for SSH proxy tunneling,
+    with HTTP CONNECT explanation, installation steps, and flag reference.
+  - Restructured into 7 chapters: Provision Flexus X, Configure Remote Access,
+    Install ncat, Install VS Code + Remote-SSH, Install MaaS Gateway, Install
+    Document Templates, Clean Up.
+  - Added verification checklist tables to all 7 chapters.
+  - Added troubleshooting subsection (6 common issues + ncat verbose debugging).
+  - Added mandatory reboot warning after SSH port change.
+  - Updated Chapter 5 (MAaaS Gateway) for v1.10.0: 4 Docker services, 4 models,
+    4 tools, dual-format API, 120 validation checks, 39-panel Grafana dashboard.
+  - Updated Chapter 6: actual repo URL, `make samples` compilation, technical
+    template mention, expanded command reference.
+  - Updated Chapter 7: EIP auto-release clarification, Windows SSH config path.
+  - Replaced 2 ECS screenshots with 5 new images (Flexus reset password, remote
+    login, restart; ncat installation; SSH connection).
+- **guide.cls / technical.cls**: Bumped to v3.1.0.
+- **round-trip.sh**: Increased Tables+Callouts tolerance for setup-guide (±15 → ±20)
+  due to expanded verification tables and callout boxes.
+
+## v3.0.2 (2026-09-10)
+
+### Fixes
+
+- **CI integration**: Removed GitHub Actions CI workflow (`.github/workflows/test.yml`).
+  Tests are run locally via `make test` before tagging.
+
 ## v3.0.1 (2026-09-10)
 
 ### Fixes
