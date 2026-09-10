@@ -409,7 +409,6 @@ if command -v code &>/dev/null; then
     log_desc "VS Code CLI: $(command -v code)"
 
     # LaTeX Workshop (required)
-    local lw_out
     lw_out=$(code --install-extension James-Yu.latex-workshop --force 2>&1)
     if echo "$lw_out" | grep -q "successfully installed"; then
         log_ok "Extension: LaTeX Workshop (James-Yu.latex-workshop)"
@@ -419,7 +418,6 @@ if command -v code &>/dev/null; then
     fi
 
     # Optional: LTeX for spell/grammar checking
-    local ltex_out
     ltex_out=$(code --install-extension valentjn.vscode-ltex --force 2>&1)
     if echo "$ltex_out" | grep -q "successfully installed"; then
         log_ok "Extension: LTeX (valentjn.vscode-ltex)"
