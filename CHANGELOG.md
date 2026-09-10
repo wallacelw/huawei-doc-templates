@@ -3,6 +3,15 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.3.2 (2026-09-11)
+
+### Fixes
+
+- **setup-guide.tex**: Replaced manual `git clone` + `./install.sh` steps in
+  Chapter 6 with one-liner `curl | bash` command.
+- **install.sh**: Fixed `local` keyword used outside function (v3.3.1).
+- **guide.cls / technical.cls**: Bumped to v3.3.2.
+
 ## v3.3.0 (2026-09-11)
 
 ### Features

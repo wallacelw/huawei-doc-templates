@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.3.0}
+\setdocversion{3.3.2}
 
 \begin{document}
 
@@ -876,27 +876,20 @@ times. It merges VS Code settings rather than overwriting them, and
 
 \stepbystep
 \begin{enumerate}
-  \item Clone the repository:
+  \item Run the one-liner install (clones the repo to
+        \inlinecode{/home/huawei-doc-templates} and installs everything):
 
   \begin{code}[bash]
 cd /home
-git clone https://github.com/wallacelw/huawei-doc-templates.git
-cd huawei-doc-templates
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
   \end{code}
 
-  \item Run the setup script (installs XeLaTeX, latexmk, fonts, the coding
-        agent skill, and configures VS Code LaTeX Workshop at the user
-        level):
-
-  \begin{code}[bash]
-./install.sh
-  \end{code}
-
-  \begin{warning}
-  The script runs \inlinecode{sudo apt-get install} for TeX Live packages. If you
-  do not have sudo access, ask your administrator to install the packages
-  listed in \inlinecode{install.sh}.
-  \end{warning}
+  \begin{infobox}
+  The script installs XeLaTeX, latexmk, fonts (HarmonyOS Sans + Cascadia Code),
+  the opencode skills, and configures VS Code LaTeX Workshop. It is idempotent
+  --- safe to re-run. It runs \inlinecode{apt-get install} for TeX Live packages;
+  if you do not have sudo access, ask your administrator to install them.
+  \end{infobox}
 
   \item Verify the LaTeX toolchain:
 
@@ -1201,6 +1194,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.3.2}{\today}{\item Replaced manual \inlinecode{git clone} + \inlinecode{./install.sh} steps in Chapter 6 with one-liner \inlinecode{curl | bash} command.}
   \changelogentry{3.3.0}{\today}{\item Moved pre-compiled setup guide to \inlinecode{setup-guide/} folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to understand the installation process. \item Updated Makefile \inlinecode{setup-guide} target to generate and copy all four formats. \item Updated README with pre-compiled setup guide section and format comparison table. \item Updated .gitignore to track all four formats in \inlinecode{setup-guide/}.}
   \changelogentry{3.2.1}{\today}{\item Renamed Chapter 7 from ``Clean Up'' to ``Operations and Maintenance''. Added subsections for updating and uninstalling both the MaaS Gateway and the document templates. Added cloud resource cleanup as an optional subsection.}
   \changelogentry{3.2.0}{\today}{\item Added \inlinecode{uninstall.sh} script with interactive menu, \inlinecode{--all}, \inlinecode{--yes}, and \inlinecode{--dry-run} flags. Removes opencode skills, .sty modules, HarmonyOS Sans font, /etc/LatexMk fix, and VS Code settings. \item Fixed \inlinecode{install.sh}: show apt-get output (was hidden), suppress fvextra build noise, fix font detection (\inlinecode{fc-list : family}), fix test compilation paths (\inlinecode{src/} subdirectory), fix LTeX extension success/failure reporting. \item Updated Chapter 7 with uninstall instructions.}

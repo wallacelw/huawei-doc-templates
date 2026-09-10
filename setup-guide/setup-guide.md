@@ -757,27 +757,21 @@ LiteLLM.
 
 **Step by step:**
 
-1.  Clone the repository:
+1.  Run the one-liner install (clones the repo to
+    `/home/huawei-doc-templates` and installs everything):
 
     ``` bash
     cd /home
-    git clone https://github.com/wallacelw/huawei-doc-templates.git
-    cd huawei-doc-templates
+    curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
     ```
 
-2.  Run the setup script (installs XeLaTeX, latexmk, fonts, the coding
-    agent skill, and configures VS Code LaTeX Workshop at the user
-    level):
+    > **Info:** The script installs XeLaTeX, latexmk, fonts (HarmonyOS
+    > Sans + Cascadia Code), the opencode skills, and configures VS Code
+    > LaTeX Workshop. It is idempotent --- safe to re-run. It runs
+    > `apt-get install` for TeX Live packages; if you do not have sudo
+    > access, ask your administrator to install them.
 
-    ``` bash
-    ./install.sh
-    ```
-
-    > **Important:** The script runs `sudo apt-get install` for TeX Live
-    > packages. If you do not have sudo access, ask your administrator
-    > to install the packages listed in `install.sh`.
-
-3.  Verify the LaTeX toolchain:
+2.  Verify the LaTeX toolchain:
 
     ``` bash
     xelatex --version
@@ -1058,6 +1052,11 @@ full command reference, see the template's README.md or run
 `/skill huawei-template-guide` in your coding agent.*
 
 # Changelog
+
+**3.3.2**  *2026-09-11*
+
+Replaced manual `git clone` + `./install.sh` steps in Chapter 6 with
+one-liner `curl | bash` command.
 
 **3.3.0**  *2026-09-11*
 
