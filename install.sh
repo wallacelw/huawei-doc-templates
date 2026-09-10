@@ -101,18 +101,7 @@ echo ""
 
 # ── Confirmation ──
 if [[ "$AUTO_YES" != true ]]; then
-    echo ""
-    echo "This script will:"
-    echo "  1. Install apt packages: texlive-xetex, texlive-latex-extra, texlive-lang-portuguese, latexmk, fonts-liberation, fonts-cascadia-code, poppler-utils, pandoc, python3-docx"
-    echo "  2. Update fvextra from CTAN if version < 1.5 (backgroundcolor support)"
-    echo "  3. Download and install HarmonyOS Sans font (.deb from GitHub releases)"
-    echo "  4. Update font cache (fc-cache)"
-    echo "  5. Copy .sty modules to system TeX directory (requires sudo)"
-    echo "  6. Fix system-wide latexmk default to xelatex (/etc/LatexMk)"
-    echo "  7. Configure VS Code settings (LaTeX Workshop, local + remote)"
-    echo "  8. Compile sample documents to verify installation"
-    echo ""
-    echo -e "  ${C_BOLD}Proceed with installation?${C_RESET} [y/N] "
+    echo -ne "  ${C_BOLD}Proceed with installation?${C_RESET} [y/N] "
     read -r response
     if [[ ! "$response" =~ ^[Yy]$ ]]; then
         echo -e "  ${C_DIM}Aborted.${C_RESET}"
@@ -157,7 +146,7 @@ $SUDO apt-get install -y \
     poppler-utils \
     pandoc \
     python3-docx \
-    2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd" || true
+    2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd\|already the newest\|automatically installed\|autoremove\|not upgraded\|newly installed\|upgraded" || true
 
 log_done "TeX Live packages installed"
 
@@ -202,13 +191,13 @@ HARMONYOS_DEB_URL="https://github.com/zhiyuan1i/fonts-harmonyos-sans-cn/releases
 HARMONYOS_DEB="/tmp/harmonyos_sans.deb"
 HARMONYOS_DEB_SHA256="d1fdaccd6d8f7a8918db366430c586503480d6e0d44ace33715fb7d999537123"
 
-if fc-list | grep -q "HarmonyOS Sans"; then
+if fc-list : family | grep -qi "HarmonyOS Sans"; then
     log_ok "HarmonyOS Sans: already installed"
 else
     log_desc "Downloading from GitHub releases..."
     if wget -q "$HARMONYOS_DEB_URL" -O "$HARMONYOS_DEB"; then
         if echo "$HARMONYOS_DEB_SHA256  $HARMONYOS_DEB" | sha256sum -c - 2>/dev/null; then
-            $SUDO apt install -y "$HARMONYOS_DEB" 2>&1 | tail -2
+            $SUDO apt install -y "$HARMONYOS_DEB" >/dev/null 2>&1
             rm -f "$HARMONYOS_DEB"
             log_done "HarmonyOS Sans: installed"
         else
@@ -438,12 +427,14 @@ compile_sample() {
     local src_dir="$dir/src"
     if [[ -f "$src_dir/$file" ]]; then
         cd "$src_dir"
-        latexmk -C "$file" 2>/dev/null
-        if latexmk "$file" 2>/dev/null; then
+        latexmk -C "$file" >/dev/null 2>&1
+        if latexmk "$file" >/dev/null 2>&1; then
             local pdf="${file%.tex}.pdf"
+            # .latexmkrc sets $out_dir='..' — PDF goes to parent dir
+            [[ ! -f "$pdf" ]] && pdf="../$pdf"
             local pages=$(pdfinfo "$pdf" 2>/dev/null | grep "^Pages:" | awk '{print $2}')
             log_ok "$label: ${pages:-?} pages"
-            latexmk -c "$file" 2>/dev/null   # clean aux files only, preserve PDF
+            latexmk -c "$file" >/dev/null 2>&1
         else
             log_warn "$label compile failed — check $src_dir/${file%.tex}.log"
         fi

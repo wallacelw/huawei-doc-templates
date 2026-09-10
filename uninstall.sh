@@ -9,8 +9,10 @@
 #   ./uninstall.sh --latexmk        # remove /etc/LatexMk fix
 #   ./uninstall.sh --vscode         # remove VS Code settings + extensions
 #   ./uninstall.sh --packages       # remove apt packages (WARNING: breaks other TeX)
-#   ./uninstall.sh --all            # everything except apt packages
+#   ./uninstall.sh --repo           # remove the cloned repo (all files, guides, docs)
+#   ./uninstall.sh --all            # everything except apt packages + repo
 #   ./uninstall.sh --all --packages # everything including apt packages
+#   ./uninstall.sh --all --repo     # everything including the repo (prompts to confirm)
 #   ./uninstall.sh --dry-run        # show what would be removed
 #   ./uninstall.sh --yes            # skip confirmation
 # ──────────────────────────────────────────────────────────────────────────────
@@ -25,6 +27,7 @@ REMOVE_FONT=false
 REMOVE_LATEXMK=false
 REMOVE_VSCODE=false
 REMOVE_PACKAGES=false
+REMOVE_REPO=false
 DRY_RUN=false
 SKIP_CONFIRM=false
 
@@ -36,6 +39,7 @@ for arg in "$@"; do
         --latexmk)    REMOVE_LATEXMK=true ;;
         --vscode)     REMOVE_VSCODE=true ;;
         --packages)   REMOVE_PACKAGES=true ;;
+        --repo)       REMOVE_REPO=true ;;
         --all)
             REMOVE_SKILLS=true
             REMOVE_MODULES=true
@@ -90,7 +94,8 @@ echo ""
 # ── Interactive menu (no flags) ──
 if [ "$REMOVE_SKILLS" = false ] && [ "$REMOVE_MODULES" = false ] \
    && [ "$REMOVE_FONT" = false ] && [ "$REMOVE_LATEXMK" = false ] \
-   && [ "$REMOVE_VSCODE" = false ] && [ "$REMOVE_PACKAGES" = false ]; then
+   && [ "$REMOVE_VSCODE" = false ] && [ "$REMOVE_PACKAGES" = false ] \
+   && [ "$REMOVE_REPO" = false ]; then
     echo -e "  Select what to uninstall:"
     echo ""
     echo -e "  ${C_BOLD}1${C_RESET}  opencode skills"
@@ -100,6 +105,7 @@ if [ "$REMOVE_SKILLS" = false ] && [ "$REMOVE_MODULES" = false ] \
     echo -e "  ${C_BOLD}5${C_RESET}  VS Code settings + extensions"
     echo -e "  ${C_BOLD}6${C_RESET}  All of the above (safe — does not remove apt packages)"
     echo -e "  ${C_BOLD}7${C_RESET}  Everything including apt packages (WARNING: breaks other TeX)"
+    echo -e "  ${C_BOLD}8${C_RESET}  Delete the repo directory (all files, guides, documents)"
     echo -e "  ${C_DIM}Or combine: 1,2,3 (skills + modules + font)${C_RESET}"
     echo ""
     echo -n "  Choice: "
@@ -115,6 +121,7 @@ if [ "$REMOVE_SKILLS" = false ] && [ "$REMOVE_MODULES" = false ] \
            REMOVE_LATEXMK=true; REMOVE_VSCODE=true ;;
         7) REMOVE_SKILLS=true; REMOVE_MODULES=true; REMOVE_FONT=true
            REMOVE_LATEXMK=true; REMOVE_VSCODE=true; REMOVE_PACKAGES=true ;;
+        8) REMOVE_REPO=true ;;
         *)
             IFS=',' read -ra items <<< "$choice"
             for item in "${items[@]}"; do
@@ -128,6 +135,7 @@ if [ "$REMOVE_SKILLS" = false ] && [ "$REMOVE_MODULES" = false ] \
                        REMOVE_LATEXMK=true; REMOVE_VSCODE=true ;;
                     7) REMOVE_SKILLS=true; REMOVE_MODULES=true; REMOVE_FONT=true
                        REMOVE_LATEXMK=true; REMOVE_VSCODE=true; REMOVE_PACKAGES=true ;;
+                    8) REMOVE_REPO=true ;;
                     *) log_warn "Unknown choice: $item" ;;
                 esac
             done
@@ -138,7 +146,8 @@ fi
 # ── Check if anything selected ──
 if [ "$REMOVE_SKILLS" = false ] && [ "$REMOVE_MODULES" = false ] \
    && [ "$REMOVE_FONT" = false ] && [ "$REMOVE_LATEXMK" = false ] \
-   && [ "$REMOVE_VSCODE" = false ] && [ "$REMOVE_PACKAGES" = false ]; then
+   && [ "$REMOVE_VSCODE" = false ] && [ "$REMOVE_PACKAGES" = false ] \
+   && [ "$REMOVE_REPO" = false ]; then
     echo -e "  ${C_DIM}Nothing selected. Aborting.${C_RESET}"
     exit 0
 fi
@@ -159,6 +168,7 @@ if [ "$SKIP_CONFIRM" != true ] && [ "$DRY_RUN" != true ]; then
     [ "$REMOVE_LATEXMK" = true ]  && log_dim "• /etc/LatexMk xelatex fix"
     [ "$REMOVE_VSCODE" = true ]   && log_dim "• VS Code LaTeX Workshop settings + extensions"
     [ "$REMOVE_PACKAGES" = true ] && log_dim "• apt packages (texlive-xetex, latexmk, fonts, pandoc, ...)"
+    [ "$REMOVE_REPO" = true ]     && log_dim "• repository directory (all files, guides, documents)"
     echo ""
     echo -ne "  ${C_BOLD}Proceed?${C_RESET} [y/N] "
     read -r response
@@ -335,6 +345,46 @@ if [ "$REMOVE_PACKAGES" = true ]; then
     fi
 fi
 
+# ── Remove repo directory ──
+if [ "$REMOVE_REPO" = true ]; then
+    log_step "Removing repository directory"
+
+    echo ""
+    echo -e "  ${C_BOLD}${C_RED}WARNING: This will permanently delete:${C_RESET}"
+    echo -e "  ${C_RED}  $SCRIPT_DIR${C_RESET}"
+    echo ""
+    echo -e "  ${C_BOLD}All files will be lost:${C_RESET}"
+    log_dim "• Source templates (.cls, .sty, .lua, .py)"
+    log_dim "• Sample documents (examples/)"
+    log_dim "• User documents (documents/)"
+    log_dim "• Assets (images, logos)"
+    log_dim "• Git history"
+    echo ""
+
+    if [ "$DRY_RUN" = true ]; then
+        log_dim "would run: rm -rf \"$SCRIPT_DIR\""
+    elif [ "$SKIP_CONFIRM" = true ]; then
+        # Even with --yes, require explicit confirmation for repo deletion
+        echo -ne "  ${C_BOLD}${C_RED}Type 'yes' to confirm deletion:${C_RESET} "
+        read -r response
+        if [[ "$response" == "yes" ]]; then
+            rm -rf "$SCRIPT_DIR"
+            log_ok "Repository directory removed"
+        else
+            log_warn "Repository deletion cancelled (must type 'yes' exactly)"
+        fi
+    else
+        echo -ne "  ${C_BOLD}${C_RED}Type 'yes' to confirm deletion:${C_RESET} "
+        read -r response
+        if [[ "$response" == "yes" ]]; then
+            rm -rf "$SCRIPT_DIR"
+            log_ok "Repository directory removed"
+        else
+            log_warn "Repository deletion cancelled (must type 'yes' exactly)"
+        fi
+    fi
+fi
+
 # ── Summary ──
 echo ""
 if [ "$DRY_RUN" = true ]; then
@@ -343,6 +393,10 @@ else
     echo -e "  ${C_BOLD}${C_GREEN}✓ Uninstall complete${C_RESET}"
 fi
 echo ""
-echo -e "  ${C_DIM}The repository itself is not removed. To delete it:${C_RESET}"
-echo -e "  ${C_DIM}  rm -rf $SCRIPT_DIR${C_RESET}"
+if [ "$REMOVE_REPO" = true ] && [ -d "$SCRIPT_DIR" ]; then
+    echo -e "  ${C_DIM}Repository was not removed (cancelled or dry run).${C_RESET}"
+elif [ -d "$SCRIPT_DIR" ]; then
+    echo -e "  ${C_DIM}The repository itself is not removed. To delete it:${C_RESET}"
+    echo -e "  ${C_DIM}  rm -rf $SCRIPT_DIR${C_RESET}"
+fi
 echo ""
