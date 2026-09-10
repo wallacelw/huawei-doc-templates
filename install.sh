@@ -26,14 +26,41 @@ done
 
 # ── Determine if running from pipe (curl | bash) or from a file ──
 REPO_URL="https://github.com/wallacelw/huawei-doc-templates.git"
-CLONE_DIR="huawei-doc-templates"
+CLONE_DIR="/home/huawei-doc-templates"
+
+# Helper: update an existing repo in place
+update_repo() {
+    local repo_path="$1"
+    cd "$repo_path"
+    SCRIPT_DIR="$(pwd)"
+    local current_tag new_tag
+    current_tag=$(git describe --tags 2>/dev/null || echo "unknown")
+    echo ""
+    echo "  Existing installation found: $repo_path (v$current_tag)"
+    if [ -c /dev/tty ] 2>/dev/null; then
+        echo -ne "  Update to latest version? [Y/n] "
+        read -r response < /dev/tty
+        if [[ "$response" =~ ^[Nn]$ ]]; then
+            echo "  Aborted."
+            exit 0
+        fi
+    fi
+    echo "  Pulling updates..."
+    git pull --quiet
+    new_tag=$(git describe --tags 2>/dev/null || echo "unknown")
+    if [[ "$current_tag" == "$new_tag" ]]; then
+        echo "  Already up to date (v$current_tag)"
+    else
+        echo "  Updated: v$current_tag → v$new_tag"
+    fi
+}
 
 if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ -f "${BASH_SOURCE[0]}" ]]; then
     # Running from a file (./install.sh)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     # If --clone flag, clone first
     if [[ "$DO_CLONE" == true ]]; then
-        if [[ -d "$CLONE_DIR" ]]; then
+        if [[ -d "$CLONE_DIR/.git" ]]; then
             echo "  $CLONE_DIR already exists — skipping clone"
         else
             git clone "$REPO_URL" "$CLONE_DIR"
@@ -42,39 +69,20 @@ if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ -f "${BASH_SOURCE[0]}" ]]; then
         SCRIPT_DIR="$(pwd)"
     fi
 else
-    # Running from pipe (curl | bash) — auto-clone or update
-    if [[ -d "$CLONE_DIR" ]] && [[ -d "$CLONE_DIR/.git" ]]; then
-        # Existing installation detected — prompt to update
-        cd "$CLONE_DIR"
-        CURRENT_TAG=$(git describe --tags 2>/dev/null || echo "unknown")
-        echo ""
-        echo -e "  Existing installation found: $CLONE_DIR (v$CURRENT_TAG)"
-        if [ -c /dev/tty ] 2>/dev/null; then
-            # Interactive — prompt user
-            echo -ne "  Update to latest version? [Y/n] "
-            read -r response < /dev/tty
-            if [[ "$response" =~ ^[Nn]$ ]]; then
-                echo -e "  Aborted."
-                exit 0
-            fi
-        fi
-        # Pull updates
-        echo "  Pulling updates..."
-        git pull --quiet
-        NEW_TAG=$(git describe --tags 2>/dev/null || echo "unknown")
-        if [[ "$CURRENT_TAG" == "$NEW_TAG" ]]; then
-            echo "  Already up to date (v$CURRENT_TAG)"
-        else
-            echo "  Updated: v$CURRENT_TAG → v$NEW_TAG"
-        fi
-        AUTO_YES=true
+    # Running from pipe (curl | bash)
+    AUTO_YES=true
+    if [[ -d .git ]] && [[ -f install.sh ]]; then
+        # Already inside the repo — update in place
+        update_repo "$(pwd)"
+    elif [[ -d "$CLONE_DIR/.git" ]]; then
+        # Repo exists at default path — update it
+        update_repo "$CLONE_DIR"
     else
-        # Fresh install — clone
+        # Fresh install — clone to default path
         git clone "$REPO_URL" "$CLONE_DIR"
         cd "$CLONE_DIR"
-        AUTO_YES=true
+        SCRIPT_DIR="$(pwd)"
     fi
-    SCRIPT_DIR="$(pwd)"
 fi
 
 # ── Colors (TTY-aware) ──
