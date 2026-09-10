@@ -3,6 +3,16 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.1.2 (2026-09-11)
+
+### Docs
+
+- **README.md**: Added "Which format should I use?" section with a comparison
+  table of PDF, Markdown, DOCX, and HTML — purpose, copy-paste quality, and
+  limitations. Recommends Markdown for copy-paste; notes PDF copy-paste is
+  unreliable due to ligatures and special characters.
+- **guide.cls / technical.cls**: Bumped to v3.1.2.
+
 ## v3.1.1 (2026-09-11)
 
 ### Fixes

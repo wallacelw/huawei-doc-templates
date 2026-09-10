@@ -136,6 +136,21 @@ Each template's Lua filter (e.g. `guide-pandoc.lua`, `technical-pandoc.lua`) is 
 Generated outputs are gitignored (build artifacts). Only the filter, reference
 DOCX, HTML template, and Python script are committed.
 
+### Which format should I use?
+
+Each format serves a different purpose. Choose based on your workflow:
+
+| Format | Best for | Copy-paste | Limitations |
+|---|---|---|---|
+| **PDF** | Reading, printing, visual reference, distribution | Poor — ligatures, special chars, and code blocks do not copy cleanly | Not editable; copy-paste unreliable |
+| **Markdown** | Copy-paste, version control diffs, feeding to AI/LLM tools | Excellent — code blocks and text copy cleanly | No visual styling (brand colors, callout boxes) |
+| **DOCX** | Collaborative editing in Microsoft Word, track changes | Good — but code blocks may lose formatting | Requires Word; styling approximates PDF |
+| **HTML** | Web publishing, online documentation, responsive viewing | Good — browser handles selection | Self-contained file is large; no page breaks |
+
+> **Tip:** If you need to copy commands or code from a document, use the
+> **Markdown** output (`make md`). PDF copy-paste often breaks on ligatures
+> and special characters — MD preserves code blocks as plain text.
+
 ## VS Code (optional)
 
 The repo ships `.vscode/settings.json` pre-configured for **latexmk (XeLaTeX)**.
