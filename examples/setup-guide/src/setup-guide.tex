@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.1.2}
+\setdocversion{3.2.0}
 
 \begin{document}
 
@@ -1080,6 +1080,16 @@ for the full command reference.
   \item Remove the SSH config entry for \inlinecode{flexusx-dev} from your
         Windows SSH config file
         (\inlinecode{C:\textbackslash Users\textbackslash <user>\textbackslash .ssh\textbackslash config}).
+  \item On the Flexus X instance, remove the document templates installation:
+  \begin{code}[bash]
+cd /home/huawei-doc-templates
+./uninstall.sh --all --yes
+  \end{code}
+  \begin{tip}
+  Use \inlinecode{--dry-run} first to preview what will be removed. Add
+  \inlinecode{--packages} to also remove apt packages (texlive, latexmk, fonts),
+  but this will break any other LaTeX documents on the instance.
+  \end{tip}
 \end{enumerate}
 
 \begin{warning}
@@ -1108,6 +1118,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.2.0}{\today}{\item Added \inlinecode{uninstall.sh} script with interactive menu, \inlinecode{--all}, \inlinecode{--yes}, and \inlinecode{--dry-run} flags. Removes opencode skills, .sty modules, HarmonyOS Sans font, /etc/LatexMk fix, and VS Code settings. \item Fixed \inlinecode{install.sh}: show apt-get output (was hidden), suppress fvextra build noise, fix font detection (\inlinecode{fc-list : family}), fix test compilation paths (\inlinecode{src/} subdirectory), fix LTeX extension success/failure reporting. \item Updated Chapter 7 with uninstall instructions.}
   \changelogentry{3.1.2}{\today}{\item Added output format guide to README.md: comparison table of PDF, Markdown, DOCX, and HTML with purpose, copy-paste quality, and limitations. Recommends Markdown for copy-paste.}
   \changelogentry{3.1.1}{\today}{\item Updated MaaS Gateway chapter to v1.10.9: non-interactive mode (\inlinecode{-y}) now suppresses all prompts (prerequisites, tool selection, skill install). \item Changed project clone path from \inlinecode{\textasciitilde} (root home) to \inlinecode{/home} as default working directory. \item Added project standards to AGENTS.md: workflow, end-to-end validation, code style, git conventions, when unsure.}
   \changelogentry{3.1.0}{\today}{\item Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider, flavor \inlinecode{x1.4u.16g}) --- more cost-efficient and robust. Updated creation steps to match Flexus X console order: billing mode first, vCPU/RAM slider (no flavor dropdown), Cloud Eye monitoring (recommended), then instance name and key pair login. Replaced screenshots with Flexus X console images. \item Rewrote Chapter 3: switched from \inlinecode{connect.exe} to \inlinecode{ncat} (from Nmap) as the SSH ProxyCommand. Added explanation of HTTP CONNECT method, why port 4444 works, why ncat is chosen, ncat installation with antivirus exclusions, flag reference table, and improved keepalive settings. \item Restructured chapters: moved SSH config and VS Code connection to new Chapter 4 (Install VS Code and Connect via Remote-SSH). Chapters 5--7 renumbered. \item Added verification checklist tables to all 7 chapters. \item Added mandatory reboot warning in Chapter 2 (SSH port change). Added troubleshooting subsection in Chapter 4 with common SSH connection issues and ncat debugging commands.}

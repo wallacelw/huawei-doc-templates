@@ -50,6 +50,19 @@ to create a new guide document.
 > `pdflatex` won't work — the templates use `fontspec` (system fonts), which
 > requires XeLaTeX. `install.sh` installs and configures XeLaTeX automatically.
 
+### Uninstalling
+
+```bash
+./uninstall.sh                  # interactive menu
+./uninstall.sh --all            # remove everything except apt packages
+./uninstall.sh --all --packages # also remove apt packages (WARNING: breaks other TeX)
+./uninstall.sh --all --dry-run  # preview what would be removed
+```
+
+`uninstall.sh` removes: opencode skills, `.sty` modules from TDS, HarmonyOS Sans
+font, `/etc/LatexMk` xelatex fix, VS Code settings + extensions. Use `--packages`
+to also remove apt packages (texlive, latexmk, fonts, pandoc).
+
 ## Building documents
 
 ## Compilation
@@ -175,6 +188,7 @@ for the technical report template command reference.
 ├── AGENTS.md               # project standards and locked decisions
 ├── CHANGELOG.md            # version history
 ├── install.sh               # one-command setup (clone + install + verify)
+├── uninstall.sh             # remove installed artifacts (interactive or --all)
 ├── Makefile                 # build convenience (make samples/examples/clean)
 ├── build.sh                # interactive format selection menu
 ├── opencode.json            # skill discovery: scans templates/ for SKILL.md

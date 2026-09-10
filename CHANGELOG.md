@@ -3,6 +3,28 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.2.0 (2026-09-11)
+
+### Features
+
+- **uninstall.sh**: New script to remove installed artifacts. Interactive menu
+  or flags (`--all`, `--skills`, `--modules`, `--font`, `--latexmk`, `--vscode`,
+  `--packages`). Supports `--dry-run` and `--yes`. Removes: opencode skills,
+  .sty modules from TDS, HarmonyOS Sans font, /etc/LatexMk fix, VS Code settings
+  + extensions.
+
+### Fixes
+
+- **install.sh**: Show apt-get output (was hidden by `tail -3`).
+- **install.sh**: Suppress fvextra build noise (LaTeX docstrip output).
+- **install.sh**: Fix font detection — use `fc-list : family` instead of `fc-list`.
+- **install.sh**: Fix test compilation paths — look in `src/` subdirectory.
+- **install.sh**: Fix LTeX extension reporting — check output for "successfully
+  installed" instead of relying on exit code.
+- **README.md**: Added uninstalling section + project structure entry.
+- **setup-guide.tex**: Added uninstall instructions to Chapter 7.
+- **guide.cls / technical.cls**: Bumped to v3.2.0.
+
 ## v3.1.2 (2026-09-11)
 
 ### Docs

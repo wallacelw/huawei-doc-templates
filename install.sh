@@ -146,6 +146,7 @@ log_step "Installing TeX Live packages"
 log_desc "xelatex, latexmk, texlive-latex-extra, texlive-lang-portuguese, fonts, poppler-utils"
 
 $SUDO apt-get update -qq
+log_dim "Installing packages..."
 $SUDO apt-get install -y \
     texlive-xetex \
     texlive-latex-extra \
@@ -156,7 +157,7 @@ $SUDO apt-get install -y \
     poppler-utils \
     pandoc \
     python3-docx \
-    2>&1 | tail -3
+    2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd" || true
 
 log_done "TeX Live packages installed"
 
@@ -177,7 +178,7 @@ else
         unzip -q "$FVEXTRA_ZIP" -d "$FVEXTRA_BUILD"
         (
             cd "$FVEXTRA_BUILD/fvextra" || exit 1
-            latex fvextra.ins 2>/dev/null
+            latex fvextra.ins >/dev/null 2>&1
             if [[ -f fvextra.sty ]] && grep -q 'backgroundcolor' fvextra.sty; then
                 FVEXTRA_TARGET="${FVEXTRA_STY:-/usr/share/texlive/texmf-dist/tex/latex/fvextra/fvextra.sty}"
                 $SUDO cp fvextra.sty "$FVEXTRA_TARGET"
@@ -271,7 +272,7 @@ fi
 
 # Font checks
 check_font() {
-    if fc-list | grep -q "$1"; then
+    if fc-list : family | grep -qi "$1"; then
         log_ok "$1: available ($2)"
     else
         log_warn "$1 not found — $2 will fall back to $3"
@@ -407,17 +408,23 @@ fi
 if command -v code &>/dev/null; then
     log_desc "VS Code CLI: $(command -v code)"
 
-    if code --install-extension James-Yu.latex-workshop --force 2>/dev/null; then
+    # LaTeX Workshop (required)
+    local lw_out
+    lw_out=$(code --install-extension James-Yu.latex-workshop --force 2>&1)
+    if echo "$lw_out" | grep -q "successfully installed"; then
         log_ok "Extension: LaTeX Workshop (James-Yu.latex-workshop)"
     else
         log_warn "Failed to install LaTeX Workshop extension"
+        log_dim "$(echo "$lw_out" | tail -2)"
     fi
 
     # Optional: LTeX for spell/grammar checking
-    if code --install-extension valentjn.vscode-ltex --force 2>/dev/null; then
+    local ltex_out
+    ltex_out=$(code --install-extension valentjn.vscode-ltex --force 2>&1)
+    if echo "$ltex_out" | grep -q "successfully installed"; then
         log_ok "Extension: LTeX (valentjn.vscode-ltex)"
     else
-        log_warn "Failed to install LTeX extension (optional — spell/grammar checking)"
+        log_warn "LTeX extension not available (optional — spell/grammar checking)"
     fi
 else
     log_warn "VS Code CLI (code) not found — extensions not installed"
@@ -430,8 +437,9 @@ log_step "Test compilation"
 
 compile_sample() {
     local dir="$1" label="$2" file="${3:-main.tex}"
-    if [[ -f "$dir/$file" ]]; then
-        cd "$dir"
+    local src_dir="$dir/src"
+    if [[ -f "$src_dir/$file" ]]; then
+        cd "$src_dir"
         latexmk -C "$file" 2>/dev/null
         if latexmk "$file" 2>/dev/null; then
             local pdf="${file%.tex}.pdf"
@@ -439,10 +447,10 @@ compile_sample() {
             log_ok "$label: ${pages:-?} pages"
             latexmk -c "$file" 2>/dev/null   # clean aux files only, preserve PDF
         else
-            log_warn "$label compile failed — check $dir/${file%.tex}.log"
+            log_warn "$label compile failed — check $src_dir/${file%.tex}.log"
         fi
     else
-        log_warn "$label not found at $dir — skipping"
+        log_warn "$label not found at $src_dir — skipping"
     fi
 }
 
