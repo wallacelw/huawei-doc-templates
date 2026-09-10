@@ -15,7 +15,26 @@
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ── Detect script location (file or pipe) ──
+CLONE_DIR="/home/huawei-doc-templates"
+
+if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ -f "${BASH_SOURCE[0]}" ]]; then
+    # Running from a file (./uninstall.sh)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    # Running from pipe (curl | bash) — find the repo
+    if [[ -d .git ]] && [[ -f uninstall.sh ]]; then
+        # Already inside the repo
+        SCRIPT_DIR="$(pwd)"
+    elif [[ -d "$CLONE_DIR/.git" ]]; then
+        # Repo exists at default path
+        SCRIPT_DIR="$CLONE_DIR"
+    else
+        echo "Error: Could not find the huawei-doc-templates repository."
+        echo "Run this script from inside the repo, or use: ./uninstall.sh"
+        exit 1
+    fi
+fi
 
 # ── Parse arguments ──
 REMOVE_SKILLS=false

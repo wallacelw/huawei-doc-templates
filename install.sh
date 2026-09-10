@@ -33,25 +33,37 @@ update_repo() {
     local repo_path="$1"
     cd "$repo_path"
     SCRIPT_DIR="$(pwd)"
-    local current_tag new_tag
+    local current_tag latest_tag new_tag
     current_tag=$(git describe --tags 2>/dev/null || echo "unknown")
+    latest_tag=$(git ls-remote --tags --sort=-v:refname origin 2>/dev/null | head -1 | awk -F/ '{print $3}')
+    [ -z "$latest_tag" ] && latest_tag="unknown"
     echo ""
-    echo "  Existing installation found: $repo_path (v$current_tag)"
-    if [ -c /dev/tty ] 2>/dev/null; then
-        echo -ne "  Update to latest version? [Y/n] "
-        read -r response < /dev/tty
-        if [[ "$response" =~ ^[Nn]$ ]]; then
-            echo "  Aborted."
+    echo "  Existing installation found: $repo_path ($current_tag)"
+    if [[ "$current_tag" == "$latest_tag" ]]; then
+        echo "  Already up to date."
+        if [ -c /dev/tty ] 2>/dev/null; then
+            echo -ne "  Re-run install anyway? [y/N] "
+            read -r response < /dev/tty
+            if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                exit 0
+            fi
+        else
             exit 0
         fi
-    fi
-    echo "  Pulling updates..."
-    git pull --quiet
-    new_tag=$(git describe --tags 2>/dev/null || echo "unknown")
-    if [[ "$current_tag" == "$new_tag" ]]; then
-        echo "  Already up to date (v$current_tag)"
     else
-        echo "  Updated: v$current_tag → v$new_tag"
+        echo "  Latest version available: $latest_tag"
+        if [ -c /dev/tty ] 2>/dev/null; then
+            echo -ne "  Update $current_tag → $latest_tag? [Y/n] "
+            read -r response < /dev/tty
+            if [[ "$response" =~ ^[Nn]$ ]]; then
+                echo "  Aborted."
+                exit 0
+            fi
+        fi
+        echo "  Pulling updates..."
+        git pull --quiet
+        new_tag=$(git describe --tags 2>/dev/null || echo "unknown")
+        echo "  Updated: $current_tag → $new_tag"
     fi
 }
 
