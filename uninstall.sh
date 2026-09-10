@@ -109,7 +109,8 @@ if ! any_selected; then
     echo -e "  ${C_BOLD}1${C_RESET}  All installed components (skills, modules, font, VS Code)  ${C_DIM}[safe]${C_RESET}"
     echo -e "  ${C_BOLD}2${C_RESET}  Everything + apt packages  ${C_DIM}(WARNING: breaks other TeX)${C_RESET}"
     echo -e "  ${C_BOLD}3${C_RESET}  Delete repository directory  ${C_DIM}(all files, guides, documents)${C_RESET}"
-    echo -e "  ${C_BOLD}4${C_RESET}  Choose specific components individually"
+    echo -e "  ${C_BOLD}4${C_RESET}  Remove 100% — everything + apt + repo  ${C_DIM}(nuclear option)${C_RESET}"
+    echo -e "  ${C_BOLD}5${C_RESET}  Choose specific components individually"
     echo ""
     echo -n "  Choice: "
     read -r choice || choice=""
@@ -118,7 +119,8 @@ if ! any_selected; then
         1) set_all ;;
         2) set_all; REMOVE_PACKAGES=true ;;
         3) REMOVE_REPO=true ;;
-        4)
+        4) set_all; REMOVE_PACKAGES=true; REMOVE_REPO=true ;;
+        5)
             echo -e "  Select components (comma-separated):"
             echo ""
             echo -e "  ${C_BOLD}1${C_RESET}  opencode skills"

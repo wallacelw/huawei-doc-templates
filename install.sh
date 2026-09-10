@@ -42,14 +42,38 @@ if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ -f "${BASH_SOURCE[0]}" ]]; then
         SCRIPT_DIR="$(pwd)"
     fi
 else
-    # Running from pipe (curl | bash) — auto-clone + non-interactive
-    AUTO_YES=true
-    if [[ -d "$CLONE_DIR" ]]; then
-        echo "  $CLONE_DIR already exists — reusing"
+    # Running from pipe (curl | bash) — auto-clone or update
+    if [[ -d "$CLONE_DIR" ]] && [[ -d "$CLONE_DIR/.git" ]]; then
+        # Existing installation detected — prompt to update
+        cd "$CLONE_DIR"
+        CURRENT_TAG=$(git describe --tags 2>/dev/null || echo "unknown")
+        echo ""
+        echo -e "  Existing installation found: $CLONE_DIR (v$CURRENT_TAG)"
+        if [ -c /dev/tty ] 2>/dev/null; then
+            # Interactive — prompt user
+            echo -ne "  Update to latest version? [Y/n] "
+            read -r response < /dev/tty
+            if [[ "$response" =~ ^[Nn]$ ]]; then
+                echo -e "  Aborted."
+                exit 0
+            fi
+        fi
+        # Pull updates
+        echo "  Pulling updates..."
+        git pull --quiet
+        NEW_TAG=$(git describe --tags 2>/dev/null || echo "unknown")
+        if [[ "$CURRENT_TAG" == "$NEW_TAG" ]]; then
+            echo "  Already up to date (v$CURRENT_TAG)"
+        else
+            echo "  Updated: v$CURRENT_TAG → v$NEW_TAG"
+        fi
+        AUTO_YES=true
     else
+        # Fresh install — clone
         git clone "$REPO_URL" "$CLONE_DIR"
+        cd "$CLONE_DIR"
+        AUTO_YES=true
     fi
-    cd "$CLONE_DIR"
     SCRIPT_DIR="$(pwd)"
 fi
 
