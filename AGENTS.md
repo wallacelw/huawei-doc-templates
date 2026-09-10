@@ -12,6 +12,62 @@ See [README.md](README.md) for project overview, setup, and layout.
 
 ---
 
+## Workflow
+
+1. Make changes.
+2. Validate end-to-end (see below).
+3. Commit with a clear message (see Git conventions).
+4. Push: `git push origin main && git push --tags`.
+5. Repeat.
+
+**Always commit and push after completing a unit of work.** Do not accumulate
+multiple unrelated changes in one commit. Do not leave uncommitted changes.
+
+---
+
+## End-to-End Validation
+
+Before committing, validate the change from **all** relevant perspectives:
+
+1. **Compile + test:** Run `make samples` (compiles all template samples) and
+   `make test` (runs `test-filter.sh`, `round-trip.sh`, `test-docx-fix.sh`,
+   `test-sync.sh`). All must pass. Verify 0 raw LaTeX blocks in output.
+
+2. **Cross-file consistency:** If you changed one file, check every file that
+   references it:
+   - Changed `guide.cls` or `technical.cls`? Check `SKILL.md` command tables,
+     `README.md` (template), both samples (`examples/<name>/pt/` + `en/`),
+     and `setup-guide.tex`.
+   - Changed a `templates/_base/huawei-*.sty` module? Check all templates that
+     load it, all samples, and `setup-guide.tex`.
+   - Changed `pandoc-common.lua`? Check all formats (MD, DOCX, HTML) for all
+     templates — run `make all-formats`.
+   - Changed `docx_fix.py` or `embed-images.py`? Check all templates' DOCX/MD
+     output.
+   - Changed a sample `.tex`? Recompile and verify the PDF, then regenerate
+     multi-format output.
+   - Changed `install.sh`? Check `README.md` setup section and `SKILL.md`
+     quick-start steps.
+   - Added a new command/environment? Document in `SKILL.md` + `README.md`,
+     demonstrate in all samples.
+
+3. **Documentation accuracy:** Read the affected documentation sections and
+   verify they match the actual code. Command tables, examples, and
+   descriptions should reflect current behavior — not stale descriptions.
+
+4. **Edge cases:** Consider:
+   - New template? Verify Makefile auto-discovery, `build.sh` auto-detection,
+     `install.sh` auto-discovery, all test scripts.
+   - New command? Check it renders correctly in PDF, DOCX, MD, and HTML.
+   - New image asset? Verify TEXINPUTS resolution (project `assets/` first,
+     then `common-assets/`).
+   - `[portuguese]` option? Check both PT and EN samples compile.
+   - `[nochangelog]` option? Verify changelog suppression works.
+   - Version bump? Check `test-sync.sh` passes (cls version = setup-guide
+     version = git tag).
+
+---
+
 ## Locked decisions (do NOT change)
 
 These decisions were explicitly made and must not be reversed without user
@@ -355,18 +411,105 @@ The naming convention is critical:
 
 ---
 
+## Code style
+
+- **LaTeX** (`.cls`, `.sty`, `.tex`): 2-space indent, no trailing whitespace,
+  sentences end with period. Use `\newcommand` / `\newenvironment` — never
+  redefine existing commands. Internal macros use `\lg@` prefix.
+- **Shell scripts** (`build.sh`, `install.sh`, `tests/*.sh`):
+  `set -euo pipefail`, 2-space indent, `snake_case` for variables.
+- **Lua filters** (`pandoc-common.lua`, `*-pandoc.lua`): 2-space indent,
+  `snake_case` for locals, global functions for Pandoc callbacks (no return
+  table — see L16).
+- **Python scripts** (`docx_fix.py`, `embed-images.py`): PEP 8, 4-space indent.
+- **Makefile**: tabs for recipe lines (never spaces), target names in
+  `lowercase`, `.PHONY` for non-file targets.
+- **Markdown** (`SKILL.md`, `README.md`, `CHANGELOG.md`): 2-space indent for
+  nested lists, sentences end with period, no trailing whitespace.
+
+---
+
 ## Git conventions
 
-- Commit messages: imperative mood, concise first line, detail in body.
-- Never commit build artifacts (`.aux`, `.log`, `.out`, `.toc`,
-  `.xdv`, `.fls`, `.fdb_latexmk`, `.synctex.gz`). They are in `.gitignore`.
-- **Compiled PDFs are committed**: `examples/guide/pt/main.pdf`,
-  `examples/guide/en/main.pdf`, `examples/setup-guide/setup-guide.pdf`,
-  `examples/technical/pt/main.pdf`, and `examples/technical/en/main.pdf`
-  are committed to git for validation. All other PDFs are gitignored.
-  Always recompile and commit updated PDFs when `.tex` or `.cls` files change.
+### Commit messages
+
+Use imperative mood, capitalized first word, no trailing period. First line
+≤72 characters, blank line, then body with `-` bullets for details:
+
+```
+Add verification checklist tables to all setup-guide chapters
+
+- Chapter 1-7: added hutable with step/what-to-check/expected columns
+- Updated changelog entry for 3.1.0
+- Recompiled all formats (PDF, DOCX, MD, HTML)
+```
+
+Conventional commit style (optional but encouraged):
+
+```
+feat: add technical report template with 5-section structure
+fix: resolve raw LaTeX leak in Markdown output from \menu command
+docs: sync SKILL.md command table with new \imagecap command
+```
+
+### Git author
+
+Before committing, verify the git author matches the expected account:
+
+```bash
+git config user.name   # wallacelw-bot
+git config user.email  # wallacelw-bot@users.noreply.github.com
+```
+
+Never set a local `user.name`/`user.email` that differs from the global
+config. If a local override exists, remove it:
+
+```bash
+git config --local --unset user.name
+git config --local --unset user.email
+```
+
+### Never commit
+
+- Build artifacts: `.aux`, `.log`, `.out`, `.toc`, `.xdv`, `.fls`,
+  `.fdb_latexmk`, `.synctex.gz` (covered by `.gitignore`).
+- Generated multi-format outputs: `.docx`, `.md`, `.html` (build artifacts,
+  except committed sample PDFs below).
+- Secrets: API keys, passwords, tokens, `.env` files.
+- Backup files: `*.bak`, `*.bak.*`.
+
+### Compiled PDFs are committed
+
+`examples/guide/pt/main.pdf`, `examples/guide/en/main.pdf`,
+`examples/setup-guide/setup-guide.pdf`, `examples/technical/pt/main.pdf`,
+and `examples/technical/en/main.pdf` are committed to git for validation.
+All other PDFs are gitignored. Always recompile and commit updated PDFs when
+`.tex` or `.cls` files change.
+
+### Before committing
+
+- Check `git status` — only stage intended files, no stray artifacts.
+- Check `git diff --cached` — review what you are about to commit.
+- Run the full End-to-End Validation section above — not just one perspective.
+- All changes must be validated before pushing. No exceptions.
+
+### Workflow rules
+
 - A commit that breaks sample compilation must not be pushed to `main`.
 - **One change, commit, push.** Make one logical change, commit it, and push
   immediately. Do not accumulate multiple unpushed commits. This keeps the
   remote in sync, makes each change individually revertable, and avoids losing
   work to a local-only working tree.
+- **Batching:** Group related changes into one version bump instead of tagging
+  each incremental step. A setup-guide rewrite across many edits should be
+  one CHANGELOG entry and one tag, not 20 separate tags.
+
+---
+
+## When unsure
+
+- Ask the user before making architectural decisions.
+- Ask before changing locked decisions (L1–L18).
+- Ask before modifying the build system (Makefile, `build.sh`, `install.sh`).
+- Ask before changing the template structure or adding new templates.
+- Do not guess — clarify first.

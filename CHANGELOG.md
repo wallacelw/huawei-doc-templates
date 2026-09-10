@@ -3,6 +3,19 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.1.1 (2026-09-11)
+
+### Fixes
+
+- **setup-guide.tex**: Updated MaaS Gateway chapter to v1.10.9 (non-interactive
+  `-y` mode now suppresses all prompts).
+- **setup-guide.tex**: Changed project clone path from `~` (root home) to
+  `/home` as default working directory.
+- **AGENTS.md**: Added 8 new standards sections adapted from
+  oh-my-coding-maas-gateway: Workflow, End-to-End Validation, Code Style,
+  Commit Messages, Git Author, Never Commit, Before Committing, When Unsure.
+- **guide.cls / technical.cls**: Bumped to v3.1.1.
+
 ## v3.1.0 (2026-09-11)
 
 ### Major: Setup guide rewrite — ECS to Flexus X, ncat proxy, chapter restructure

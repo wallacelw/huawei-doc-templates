@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.1.0}
+\setdocversion{3.1.1}
 
 \begin{document}
 
@@ -719,7 +719,7 @@ The gateway repository is at
 It supports 4 models: \inlinecode{glm-5.2} (1M context),
 \inlinecode{glm-5.1}, \inlinecode{deepseek-v4-pro}, and
 \inlinecode{deepseek-v4-flash} (384K max output). This guide was tested with
-v1.10.0; the installation process is the same for newer versions.
+v1.10.9; the installation process is the same for newer versions.
 \end{infobox}
 
 \subsection{Architecture}
@@ -794,7 +794,9 @@ curl -fsSL https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway
 \end{enumerate}
 
 \begin{tip}
-For non-interactive installs (CI/automation), pass the API key directly:
+For non-interactive installs (CI/automation), pass the API key directly. The
+\inlinecode{-y} flag suppresses all prompts (prerequisites, tool selection,
+skill install):
 \begin{code}
 curl -fsSL https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway/main/scripts/bootstrap.sh | bash -s -- -y --api-key=sk-xxxx
 \end{code}
@@ -877,7 +879,7 @@ times. It merges VS Code settings rather than overwriting them, and
   \item Clone the repository:
 
   \begin{code}[bash]
-cd ~
+cd /home
 git clone https://github.com/wallacelw/huawei-doc-templates.git
 cd huawei-doc-templates
   \end{code}
@@ -940,7 +942,7 @@ directory. Run \inlinecode{make} with no arguments to see all available targets.
   \item In the VS Code remote terminal, launch your coding agent:
 
   \begin{code}[bash]
-cd ~/huawei-doc-templates
+cd /home/huawei-doc-templates
 opencode          # or: codex, claude --bare, pi
   \end{code}
 
@@ -1046,7 +1048,7 @@ for the full command reference.
   \begin{hutable}{|l|l|l|}
     \rowcolor{huaweired} \thd{Step} & \thd{What to check} & \thd{Expected result} \\
     \tbody
-    Repository      & Cloned to \inlinecode{\textasciitilde/huawei-doc-templates} & Files present \\
+    Repository      & Cloned to \inlinecode{/home/huawei-doc-templates} & Files present \\
     install.sh      & Completed without errors                     & Dependencies installed \\
     XeLaTeX         & \inlinecode{xelatex --version} works        & Toolchain ready \\
     latexmk         & \inlinecode{latexmk --version} works        & Build system ready \\
@@ -1106,6 +1108,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.1.1}{\today}{\item Updated MaaS Gateway chapter to v1.10.9: non-interactive mode (\inlinecode{-y}) now suppresses all prompts (prerequisites, tool selection, skill install). \item Changed project clone path from \inlinecode{\textasciitilde} (root home) to \inlinecode{/home} as default working directory. \item Added project standards to AGENTS.md: workflow, end-to-end validation, code style, git conventions, when unsure.}
   \changelogentry{3.1.0}{\today}{\item Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider, flavor \inlinecode{x1.4u.16g}) --- more cost-efficient and robust. Updated creation steps to match Flexus X console order: billing mode first, vCPU/RAM slider (no flavor dropdown), Cloud Eye monitoring (recommended), then instance name and key pair login. Replaced screenshots with Flexus X console images. \item Rewrote Chapter 3: switched from \inlinecode{connect.exe} to \inlinecode{ncat} (from Nmap) as the SSH ProxyCommand. Added explanation of HTTP CONNECT method, why port 4444 works, why ncat is chosen, ncat installation with antivirus exclusions, flag reference table, and improved keepalive settings. \item Restructured chapters: moved SSH config and VS Code connection to new Chapter 4 (Install VS Code and Connect via Remote-SSH). Chapters 5--7 renumbered. \item Added verification checklist tables to all 7 chapters. \item Added mandatory reboot warning in Chapter 2 (SSH port change). Added troubleshooting subsection in Chapter 4 with common SSH connection issues and ncat debugging commands.}
   \changelogentry{3.0.1}{\today}{\item Minor fixes: test-filter.sh auto-discovery, build.sh help text, Makefile aggregate descriptions, 5-section comment correction, CHANGELOG version gap note, callout-in-code fix, CI font auto-discovery, dofile path comment, test-sync.sh header.}
   \changelogentry{3.0.0}{\today}{\item Modular pipeline refactoring: shared Lua filter factory, shared DOCX fix logic, build system auto-discovery, unified format pipeline, GitHub Actions CI.}
