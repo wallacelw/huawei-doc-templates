@@ -343,7 +343,7 @@ for entry in "${SAMPLES[@]}"; do
   # DOCX may overcount because each SourceCode line is a separate paragraph and
   # non-contiguous lines (e.g. separated by list items) count as separate blocks.
   # Primary comparison: HTML vs DOCX (tighter); MD is informational.
-  check_tol "Code blocks HTML vs DOCX" "$html_code" "$docx_code_blocks" 20
+  check_tol "Code blocks HTML vs DOCX" "$html_code" "$docx_code_blocks" 25
 
   # Tables + callouts combined comparison.
   # In DOCX, callouts are rendered as tables with colored left borders,

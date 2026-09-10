@@ -30,6 +30,24 @@ Then open the project in [opencode](https://opencode.ai) and run:
 /skill huawei-template-guide
 ```
 
+### Pre-compiled setup guide
+
+The `setup-guide/` folder at the repo root contains the full installation guide
+in all four output formats. You can read these before cloning the repo to
+understand the setup process:
+
+| File | Best for |
+|---|---|
+| `setup-guide/setup-guide.pdf` | Reading on screen or printing — full visual styling (brand colors, callout boxes, cover page) |
+| `setup-guide/setup-guide.md` | Copy-pasting commands — code blocks copy cleanly; feed to AI/LLM tools |
+| `setup-guide/setup-guide.docx` | Collaborative editing in Microsoft Word — track changes, comments |
+| `setup-guide/setup-guide.html` | Web publishing — responsive, self-contained, viewable in any browser |
+
+> **Tip:** If you need to copy commands from the guide, use the **Markdown**
+> file. PDF copy-paste often breaks on ligatures and special characters.
+
+Run `make setup-guide` to regenerate all four formats after changing the source.
+
 to create a new guide document.
 
 ## Requirements
@@ -189,6 +207,7 @@ for the technical report template command reference.
 ├── CHANGELOG.md            # version history
 ├── install.sh               # one-command setup (clone + install + verify)
 ├── uninstall.sh             # remove installed artifacts (interactive or --all)
+├── setup-guide/             # pre-compiled setup guide (PDF + MD + DOCX + HTML)
 ├── Makefile                 # build convenience (make samples/examples/clean)
 ├── build.sh                # interactive format selection menu
 ├── opencode.json            # skill discovery: scans templates/ for SKILL.md

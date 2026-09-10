@@ -486,6 +486,10 @@ and `examples/technical/en/main.pdf` are committed to git for validation.
 All other PDFs are gitignored. Always recompile and commit updated PDFs when
 `.tex` or `.cls` files change.
 
+The `setup-guide/` folder at the repo root contains pre-compiled setup guide
+in all four formats (PDF, MD, DOCX, HTML) for users to read before cloning.
+These are committed to git. Run `make setup-guide` to regenerate.
+
 ### Before committing
 
 - Check `git status` — only stage intended files, no stray artifacts.

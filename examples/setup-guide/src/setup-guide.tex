@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.2.0}
+\setdocversion{3.3.0}
 
 \begin{document}
 
@@ -1059,14 +1059,103 @@ for the full command reference.
 \end{table}
 
 % =====================================================================
-%  Chapter 7 — Clean Up
+%  Chapter 7 — Operations and Maintenance
 % =====================================================================
-\section{Clean Up}
+\section{Operations and Maintenance}
 
 \begin{objectives}
-  \generalobjective{Remove the resources created in this guide to avoid ongoing
-  charges on your Huawei Cloud account.}
+  \generalobjective{Update, uninstall, or clean up the software and cloud
+  resources created in this guide. All operations in this chapter are optional.}
 \end{objectives}
+
+\subsection{Updating the MaaS Gateway}
+
+To update the oh-my-coding-maas-gateway to a newer version:
+
+\stepbystep
+\begin{enumerate}
+  \item Re-run the bootstrap script in the VS Code remote terminal:
+  \begin{code}[bash]
+curl -fsSL https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway/main/scripts/bootstrap.sh | bash
+  \end{code}
+  \item The installer detects the existing installation, pulls updates, and
+        preserves all secrets, virtual keys, and data.
+  \item To update only the coding tools (without touching the proxy stack):
+  \begin{code}[bash]
+cd /home/oh-my-coding-maas-gateway
+./scripts/update.sh
+  \end{code}
+\end{enumerate}
+
+\subsection{Updating the Document Templates}
+
+To update the Huawei document templates project:
+
+\stepbystep
+\begin{enumerate}
+  \item Pull the latest changes and re-run the installer (idempotent):
+  \begin{code}[bash]
+cd /home/huawei-doc-templates
+git pull
+./install.sh --yes
+  \end{code}
+  \item The installer skips components that are already up to date. New
+        templates, commands, or modules are installed automatically.
+\end{enumerate}
+
+\subsection{Uninstalling the MaaS Gateway}
+
+To remove the oh-my-coding-maas-gateway:
+
+\stepbystep
+\begin{enumerate}
+  \item Run the uninstall script:
+  \begin{code}[bash]
+cd /home/oh-my-coding-maas-gateway
+./scripts/uninstall.sh --all --yes
+  \end{code}
+  \item This stops and removes Docker containers, volumes, and images, removes
+        coding tool configs (opencode, Codex, Claude, Pi), and deletes the
+        repository.
+  \item To remove only specific components:
+  \begin{code}[bash]
+./scripts/uninstall.sh --tool=opencode    # remove one tool
+./scripts/uninstall.sh --docker           # remove Docker stack only
+  \end{code}
+\end{enumerate}
+
+\subsection{Uninstalling the Document Templates}
+
+To remove the Huawei document templates installation:
+
+\stepbystep
+\begin{enumerate}
+  \item Run the uninstall script:
+  \begin{code}[bash]
+cd /home/huawei-doc-templates
+./uninstall.sh --all --yes
+  \end{code}
+  \item This removes: opencode skills, \inlinecode{.sty} modules from TDS,
+        HarmonyOS Sans font, \inlinecode{/etc/LatexMk} fix, and VS Code
+        settings + extensions.
+  \item To preview what would be removed before running:
+  \begin{code}[bash]
+./uninstall.sh --all --dry-run
+  \end{code}
+  \item To also remove apt packages (texlive, latexmk, fonts, pandoc):
+  \begin{code}[bash]
+./uninstall.sh --all --packages --yes
+  \end{code}
+  \begin{warning}
+  Removing apt packages will break any other LaTeX documents on the instance.
+  Only use \inlinecode{--packages} if you are decommissioning the instance.
+  \end{warning}
+\end{enumerate}
+
+\subsection{Deleting cloud resources (optional)}
+
+If you no longer need the Flexus X instance, delete it to stop incurring
+charges:
 
 \stepbystep
 \begin{enumerate}
@@ -1080,16 +1169,6 @@ for the full command reference.
   \item Remove the SSH config entry for \inlinecode{flexusx-dev} from your
         Windows SSH config file
         (\inlinecode{C:\textbackslash Users\textbackslash <user>\textbackslash .ssh\textbackslash config}).
-  \item On the Flexus X instance, remove the document templates installation:
-  \begin{code}[bash]
-cd /home/huawei-doc-templates
-./uninstall.sh --all --yes
-  \end{code}
-  \begin{tip}
-  Use \inlinecode{--dry-run} first to preview what will be removed. Add
-  \inlinecode{--packages} to also remove apt packages (texlive, latexmk, fonts),
-  but this will break any other LaTeX documents on the instance.
-  \end{tip}
 \end{enumerate}
 
 \begin{warning}
@@ -1102,10 +1181,14 @@ configuration.
   \begin{hutable}{|l|l|l|}
     \rowcolor{huaweired} \thd{Step} & \thd{What to check} & \thd{Expected result} \\
     \tbody
-    Flexus X instance & \inlinecode{flexusx-dev} deleted            & No running instance \\
-    EIP               & Released                                    & No public IP charges \\
-    Security group    & \inlinecode{sg-xgate} deleted               & No SG charges \\
-    SSH config        & Host entry removed                          & Clean config \\
+    Gateway update   & Re-run bootstrap                            & New version running \\
+    Templates update & \inlinecode{git pull \&\& ./install.sh}     & New templates available \\
+    Gateway uninstall & \inlinecode{./scripts/uninstall.sh --all}  & Docker stack removed \\
+    Templates uninstall & \inlinecode{./uninstall.sh --all}         & Skills + modules removed \\
+    Cloud cleanup    & \inlinecode{flexusx-dev} deleted            & No running instance \\
+    EIP              & Released                                    & No public IP charges \\
+    Security group   & \inlinecode{sg-xgate} deleted               & No SG charges \\
+    SSH config       & Host entry removed                          & Clean config \\
   \end{hutable}
   \caption{Chapter 7 verification checklist.}
 \end{table}
@@ -1118,6 +1201,8 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.3.0}{\today}{\item Moved pre-compiled setup guide to \inlinecode{setup-guide/} folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to understand the installation process. \item Updated Makefile \inlinecode{setup-guide} target to generate and copy all four formats. \item Updated README with pre-compiled setup guide section and format comparison table. \item Updated .gitignore to track all four formats in \inlinecode{setup-guide/}.}
+  \changelogentry{3.2.1}{\today}{\item Renamed Chapter 7 from ``Clean Up'' to ``Operations and Maintenance''. Added subsections for updating and uninstalling both the MaaS Gateway and the document templates. Added cloud resource cleanup as an optional subsection.}
   \changelogentry{3.2.0}{\today}{\item Added \inlinecode{uninstall.sh} script with interactive menu, \inlinecode{--all}, \inlinecode{--yes}, and \inlinecode{--dry-run} flags. Removes opencode skills, .sty modules, HarmonyOS Sans font, /etc/LatexMk fix, and VS Code settings. \item Fixed \inlinecode{install.sh}: show apt-get output (was hidden), suppress fvextra build noise, fix font detection (\inlinecode{fc-list : family}), fix test compilation paths (\inlinecode{src/} subdirectory), fix LTeX extension success/failure reporting. \item Updated Chapter 7 with uninstall instructions.}
   \changelogentry{3.1.2}{\today}{\item Added output format guide to README.md: comparison table of PDF, Markdown, DOCX, and HTML with purpose, copy-paste quality, and limitations. Recommends Markdown for copy-paste.}
   \changelogentry{3.1.1}{\today}{\item Updated MaaS Gateway chapter to v1.10.9: non-interactive mode (\inlinecode{-y}) now suppresses all prompts (prerequisites, tool selection, skill install). \item Changed project clone path from \inlinecode{\textasciitilde} (root home) to \inlinecode{/home} as default working directory. \item Added project standards to AGENTS.md: workflow, end-to-end validation, code style, git conventions, when unsure.}

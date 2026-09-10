@@ -39,11 +39,15 @@ all: samples examples all-formats ## Compile everything (samples + setup-guide +
 
 samples: $(TEMPLATE_SAMPLES) ## Compile all samples (all templates, PT + EN)
 
-examples: setup-guide ## Compile the setup-guide and copy its PDF to repo root
+examples: setup-guide ## Compile the setup-guide and copy all formats to setup-guide/
 
-setup-guide: ## Compile the setup-guide and copy its PDF to repo root
+setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
 	cd examples/setup-guide/src && latexmk setup-guide.tex
-	cp examples/setup-guide/setup-guide.pdf setup-guide.pdf
+	./build.sh --all examples/setup-guide >/dev/null 2>&1 || true
+	cp examples/setup-guide/setup-guide.pdf  setup-guide/setup-guide.pdf
+	cp examples/setup-guide/setup-guide.md   setup-guide/setup-guide.md
+	cp examples/setup-guide/setup-guide.docx setup-guide/setup-guide.docx
+	cp examples/setup-guide/setup-guide.html setup-guide/setup-guide.html
 
 # ── Per-template rules (auto-generated via eval) ─────────────────────────────
 # Each template gets: <t>-pt, <t>-en, <t>-samples,
@@ -156,9 +160,10 @@ clean: $(TEMPLATE_CLEAN_SAMPLES) clean-examples clean-formats ## Remove all buil
 
 clean-examples: clean-setup-guide ## Clean the setup-guide
 
-clean-setup-guide: ## Clean the setup-guide and the repo-root PDF copy
+clean-setup-guide: ## Clean the setup-guide and the root format copies
 	cd examples/setup-guide/src && latexmk -C setup-guide.tex
-	rm -f examples/setup-guide/setup-guide.pdf setup-guide.pdf
+	rm -f examples/setup-guide/setup-guide.pdf
+	rm -f setup-guide/setup-guide.pdf setup-guide/setup-guide.md setup-guide/setup-guide.docx setup-guide/setup-guide.html
 
 clean-formats: ## Remove generated multi-format files (DOCX/MD/HTML)
 	@for tmpl_dir in templates/*/; do \

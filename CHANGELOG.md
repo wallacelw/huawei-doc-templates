@@ -3,6 +3,31 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.3.0 (2026-09-11)
+
+### Features
+
+- **setup-guide/**: New folder at repo root with pre-compiled setup guide in all
+  four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to
+  understand the installation process. All four files are committed to git.
+- **Makefile**: `setup-guide` target now generates and copies all four formats
+  to `setup-guide/` (was PDF-only to repo root).
+- **README.md**: Added "Pre-compiled setup guide" section with format comparison
+  table and usage recommendations.
+- **.gitignore**: Track all four formats in `setup-guide/` folder.
+- **AGENTS.md**: Updated "Compiled PDFs are committed" section.
+- **guide.cls / technical.cls**: Bumped to v3.3.0.
+
+## v3.2.1 (2026-09-11)
+
+### Features
+
+- **setup-guide.tex**: Renamed Chapter 7 from "Clean Up" to "Operations and
+  Maintenance". Added subsections: updating MaaS Gateway, updating document
+  templates, uninstalling MaaS Gateway, uninstalling document templates,
+  deleting cloud resources (optional). Expanded verification checklist.
+- **guide.cls / technical.cls**: Bumped to v3.2.1.
+
 ## v3.2.0 (2026-09-11)
 
 ### Features
