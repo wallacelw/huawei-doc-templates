@@ -43,6 +43,14 @@ Read all four files before proceeding to the Quick start below.
    - **Title** — e.g. "[Analysis Report] ECS Creation Page Issue"
    - **Language** — English (default) or Portuguese
    - **Project name** — used as the folder name (e.g. `ecs-issue-report`)
+   - **Author(s)** — prompt the user: "Who is the author of this report?"
+     Add `\setdocauthors{Name}` to the preamble. If multiple authors, separate
+     with commas: `\setdocauthors{John Smith, Jane Doe}`. If the user declines,
+     omit the command entirely (nothing shown on the cover).
+   - **Changelog** — prompt the user: "Keep the changelog section? [Y/n]"
+     If yes (default), include the `changelog` environment with an initial
+     `\changelogentry{1.0.0}{\today}{\item Initial version.}`. If no, add the
+     `[nochangelog]` class option to suppress it.
 
 2. **Create a self-contained project folder** at `documents/<project-name>/`:
    - Inside the folder, create:
