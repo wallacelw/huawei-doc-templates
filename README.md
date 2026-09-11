@@ -59,8 +59,6 @@ understand the setup process:
 
 Run `make setup-guide` to regenerate all four formats after changing the source.
 
-to create a new guide document.
-
 ## Requirements
 
 - **OS:** Ubuntu 22.04+ (WSL or native)
@@ -151,9 +149,9 @@ cd examples/setup-guide/src && latexmk setup-guide.tex   # setup guide
 Use `build.sh` to interactively select which output formats to generate:
 
 ```bash
-./build.sh examples/guide/en    # interactive menu for the EN sample
-./build.sh --all examples/guide/en   # non-interactive: all formats
-./build.sh --pdf --docx examples/guide/pt   # non-interactive: PDF + DOCX only
+./scripts/build.sh examples/guide/en    # interactive menu for the EN sample
+./scripts/build.sh --all examples/guide/en   # non-interactive: all formats
+./scripts/build.sh --pdf --docx examples/guide/pt   # non-interactive: PDF + DOCX only
 make menu                       # invokes build.sh in interactive mode
 ```
 
@@ -234,11 +232,12 @@ for the technical report template command reference.
 .
 ├── AGENTS.md               # project standards and locked decisions
 ├── CHANGELOG.md            # version history
-├── install.sh               # one-command setup (clone + install + verify)
-├── uninstall.sh             # remove installed artifacts (interactive or --all)
+├── scripts/                # install, uninstall, and build scripts
+│   ├── install.sh          # one-command setup (clone + install + verify)
+│   ├── uninstall.sh        # remove installed artifacts (interactive or --all)
+│   └── build.sh            # interactive format selection menu
 ├── setup-guide/             # pre-compiled setup guide (PDF + MD + DOCX + HTML)
 ├── Makefile                 # build convenience (make samples/examples/clean)
-├── build.sh                # interactive format selection menu
 ├── opencode.json            # skill discovery: scans templates/ for SKILL.md
 ├── README.md                # this file
 ├── LICENSE                  # MIT

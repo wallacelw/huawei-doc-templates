@@ -60,7 +60,8 @@ Read all four files before proceeding to the Quick start below.
          ```
      - `assets/` subfolder for project-specific images.
 
-3. **Compile and verify** with `cd src/ && latexmk main.tex`.
+3. **Compile and verify** with `make project DIR=documents/<project-name>`
+   (or `cd src/ && latexmk main.tex` from inside the project folder).
 
 4. **Report** the page count and any warnings to the user.
 
@@ -90,6 +91,7 @@ Read all four files before proceeding to the Quick start below.
 \setreportdate{<date>}
 \setreportscenario{<scenario>}
 \setheadertitle{Huawei Cloud -- <short title>}
+\setdocauthors{Author Name}  % optional — omit to hide
 
 \begin{document}
 \makecover
@@ -387,6 +389,26 @@ From the project folder:
 cd src/ && latexmk main.tex          # compile to PDF (XeLaTeX)
 cd src/ && latexmk -C main.tex       # clean all generated files
 ```
+
+### Versioning workflow (for AI-assisted edits)
+
+**Every AI-assisted change to a document must bump the version and add a
+changelog entry.** See the guide SKILL.md for the full workflow.
+
+#### Steps (after making content edits):
+
+1. **Determine the bump level:**
+   - **Patch** (`1.0.0` → `1.0.1`): typo fixes, wording tweaks.
+   - **Minor** (`1.0.0` → `1.1.0`): new sections, new content.
+   - **Major** (`1.0.0` → `2.0.0`): structural changes, breaking reorganization.
+
+2. **Update `\setdocversion{...}`** in the preamble with the new version.
+
+3. **Add a `\changelogentry` at the top of the `changelog` block** (newest first).
+
+4. **Recompile** with `make project DIR=documents/<project-name>`.
+
+5. **Report** the new version number to the user.
 
 ---
 

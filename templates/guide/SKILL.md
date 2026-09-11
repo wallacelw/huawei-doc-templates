@@ -101,6 +101,7 @@ up in the class file and this SKILL.md.
 \setcovertext{Huawei Technologies CO., LTD}
 \setdocversion{1.0.0}
 \setdocdate{\today}
+\setdocauthors{Author Name}  % optional — omit to hide
 
 \begin{document}
 \makecover
