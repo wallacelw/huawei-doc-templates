@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="date" content="2026-09-12" />
+  <title>POC Test Cases — Data Platform Validation</title>
+  <style>
+
+:root {
+--huawei-red: #C7000B;
+--code-bg: #F6F8FA;
+--code-text: #1F2328;
+--link-blue: #0000FF;
+--warning-bg: #FFF8E1;
+--warning-border: #F57C00;
+--tip-bg: #E8F5E9;
+--tip-border: #2E7D32;
+--info-bg: #E3F2FD;
+--info-border: #1565C0;
+--body-text: #1F2328;
+--rule-black: #000000;
+}
+
+body {
+font-family: "HarmonyOS Sans", "Liberation Sans", sans-serif;
+font-size: 10.5pt;
+line-height: 1.6;
+color: var(--body-text);
+max-width: 210mm; 
+margin: 0 auto;
+padding: 2cm 2.5cm;
+background: #fff;
+}
+
+h1 {
+font-size: 20pt;
+font-weight: 700;
+color: var(--body-text);
+border-bottom: 2pt solid var(--huawei-red);
+padding-bottom: 4pt;
+margin-top: 24pt;
+margin-bottom: 12pt;
+}
+h2 {
+font-size: 18pt;
+font-weight: 400;
+color: var(--body-text);
+margin-top: 20pt;
+margin-bottom: 10pt;
+}
+h3 {
+font-size: 16pt;
+font-weight: 400;
+color: var(--body-text);
+margin-top: 16pt;
+margin-bottom: 8pt;
+}
+h4 {
+font-size: 14pt;
+font-weight: 400;
+color: var(--body-text);
+margin-top: 14pt;
+margin-bottom: 6pt;
+}
+
+a {
+color: var(--link-blue);
+text-decoration: none;
+}
+a:hover {
+text-decoration: underline;
+}
+
+code {
+font-family: "Cascadia Code", "DejaVu Sans Mono", monospace;
+font-size: 9pt;
+font-variant-ligatures: none;
+background-color: var(--code-bg);
+color: var(--code-text);
+padding: 1pt 3pt;
+border-radius: 2pt;
+}
+pre {
+background-color: var(--code-bg);
+color: var(--code-text);
+padding: 10pt 12pt;
+border-radius: 3pt;
+overflow-x: auto;
+font-variant-ligatures: none;
+}
+pre code {
+background: none;
+padding: 0;
+border-radius: 0;
+font-size: 9pt;
+}
+
+
+.callout {
+padding: 10pt 14pt 10pt 14pt;
+margin: 10pt 0;
+border-left: 3pt solid var(--rule-black);
+border-radius: 0 3pt 3pt 0;
+}
+.callout.warning {
+background-color: var(--warning-bg);
+border-left-color: var(--warning-border);
+}
+.callout.tip {
+background-color: var(--tip-bg);
+border-left-color: var(--tip-border);
+}
+.callout.infobox {
+background-color: var(--info-bg);
+border-left-color: var(--info-border);
+}
+
+.callout.warning > p:first-child strong {
+color: var(--huawei-red);
+}
+.callout.tip > p:first-child strong {
+color: var(--tip-border);
+}
+.callout.infobox > p:first-child strong {
+color: var(--info-border);
+}
+
+.objectives {
+margin: 10pt 0;
+padding-bottom: 8pt;
+border-bottom: 1.5pt solid var(--rule-black);
+}
+
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 10pt 0;
+}
+th, td {
+border: 1pt solid var(--huawei-red);
+padding: 5pt 8pt;
+text-align: left;
+}
+thead th {
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-weight: 700;
+}
+tbody tr:nth-child(even) {
+background-color: var(--code-bg);
+}
+tbody tr:nth-child(odd) {
+background-color: #FFFFFF;
+}
+
+
+.testcase-table {
+border-collapse: collapse;
+width: 100%;
+margin: 10pt 0;
+}
+.testcase-table th,
+.testcase-table td {
+border: 1pt solid var(--huawei-red);
+padding: 5pt 8pt;
+text-align: left;
+vertical-align: top;
+}
+.testcase-table thead th {
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-weight: 700;
+}
+.testcase-table tbody td:first-child {
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-weight: 700;
+width: 3cm;
+white-space: nowrap;
+}
+.testcase-table tbody tr:nth-child(even) td:last-child {
+background-color: var(--code-bg);
+}
+.testcase-table tbody tr:nth-child(odd) td:last-child {
+background-color: #FFFFFF;
+}
+
+.badge {
+display: inline-block;
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-size: 9pt;
+font-weight: 700;
+padding: 1pt 6pt;
+border-radius: 2pt;
+vertical-align: middle;
+line-height: 1.4;
+}
+
+.changelog {
+margin: 12pt 0;
+padding: 8pt 0;
+border-top: 0.5pt solid var(--rule-black);
+border-bottom: 0.5pt solid var(--rule-black);
+}
+
+img {
+max-width: 100%;
+height: auto;
+display: block;
+margin: 0 auto;
+}
+
+hr {
+border: none;
+border-top: 1pt solid var(--rule-black);
+margin: 16pt 0;
+}
+
+blockquote {
+margin: 10pt 0;
+padding: 6pt 14pt;
+border-left: 3pt solid #CCC;
+color: #555;
+}
+
+.version {
+font-size: 9pt;
+color: #888;
+margin-top: 2pt;
+margin-bottom: 0;
+}
+
+ul, ol {
+margin: 6pt 0;
+padding-left: 24pt;
+}
+li {
+margin-bottom: 3pt;
+}
+
+@media print {
+body {
+max-width: none;
+padding: 0;
+margin: 0;
+}
+h1 {
+page-break-before: always;
+border-bottom: 2pt solid var(--huawei-red);
+}
+h1:first-of-type {
+page-break-before: avoid;
+}
+table, img, pre {
+page-break-inside: avoid;
+}
+a {
+color: var(--link-blue);
+text-decoration: none;
+}
+.badge {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+thead th {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+tbody tr:nth-child(even) {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.callout {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.testcase-table tbody td:first-child {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+}
+
+@media screen and (max-width: 768px) {
+body {
+padding: 12pt 16pt;
+font-size: 11pt;
+}
+h1 { font-size: 18pt; }
+h2 { font-size: 16pt; }
+h3 { font-size: 14pt; }
+h4 { font-size: 12pt; }
+table {
+font-size: 9pt;
+}
+th, td {
+padding: 3pt 5pt;
+}
+pre {
+padding: 8pt;
+font-size: 8pt;
+}
+code {
+font-size: 8pt;
+}
+.testcase-table tbody td:first-child {
+white-space: normal;
+width: auto;
+}
+}
+</style>
+</head>
+<body>
+  <h1 class="title">POC Test Cases — Data Platform Validation</h1>
+  <p class="date">2026-09-12</p>
+<p class="version">v1.0.0</p>
+<div class="callout infobox" role="note" aria-label="Info">
+<p><strong>Info</strong> </p>
+<p>This document demonstrates the <code>testbook</code> template
+(<code>testbook.cls</code>) for Huawei Cloud POC/acceptance test case
+documents. It exercises all available commands and environments: cover
+page, table of contents, test case environment with all field commands,
+objectives block, code blocks, images, callouts, tables, badge, and
+changelog.</p>
+</div>
+<h1 data-number="1" id="test-cases-description"><span class="header-section-number">1</span> Test Cases Description</h1>
+<div class="objectives">
+<p><strong>General Objective:</strong> Validate the Huawei Cloud Data
+Platform deployment for the POC environment, ensuring that all core
+services (DataArts Studio, MRS, OBS, VPC) are provisioned correctly,
+accessible, and functioning as specified in the solution
+architecture.</p>
+<p><strong>Prerequisites:</strong> </p>
+<ul>
+<li><p>Huawei Cloud account with IAM admin privileges in the
+<code>sa-brazil-1</code> region.</p></li>
+<li><p>VPC, subnet, and security groups already created by the
+infrastructure team.</p></li>
+<li><p>DataArts Studio instance (Dayu) provisioned and
+licensed.</p></li>
+<li><p>MRS cluster deployed with the required component stack (HDFS,
+YARN, Spark, Hive).</p></li>
+<li><p>OBS bucket created and accessible with the designated IAM
+policy.</p></li>
+<li><p>Test execution environment with network connectivity to the
+Huawei Cloud Console.</p></li>
+</ul>
+</div>
+<h2 data-number="1.1" id="test-scope"><span class="header-section-number">1.1</span> Test Scope</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>What Should Be Observed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Platform Architecture</td>
+<td>Core services are deployed, healthy, and reachable via the Console
+API.</td>
+</tr>
+<tr class="even">
+<td>Data Engineering</td>
+<td>DataArts Studio pipelines can ingest, transform, and load data into
+the target storage.</td>
+</tr>
+<tr class="odd">
+<td>Data Storage</td>
+<td>OBS buckets and MRS HDFS accept writes/reads with correct
+permissions.</td>
+</tr>
+<tr class="even">
+<td>Security</td>
+<td>IAM policies, VPC isolation, and security group rules enforce the
+intended access control.</td>
+</tr>
+</tbody>
+</table>
+<h2 data-number="1.2" id="preconditions-and-preparations"><span class="header-section-number">1.2</span> Preconditions and
+Preparations</h2>
+<ul>
+<li><p>All infrastructure resources must be provisioned via Terraform
+and the <code>terraform apply</code> output must show zero
+errors.</p></li>
+<li><p>The MRS cluster must be in <strong>Running</strong> state before
+any data engineering test case is executed.</p></li>
+<li><p>Test data files (CSV/JSON) must be uploaded to the designated OBS
+bucket prior to pipeline execution.</p></li>
+<li><p>Each tester must have a personal IAM account with the
+<strong>Dayu_User</strong> role assigned in DataArts Studio.</p></li>
+<li><p>Network firewall rules must allow inbound TCP 22 (SSH) and TCP
+443 (HTTPS) from the test execution subnet.</p></li>
+</ul>
+<h2 data-number="1.3" id="acceptance-method"><span class="header-section-number">1.3</span> Acceptance Method</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Satisfied</td>
+<td>The test case passes fully — observed behavior matches the expected
+result with no deviations.</td>
+</tr>
+<tr class="even">
+<td>Satisfied but with reservations</td>
+<td>The test case passes but minor deviations were observed that do not
+impact the POC objectives (documented in Remarks).</td>
+</tr>
+<tr class="odd">
+<td>Not satisfied</td>
+<td>The test case fails — observed behavior does not match the expected
+result. A defect report must be filed.</td>
+</tr>
+<tr class="even">
+<td>Untested</td>
+<td>The test case could not be executed due to blocking dependencies or
+environment issues.</td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="2" id="platform-architecture"><span class="header-section-number">2</span> Platform Architecture</h1>
+<h2 data-number="2.1"><span class="header-section-number">2.1</span>
+TC-001: Verify MRS cluster deployment and health</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objective</td>
+<td>Confirm that the MapReduce Service (MRS) cluster is deployed</td>
+</tr>
+</tbody>
+</table>
+<pre><code>with the required components (HDFS, YARN, Spark, Hive) and all nodes
+report a healthy status. |</code></pre>
+<div class="line-block">Prerequisites | 1. Terraform infrastructure
+apply completed successfully. 2. MRS cluster ID is available in the
+Terraform output. 3. IAM user has MRS_Viewer or higher role. |<br />
+Procedure | 1. Log in to the Huawei Cloud Console. 2. Navigate to
+Console, MapReduce Service, Clusters. 3. Locate the cluster by its name
+(e.g. mrs-poc-cluster). 4. Verify the cluster status is Running. 5.
+Click the cluster name and review the Component tab — confirm HDFS,
+YARN, Spark, and Hive are listed with status Normal. 6. Review the Node
+tab — confirm all master and core nodes show status Running. |<br />
+Expected Result | 1. Cluster status is Running. 2. All four components
+(HDFS, YARN, Spark, Hive) are listed with status Normal. 3. All nodes
+report status Running with no alarms. |<br />
+Remarks | If any component shows Abnormal, check the MRS alarm page
+before marking the result. |<br />
+Test Result | Pass |</div>
+<h2 data-number="2.2"><span class="header-section-number">2.2</span>
+TC-002: Verify OBS bucket creation and accessibility</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objective</td>
+<td>Confirm that the Object Storage Service (OBS) bucket used</td>
+</tr>
+</tbody>
+</table>
+<pre><code>for the POC data lake is created, has the correct storage class, and
+is accessible with the designated IAM policy. |</code></pre>
+<div class="line-block">Prerequisites | 1. OBS bucket name is defined in
+the Terraform configuration. 2. IAM policy granting read/write access to
+the bucket is attached to the test user. |<br />
+Procedure | 1. Log in to the Console. 2. Navigate to Console, Object
+Storage Service. 3. Locate the bucket (e.g. poc-datalake-raw). 4. Verify
+the storage class is Standard. 5. Upload a test file (test-upload.txt)
+to the bucket. 6. Download the file and compare its content with the
+original. 7. Delete the test file. |<br />
+Expected Result | 1. Bucket exists with storage class Standard. 2. File
+upload completes without error. 3. Downloaded file content matches the
+original. 4. File deletion succeeds. |<br />
+Remarks | OBS eventual consistency may cause a brief delay before a
+newly uploaded object appears in listings. |<br />
+Test Result | Pass |</div>
+<h2 data-number="2.3"><span class="header-section-number">2.3</span>
+TC-003: Verify VPC and security group configuration</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objective</td>
+<td>Confirm that the VPC, subnet, and security groups are</td>
+</tr>
+</tbody>
+</table>
+<pre><code>configured according to the network architecture diagram, with the
+correct CIDR blocks and inbound/outbound rules. |</code></pre>
+<div class="line-block">Prerequisites | 1. VPC and subnet IDs are
+available from the Terraform output. 2. Security group names are
+documented in the solution architecture. |<br />
+Procedure | 1. Log in to the Console. 2. Navigate to Console, Virtual
+Private Cloud, VPCs. 3. Locate the VPC (e.g. vpc-poc) and verify its
+CIDR block matches the architecture (e.g. 10.0.0.0/16). 4. Click the
+subnet and verify its CIDR (e.g. 10.0.1.0/24). 5. Navigate to Security
+Groups and verify inbound rules: TCP 22 from the bastion subnet, TCP 443
+from the corporate proxy. 6. Verify outbound rules allow all traffic
+(default). |<br />
+Expected Result | 1. VPC CIDR is 10.0.0.0/16. 2. Subnet CIDR is
+10.0.1.0/24. 3. Inbound rules match the architecture: TCP 22 and TCP 443
+from the specified sources. 4. Outbound allows all traffic. |<br />
+Remarks | If the security group has additional rules beyond the
+architecture spec, document them in the Remarks field. |<br />
+Test Result | Pass |</div>
+<h1 data-number="3" id="data-engineering"><span class="header-section-number">3</span> Data Engineering</h1>
+<h2 data-number="3.1"><span class="header-section-number">3.1</span>
+TC-004: Verify DataArts Studio workspace creation</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objective</td>
+<td>Confirm that the DataArts Studio (Dayu) instance is</td>
+</tr>
+</tbody>
+</table>
+<pre><code>provisioned, the workspace is accessible, and the designated IAM
+users can log in with the Dayu\_User role. |</code></pre>
+<div class="line-block">Prerequisites | 1. DataArts Studio instance is
+provisioned and its status is Running. 2. Test IAM user has the
+Dayu_User role assigned. |<br />
+Procedure | 1. Log in to the Console with the test IAM user. 2. Navigate
+to Console, DataArts Studio, Workspaces. 3. Locate the workspace
+(e.g. poc-workspace). 4. Click Access Workspace to open the DataArts
+Studio console. 5. Verify the left navigation panel loads with the
+expected modules: Data Integration, Data Development, Data Architecture.
+|<br />
+Expected Result | 1. Workspace is listed and accessible. 2. DataArts
+Studio console opens without errors. 3. All three modules (Data
+Integration, Data Development, Data Architecture) are visible in the
+navigation. |<br />
+Remarks | If the workspace fails to load, check the Dayu instance status
+and the IAM role assignment. |<br />
+Test Result | Pass |</div>
+<h2 data-number="3.2"><span class="header-section-number">3.2</span>
+TC-005: Verify data ingestion pipeline execution</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objective</td>
+<td>Confirm that a DataArts Studio batch pipeline can</td>
+</tr>
+</tbody>
+</table>
+<pre><code>successfully ingest CSV data from OBS, apply a basic transformation,
+and write the result to the target OBS path. |</code></pre>
+<div class="line-block">Prerequisites | 1. TC-004 completed (DataArts
+Studio workspace accessible). 2. Source CSV file (customers.csv) exists
+in the OBS raw bucket. 3. Target OBS path
+(poc-datalake-curated/customers/) is configured. 4. Pipeline
+pl-ingest-customers is published in DataArts Studio. |<br />
+Procedure | 1. In the DataArts Studio console, navigate to Data
+Development. 2. Locate the pipeline pl-ingest-customers in the job list.
+3. Click Run to execute the pipeline. 4. Wait for the pipeline status to
+change to Success (timeout: 10 minutes). 5. Navigate to OBS and verify
+the output file exists in poc-datalake-curated/customers/. 6. Download
+the output file and verify the row count matches the source (no data
+loss). |<br />
+Expected Result | 1. Pipeline execution completes with status Success.
+2. Output file is created in the target OBS path. 3. Row count of the
+output file matches the source file. |<br />
+Remarks | Pipeline execution time varies with data volume. For the POC,
+the source file contains approximately 10,000 rows. |<br />
+Test Result | Pass |</div>
+<h2 data-number="3.3"><span class="header-section-number">3.3</span>
+TC-006: Verify Spark SQL query on MRS cluster</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objective</td>
+<td>Confirm that a Spark SQL query can be executed on the</td>
+</tr>
+</tbody>
+</table>
+<pre><code>MRS cluster to read data from a Hive table and return correct
+results, validating the integration between MRS and the data lake. |</code></pre>
+<div class="line-block">Prerequisites | 1. TC-001 completed (MRS cluster
+healthy). 2. Hive table poc_db.customers exists and contains data loaded
+by the ingestion pipeline. 3. SSH access to the MRS master node is
+configured. |<br />
+Procedure | 1. SSH into the MRS master node. 2. Run the Spark SQL CLI:
+spark-sql –master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true
+-e “SELECT COUNT(*) FROM poc_db.customers;” 3. Verify the returned count
+matches the expected row count (10,000). 4. Run a sample query to verify
+data integrity: spark-sql –master yarn -e “SELECT customer_id, name FROM
+poc_db.customers LIMIT 5;” 5. Confirm the query returns 5 rows with
+non-null values. |<br />
+Expected Result | 1. COUNT(*) returns 10,000. 2. The sample query
+returns 5 rows with valid customer_id and name values. |<br />
+Remarks | If the Spark SQL CLI is not available, use the MRS Spark2x
+component’s web UI to submit the query instead. |<br />
+Test Result | Pass |</div>
+<h1 data-number="4"><span class="header-section-number">4</span>
+Changelog</h1>
+<p><strong>1.0.0</strong>  <em>2026-09-12</em></p>
+<p>Initial version.</p>
+<p>Added Platform Architecture test cases (TC-001 to TC-003).</p>
+<p>Added Data Engineering test cases (TC-004 to TC-006).</p>
+</body>
+</html>

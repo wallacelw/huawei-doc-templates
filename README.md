@@ -221,6 +221,7 @@ extension, open the repo root, and save any `.tex` file to auto-compile.
 |---|---|---|
 | [`guide`](templates/guide/) | `/skill huawei-template-guide` | Huawei Cloud guide — branded cover, header, TOC, giant chapter numbers, objectives block, code blocks, tables, callout boxes, badges, changelog. English (default) and Portuguese. |
 | [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — 5-section structure (problem → root cause analysis → root cause → trigger condition → workaround), branded cover with version info table, TOC, callout boxes, tables, code blocks. PDF via XeLaTeX; DOCX/MD/HTML via Pandoc. Portuguese and English. |
+| [`testbook`](templates/testbook/) | `/skill huawei-template-testbook` | Huawei Cloud test case document — POC/acceptance test cases with structured `testcase` environment (Objective, Prerequisites, Procedure, Expected Result, Remarks, Test Result), test scope and acceptance method tables, `[noanswers]` option for clean handouts. PDF via XeLaTeX; DOCX/MD/HTML via Pandoc. Portuguese and English. |
 
 See [`templates/guide/SKILL.md`](templates/guide/SKILL.md) for the full command
 and environment reference. See [`templates/technical/SKILL.md`](templates/technical/SKILL.md)

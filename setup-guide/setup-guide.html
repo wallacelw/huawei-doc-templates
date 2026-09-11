@@ -273,7 +273,7 @@ font-size: 8pt;
 <body>
   <h1 class="title">Guide: Environment Setup for Huawei Cloud
 Development</h1>
-<p class="version">v3.4.0</p>
+<p class="version">v3.7.0</p>
 <h1 data-number="1" id="provision-a-flexus-x-instance-on-huawei-cloud"><span class="header-section-number">1</span> Provision a Flexus X Instance on
 Huawei Cloud</h1>
 <div class="objectives">
@@ -1214,15 +1214,15 @@ project</h2>
 <li><p>Run the one-liner install (clones the repo to
 <code>/home/huawei-doc-templates</code> and installs everything):</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Info</strong> </p>
 <p>The script installs XeLaTeX, latexmk, fonts (HarmonyOS Sans +
 Cascadia Code), the opencode skills, and configures VS Code LaTeX
-Workshop. When run interactively (<code>./install.sh</code>), it prompts
-for optional components (skills and VS Code — both default to yes). When
-run via one-liner, all components are installed automatically. It is
-idempotent — safe to re-run.</p>
+Workshop. When run interactively (<code>./scripts/install.sh</code>), it
+prompts for optional components (skills and VS Code — both default to
+yes). When run via one-liner, all components are installed
+automatically. It is idempotent — safe to re-run.</p>
 </div>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Info</strong> </p>
@@ -1406,7 +1406,7 @@ Templates</h2>
 <ol>
 <li><p>Re-run the one-liner — it detects the existing installation and
 prompts to update:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The script pulls the latest version, shows the version change
 (<code>v3.3.6 → v3.3.7</code>), and re-runs the installer. New
 templates, commands, or modules are installed automatically.</p></li>
@@ -1433,9 +1433,9 @@ Templates</h2>
 <ol>
 <li><p>Run the uninstall script (interactive menu with 5 options):</p>
 <div class="sourceCode" id="cb34"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span></span></code></pre></div></li>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span></span></code></pre></div></li>
 <li><p>Or use the one-liner:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The interactive menu offers:</p>
 <ul>
 <li><p>Option 1: All installed components (skills, modules, font, VS
@@ -1449,10 +1449,10 @@ option)</p></li>
 <li><p>Option 5: Choose specific components individually</p></li>
 </ul></li>
 <li><p>To preview what would be removed before running:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
 <li><p>To also remove apt packages (texlive, latexmk, fonts,
 pandoc):</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
 <div class="callout warning" role="alert" aria-label="Warning">
 <p><strong>Important</strong> </p>
 <p>Removing apt packages will break any other LaTeX documents on the
@@ -1484,6 +1484,11 @@ your Windows SSH config file
 in the configuration.</p>
 </div>
 <table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th>Step</th>
@@ -1499,7 +1504,7 @@ in the configuration.</p>
 </tr>
 <tr class="even">
 <td>Templates update</td>
-<td><code>git pull &amp;&amp; ./install.sh</code></td>
+<td><code>git pull &amp;&amp; ./scripts/install.sh</code></td>
 <td>New templates available</td>
 </tr>
 <tr class="odd">
@@ -1509,7 +1514,7 @@ in the configuration.</p>
 </tr>
 <tr class="even">
 <td>Templates uninstall</td>
-<td><code>./uninstall.sh –all</code></td>
+<td><code>./scripts/uninstall.sh –all</code></td>
 <td>Skills + modules removed</td>
 </tr>
 <tr class="odd">
@@ -1540,7 +1545,22 @@ or run <code>/skill huawei-template-guide</code> in your coding
 agent.</em></p>
 <h1 data-number="8"><span class="header-section-number">8</span>
 Changelog</h1>
-<p><strong>3.4.0</strong>  <em>2026-09-11</em></p>
+<p><strong>3.7.0</strong>  <em>2026-09-12</em></p>
+<p>Added <code>testbook</code> template for POC/acceptance test case
+documents with <code>testcase</code> environment and
+<code>[noanswers]</code> option.</p>
+<p><strong>3.6.0</strong>  <em>2026-09-12</em></p>
+<p>Added <code>\setdocauthors</code> command and
+<code>[noauthors]</code> class option to both templates. Authors are
+displayed on the cover page (optional — hidden if not set or if
+<code>[noauthors]</code> is passed). Demonstrated in all 4 samples.</p>
+<p><strong>3.5.0</strong>  <em>2026-09-12</em></p>
+<p>Reorganized project structure: moved <code>build.sh</code>,
+<code>install.sh</code>, and <code>uninstall.sh</code> from repo root to
+<code>scripts/</code> directory. Updated all references in Makefile,
+README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use
+<code>main/scripts/install.sh</code>.</p>
+<p><strong>3.4.0</strong>  <em>2026-09-12</em></p>
 <p><code>install.sh</code>: opencode skills and VS Code LaTeX Workshop
 are now optional prompts (default yes). Removed LTeX extension (was
 failing to install). One-liner detects existing installation and prompts
@@ -1552,7 +1572,7 @@ absolute paths to prevent nested clones.</p>
 <p>Updated Chapter 6 with optional component prompts and update
 detection. Updated Chapter 7 with one-liner update/uninstall and full
 menu documentation.</p>
-<p><strong>3.3.0</strong>  <em>2026-09-11</em></p>
+<p><strong>3.3.0</strong>  <em>2026-09-12</em></p>
 <p>Moved pre-compiled setup guide to <code>setup-guide/</code> folder in
 repo root with all four formats (PDF, MD, DOCX, HTML). Users can read
 these before cloning to understand the installation process.</p>
@@ -1562,12 +1582,12 @@ all four formats.</p>
 comparison table.</p>
 <p>Updated .gitignore to track all four formats in
 <code>setup-guide/</code>.</p>
-<p><strong>3.2.1</strong>  <em>2026-09-11</em></p>
+<p><strong>3.2.1</strong>  <em>2026-09-12</em></p>
 <p>Renamed Chapter 7 from “Clean Up” to “Operations and Maintenance”.
 Added subsections for updating and uninstalling both the MaaS Gateway
 and the document templates. Added cloud resource cleanup as an optional
 subsection.</p>
-<p><strong>3.2.0</strong>  <em>2026-09-11</em></p>
+<p><strong>3.2.0</strong>  <em>2026-09-12</em></p>
 <p>Added <code>uninstall.sh</code> script with interactive menu,
 <code>–all</code>, <code>–yes</code>, and <code>–dry-run</code> flags.
 Removes opencode skills, .sty modules, HarmonyOS Sans font, /etc/LatexMk
@@ -1578,11 +1598,11 @@ suppress fvextra build noise, fix font detection
 (<code>src/</code> subdirectory), fix LTeX extension success/failure
 reporting.</p>
 <p>Updated Chapter 7 with uninstall instructions.</p>
-<p><strong>3.1.2</strong>  <em>2026-09-11</em></p>
+<p><strong>3.1.2</strong>  <em>2026-09-12</em></p>
 <p>Added output format guide to README.md: comparison table of PDF,
 Markdown, DOCX, and HTML with purpose, copy-paste quality, and
 limitations. Recommends Markdown for copy-paste.</p>
-<p><strong>3.1.1</strong>  <em>2026-09-11</em></p>
+<p><strong>3.1.1</strong>  <em>2026-09-12</em></p>
 <p>Updated MaaS Gateway chapter to v1.10.9: non-interactive mode
 (<code>-y</code>) now suppresses all prompts (prerequisites, tool
 selection, skill install).</p>
@@ -1590,7 +1610,7 @@ selection, skill install).</p>
 <code>/home</code> as default working directory.</p>
 <p>Added project standards to AGENTS.md: workflow, end-to-end
 validation, code style, git conventions, when unsure.</p>
-<p><strong>3.1.0</strong>  <em>2026-09-11</em></p>
+<p><strong>3.1.0</strong>  <em>2026-09-12</em></p>
 <p>Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider,
 flavor <code>x1.4u.16g</code>) — more cost-efficient and robust. Updated
 creation steps to match Flexus X console order: billing mode first,
@@ -1609,16 +1629,16 @@ renumbered.</p>
 <p>Added mandatory reboot warning in Chapter 2 (SSH port change). Added
 troubleshooting subsection in Chapter 4 with common SSH connection
 issues and ncat debugging commands.</p>
-<p><strong>3.0.1</strong>  <em>2026-09-11</em></p>
+<p><strong>3.0.1</strong>  <em>2026-09-12</em></p>
 <p>Minor fixes: test-filter.sh auto-discovery, build.sh help text,
 Makefile aggregate descriptions, 5-section comment correction, CHANGELOG
 version gap note, callout-in-code fix, CI font auto-discovery, dofile
 path comment, test-sync.sh header.</p>
-<p><strong>3.0.0</strong>  <em>2026-09-11</em></p>
+<p><strong>3.0.0</strong>  <em>2026-09-12</em></p>
 <p>Modular pipeline refactoring: shared Lua filter factory, shared DOCX
 fix logic, build system auto-discovery, unified format pipeline, GitHub
 Actions CI.</p>
-<p><strong>2.16.0</strong>  <em>2026-09-11</em></p>
+<p><strong>2.16.0</strong>  <em>2026-09-12</em></p>
 <p>Updated to match template v2.16.0 — Lua filter fixes, build system
 updates, and technical template parity improvements.</p>
 <p><strong>2.13.0</strong>  <em>2026-08-24</em></p>

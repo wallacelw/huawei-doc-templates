@@ -1,0 +1,189 @@
+% =====================================================================
+%  Test Book — Amostra em português (verifica todos os recursos do template)
+%  Compilar com XeLaTeX:
+%      xelatex main.tex   (executar 2x para o sumário)
+%
+%  Opções de classe:
+%    portuguese  — rótulos em português (padrão: inglês)
+%    notime      — oculta o horário de compilação na capa
+%    nochangelog — desabilita a renderização do histórico de versões
+%    noauthors   — oculta os autores na capa
+%    noanswers   — oculta Observações e Resultado do Teste nos casos de teste
+% =====================================================================
+\documentclass[portuguese]{testbook}
+
+% --- Configuração do documento --------------------------------------
+\settestbooktitle{Casos de Teste POC — Validação da Plataforma de Dados}
+\setheadertitle{Huawei Cloud -- Casos de Teste POC}
+\setcovertext{Huawei Technologies CO., LTD}
+\setdocversion{1.0.0}
+\setdocdate{\today}
+\setdocauthors{Wallace Wu}
+
+\begin{document}
+
+% ---- CAPA -----------------------------------------------------------
+\makecover
+
+% ---- SUMÁRIO --------------------------------------------------------
+\maketoc
+
+% ---- CORPO (reinicia a numeração de páginas em 1) -------------------
+\startbody
+
+\begin{infobox}
+Este documento demonstra o template \inlinecode{testbook} (\inlinecode{testbook.cls}) para
+documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
+comandos e ambientes disponíveis: capa, sumário, ambiente de caso de teste
+com todos os comandos de campo, bloco de objetivos, blocos de código, imagens,
+caixas de destaque, tabelas, badge e histórico de versões.
+\end{infobox}
+
+% =====================================================================
+%  Seção 1 — Descrição dos Casos de Teste
+% =====================================================================
+\section{Descrição dos Casos de Teste}
+
+\begin{objectives}
+  \generalobjective{Validar a implantação da Plataforma de Dados do Huawei Cloud para o
+    ambiente de POC, garantindo que todos os serviços principais (DataArts Studio, MRS,
+    OBS, VPC) estejam provisionados corretamente, acessíveis e funcionando conforme
+    especificado na arquitetura da solução.}
+
+  \prerequisites
+  \begin{itemize}
+    \item Conta Huawei Cloud com privilégios de administrador IAM na região \inlinecode{sa-brazil-1}.
+    \item VPC, sub-rede e grupos de segurança já criados pela equipe de infraestrutura.
+    \item Instância do DataArts Studio (Dayu) provisionada e licenciada.
+    \item Cluster MRS implantado com a pilha de componentes necessária (HDFS, YARN, Spark, Hive).
+    \item Bucket OBS criado e acessível com a política IAM designada.
+    \item Ambiente de execução de testes com conectividade de rede ao Console do Huawei Cloud.
+  \end{itemize}
+\end{objectives}
+
+\subsection{Escopo dos Testes}
+
+\begin{table}[H]
+  \begin{hutable}{|l|p{0.72\textwidth}|}
+    \rowcolor{huaweired} \thd{Domínio} & \thd{O Que Deve Ser Observado} \\
+    \tbody
+    Arquitetura da Plataforma & Os serviços principais estão implantados, saudáveis e acessíveis via API do Console. \\
+    Engenharia de Dados & Os pipelines do DataArts Studio conseguem ingerir, transformar e carregar dados no armazenamento de destino. \\
+    Armazenamento de Dados & Os buckets OBS e o HDFS do MRS aceitam escritas/leituras com as permissões corretas. \\
+    Segurança & As políticas IAM, o isolamento VPC e as regras dos grupos de segurança impõem o controle de acesso pretendido. \\
+  \end{hutable}
+  \caption{Escopo dos testes por domínio.}
+\end{table}
+
+\subsection{Pré-condições e Preparações}
+
+\begin{itemize}
+  \item Todos os recursos de infraestrutura devem ser provisionados via Terraform e a saída de \inlinecode{terraform apply} deve apresentar zero erros.
+  \item O cluster MRS deve estar no estado \textbf{Executando} antes da execução de qualquer caso de teste de engenharia de dados.
+  \item Os arquivos de dados de teste (CSV/JSON) devem ser carregados no bucket OBS designado antes da execução dos pipelines.
+  \item Cada testador deve ter uma conta IAM pessoal com a função \textbf{Dayu\_User} atribuída no DataArts Studio.
+  \item As regras de firewall de rede devem permitir TCP 22 (SSH) e TCP 443 (HTTPS) de entrada a partir da sub-rede de execução de testes.
+\end{itemize}
+
+\subsection{Método de Aceitação}
+
+\begin{table}[H]
+  \begin{hutable}{|l|p{0.72\textwidth}|}
+    \rowcolor{huaweired} \thd{Resultado} & \thd{Explicação} \\
+    \tbody
+    Satisfeito & O caso de teste passa completamente — o comportamento observado corresponde ao resultado esperado sem desvios. \\
+    Satisfeito com ressalvas & O caso de teste passa, mas desvios menores foram observados que não impactam os objetivos da POC (documentados em Observações). \\
+    Não satisfeito & O caso de teste falha — o comportamento observado não corresponde ao resultado esperado. Um relatório de defeito deve ser registrado. \\
+    Não testado & O caso de teste não pôde ser executado devido a dependências bloqueantes ou problemas de ambiente. \\
+  \end{hutable}
+  \caption{Critérios de aceitação.}
+\end{table}
+
+% =====================================================================
+%  Seção 2 — Arquitetura da Plataforma
+% =====================================================================
+\section{Arquitetura da Plataforma}
+
+\begin{testcase}{TC-001: Verificar implantação e saúde do cluster MRS}
+  \testobjective{Confirmar que o cluster MapReduce Service (MRS) está implantado
+    com os componentes necessários (HDFS, YARN, Spark, Hive) e que todos os nós
+    apresentam status saudável.}
+  \testprerequisites{1. Aplicação da infraestrutura Terraform concluída com sucesso. \\ 2. ID do cluster MRS disponível na saída do Terraform. \\ 3. Usuário IAM possui função \textbf{MRS\_Viewer} ou superior.}
+  \testprocedure{1. Acessar o Console do Huawei Cloud. \\ 2. Navegar em \menu{Console, MapReduce Service, Clusters}. \\ 3. Localizar o cluster pelo nome (ex.: \inlinecode{mrs-poc-cluster}). \\ 4. Verificar se o status do cluster é \textbf{Executando}. \\ 5. Clicar no nome do cluster e revisar a aba \textbf{Componente} — confirmar que HDFS, YARN, Spark e Hive estão listados com status \textbf{Normal}. \\ 6. Revisar a aba \textbf{Nó} — confirmar que todos os nós master e core apresentam status \textbf{Executando}.}
+  \testexpected{1. Status do cluster é \textbf{Executando}. \\ 2. Todos os quatro componentes (HDFS, YARN, Spark, Hive) estão listados com status \textbf{Normal}. \\ 3. Todos os nós apresentam status \textbf{Executando} sem alarmes.}
+  \testremarks{Se algum componente apresentar status \textbf{Anormal}, verificar a página de alarmes do MRS antes de registrar o resultado.}
+  \testresult{Aprovado}
+\end{testcase}
+
+\begin{testcase}{TC-002: Verificar criação e acessibilidade do bucket OBS}
+  \testobjective{Confirmar que o bucket do Object Storage Service (OBS) utilizado
+    para o data lake da POC está criado, possui a classe de armazenamento correta
+    e é acessível com a política IAM designada.}
+  \testprerequisites{1. Nome do bucket OBS definido na configuração Terraform. \\ 2. Política IAM concedendo acesso de leitura/escrita ao bucket está anexada ao usuário de teste.}
+  \testprocedure{1. Acessar o Console. \\ 2. Navegar em \menu{Console, Object Storage Service}. \\ 3. Localizar o bucket (ex.: \inlinecode{poc-datalake-raw}). \\ 4. Verificar se a classe de armazenamento é \textbf{Standard}. \\ 5. Carregar um arquivo de teste (\inlinecode{test-upload.txt}) no bucket. \\ 6. Baixar o arquivo e comparar seu conteúdo com o original. \\ 7. Excluir o arquivo de teste.}
+  \testexpected{1. O bucket existe com classe de armazenamento \textbf{Standard}. \\ 2. O carregamento do arquivo conclui sem erro. \\ 3. O conteúdo do arquivo baixado corresponde ao original. \\ 4. A exclusão do arquivo é realizada com sucesso.}
+  \testremarks{A consistência eventual do OBS pode causar um breve atraso antes que um objeto recém-carregado apareça nas listagens.}
+  \testresult{Aprovado}
+\end{testcase}
+
+\begin{testcase}{TC-003: Verificar configuração de VPC e grupo de segurança}
+  \testobjective{Confirmar que a VPC, a sub-rede e os grupos de segurança estão
+    configurados conforme o diagrama de arquitetura de rede, com os blocos CIDR
+    e regras de entrada/saída corretos.}
+  \testprerequisites{1. IDs da VPC e da sub-rede disponíveis na saída do Terraform. \\ 2. Nomes dos grupos de segurança documentados na arquitetura da solução.}
+  \testprocedure{1. Acessar o Console. \\ 2. Navegar em \menu{Console, Virtual Private Cloud, VPCs}. \\ 3. Localizar a VPC (ex.: \inlinecode{vpc-poc}) e verificar se o bloco CIDR corresponde à arquitetura (ex.: \inlinecode{10.0.0.0/16}). \\ 4. Clicar na sub-rede e verificar seu CIDR (ex.: \inlinecode{10.0.1.0/24}). \\ 5. Navegar até \textbf{Security Groups} e verificar regras de entrada: TCP 22 da sub-rede bastion, TCP 443 do proxy corporativo. \\ 6. Verificar se as regras de saída permitem todo o tráfego (padrão).}
+  \testexpected{1. CIDR da VPC é \inlinecode{10.0.0.0/16}. \\ 2. CIDR da sub-rede é \inlinecode{10.0.1.0/24}. \\ 3. Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443 das origens especificadas. \\ 4. Saída permite todo o tráfego.}
+  \testremarks{Se o grupo de segurança possuir regras adicionais além da especificação da arquitetura, documentá-las no campo de Observações.}
+  \testresult{Aprovado}
+\end{testcase}
+
+% =====================================================================
+%  Seção 3 — Engenharia de Dados
+% =====================================================================
+\section{Engenharia de Dados}
+
+\begin{testcase}{TC-004: Verificar criação do workspace do DataArts Studio}
+  \testobjective{Confirmar que a instância do DataArts Studio (Dayu) está
+    provisionada, o workspace está acessível e os usuários IAM designados
+    conseguem acessar com a função \textbf{Dayu\_User}.}
+  \testprerequisites{1. Instância do DataArts Studio provisionada e com status \textbf{Executando}. \\ 2. Usuário IAM de teste possui a função \textbf{Dayu\_User} atribuída.}
+  \testprocedure{1. Acessar o Console com o usuário IAM de teste. \\ 2. Navegar em \menu{Console, DataArts Studio, Workspaces}. \\ 3. Localizar o workspace (ex.: \inlinecode{poc-workspace}). \\ 4. Clicar em \textbf{Acessar Workspace} para abrir o console do DataArts Studio. \\ 5. Verificar se o painel de navegação à esquerda carrega com os módulos esperados: \textbf{Integração de Dados}, \textbf{Desenvolvimento de Dados}, \textbf{Arquitetura de Dados}.}
+  \testexpected{1. O workspace está listado e acessível. \\ 2. O console do DataArts Studio abre sem erros. \\ 3. Todos os três módulos (Integração de Dados, Desenvolvimento de Dados, Arquitetura de Dados) estão visíveis na navegação.}
+  \testremarks{Se o workspace falhar ao carregar, verificar o status da instância Dayu e a atribuição da função IAM.}
+  \testresult{Aprovado}
+\end{testcase}
+
+\begin{testcase}{TC-005: Verificar execução do pipeline de ingestão de dados}
+  \testobjective{Confirmar que um pipeline em lote do DataArts Studio consegue
+    ingerir dados CSV do OBS, aplicar uma transformação básica
+    e gravar o resultado no caminho OBS de destino.}
+  \testprerequisites{1. TC-004 concluído (workspace do DataArts Studio acessível). \\ 2. Arquivo CSV de origem (\inlinecode{customers.csv}) existe no bucket OBS raw. \\ 3. Caminho OBS de destino (\inlinecode{poc-datalake-curated/customers/}) está configurado. \\ 4. Pipeline \inlinecode{pl-ingest-customers} está publicado no DataArts Studio.}
+  \testprocedure{1. No console do DataArts Studio, navegar até \textbf{Desenvolvimento de Dados}. \\ 2. Localizar o pipeline \inlinecode{pl-ingest-customers} na lista de jobs. \\ 3. Clicar em \textbf{Executar} para iniciar o pipeline. \\ 4. Aguardar o status do pipeline mudar para \textbf{Sucesso} (timeout: 10 minutos). \\ 5. Navegar até o OBS e verificar se o arquivo de saída existe em \inlinecode{poc-datalake-curated/customers/}. \\ 6. Baixar o arquivo de saída e verificar se a contagem de linhas corresponde à origem (sem perda de dados).}
+  \testexpected{1. A execução do pipeline conclui com status \textbf{Sucesso}. \\ 2. O arquivo de saída é criado no caminho OBS de destino. \\ 3. A contagem de linhas do arquivo de saída corresponde ao arquivo de origem.}
+  \testremarks{O tempo de execução do pipeline varia conforme o volume de dados. Para a POC, o arquivo de origem contém aproximadamente 10.000 linhas.}
+  \testresult{Aprovado}
+\end{testcase}
+
+\begin{testcase}{TC-006: Verificar consulta Spark SQL no cluster MRS}
+  \testobjective{Confirmar que uma consulta Spark SQL pode ser executada no
+    cluster MRS para ler dados de uma tabela Hive e retornar resultados
+    corretos, validando a integração entre o MRS e o data lake.}
+  \testprerequisites{1. TC-001 concluído (cluster MRS saudável). \\ 2. Tabela Hive \inlinecode{poc\_db.customers} existe e contém dados carregados pelo pipeline de ingestão. \\ 3. Acesso SSH ao nó master do MRS configurado.}
+  \testprocedure{1. Acessar o nó master do MRS via SSH. \\ 2. Executar a CLI do Spark SQL: \inlinecode{spark-sql --master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc\_db.customers;"} \\ 3. Verificar se a contagem retornada corresponde ao esperado (10.000). \\ 4. Executar uma consulta de amostra para verificar a integridade dos dados: \inlinecode{spark-sql --master yarn -e "SELECT customer\_id, name FROM poc\_db.customers LIMIT 5;"} \\ 5. Confirmar que a consulta retorna 5 linhas com valores não nulos.}
+  \testexpected{1. \inlinecode{COUNT(*)} retorna 10.000. \\ 2. A consulta de amostra retorna 5 linhas com valores válidos de \inlinecode{customer\_id} e \inlinecode{name}.}
+  \testremarks{Se a CLI do Spark SQL não estiver disponível, utilizar a interface web do componente Spark2x do MRS para submeter a consulta.}
+  \testresult{Aprovado}
+\end{testcase}
+
+% =====================================================================
+%  Histórico de versões
+% =====================================================================
+\begin{changelog}
+  \changelogentry{1.0.0}{\today}{
+    \item Versão inicial.
+    \item Adicionados casos de teste de Arquitetura da Plataforma (TC-001 a TC-003).
+    \item Adicionados casos de teste de Engenharia de Dados (TC-004 a TC-006).
+  }
+\end{changelog}
+
+\end{document}

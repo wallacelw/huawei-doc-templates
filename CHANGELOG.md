@@ -3,6 +3,21 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.7.0 (2026-09-12)
+
+### Features
+
+- **testbook template**: New template for POC/acceptance test case documents.
+  - `testcase` environment with structured fields: Objective, Prerequisites,
+    Procedure, Expected Result, Remarks, Test Result.
+  - `[noanswers]` class option to hide Remarks and Test Result (clean handouts).
+  - Test scope and acceptance method tables.
+  - Language-aware labels (English/Portuguese).
+  - Multi-format output (PDF, DOCX, MD, HTML) via Pandoc.
+  - Samples in both PT and EN (20 pages each).
+  - SKILL.md with full command reference and quick start.
+- **guide.cls / technical.cls**: Bumped to v3.7.0.
+
 ## v3.6.0 (2026-09-11)
 
 ### Features

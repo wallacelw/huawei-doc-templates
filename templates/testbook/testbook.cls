@@ -1,24 +1,18 @@
-%% guide.cls
+%% testbook.cls
 %% =====================================================================
-%%  LaTeX class for Huawei Cloud guides
-%%  Requires XeLaTeX or LuaLaTeX (due to fontspec).
+%%  Huawei Test Book Template — POC/acceptance test case documents.
 %%
-%%  v2.10.0 — Decomposed into shared modules (templates/_base/huawei-*.sty):
-%%    huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
-%%    huawei-code, huawei-callouts, huawei-images, huawei-changelog,
-%%    huawei-shared.
-%%  This class loads all packages, then all modules, then applies
-%%  template-specific formatting (titles, TOC, cover).
-%%
-%%  Fonts:
-%%    - Body : HarmonyOS Sans (fallback: Liberation Sans)
-%%    - Code : Cascadia Code (fallback: DejaVu Sans Mono)
+%%  Structure:
+%%    1. Cover page (title, version, date, authors)
+%%    2. Table of contents
+%%    3. Test cases description (objective, scope, preconditions, acceptance)
+%%    4. Test case sections organized by domain (H1)
+%%    5. Each test case uses a `testcase` environment (table format)
+%%    6. Changelog (optional)
 %%
 %%  Class options:
 %%    portuguese  -> uses Portuguese for predefined labels and babel.
 %%                   (default: English)
-%%    indentbody  -> indents all running text by \contentindent.
-%%                   (default: off)
 %%    notime      -> hides the compilation time on the cover.
 %%                   (default: show time)
 %%    nochangelog -> suppresses the changelog section entirely
@@ -26,10 +20,12 @@
 %%                   (default: show changelog)
 %%    noauthors   -> hides the authors on the cover page.
 %%                   (default: show authors if set)
+%%    noanswers   -> hides Remarks and Test Result rows in test cases.
+%%                   (default: show all rows)
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{guide}[2026/09/12 Huawei Guide template v3.7.0]
+\ProvidesClass{testbook}[2026/09/12 Huawei Test Book template v3.7.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -42,6 +38,8 @@
 \DeclareOption{nochangelog}{\@changelogfalse}
 \newif\if@showauthors \@showauthorstrue
 \DeclareOption{noauthors}{\@showauthorsfalse}
+\newif\if@showanswers \@showanswerstrue
+\DeclareOption{noanswers}{\@showanswersfalse}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 \LoadClass[a4paper,10pt]{article}
@@ -59,6 +57,7 @@
 \RequirePackage{enumitem}
 \RequirePackage{fancyvrb}
 \RequirePackage{fvextra}
+\fvset{breaklines,breakanywhere}
 \RequirePackage[most]{tcolorbox}
 \RequirePackage{etoolbox}
 \RequirePackage{booktabs}
@@ -86,23 +85,41 @@
 \RequirePackage{huawei-shared}
 
 % =====================================================================
-%  TITLES (headings)
+%  LANGUAGE-AWARE LABELS
+% =====================================================================
+\if@portuguese
+  \newcommand{\lg@testcases}{Casos de Teste}
+  \newcommand{\lg@objective}{Objetivo}
+  \newcommand{\lg@prerequisites}{Pré-requisitos}
+  \newcommand{\lg@procedure}{Procedimento}
+  \newcommand{\lg@expectedresult}{Resultado Esperado}
+  \newcommand{\lg@remarks}{Observações}
+  \newcommand{\lg@testresult}{Resultado do Teste}
+\else
+  \newcommand{\lg@testcases}{Test Cases}
+  \newcommand{\lg@objective}{Objective}
+  \newcommand{\lg@prerequisites}{Prerequisites}
+  \newcommand{\lg@procedure}{Procedure}
+  \newcommand{\lg@expectedresult}{Expected Result}
+  \newcommand{\lg@remarks}{Remarks}
+  \newcommand{\lg@testresult}{Test Result}
+\fi
+
+% =====================================================================
+%  TITLES (headings) — same style as guide.cls for consistency
 % =====================================================================
 \setcounter{secnumdepth}{4}
 
-% --- H1: big number (56pt) left-aligned + 20pt bold right-aligned title + rule
 \titleformat{\section}[block]
   {\normalfont\bfseries\fontsize{20}{25}\selectfont}
   {\fontsize{56}{56}\selectfont\thesection}
   {0pt}
   {\hfill}
   [\vspace{2pt}{\color{huaweired}\titlerule[1.5pt]}\vspace{14pt}]
-\titlespacing*{\section}{0pt}{0pt}{30pt} % before 0 / after 30pt
-% Each \section (chapter) starts on a new page
+\titlespacing*{\section}{0pt}{0pt}{30pt}
 \let\lg@origsection\section
 \renewcommand{\section}{\clearpage\lg@origsection}
 
-% --- H2/H3/H4: regular, decreasing sizes, left-aligned
 \titleformat{\subsection}
   {\normalfont\fontsize{18}{22}\selectfont}{\thesubsection}{0.4em}{}
 \titlespacing*{\subsection}{0pt}{30pt}{6pt}
@@ -115,51 +132,45 @@
   {\normalfont\fontsize{14}{18}\selectfont}{\theparagraph}{0.4em}{}
 \titlespacing*{\paragraph}{0pt}{8pt}{4pt}
 
-% Numbering: 1  /  1.1  /  1.1.1  /  1.1.1.1
 \renewcommand{\thesection}{\arabic{section}}
 \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
 \renewcommand{\theparagraph}{\thesubsubsection.\arabic{paragraph}}
 
 % =====================================================================
-%  TABLE OF CONTENTS — right-aligned title + rule; dotted leaders
+%  TABLE OF CONTENTS
 % =====================================================================
 \renewcommand{\contentsname}{\lg@toc}
 \renewcommand{\cfttoctitlefont}{\hfill\normalfont\bfseries\fontsize{22}{26}\selectfont}
 \renewcommand{\cftaftertoctitle}{\par\vspace{2pt}%
   {\color{ruleblack}\hrule height 0.5pt}\vspace{6pt}}
-% Level 1: bold 12pt
 \renewcommand{\cftsecfont}{\bfseries\fontsize{12}{15}\selectfont}
 \renewcommand{\cftsecpagefont}{\bfseries\fontsize{12}{15}\selectfont}
 \renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}}
-% Levels 2 and 3: normal 10pt
 \renewcommand{\cftsubsecfont}{\fontsize{10}{13}\selectfont}
 \renewcommand{\cftsubsecpagefont}{\fontsize{10}{13}\selectfont}
 \renewcommand{\cftsubsubsecfont}{\fontsize{10}{13}\selectfont}
 \renewcommand{\cftsubsubsecpagefont}{\fontsize{10}{13}\selectfont}
-% TOC indents starting at the margin (ind left=0)
 \setlength{\cftsecindent}{0pt}
 \setlength{\cftsubsecindent}{1.2em}
 \setlength{\cftsubsubsecindent}{2.4em}
 \setlength{\cftbeforesecskip}{4pt}
 \renewcommand{\cftdotsep}{1.2}
-% show dotted leaders also at level 1
 \setcounter{tocdepth}{3}
 
-% Convenience command for TOC (resets leftskip)
 \newcommand{\maketoc}{{\leftskip=0pt\relax\pagestyle{plain}\thispagestyle{plain}\tableofcontents}\clearpage}
 
 % =====================================================================
-%  COVER
+%  COVER PAGE
 % =====================================================================
-% \setguidetitle{...}  -> large cover title (and default header)
-\newcommand{\setguidetitle}[1]{\renewcommand{\lg@guidetitle}{#1}}
+\newcommand{\lg@testbooktitle}{Test Book}
+\newcommand{\settestbooktitle}[1]{\renewcommand{\lg@testbooktitle}{#1}}
 \newcommand{\lg@covertext}{Huawei Technologies CO., LTD}
 \newcommand{\setcovertext}[1]{\renewcommand{\lg@covertext}{#1}}
 \newcommand{\lg@coverlogo}{common-assets/huawei-logo-cover.png}
 \newcommand{\setcoverlogo}[1]{\renewcommand{\lg@coverlogo}{#1}}
-% Compilation time from \time primitive (minutes since midnight, respects TZ)
-% \two@digits is provided by the LaTeX kernel
+
+% Compilation time from \time primitive
 \newcount\lg@hour
 \newcount\lg@min
 \newcount\lg@tmp
@@ -182,7 +193,7 @@
   \thispagestyle{empty}%
   \vspace*{2.2cm}%
   {\centering
-   \fontsize{36}{42}\selectfont\bfseries \lg@guidetitle\par}%
+   \fontsize{36}{42}\selectfont\bfseries \lg@testbooktitle\par}%
   \vspace{4.5cm}%
   {\centering
    \includegraphics[width=3.6cm]{\lg@coverlogo}\par}%
@@ -201,5 +212,47 @@
     \fontsize{12}{14}\selectfont \if@changelog\lg@covermeta\fi\par}%
    \endgroup
   \clearpage}
+
+% =====================================================================
+%  TEST CASE ENVIRONMENT
+% =====================================================================
+% The testcase environment creates a subsection and a structured table.
+% Usage:
+%   \begin{testcase}{Test case title}
+%     \testobjective{Verify that X can be created.}
+%     \testprerequisites{1. X is running. \\ 2. Y is configured.}
+%     \testprocedure{1. Click Create. \\ 2. Set parameters. \\ 3. Click Save.}
+%     \testexpected{1. The instance is created. \\ 2. Settings are saved.}
+%     \testremarks{Optional remarks.}
+%     \testresult{Pass/Fail}
+%   \end{testcase}
+
+\newenvironment{testcase}[1]{%
+  \subsection{#1}%
+  \renewcommand{\arraystretch}{1.3}%
+  \noindent
+  \begin{tabular}{|>{\columncolor{huaweired}\color{white}\bfseries}p{3cm}|p{0.72\textwidth}|}%
+  \hline
+}{%
+  \hline
+  \end{tabular}%
+  \vspace{0.5cm}%
+}
+
+% Test case field commands (language-aware labels)
+\newcommand{\testobjective}[1]{\lg@objective & #1 \\ \hline}
+\newcommand{\testprerequisites}[1]{\lg@prerequisites & #1 \\ \hline}
+\newcommand{\testprocedure}[1]{\lg@procedure & #1 \\ \hline}
+\newcommand{\testexpected}[1]{\lg@expectedresult & #1 \\ \hline}
+\newcommand{\testremarks}[1]{%
+  \if@showanswers
+    \lg@remarks & #1 \\ \hline
+  \fi
+}
+\newcommand{\testresult}[1]{%
+  \if@showanswers
+    \lg@testresult & #1 \\ \hline
+  \fi
+}
 
 \endinput

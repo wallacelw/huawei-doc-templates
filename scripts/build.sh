@@ -10,8 +10,8 @@
 
 set -euo pipefail
 
-# ── Resolve repo root (where this script lives) ──────────────────────────
-REPO_ROOT="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
+# ── Resolve repo root (parent of scripts/ directory) ──────────────────────
+REPO_ROOT="$(cd "$(dirname "$(realpath "$0")")/.." && pwd)"
 
 # ── Template detection ─────────────────────────────────────────────────────
 TEMPLATE=""  # set by --template flag or auto-detected
