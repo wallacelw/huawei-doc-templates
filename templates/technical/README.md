@@ -8,7 +8,7 @@ Pandoc.
 ## Setup
 
 See the [root README](../../README.md) for environment setup and
-`install.sh` for one-command installation.
+`scripts/install.sh` for one-command installation.
 
 ## Usage
 
