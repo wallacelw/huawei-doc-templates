@@ -35,7 +35,7 @@ Before committing, validate the change from **all** relevant perspectives:
 
 2. **Cross-file consistency:** If you changed one file, check every file that
    references it:
-   - Changed `guide.cls` or `technical.cls`? Check `SKILL.md` command tables,
+   - Changed `guide.cls`, `technical.cls`, or `testbook.cls`? Check `SKILL.md` command tables,
      `README.md` (template), both samples (`examples/<name>/pt/` + `en/`),
      and `setup-guide.tex`.
    - Changed a `templates/_base/huawei-*.sty` module? Check all templates that
@@ -196,7 +196,7 @@ approval. Changing them breaks existing documents and reproducibility.
   table styling, heading appearance, and spacing.
 - When adding or changing any visual element, update all formats to
   match the PDF. The Lua filter, reference DOCX, and HTML template must
-  stay in sync with `guide.cls` and `technical.cls`.
+  stay in sync with `guide.cls`, `technical.cls`, and `testbook.cls`.
 
 ### L19. Authors are optional and hideable with `[noauthors]`
 - `\setdocauthors{...}` sets one or more authors displayed on the cover page.
@@ -205,6 +205,7 @@ approval. Changing them breaks existing documents and reproducibility.
   `[nochangelog]` suppresses the changelog).
 - In `guide.cls`, authors appear below the cover text, above version/date/time.
 - In `technical.cls`, authors appear as a row in the cover version table.
+- In `testbook.cls`, authors appear below the cover text, above version/date/time.
 - The command is defined in `templates/_base/huawei-changelog.sty` (shared).
 
 ---
@@ -330,8 +331,8 @@ at the repo root registers `templates/` as a discovery path.
 
 ## How to extend the existing template
 
-### Adding a new command to `guide.cls` or `technical.cls`
-1. Define the command in the appropriate `.cls` file (`guide.cls` or `technical.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
+### Adding a new command to `guide.cls`, `technical.cls`, or `testbook.cls`
+1. Define the command in the appropriate `.cls` file (`guide.cls`, `technical.cls`, or `testbook.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the command to the reference tables in `SKILL.md` and `README.md`.
 4. Demonstrate the command in all template samples (`examples/guide/pt/`, `examples/guide/en/`, `examples/technical/pt/`, `examples/technical/en/`).
@@ -390,7 +391,8 @@ The naming convention is critical:
 - **`guide.cls`** — guide-specific formatting (cover, TOC, titles). Shared
   formatting lives in `templates/_base/huawei-*.sty` modules. Changes here
   affect every document. Test with both samples before committing.
-- **`technical.cls`** — technical-report-specific formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
+- **`technical.cls`** — technical-report-specific formatting9 formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
+- **`testbook.cls`** — test-book-specific formatting (cover, TOC, titles, testcase environment). Same rules as `guide.cls+ samples before committing.
 - **`templates/_base/pandoc-common.lua`** — shared Lua filter factory. Changes
   affect ALL templates' multi-format output. Test with `make test` and
   `make all-formats` before committing.

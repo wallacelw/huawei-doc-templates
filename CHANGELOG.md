@@ -14,7 +14,7 @@ Per-document changelogs are maintained via `\changelogentry` in each `.tex` file
   - Test scope and acceptance method tables.
   - Language-aware labels (English/Portuguese).
   - Multi-format output (PDF, DOCX, MD, HTML) via Pandoc.
-  - Samples in both PT and EN (20 pages each).
+  - Samples in both PT and EN (31 pages each, full feature coverage).
   - SKILL.md with full command reference and quick start.
 - **guide.cls / technical.cls**: Bumped to v3.7.0.
 
