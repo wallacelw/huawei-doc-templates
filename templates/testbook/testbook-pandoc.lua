@@ -72,7 +72,7 @@ local config = {
   cover_logo = nil,  -- read from preamble.commands.setcoverlogo
   warn_setheaderlogo = true,
   -- Test case environment handler
-  extra_env_handlers = function(L, parse_latex_blocks)
+  extra_env_handlers = function(L, parse_latex_blocks, preamble)
     -- Handler for the testcase environment.
     -- Converts \begin{testcase}{Title}...\end{testcase} into a
     -- subsection heading + a definition-list style table with
@@ -99,22 +99,28 @@ local config = {
 
       -- Parse test field commands from the body.
       -- Each \testfield{content} becomes a row: label | content.
+      -- When noanswers option is true, skip testremarks and testresult.
       local field_order = {
         { cmd = "testobjective",   label_key = "objective" },
         { cmd = "testprerequisites", label_key = "prerequisites" },
         { cmd = "testprocedure",  label_key = "procedure" },
         { cmd = "testexpected",   label_key = "expectedresult" },
-        { cmd = "testremarks",    label_key = "remarks" },
-        { cmd = "testresult",     label_key = "testresult" },
+        { cmd = "testremarks",    label_key = "remarks",     answer = true },
+        { cmd = "testresult",     label_key = "testresult",  answer = true },
       }
 
+      local noanswers = preamble and preamble.options and preamble.options.noanswers
       local rows = {}
       for _, field in ipairs(field_order) do
-        local content = body:match("\\" .. field.cmd .. "%s*(%b{})")
-        if content then
-          content = content:sub(2, -2)  -- strip braces
-          local label = L(field.label_key)
-          table.insert(rows, { label = label, content = content })
+        if noanswers and field.answer then
+          -- Skip answer fields when noanswers is set
+        else
+          local content = body:match("\\" .. field.cmd .. "%s*(%b{})")
+          if content then
+            content = content:sub(2, -2)  -- strip braces
+            local label = L(field.label_key)
+            table.insert(rows, { label = label, content = content })
+          end
         end
       end
 
@@ -124,7 +130,13 @@ local config = {
       local function cell_to_md(cell_text)
         cell_text = cell_text:gsub("\\\\", "\n")  -- line breaks → newlines
         -- Strip remaining LaTeX commands that aren't meaningful in MD
-        cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        -- Apply \cmd{arg} → arg iteratively to handle nested commands
+        local prev = nil
+        while prev ~= cell_text do
+          prev = cell_text
+          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        end
+        cell_text = cell_text:gsub("\\_", "_")  -- escaped underscores
         cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
         return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))  -- trim
       end

@@ -291,7 +291,7 @@ for entry in "${SAMPLES[@]}"; do
   mkdir -p "$docx_outdir"
   pandoc -f latex+raw_tex --lua-filter="$FILTER" \
     --reference-doc="$REF_DOCX" --number-sections \
-    --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}/common-assets" \
+    --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
     -t docx "$tex_file" -o "$docx_outdir/${basename}.docx" 2>/dev/null
   # Post-process with --fix (same pipeline as scripts/build.sh)
   if [ -f "$docx_outdir/${basename}.docx" ]; then

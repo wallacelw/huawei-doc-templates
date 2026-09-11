@@ -148,7 +148,7 @@ local function make_filter(config)
   local function parse_preamble(source_text)
     local p = {
       lang = "en",
-      options = { portuguese = false, indentbody = false, notime = false, nochangelog = false, noauthors = false },
+      options = { portuguese = false, indentbody = false, notime = false, nochangelog = false, noauthors = false, noanswers = false },
       commands = {},
     }
     if not source_text then return p end
@@ -163,6 +163,7 @@ local function make_filter(config)
         elseif opt == "notime" then p.options.notime = true
         elseif opt == "nochangelog" then p.options.nochangelog = true
         elseif opt == "noauthors" then p.options.noauthors = true
+        elseif opt == "noanswers" then p.options.noanswers = true
         end
       end
     end
@@ -694,7 +695,7 @@ local function make_filter(config)
   -- Add extra env handlers from config (e.g., technical's section environments)
   -- Supports both a plain table and a function(L, parse_latex_blocks) → table
   if type(config.extra_env_handlers) == "function" then
-    local extra = config.extra_env_handlers(L, parse_latex_blocks)
+    local extra = config.extra_env_handlers(L, parse_latex_blocks, preamble)
     for env, handler in pairs(extra) do
       block_env_handlers[env] = handler
     end

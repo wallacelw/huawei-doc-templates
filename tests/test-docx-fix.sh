@@ -60,7 +60,7 @@ run_template_tests() {
   echo "Generating DOCX..."
   pandoc -f latex+raw_tex --lua-filter="$FILTER" \
     --reference-doc="$REF_DOCX" --number-sections \
-    --resource-path="$SAMPLE_DIR:$COMMON_ASSETS" \
+    --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${tmpl_name}:$COMMON_ASSETS" \
     -t docx "$TEX_FILE" -o "$DOCX_OUT" 2>/dev/null
 
   echo "Running --fix..."

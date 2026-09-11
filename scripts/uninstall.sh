@@ -293,7 +293,7 @@ if [ "$REMOVE_VSCODE" = true ]; then
 
     for settings_path in \
         "$HOME/.config/Code/User/settings.json" \
-       "~/.vscode-server/data/Machine/settings.json"; do
+        "$HOME/.vscode-server/data/Machine/settings.json"; do
 
         display_path=$(echo "$settings_path" | sed "s|$HOME|~|")
 
