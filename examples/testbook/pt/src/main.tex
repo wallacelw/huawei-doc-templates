@@ -16,7 +16,7 @@
 \settestbooktitle{Casos de Teste POC — Validação da Plataforma de Dados}
 \setheadertitle{Huawei Cloud -- Casos de Teste POC}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{1.0.0}
+\setdocversion{1.1.0}
 \setdocdate{\today}
 \setdocauthors{Wallace Wu}
 
@@ -36,7 +36,8 @@ Este documento demonstra o template \inlinecode{testbook} (\inlinecode{testbook.
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
 comandos e ambientes disponíveis: capa, sumário, ambiente de caso de teste
 com todos os comandos de campo, bloco de objetivos, blocos de código, imagens,
-caixas de destaque, tabelas, badge e histórico de versões.
+caixas de destaque (\inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox}), tabelas, badge,
+caminhos de menu, weblinks, notas, referências param e histórico de versões.
 \end{infobox}
 
 % =====================================================================
@@ -58,6 +59,7 @@ caixas de destaque, tabelas, badge e histórico de versões.
     \item Cluster MRS implantado com a pilha de componentes necessária (HDFS, YARN, Spark, Hive).
     \item Bucket OBS criado e acessível com a política IAM designada.
     \item Ambiente de execução de testes com conectividade de rede ao Console do Huawei Cloud.
+    \item Ferramentas CLI \inlinecode{latexmk} e \inlinecode{terraform} instaladas localmente.
   \end{itemize}
 \end{objectives}
 
@@ -85,6 +87,20 @@ caixas de destaque, tabelas, badge e histórico de versões.
   \item As regras de firewall de rede devem permitir TCP 22 (SSH) e TCP 443 (HTTPS) de entrada a partir da sub-rede de execução de testes.
 \end{itemize}
 
+\note{Certifique-se de que o ambiente de execução de testes esteja configurado com o fuso horário \inlinecode{America/Sao\_Paulo} (GMT-3) para que os registros de data/hora nos logs estejam alinhados com o Console do Huawei Cloud.}
+
+\begin{code}[bash]
+# Verificar se as ferramentas CLI estão instaladas
+terraform version
+obsutil version
+kubectl version --client
+\end{code}
+
+\begin{tip}
+Utilize \inlinecode{terraform plan} antes de \inlinecode{terraform apply} para
+visualizar as alterações de infraestrutura e evitar modificações indesejadas de recursos.
+\end{tip}
+
 \subsection{Método de Aceitação}
 
 \begin{table}[H]
@@ -110,6 +126,9 @@ caixas de destaque, tabelas, badge e histórico de versões.
     apresentam status saudável.}
   \testprerequisites{1. Aplicação da infraestrutura Terraform concluída com sucesso. \\ 2. ID do cluster MRS disponível na saída do Terraform. \\ 3. Usuário IAM possui função \textbf{MRS\_Viewer} ou superior.}
   \testprocedure{1. Acessar o Console do Huawei Cloud. \\ 2. Navegar em \menu{Console, MapReduce Service, Clusters}. \\ 3. Localizar o cluster pelo nome (ex.: \inlinecode{mrs-poc-cluster}). \\ 4. Verificar se o status do cluster é \textbf{Executando}. \\ 5. Clicar no nome do cluster e revisar a aba \textbf{Componente} — confirmar que HDFS, YARN, Spark e Hive estão listados com status \textbf{Normal}. \\ 6. Revisar a aba \textbf{Nó} — confirmar que todos os nós master e core apresentam status \textbf{Executando}.}
+
+  \image[width=0.8\linewidth]{common-assets/exemplo-menu.png}
+
   \testexpected{1. Status do cluster é \textbf{Executando}. \\ 2. Todos os quatro componentes (HDFS, YARN, Spark, Hive) estão listados com status \textbf{Normal}. \\ 3. Todos os nós apresentam status \textbf{Executando} sem alarmes.}
   \testremarks{Se algum componente apresentar status \textbf{Anormal}, verificar a página de alarmes do MRS antes de registrar o resultado.}
   \testresult{Aprovado}
@@ -142,7 +161,7 @@ caixas de destaque, tabelas, badge e histórico de versões.
 % =====================================================================
 \section{Engenharia de Dados}
 
-\begin{testcase}{TC-004: Verificar criação do workspace do DataArts Studio}
+\begin{testcase}{TC-004: Verificar criação do workspace do DataArts Studio} \badge{Obrigatório}
   \testobjective{Confirmar que a instância do DataArts Studio (Dayu) está
     provisionada, o workspace está acessível e os usuários IAM designados
     conseguem acessar com a função \textbf{Dayu\_User}.}
@@ -159,6 +178,13 @@ caixas de destaque, tabelas, badge e histórico de versões.
     e gravar o resultado no caminho OBS de destino.}
   \testprerequisites{1. TC-004 concluído (workspace do DataArts Studio acessível). \\ 2. Arquivo CSV de origem (\inlinecode{customers.csv}) existe no bucket OBS raw. \\ 3. Caminho OBS de destino (\inlinecode{poc-datalake-curated/customers/}) está configurado. \\ 4. Pipeline \inlinecode{pl-ingest-customers} está publicado no DataArts Studio.}
   \testprocedure{1. No console do DataArts Studio, navegar até \textbf{Desenvolvimento de Dados}. \\ 2. Localizar o pipeline \inlinecode{pl-ingest-customers} na lista de jobs. \\ 3. Clicar em \textbf{Executar} para iniciar o pipeline. \\ 4. Aguardar o status do pipeline mudar para \textbf{Sucesso} (timeout: 10 minutos). \\ 5. Navegar até o OBS e verificar se o arquivo de saída existe em \inlinecode{poc-datalake-curated/customers/}. \\ 6. Baixar o arquivo de saída e verificar se a contagem de linhas corresponde à origem (sem perda de dados).}
+
+  \begin{code}[bash]
+# Verificar o arquivo de saída no OBS via CLI
+obsutil ls obs://poc-datalake-curated/customers/ -limit=10
+obsutil stat obs://poc-datalake-curated/customers/output.csv
+  \end{code}
+
   \testexpected{1. A execução do pipeline conclui com status \textbf{Sucesso}. \\ 2. O arquivo de saída é criado no caminho OBS de destino. \\ 3. A contagem de linhas do arquivo de saída corresponde ao arquivo de origem.}
   \testremarks{O tempo de execução do pipeline varia conforme o volume de dados. Para a POC, o arquivo de origem contém aproximadamente 10.000 linhas.}
   \testresult{Aprovado}
@@ -170,15 +196,135 @@ caixas de destaque, tabelas, badge e histórico de versões.
     corretos, validando a integração entre o MRS e o data lake.}
   \testprerequisites{1. TC-001 concluído (cluster MRS saudável). \\ 2. Tabela Hive \inlinecode{poc\_db.customers} existe e contém dados carregados pelo pipeline de ingestão. \\ 3. Acesso SSH ao nó master do MRS configurado.}
   \testprocedure{1. Acessar o nó master do MRS via SSH. \\ 2. Executar a CLI do Spark SQL: \inlinecode{spark-sql --master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc\_db.customers;"} \\ 3. Verificar se a contagem retornada corresponde ao esperado (10.000). \\ 4. Executar uma consulta de amostra para verificar a integridade dos dados: \inlinecode{spark-sql --master yarn -e "SELECT customer\_id, name FROM poc\_db.customers LIMIT 5;"} \\ 5. Confirmar que a consulta retorna 5 linhas com valores não nulos.}
+
+  \begin{code}[bash]
+# Acessar o nó master do MRS via SSH
+ssh root@mrs-master-poc
+
+# Executar consulta de contagem Spark SQL
+spark-sql --master yarn \
+  --conf spark.sql.hive.convertMetastoreOrc=true \
+  -e "SELECT COUNT(*) FROM poc_db.customers;"
+  \end{code}
+
   \testexpected{1. \inlinecode{COUNT(*)} retorna 10.000. \\ 2. A consulta de amostra retorna 5 linhas com valores válidos de \inlinecode{customer\_id} e \inlinecode{name}.}
   \testremarks{Se a CLI do Spark SQL não estiver disponível, utilizar a interface web do componente Spark2x do MRS para submeter a consulta.}
   \testresult{Aprovado}
 \end{testcase}
 
 % =====================================================================
+%  Seção 4 — Segurança e Controle de Acesso
+% =====================================================================
+\section{Segurança e Controle de Acesso}
+
+\begin{testcase}{TC-007: Verificar aplicação de política IAM nos buckets OBS} \badge{Novo}
+  \testobjective{Confirmar que as políticas IAM restringem corretamente o acesso
+    ao bucket OBS — usuários autorizados podem ler/escrever enquanto usuários
+    não autorizados são negados, e a política do bucket segue o princípio
+    do menor privilégio.}
+  \testprerequisites{1. Bucket OBS \inlinecode{poc-datalake-raw} existe com a política IAM designada. \\ 2. Dois usuários IAM de teste: um com função \textbf{OBS\_ReadWrite}, outro sem permissões OBS. \\ 3. CLI \inlinecode{obsutil} configurada para ambos os usuários.}
+  \testprocedure{1. Usando o usuário autorizado, carregar um arquivo de teste em \inlinecode{poc-datalake-raw}. \\ 2. Usando o usuário autorizado, baixar e verificar o conteúdo do arquivo. \\ 3. Usando o usuário não autorizado, tentar carregar um arquivo — verificar se a requisição é negada (HTTP 403). \\ 4. Usando o usuário não autorizado, tentar listar objetos no bucket — verificar se a requisição é negada. \\ 5. Revisar a política do bucket no Console em \menu{Console, Object Storage Service, Bucket Policies} e confirmar que concede apenas as permissões pretendidas.}
+
+  \begin{code}[bash]
+# Usuário autorizado — carregar e verificar
+obsutil cp test-file.txt obs://poc-datalake-raw/test-file.txt
+obsutil ls obs://poc-datalake-raw/ -limit=5
+
+# Usuário não autorizado — esperar erros 403
+obsutil cp test-file.txt obs://poc-datalake-raw/unauthorized.txt
+obsutil ls obs://poc-datalake-raw/
+  \end{code}
+
+  \testexpected{1. Usuário autorizado consegue carregar e baixar com sucesso. \\ 2. Usuário não autorizado recebe HTTP 403 nas operações de carregamento e listagem. \\ 3. Política do bucket concede apenas as permissões de leitura/escrita pretendidas às funções designadas.}
+  \testremarks{Verificar os logs do Cloud Trail se a negação de acesso não for retornada conforme esperado — pode haver herança de política do projeto ou domínio.}
+
+  \note{Alterações em políticas IAM podem levar até 5 minutos para propagar. Aguardar antes de retestar após modificar uma política.}
+
+  \testresult{Aprovado}
+\end{testcase}
+
+\begin{testcase}{TC-008: Verificar regra de mascaramento de dados do DataArts Studio}
+  \testobjective{Confirmar que colunas de dados sensíveis (ex.: campos PII) são
+    mascaradas conforme a regra de mascaramento do DataArts Studio quando
+    consultadas por usuários não administradores.}
+  \testprerequisites{1. TC-004 concluído (workspace do DataArts Studio acessível). \\ 2. Regra de mascaramento configurada para a coluna \inlinecode{customers.ssn} (Número de Seguro Social). \\ 3. Usuário de teste possui função \textbf{Dayu\_User} (não administrador).}
+  \testprocedure{1. No console do DataArts Studio, navegar até \textbf{Arquitetura de Dados} $\rightarrow$ \textbf{Mascaramento de Dados}. \\ 2. Verificar se a regra de mascaramento para \inlinecode{customers.ssn} está ativa e utiliza a estratégia \textbf{Mascarar Tudo}. \\ 3. Consultar a tabela \inlinecode{customers} como usuário de teste via console SQL do DataArts Studio. \\ 4. Verificar se a coluna \inlinecode{ssn} retorna valores mascarados (ex.: \inlinecode{*********}) em vez dos dados reais. \\ 5. Consultar a mesma tabela como usuário administrador e verificar se os valores reais são retornados.}
+  \testexpected{1. Regra de mascaramento ativa para \inlinecode{customers.ssn}. \\ 2. Usuário não administrador visualiza valores mascarados na coluna \inlinecode{ssn}. \\ 3. Usuário administrador visualiza valores reais na coluna \inlinecode{ssn}.}
+  \testremarks{Regras de mascaramento de dados são aplicadas no momento da consulta — os dados subjacentes no OBS/HDFS não são modificados.}
+  \testresult{Aprovado}
+\end{testcase}
+
+% =====================================================================
+%  Seção 5 — Configuração do Ambiente e Ferramentas
+% =====================================================================
+\section{Configuração do Ambiente e Ferramentas}
+
+\begin{testcase}{TC-009: Verificar implantação de infraestrutura via Terraform}
+  \testobjective{Confirmar que a configuração Terraform implanta todos os
+    recursos de infraestrutura necessários (VPC, MRS, OBS, DataArts Studio)
+    sem erros e que o arquivo de estado reflete os recursos esperados.}
+  \testprerequisites{1. CLI \inlinecode{terraform} instalada (versão $\geq$ 1.0). \\ 2. Credenciais AK/SK configuradas via variáveis de ambiente ou \param{provider.tf}. \\ 3. Arquivos de configuração Terraform no diretório do projeto.}
+  \testprocedure{1. Navegar até o diretório do projeto Terraform. \\ 2. Executar \inlinecode{terraform init} para inicializar o diretório de trabalho. \\ 3. Executar \inlinecode{terraform plan} e revisar as alterações planejadas — confirmar que todos os recursos esperados estão listados. \\ 4. Executar \inlinecode{terraform apply -auto-approve} e aguardar a conclusão. \\ 5. Executar \inlinecode{terraform output} e verificar se todos os valores de saída estão preenchidos. \\ 6. Executar \inlinecode{terraform state list} e confirmar que a contagem de recursos corresponde à arquitetura.}
+
+  \begin{code}[bash]
+# Inicializar e implantar infraestrutura
+cd /opt/poc-infra/terraform
+terraform init
+terraform plan -out=tfplan
+terraform apply tfplan
+
+# Verificar implantação
+terraform output
+terraform state list | wc -l
+  \end{code}
+
+  \testexpected{1. \inlinecode{terraform apply} conclui sem erros. \\ 2. Todos os valores de saída estão preenchidos (ID do cluster, nome do bucket, ID da VPC). \\ 3. Contagem de recursos no estado corresponde à especificação da arquitetura.}
+  \testremarks{Se \inlinecode{terraform apply} falhar, verificar as credenciais AK/SK e os limites de cota da região \inlinecode{sa-brazil-1}.}
+
+  \begin{warning}
+  Não pule a etapa de revisão do \inlinecode{terraform plan}. Aplicar alterações
+  não revisadas em ambientes adjacentes à produção pode causar perda de dados
+  ou interrupção de serviços.
+  \end{warning}
+
+  \testresult{Aprovado}
+\end{testcase}
+
+\begin{testcase}{TC-010: Verificar carregamento de dados de teste no OBS}
+  \testobjective{Confirmar que todos os arquivos de dados de teste necessários
+    (CSV, JSON) podem ser carregados no bucket OBS designado e são acessíveis
+    pelo pipeline do DataArts Studio.}
+  \testprerequisites{1. TC-002 concluído (bucket OBS acessível). \\ 2. Arquivos de dados de teste preparados no diretório local \param{./test-data/}. \\ 3. CLI \inlinecode{obsutil} configurada com as credenciais do usuário de teste.}
+  \testprocedure{1. Listar os arquivos de dados de teste locais e verificar sua integridade (contagem de linhas, esquema). \\ 2. Carregar todos os arquivos no bucket OBS raw usando \inlinecode{obsutil}. \\ 3. Verificar se cada arquivo existe no OBS listando o conteúdo do bucket. \\ 4. Baixar um arquivo de amostra do OBS e compará-lo com o original local (checksum). \\ 5. No DataArts Studio, verificar se a conexão de fonte de dados consegue ler os arquivos carregados.}
+
+  \begin{code}[bash]
+# Carregar arquivos de dados de teste no OBS
+obsutil cp ./test-data/customers.csv obs://poc-datalake-raw/customers.csv
+obsutil cp ./test-data/transactions.json obs://poc-datalake-raw/transactions.json
+
+# Verificar carregamentos
+obsutil ls obs://poc-datalake-raw/ -limit=20
+  \end{code}
+
+  \testexpected{1. Todos os arquivos de dados de teste são carregados sem erros. \\ 2. A listagem do bucket mostra todos os arquivos carregados com tamanhos corretos. \\ 3. O checksum do arquivo baixado corresponde ao original local. \\ 4. A conexão de fonte de dados do DataArts Studio consegue ler os arquivos.}
+  \testremarks{Arquivos grandes ($>$1 GB) devem ser carregados usando o recurso de upload multipart do OBS para maior confiabilidade.}
+
+  \note{Consulte a \weblink{https://support.huaweicloud.com/obs/index.html}{Documentação do Huawei Cloud OBS} para opções avançadas de upload e solução de problemas.}
+
+  \testresult{Aprovado}
+\end{testcase}
+
+\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do painel de execução de testes mostrando os resultados de todos os casos de teste}
+
+% =====================================================================
 %  Histórico de versões
 % =====================================================================
 \begin{changelog}
+  \changelogentry{1.1.0}{\today}{
+    \item Adicionadas demonstrações abrangentes de recursos: caixas de destaque \inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox}; blocos \inlinecode{code}; \inlinecode{badge}; \inlinecode{weblink}; \inlinecode{note}; \inlinecode{param}; \inlinecode{image}, \inlinecode{imagecap} e \inlinecode{imageplaceholder}; caminhos \inlinecode{menu}; e referências \inlinecode{inlinecode}.
+    \item Adicionados casos de teste de Segurança e Controle de Acesso (TC-007, TC-008).
+    \item Adicionados casos de teste de Configuração do Ambiente e Ferramentas (TC-009, TC-010).
+  }
   \changelogentry{1.0.0}{\today}{
     \item Versão inicial.
     \item Adicionados casos de teste de Arquitetura da Plataforma (TC-001 a TC-003).

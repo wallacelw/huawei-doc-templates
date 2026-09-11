@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="date" content="2026-09-12" />
+  <title>Casos de Teste POC — Validação da Plataforma de Dados</title>
+  <style>
+
+:root {
+--huawei-red: #C7000B;
+--code-bg: #F6F8FA;
+--code-text: #1F2328;
+--link-blue: #0000FF;
+--warning-bg: #FFF8E1;
+--warning-border: #F57C00;
+--tip-bg: #E8F5E9;
+--tip-border: #2E7D32;
+--info-bg: #E3F2FD;
+--info-border: #1565C0;
+--body-text: #1F2328;
+--rule-black: #000000;
+}
+
+body {
+font-family: "HarmonyOS Sans", "Liberation Sans", sans-serif;
+font-size: 10.5pt;
+line-height: 1.6;
+color: var(--body-text);
+max-width: 210mm; 
+margin: 0 auto;
+padding: 2cm 2.5cm;
+background: #fff;
+}
+
+h1 {
+font-size: 20pt;
+font-weight: 700;
+color: var(--body-text);
+border-bottom: 2pt solid var(--huawei-red);
+padding-bottom: 4pt;
+margin-top: 24pt;
+margin-bottom: 12pt;
+}
+h2 {
+font-size: 18pt;
+font-weight: 400;
+color: var(--body-text);
+margin-top: 20pt;
+margin-bottom: 10pt;
+}
+h3 {
+font-size: 16pt;
+font-weight: 400;
+color: var(--body-text);
+margin-top: 16pt;
+margin-bottom: 8pt;
+}
+h4 {
+font-size: 14pt;
+font-weight: 400;
+color: var(--body-text);
+margin-top: 14pt;
+margin-bottom: 6pt;
+}
+
+a {
+color: var(--link-blue);
+text-decoration: none;
+}
+a:hover {
+text-decoration: underline;
+}
+
+code {
+font-family: "Cascadia Code", "DejaVu Sans Mono", monospace;
+font-size: 9pt;
+font-variant-ligatures: none;
+background-color: var(--code-bg);
+color: var(--code-text);
+padding: 1pt 3pt;
+border-radius: 2pt;
+}
+pre {
+background-color: var(--code-bg);
+color: var(--code-text);
+padding: 10pt 12pt;
+border-radius: 3pt;
+overflow-x: auto;
+font-variant-ligatures: none;
+}
+pre code {
+background: none;
+padding: 0;
+border-radius: 0;
+font-size: 9pt;
+}
+
+
+.callout {
+padding: 10pt 14pt 10pt 14pt;
+margin: 10pt 0;
+border-left: 3pt solid var(--rule-black);
+border-radius: 0 3pt 3pt 0;
+}
+.callout.warning {
+background-color: var(--warning-bg);
+border-left-color: var(--warning-border);
+}
+.callout.tip {
+background-color: var(--tip-bg);
+border-left-color: var(--tip-border);
+}
+.callout.infobox {
+background-color: var(--info-bg);
+border-left-color: var(--info-border);
+}
+
+.callout.warning > p:first-child strong {
+color: var(--huawei-red);
+}
+.callout.tip > p:first-child strong {
+color: var(--tip-border);
+}
+.callout.infobox > p:first-child strong {
+color: var(--info-border);
+}
+
+.objectives {
+margin: 10pt 0;
+padding-bottom: 8pt;
+border-bottom: 1.5pt solid var(--rule-black);
+}
+
+table {
+border-collapse: collapse;
+width: 100%;
+margin: 10pt 0;
+}
+th, td {
+border: 1pt solid var(--huawei-red);
+padding: 5pt 8pt;
+text-align: left;
+}
+thead th {
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-weight: 700;
+}
+tbody tr:nth-child(even) {
+background-color: var(--code-bg);
+}
+tbody tr:nth-child(odd) {
+background-color: #FFFFFF;
+}
+
+
+.testcase-table {
+border-collapse: collapse;
+width: 100%;
+margin: 10pt 0;
+}
+.testcase-table th,
+.testcase-table td {
+border: 1pt solid var(--huawei-red);
+padding: 5pt 8pt;
+text-align: left;
+vertical-align: top;
+}
+.testcase-table thead th {
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-weight: 700;
+}
+.testcase-table tbody td:first-child {
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-weight: 700;
+width: 3cm;
+white-space: nowrap;
+}
+.testcase-table tbody tr:nth-child(even) td:last-child {
+background-color: var(--code-bg);
+}
+.testcase-table tbody tr:nth-child(odd) td:last-child {
+background-color: #FFFFFF;
+}
+
+.badge {
+display: inline-block;
+background-color: var(--huawei-red);
+color: #FFFFFF;
+font-size: 9pt;
+font-weight: 700;
+padding: 1pt 6pt;
+border-radius: 2pt;
+vertical-align: middle;
+line-height: 1.4;
+}
+
+.changelog {
+margin: 12pt 0;
+padding: 8pt 0;
+border-top: 0.5pt solid var(--rule-black);
+border-bottom: 0.5pt solid var(--rule-black);
+}
+
+img {
+max-width: 100%;
+height: auto;
+display: block;
+margin: 0 auto;
+}
+
+hr {
+border: none;
+border-top: 1pt solid var(--rule-black);
+margin: 16pt 0;
+}
+
+blockquote {
+margin: 10pt 0;
+padding: 6pt 14pt;
+border-left: 3pt solid #CCC;
+color: #555;
+}
+
+.version {
+font-size: 9pt;
+color: #888;
+margin-top: 2pt;
+margin-bottom: 0;
+}
+
+ul, ol {
+margin: 6pt 0;
+padding-left: 24pt;
+}
+li {
+margin-bottom: 3pt;
+}
+
+@media print {
+body {
+max-width: none;
+padding: 0;
+margin: 0;
+}
+h1 {
+page-break-before: always;
+border-bottom: 2pt solid var(--huawei-red);
+}
+h1:first-of-type {
+page-break-before: avoid;
+}
+table, img, pre {
+page-break-inside: avoid;
+}
+a {
+color: var(--link-blue);
+text-decoration: none;
+}
+.badge {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+thead th {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+tbody tr:nth-child(even) {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.callout {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+.testcase-table tbody td:first-child {
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+}
+
+@media screen and (max-width: 768px) {
+body {
+padding: 12pt 16pt;
+font-size: 11pt;
+}
+h1 { font-size: 18pt; }
+h2 { font-size: 16pt; }
+h3 { font-size: 14pt; }
+h4 { font-size: 12pt; }
+table {
+font-size: 9pt;
+}
+th, td {
+padding: 3pt 5pt;
+}
+pre {
+padding: 8pt;
+font-size: 8pt;
+}
+code {
+font-size: 8pt;
+}
+.testcase-table tbody td:first-child {
+white-space: normal;
+width: auto;
+}
+}
+</style>
+</head>
+<body>
+  <h1 class="title">Casos de Teste POC — Validação da Plataforma de
+Dados</h1>
+  <p class="date">2026-09-12</p>
+<p class="version">v1.0.0</p>
+<div class="callout infobox" role="note" aria-label="Info">
+<p><strong>Informação</strong> </p>
+<p>Este documento demonstra o template <code>testbook</code>
+(<code>testbook.cls</code>) para documentos de casos de teste
+POC/aceitação do Huawei Cloud. Ele exercita todos os comandos e
+ambientes disponíveis: capa, sumário, ambiente de caso de teste com
+todos os comandos de campo, bloco de objetivos, blocos de código,
+imagens, caixas de destaque, tabelas, badge e histórico de versões.</p>
+</div>
+<h1 data-number="1" id="descrição-dos-casos-de-teste"><span class="header-section-number">1</span> Descrição dos Casos de Teste</h1>
+<div class="objectives">
+<p><strong>Objetivo Geral:</strong> Validar a implantação da Plataforma
+de Dados do Huawei Cloud para o ambiente de POC, garantindo que todos os
+serviços principais (DataArts Studio, MRS, OBS, VPC) estejam
+provisionados corretamente, acessíveis e funcionando conforme
+especificado na arquitetura da solução.</p>
+<p><strong>Pré-requisitos:</strong> </p>
+<ul>
+<li><p>Conta Huawei Cloud com privilégios de administrador IAM na região
+<code>sa-brazil-1</code>.</p></li>
+<li><p>VPC, sub-rede e grupos de segurança já criados pela equipe de
+infraestrutura.</p></li>
+<li><p>Instância do DataArts Studio (Dayu) provisionada e
+licenciada.</p></li>
+<li><p>Cluster MRS implantado com a pilha de componentes necessária
+(HDFS, YARN, Spark, Hive).</p></li>
+<li><p>Bucket OBS criado e acessível com a política IAM
+designada.</p></li>
+<li><p>Ambiente de execução de testes com conectividade de rede ao
+Console do Huawei Cloud.</p></li>
+</ul>
+</div>
+<h2 data-number="1.1" id="escopo-dos-testes"><span class="header-section-number">1.1</span> Escopo dos Testes</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Domínio</th>
+<th>O Que Deve Ser Observado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Arquitetura da Plataforma</td>
+<td>Os serviços principais estão implantados, saudáveis e acessíveis via
+API do Console.</td>
+</tr>
+<tr class="even">
+<td>Engenharia de Dados</td>
+<td>Os pipelines do DataArts Studio conseguem ingerir, transformar e
+carregar dados no armazenamento de destino.</td>
+</tr>
+<tr class="odd">
+<td>Armazenamento de Dados</td>
+<td>Os buckets OBS e o HDFS do MRS aceitam escritas/leituras com as
+permissões corretas.</td>
+</tr>
+<tr class="even">
+<td>Segurança</td>
+<td>As políticas IAM, o isolamento VPC e as regras dos grupos de
+segurança impõem o controle de acesso pretendido.</td>
+</tr>
+</tbody>
+</table>
+<h2 data-number="1.2" id="pré-condições-e-preparações"><span class="header-section-number">1.2</span> Pré-condições e
+Preparações</h2>
+<ul>
+<li><p>Todos os recursos de infraestrutura devem ser provisionados via
+Terraform e a saída de <code>terraform apply</code> deve apresentar zero
+erros.</p></li>
+<li><p>O cluster MRS deve estar no estado <strong>Executando</strong>
+antes da execução de qualquer caso de teste de engenharia de
+dados.</p></li>
+<li><p>Os arquivos de dados de teste (CSV/JSON) devem ser carregados no
+bucket OBS designado antes da execução dos pipelines.</p></li>
+<li><p>Cada testador deve ter uma conta IAM pessoal com a função
+<strong>Dayu_User</strong> atribuída no DataArts Studio.</p></li>
+<li><p>As regras de firewall de rede devem permitir TCP 22 (SSH) e TCP
+443 (HTTPS) de entrada a partir da sub-rede de execução de
+testes.</p></li>
+</ul>
+<h2 data-number="1.3" id="método-de-aceitação"><span class="header-section-number">1.3</span> Método de Aceitação</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Resultado</th>
+<th>Explicação</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Satisfeito</td>
+<td>O caso de teste passa completamente — o comportamento observado
+corresponde ao resultado esperado sem desvios.</td>
+</tr>
+<tr class="even">
+<td>Satisfeito com ressalvas</td>
+<td>O caso de teste passa, mas desvios menores foram observados que não
+impactam os objetivos da POC (documentados em Observações).</td>
+</tr>
+<tr class="odd">
+<td>Não satisfeito</td>
+<td>O caso de teste falha — o comportamento observado não corresponde ao
+resultado esperado. Um relatório de defeito deve ser registrado.</td>
+</tr>
+<tr class="even">
+<td>Não testado</td>
+<td>O caso de teste não pôde ser executado devido a dependências
+bloqueantes ou problemas de ambiente.</td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="2" id="arquitetura-da-plataforma"><span class="header-section-number">2</span> Arquitetura da Plataforma</h1>
+<h2 data-number="2.1"><span class="header-section-number">2.1</span>
+TC-001: Verificar implantação e saúde do cluster MRS</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objetivo</td>
+<td>Confirmar que o cluster MapReduce Service (MRS) está implantado</td>
+</tr>
+</tbody>
+</table>
+<pre><code>com os componentes necessários (HDFS, YARN, Spark, Hive) e que todos os nós
+apresentam status saudável. |</code></pre>
+<div class="line-block">Pré-requisitos | 1. Aplicação da infraestrutura
+Terraform concluída com sucesso. 2. ID do cluster MRS disponível na
+saída do Terraform. 3. Usuário IAM possui função MRS_Viewer ou superior.
+|<br />
+Procedimento | 1. Acessar o Console do Huawei Cloud. 2. Navegar em
+Console, MapReduce Service, Clusters. 3. Localizar o cluster pelo nome
+(ex.: mrs-poc-cluster). 4. Verificar se o status do cluster é
+Executando. 5. Clicar no nome do cluster e revisar a aba Componente —
+confirmar que HDFS, YARN, Spark e Hive estão listados com status Normal.
+6. Revisar a aba Nó — confirmar que todos os nós master e core
+apresentam status Executando. |<br />
+Resultado Esperado | 1. Status do cluster é Executando. 2. Todos os
+quatro componentes (HDFS, YARN, Spark, Hive) estão listados com status
+Normal. 3. Todos os nós apresentam status Executando sem alarmes.
+|<br />
+Observações | Se algum componente apresentar status Anormal, verificar a
+página de alarmes do MRS antes de registrar o resultado. |<br />
+Resultado do Teste | Aprovado |</div>
+<h2 data-number="2.2"><span class="header-section-number">2.2</span>
+TC-002: Verificar criação e acessibilidade do bucket OBS</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objetivo</td>
+<td>Confirmar que o bucket do Object Storage Service (OBS)
+utilizado</td>
+</tr>
+</tbody>
+</table>
+<pre><code>para o data lake da POC está criado, possui a classe de armazenamento correta
+e é acessível com a política IAM designada. |</code></pre>
+<div class="line-block">Pré-requisitos | 1. Nome do bucket OBS definido
+na configuração Terraform. 2. Política IAM concedendo acesso de
+leitura/escrita ao bucket está anexada ao usuário de teste. |<br />
+Procedimento | 1. Acessar o Console. 2. Navegar em Console, Object
+Storage Service. 3. Localizar o bucket (ex.: poc-datalake-raw). 4.
+Verificar se a classe de armazenamento é Standard. 5. Carregar um
+arquivo de teste (test-upload.txt) no bucket. 6. Baixar o arquivo e
+comparar seu conteúdo com o original. 7. Excluir o arquivo de teste.
+|<br />
+Resultado Esperado | 1. O bucket existe com classe de armazenamento
+Standard. 2. O carregamento do arquivo conclui sem erro. 3. O conteúdo
+do arquivo baixado corresponde ao original. 4. A exclusão do arquivo é
+realizada com sucesso. |<br />
+Observações | A consistência eventual do OBS pode causar um breve atraso
+antes que um objeto recém-carregado apareça nas listagens. |<br />
+Resultado do Teste | Aprovado |</div>
+<h2 data-number="2.3"><span class="header-section-number">2.3</span>
+TC-003: Verificar configuração de VPC e grupo de segurança</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objetivo</td>
+<td>Confirmar que a VPC, a sub-rede e os grupos de segurança estão</td>
+</tr>
+</tbody>
+</table>
+<pre><code>configurados conforme o diagrama de arquitetura de rede, com os blocos CIDR
+e regras de entrada/saída corretos. |</code></pre>
+<div class="line-block">Pré-requisitos | 1. IDs da VPC e da sub-rede
+disponíveis na saída do Terraform. 2. Nomes dos grupos de segurança
+documentados na arquitetura da solução. |<br />
+Procedimento | 1. Acessar o Console. 2. Navegar em Console, Virtual
+Private Cloud, VPCs. 3. Localizar a VPC (ex.: vpc-poc) e verificar se o
+bloco CIDR corresponde à arquitetura (ex.: 10.0.0.0/16). 4. Clicar na
+sub-rede e verificar seu CIDR (ex.: 10.0.1.0/24). 5. Navegar até
+Security Groups e verificar regras de entrada: TCP 22 da sub-rede
+bastion, TCP 443 do proxy corporativo. 6. Verificar se as regras de
+saída permitem todo o tráfego (padrão). |<br />
+Resultado Esperado | 1. CIDR da VPC é 10.0.0.0/16. 2. CIDR da sub-rede é
+10.0.1.0/24. 3. Regras de entrada correspondem à arquitetura: TCP 22 e
+TCP 443 das origens especificadas. 4. Saída permite todo o tráfego.
+|<br />
+Observações | Se o grupo de segurança possuir regras adicionais além da
+especificação da arquitetura, documentá-las no campo de Observações.
+|<br />
+Resultado do Teste | Aprovado |</div>
+<h1 data-number="3" id="engenharia-de-dados"><span class="header-section-number">3</span> Engenharia de Dados</h1>
+<h2 data-number="3.1"><span class="header-section-number">3.1</span>
+TC-004: Verificar criação do workspace do DataArts Studio</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objetivo</td>
+<td>Confirmar que a instância do DataArts Studio (Dayu) está</td>
+</tr>
+</tbody>
+</table>
+<pre><code>provisionada, o workspace está acessível e os usuários IAM designados
+conseguem acessar com a função Dayu\_User. |</code></pre>
+<div class="line-block">Pré-requisitos | 1. Instância do DataArts Studio
+provisionada e com status Executando. 2. Usuário IAM de teste possui a
+função Dayu_User atribuída. |<br />
+Procedimento | 1. Acessar o Console com o usuário IAM de teste. 2.
+Navegar em Console, DataArts Studio, Workspaces. 3. Localizar o
+workspace (ex.: poc-workspace). 4. Clicar em Acessar Workspace para
+abrir o console do DataArts Studio. 5. Verificar se o painel de
+navegação à esquerda carrega com os módulos esperados: Integração de
+Dados, Desenvolvimento de Dados, Arquitetura de Dados. |<br />
+Resultado Esperado | 1. O workspace está listado e acessível. 2. O
+console do DataArts Studio abre sem erros. 3. Todos os três módulos
+(Integração de Dados, Desenvolvimento de Dados, Arquitetura de Dados)
+estão visíveis na navegação. |<br />
+Observações | Se o workspace falhar ao carregar, verificar o status da
+instância Dayu e a atribuição da função IAM. |<br />
+Resultado do Teste | Aprovado |</div>
+<h2 data-number="3.2"><span class="header-section-number">3.2</span>
+TC-005: Verificar execução do pipeline de ingestão de dados</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objetivo</td>
+<td>Confirmar que um pipeline em lote do DataArts Studio consegue</td>
+</tr>
+</tbody>
+</table>
+<pre><code>ingerir dados CSV do OBS, aplicar uma transformação básica
+e gravar o resultado no caminho OBS de destino. |</code></pre>
+<div class="line-block">Pré-requisitos | 1. TC-004 concluído (workspace
+do DataArts Studio acessível). 2. Arquivo CSV de origem (customers.csv)
+existe no bucket OBS raw. 3. Caminho OBS de destino
+(poc-datalake-curated/customers/) está configurado. 4. Pipeline
+pl-ingest-customers está publicado no DataArts Studio. |<br />
+Procedimento | 1. No console do DataArts Studio, navegar até
+Desenvolvimento de Dados. 2. Localizar o pipeline pl-ingest-customers na
+lista de jobs. 3. Clicar em Executar para iniciar o pipeline. 4.
+Aguardar o status do pipeline mudar para Sucesso (timeout: 10 minutos).
+5. Navegar até o OBS e verificar se o arquivo de saída existe em
+poc-datalake-curated/customers/. 6. Baixar o arquivo de saída e
+verificar se a contagem de linhas corresponde à origem (sem perda de
+dados). |<br />
+Resultado Esperado | 1. A execução do pipeline conclui com status
+Sucesso. 2. O arquivo de saída é criado no caminho OBS de destino. 3. A
+contagem de linhas do arquivo de saída corresponde ao arquivo de origem.
+|<br />
+Observações | O tempo de execução do pipeline varia conforme o volume de
+dados. Para a POC, o arquivo de origem contém aproximadamente 10.000
+linhas. |<br />
+Resultado do Teste | Aprovado |</div>
+<h2 data-number="3.3"><span class="header-section-number">3.3</span>
+TC-006: Verificar consulta Spark SQL no cluster MRS</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Objetivo</td>
+<td>Confirmar que uma consulta Spark SQL pode ser executada no</td>
+</tr>
+</tbody>
+</table>
+<pre><code>cluster MRS para ler dados de uma tabela Hive e retornar resultados
+corretos, validando a integração entre o MRS e o data lake. |</code></pre>
+<div class="line-block">Pré-requisitos | 1. TC-001 concluído (cluster
+MRS saudável). 2. Tabela Hive poc_db.customers existe e contém dados
+carregados pelo pipeline de ingestão. 3. Acesso SSH ao nó master do MRS
+configurado. |<br />
+Procedimento | 1. Acessar o nó master do MRS via SSH. 2. Executar a CLI
+do Spark SQL: spark-sql –master yarn -{}-conf
+spark.sql.hive.convertMetastoreOrc=true -e “SELECT COUNT(*) FROM
+poc_db.customers;” 3. Verificar se a contagem retornada corresponde ao
+esperado (10.000). 4. Executar uma consulta de amostra para verificar a
+integridade dos dados: spark-sql –master yarn -e “SELECT customer_id,
+name FROM poc_db.customers LIMIT 5;” 5. Confirmar que a consulta retorna
+5 linhas com valores não nulos. |<br />
+Resultado Esperado | 1. COUNT(*) retorna 10.000. 2. A consulta de
+amostra retorna 5 linhas com valores válidos de customer_id e name.
+|<br />
+Observações | Se a CLI do Spark SQL não estiver disponível, utilizar a
+interface web do componente Spark2x do MRS para submeter a consulta.
+|<br />
+Resultado do Teste | Aprovado |</div>
+<h1 data-number="4"><span class="header-section-number">4</span>
+Histórico de versões</h1>
+<p><strong>1.0.0</strong>  <em>2026-09-12</em></p>
+<p>Versão inicial.</p>
+<p>Adicionados casos de teste de Arquitetura da Plataforma (TC-001 a
+TC-003).</p>
+<p>Adicionados casos de teste de Engenharia de Dados (TC-004 a
+TC-006).</p>
+</body>
+</html>
