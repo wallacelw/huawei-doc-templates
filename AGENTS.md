@@ -198,6 +198,15 @@ approval. Changing them breaks existing documents and reproducibility.
   match the PDF. The Lua filter, reference DOCX, and HTML template must
   stay in sync with `guide.cls` and `technical.cls`.
 
+### L19. Authors are optional and hideable with `[noauthors]`
+- `\setdocauthors{...}` sets one or more authors displayed on the cover page.
+- If not set, nothing is shown (no placeholder, no empty space).
+- The `[noauthors]` class option hides authors even if set (like
+  `[nochangelog]` suppresses the changelog).
+- In `guide.cls`, authors appear below the cover text, above version/date/time.
+- In `technical.cls`, authors appear as a row in the cover version table.
+- The command is defined in `templates/_base/huawei-changelog.sty` (shared).
+
 ---
 
 ## Conventions
@@ -513,7 +522,7 @@ These are committed to git. Run `make setup-guide` to regenerate.
 ## When unsure
 
 - Ask the user before making architectural decisions.
-- Ask before changing locked decisions (L1–L18).
+- Ask before changing locked decisions (L1–L19).
 - Ask before modifying the build system (Makefile, `scripts/build.sh`, `scripts/install.sh`).
 - Ask before changing the template structure or adding new templates.
 - Do not guess — clarify first.

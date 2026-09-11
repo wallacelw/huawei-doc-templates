@@ -3,6 +3,23 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.6.0 (2026-09-11)
+
+### Features
+
+- **`\setdocauthors`**: New command to set one or more authors displayed on the
+  cover page. Optional — if not set, nothing is shown. Example:
+  `\setdocauthors{John Smith, Jane Doe}`.
+- **`[noauthors]` class option**: Hides authors on the cover page (like
+  `[nochangelog]` suppresses the changelog). Default: show authors if set.
+- **guide.cls**: Authors shown below cover text, above version/date/time.
+- **technical.cls**: Authors shown as a row in the cover version table.
+- **pandoc-common.lua**: Parses `\setdocauthors` and `[noauthors]` for
+  multi-format output (DOCX, MD, HTML).
+- **Samples**: All 4 samples (guide pt/en + technical pt/en) demonstrate
+  `\setdocauthors` with different author names.
+- **guide.cls / technical.cls**: Bumped to v3.6.0.
+
 ## v3.5.0 (2026-09-11)
 
 ### Refactoring

@@ -47,7 +47,7 @@ local config = {
   strip_commands = {
     setguidetitle = true, setheadertitle = true, setcovertext = true,
     setheaderlogo = true, setcoverlogo = true, setdocversion = true,
-    setdocdate = true, makecover = true, maketoc = true, startbody = true,
+    setdocdate = true, setdocauthors = true, makecover = true, maketoc = true, startbody = true,
   },
   command_map = {
     title = 'setguidetitle',

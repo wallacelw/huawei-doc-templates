@@ -72,7 +72,7 @@ local config = {
     setreporttitle = true, setreportversion = true, setreportdate = true,
     setreportscenario = true, setreporttype = true, setheadertitle = true,
     setheaderlogo = true,
-    setdocversion = true, setdocdate = true,
+    setdocversion = true, setdocdate = true, setdocauthors = true,
     makecover = true, maketoc = true, startbody = true,
   },
   command_map = {

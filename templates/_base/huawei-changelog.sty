@@ -1,19 +1,21 @@
 %% huawei-changelog.sty
 %% =====================================================================
-%%  Version commands (\setdocversion, \setdocdate), changelog environment,
-%%  \changelogentry, and [nochangelog] disable block.
+%%  Version commands (\setdocversion, \setdocdate, \setdocauthors),
+%%  changelog environment, \changelogentry, and [nochangelog] disable block.
 %%  Extracted from guide.cls v2.0.0 decomposition.
 %% =====================================================================
 \ProvidesPackage{huawei-changelog}[2026/08/19 Huawei changelog]
 %% Depends on: huawei-colors (huaweired)
 
 % =====================================================================
-%  VERSION / DATE  (used on cover page and in changelog)
+%  VERSION / DATE / AUTHORS  (used on cover page and in changelog)
 % =====================================================================
 \newcommand{\lg@docversion}{}
 \newcommand{\setdocversion}[1]{\renewcommand{\lg@docversion}{#1}}
 \newcommand{\lg@docdate}{\today}
 \newcommand{\setdocdate}[1]{\renewcommand{\lg@docdate}{#1}}
+\newcommand{\lg@docauthors}{}
+\newcommand{\setdocauthors}[1]{\renewcommand{\lg@docauthors}{#1}}
 
 % =====================================================================
 %  CHANGELOG / VERSIONING

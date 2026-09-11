@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.5.0}
+\setdocversion{3.6.0}
 
 \begin{document}
 
@@ -1210,6 +1210,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.6.0}{\today}{\item Added \inlinecode{\textbackslash setdocauthors} command and \inlinecode{[noauthors]} class option to both templates. Authors are displayed on the cover page (optional --- hidden if not set or if \inlinecode{[noauthors]} is passed). Demonstrated in all 4 samples.}
   \changelogentry{3.5.0}{\today}{\item Reorganized project structure: moved \inlinecode{build.sh}, \inlinecode{install.sh}, and \inlinecode{uninstall.sh} from repo root to \inlinecode{scripts/} directory. Updated all references in Makefile, README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use \inlinecode{main/scripts/install.sh}.}
   \changelogentry{3.4.0}{\today}{\item \inlinecode{install.sh}: opencode skills and VS Code LaTeX Workshop are now optional prompts (default yes). Removed LTeX extension (was failing to install). One-liner detects existing installation and prompts to update with version display (\inlinecode{v3.3.6 → v3.3.7}). Uses absolute paths to prevent nested clones. \item \inlinecode{uninstall.sh}: Added one-liner support (\inlinecode{curl | bash}). Added ``Remove 100\%'' nuclear option (option 4) to interactive menu. Added \inlinecode{--repo} flag. \item Updated Chapter 6 with optional component prompts and update detection. Updated Chapter 7 with one-liner update/uninstall and full menu documentation.}
   \changelogentry{3.3.0}{\today}{\item Moved pre-compiled setup guide to \inlinecode{setup-guide/} folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to understand the installation process. \item Updated Makefile \inlinecode{setup-guide} target to generate and copy all four formats. \item Updated README with pre-compiled setup guide section and format comparison table. \item Updated .gitignore to track all four formats in \inlinecode{setup-guide/}.}

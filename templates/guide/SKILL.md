@@ -227,6 +227,7 @@ asks.
 | `\setcoverlogo{path}` | Cover logo image path (default `common-assets/huawei-logo-cover.png`). |
 | `\setdocversion{1.0.0}` | Document version, shown on the cover page (e.g. "v1.0.0"). |
 | `\setdocdate{2026-08-05}` | Document date, shown on the cover page next to the version. |
+| `\setdocauthors{John Smith, Jane Doe}` | One or more authors displayed on the cover page. Optional — if not set, nothing is shown. |
 
 ### Document structure
 | Command | Purpose |
@@ -445,7 +446,7 @@ rendered, but the content remains in the `.tex` file for future reference.
 ## Class options
 
 ```latex
-\documentclass[portuguese,indentbody,notime,nochangelog]{guide}
+\documentclass[portuguese,indentbody,notime,nochangelog,noauthors]{guide}
 ```
 - `portuguese` — switches all predefined labels to Portuguese and loads `babel`
   with `brazilian`. Default off (English).
@@ -454,6 +455,7 @@ rendered, but the content remains in the `.tex` file for future reference.
 - `notime` — hides the compilation time on the cover page. Default off
   (time is shown).
 - `nochangelog` — suppresses the changelog section entirely (heading + entries) and hides version, date, and time on the cover page. The `changelog` environment emits its own heading, so this one option hides everything. Default off (changelog is shown).
+- `noauthors` — hides the authors on the cover page. Default off (authors are shown if set via `\setdocauthors`).
 
 ---
 

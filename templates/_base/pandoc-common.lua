@@ -148,7 +148,7 @@ local function make_filter(config)
   local function parse_preamble(source_text)
     local p = {
       lang = "en",
-      options = { portuguese = false, indentbody = false, notime = false, nochangelog = false },
+      options = { portuguese = false, indentbody = false, notime = false, nochangelog = false, noauthors = false },
       commands = {},
     }
     if not source_text then return p end
@@ -162,6 +162,7 @@ local function make_filter(config)
         elseif opt == "indentbody" then p.options.indentbody = true
         elseif opt == "notime" then p.options.notime = true
         elseif opt == "nochangelog" then p.options.nochangelog = true
+        elseif opt == "noauthors" then p.options.noauthors = true
         end
       end
     end

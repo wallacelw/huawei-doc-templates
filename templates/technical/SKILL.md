@@ -216,6 +216,7 @@ goes in `technical.cls`. Do not inline formatting overrides in the document.
 | `\setheadertitle{...}` | Centered header text on body pages. |
 | `\setdocversion{1.0.0}` | Document version for changelog (if using changelog). |
 | `\setdocdate{\today}` | Document date for changelog. |
+| `\setdocauthors{John Smith, Jane Doe}` | One or more authors displayed on the cover page. Optional — if not set, nothing is shown. |
 
 ### Document structure
 | Command | Purpose |
@@ -373,6 +374,7 @@ pandoc --lua-filter=templates/technical/technical-pandoc.lua \
 | `portuguese` | Portuguese labels (Sumário, section names, etc.). |
 | `notime` | Hide compilation time on cover page. |
 | `nochangelog` | Suppress changelog section and cover page version/date/time. |
+| `noauthors` | Hide authors on the cover page (default: show if set via `\setdocauthors`). |
 | `indentbody` | Indent first line of paragraphs. |
 
 ---

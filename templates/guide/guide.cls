@@ -24,10 +24,12 @@
 %%    nochangelog -> suppresses the changelog section entirely
 %%                   and hides version/date/time on the cover page.
 %%                   (default: show changelog)
+%%    noauthors   -> hides the authors on the cover page.
+%%                   (default: show authors if set)
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{guide}[2026/09/11 Huawei Guide template v3.5.0]
+\ProvidesClass{guide}[2026/09/11 Huawei Guide template v3.6.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -38,6 +40,8 @@
 \DeclareOption{notime}{\@showtimefalse}
 \newif\if@changelog \@changelogtrue
 \DeclareOption{nochangelog}{\@changelogfalse}
+\newif\if@showauthors \@showauthorstrue
+\DeclareOption{noauthors}{\@showauthorsfalse}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 \LoadClass[a4paper,10pt]{article}
@@ -185,6 +189,13 @@
   \vspace{0.9cm}%
    {\centering
     \fontsize{16}{20}\selectfont \lg@covertext\par}%
+   \if@showauthors
+     \ifx\lg@docauthors\@empty\else
+       \vspace{0.3cm}%
+       {\centering
+        \fontsize{12}{14}\selectfont \lg@docauthors\par}%
+     \fi
+   \fi
    \vspace{0.5cm}%
    {\centering
     \fontsize{12}{14}\selectfont \if@changelog\lg@covermeta\fi\par}%

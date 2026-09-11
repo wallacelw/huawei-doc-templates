@@ -19,7 +19,7 @@ load `babel` with `brazilian` instead.
 ## Class options
 
 ```latex
-\documentclass[portuguese,indentbody,notime,nochangelog]{guide}
+\documentclass[portuguese,indentbody,notime,nochangelog,noauthors]{guide}
 ```
 
 | Option | Effect |
@@ -28,6 +28,7 @@ load `babel` with `brazilian` instead.
 | `indentbody` | Indents all running text by `\contentindent` (0.6 cm). Default off (text flush to the left margin). |
 | `notime` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
 | `nochangelog` | Suppresses the changelog section entirely (no-ops) and hides version, date, and time on the cover page. Use when it grows too large. Default off (changelog is shown). |
+| `noauthors` | Hides the authors on the cover page. Default off (authors shown if set via `\setdocauthors`). |
 
 ### Label translations
 
