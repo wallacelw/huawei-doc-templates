@@ -83,7 +83,7 @@ if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ -f "${BASH_SOURCE[0]}" ]]; then
 else
     # Running from pipe (curl | bash)
     AUTO_YES=true
-    if [[ -d .git ]] && [[ -f install.sh ]]; then
+    if [[ -d .git ]] && [[ -f scripts/install.sh ]]; then
         # Already inside the repo — update in place
         update_repo "$(pwd)"
     elif [[ -d "$CLONE_DIR/.git" ]]; then

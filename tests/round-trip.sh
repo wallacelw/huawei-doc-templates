@@ -293,7 +293,7 @@ for entry in "${SAMPLES[@]}"; do
     --reference-doc="$REF_DOCX" --number-sections \
     --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}/common-assets" \
     -t docx "$tex_file" -o "$docx_outdir/${basename}.docx" 2>/dev/null
-  # Post-process with --fix (same pipeline as build.sh)
+  # Post-process with --fix (same pipeline as scripts/build.sh)
   if [ -f "$docx_outdir/${basename}.docx" ]; then
     python3 "$FIX_SCRIPT" --fix "$docx_outdir/${basename}.docx" 2>/dev/null || true
   fi

@@ -3,6 +3,17 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.5.0 (2026-09-11)
+
+### Refactoring
+
+- **Project structure**: Moved `build.sh`, `install.sh`, and `uninstall.sh` from
+  repo root to `scripts/` directory. Updated all references in Makefile, README,
+  AGENTS.md, SKILL.md, tests, and setup guide.
+- **One-liner URLs**: Now use `main/scripts/install.sh` and
+  `main/scripts/uninstall.sh`.
+- **guide.cls / technical.cls**: Bumped to v3.5.0.
+
 ## v3.4.0 (2026-09-11)
 
 ### Features

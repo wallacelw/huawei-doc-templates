@@ -2,14 +2,14 @@
 # ─── uninstall.sh — Remove Huawei Document Templates artifacts ──────────────
 #
 # Usage:
-#   ./uninstall.sh                  # interactive menu
-#   ./uninstall.sh --all            # remove all installed components (safe)
-#   ./uninstall.sh --all --packages # also remove apt packages (breaks other TeX)
-#   ./uninstall.sh --all --repo     # also delete the repo (prompts to confirm)
-#   ./uninstall.sh --skills         # remove specific component only
-#   ./uninstall.sh --modules --font # combine specific components
-#   ./uninstall.sh --dry-run        # show what would be removed
-#   ./uninstall.sh --yes            # skip confirmation (repo still prompts)
+#   ./scripts/uninstall.sh                  # interactive menu
+#   ./scripts/uninstall.sh --all            # remove all installed components (safe)
+#   ./scripts/uninstall.sh --all --packages # also remove apt packages (breaks other TeX)
+#   ./scripts/uninstall.sh --all --repo     # also delete the repo (prompts to confirm)
+#   ./scripts/uninstall.sh --skills         # remove specific component only
+#   ./scripts/uninstall.sh --modules --font # combine specific components
+#   ./scripts/uninstall.sh --dry-run        # show what would be removed
+#   ./scripts/uninstall.sh --yes            # skip confirmation (repo still prompts)
 #
 # Components: --skills --modules --font --latexmk --vscode --packages --repo
 # ──────────────────────────────────────────────────────────────────────────────
@@ -19,11 +19,11 @@ set -euo pipefail
 CLONE_DIR="/home/huawei-doc-templates"
 
 if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ -f "${BASH_SOURCE[0]}" ]]; then
-    # Running from a file (./uninstall.sh)
+    # Running from a file (./scripts/uninstall.sh)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 else
     # Running from pipe (curl | bash) — find the repo
-    if [[ -d .git ]] && [[ -f uninstall.sh ]]; then
+    if [[ -d .git ]] && [[ -f scripts/uninstall.sh ]]; then
         # Already inside the repo
         SCRIPT_DIR="$(pwd)"
     elif [[ -d "$CLONE_DIR/.git" ]]; then
@@ -31,7 +31,7 @@ else
         SCRIPT_DIR="$CLONE_DIR"
     else
         echo "Error: Could not find the huawei-doc-templates repository."
-        echo "Run this script from inside the repo, or use: ./uninstall.sh"
+        echo "Run this script from inside the repo, or use: ./scripts/uninstall.sh"
         exit 1
     fi
 fi
@@ -331,7 +331,7 @@ PYEOF
         if [ "$DRY_RUN" = true ]; then
             log_dim "would uninstall: LaTeX Workshop extension"
         else
-            code --uninstall-extension James-Yu.latex-workshop 2>/dev/null && \
+            code --uninstall-extension James-Yu.latex-workshop >/dev/null 2>&1 && \
                 log_ok "Uninstalled: LaTeX Workshop extension" || \
                 log_dim "LaTeX Workshop extension not installed"
         fi

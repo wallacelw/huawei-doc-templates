@@ -2,11 +2,11 @@
 # build.sh — Interactive format selection menu for Huawei Cloud Document Builder
 #
 # Usage:
-#   ./build.sh                           # interactive, current directory
-#   ./build.sh examples/guide/en         # interactive, specified project
-#   ./build.sh --pdf examples/guide/en   # non-interactive: PDF only
-#   ./build.sh --pdf --docx examples/guide/en
-#   ./build.sh --all examples/guide/en
+#   ./scripts/build.sh                           # interactive, current directory
+#   ./scripts/build.sh examples/guide/en         # interactive, specified project
+#   ./scripts/build.sh --pdf examples/guide/en   # non-interactive: PDF only
+#   ./scripts/build.sh --pdf --docx examples/guide/en
+#   ./scripts/build.sh --all examples/guide/en
 
 set -euo pipefail
 
@@ -82,7 +82,7 @@ while [[ $# -gt 0 ]]; do
         --dry-run) DRY_RUN=1; shift ;;
         --all)     FLAG_PDF=true; FLAG_DOCX=true; FLAG_MD=true; FLAG_HTML=true; shift ;;
         -h|--help)
-            echo "Usage: ./build.sh [OPTIONS] [PROJECT-DIR]"
+            echo "Usage: ./scripts/build.sh [OPTIONS] [PROJECT-DIR]"
             echo ""
             echo "Options:"
             echo "  --pdf       Generate PDF only"
@@ -95,10 +95,10 @@ while [[ $# -gt 0 ]]; do
             echo "  -h, --help  Show this help message"
             echo ""
             echo "Examples:"
-            echo "  ./build.sh                           # interactive, current dir"
-            echo "  ./build.sh examples/guide/en         # interactive, specified project"
-            echo "  ./build.sh --pdf examples/guide/en   # PDF only"
-            echo "  ./build.sh --all examples/guide/en   # all formats"
+            echo "  ./scripts/build.sh                           # interactive, current dir"
+            echo "  ./scripts/build.sh examples/guide/en         # interactive, specified project"
+            echo "  ./scripts/build.sh --pdf examples/guide/en   # PDF only"
+            echo "  ./scripts/build.sh --all examples/guide/en   # all formats"
             exit 0
             ;;
         -*)

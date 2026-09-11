@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.4.0}
+\setdocversion{3.5.0}
 
 \begin{document}
 
@@ -881,13 +881,13 @@ times. It merges VS Code settings rather than overwriting them, and
 
   \begin{code}[bash]
 cd /home
-curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh | bash
   \end{code}
 
   \begin{infobox}
   The script installs XeLaTeX, latexmk, fonts (HarmonyOS Sans + Cascadia Code),
   the opencode skills, and configures VS Code LaTeX Workshop. When run
-  interactively (\inlinecode{./install.sh}), it prompts for optional components
+  interactively (\inlinecode{./scripts/install.sh}), it prompts for optional components
   (skills and VS Code --- both default to yes). When run via one-liner, all
   components are installed automatically. It is idempotent --- safe to re-run.
   \end{infobox}
@@ -1096,7 +1096,7 @@ To update the Huawei document templates project:
   \item Re-run the one-liner --- it detects the existing installation and
         prompts to update:
   \begin{code}[bash]
-curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh | bash
   \end{code}
   \item The script pulls the latest version, shows the version change
         (\inlinecode{v3.3.6 → v3.3.7}), and re-runs the installer. New
@@ -1133,11 +1133,11 @@ To remove the Huawei document templates installation:
   \item Run the uninstall script (interactive menu with 5 options):
   \begin{code}[bash]
 cd /home/huawei-doc-templates
-./uninstall.sh
+./scripts/uninstall.sh
   \end{code}
   \item Or use the one-liner:
   \begin{code}[bash]
-curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh | bash
   \end{code}
   \item The interactive menu offers:
   \begin{itemize}
@@ -1149,11 +1149,11 @@ curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main
   \end{itemize}
   \item To preview what would be removed before running:
   \begin{code}[bash]
-./uninstall.sh --all --dry-run
+./scripts/uninstall.sh --all --dry-run
   \end{code}
   \item To also remove apt packages (texlive, latexmk, fonts, pandoc):
   \begin{code}[bash]
-./uninstall.sh --all --packages --yes
+./scripts/uninstall.sh --all --packages --yes
   \end{code}
   \begin{warning}
   Removing apt packages will break any other LaTeX documents on the instance.
@@ -1191,9 +1191,9 @@ configuration.
     \rowcolor{huaweired} \thd{Step} & \thd{What to check} & \thd{Expected result} \\
     \tbody
     Gateway update   & Re-run bootstrap                            & New version running \\
-    Templates update & \inlinecode{git pull \&\& ./install.sh}     & New templates available \\
+    Templates update & \inlinecode{git pull \&\& ./scripts/install.sh}     & New templates available \\
     Gateway uninstall & \inlinecode{./scripts/uninstall.sh --all}  & Docker stack removed \\
-    Templates uninstall & \inlinecode{./uninstall.sh --all}         & Skills + modules removed \\
+    Templates uninstall & \inlinecode{./scripts/uninstall.sh --all}         & Skills + modules removed \\
     Cloud cleanup    & \inlinecode{flexusx-dev} deleted            & No running instance \\
     EIP              & Released                                    & No public IP charges \\
     Security group   & \inlinecode{sg-xgate} deleted               & No SG charges \\
@@ -1210,6 +1210,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.5.0}{\today}{\item Reorganized project structure: moved \inlinecode{build.sh}, \inlinecode{install.sh}, and \inlinecode{uninstall.sh} from repo root to \inlinecode{scripts/} directory. Updated all references in Makefile, README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use \inlinecode{main/scripts/install.sh}.}
   \changelogentry{3.4.0}{\today}{\item \inlinecode{install.sh}: opencode skills and VS Code LaTeX Workshop are now optional prompts (default yes). Removed LTeX extension (was failing to install). One-liner detects existing installation and prompts to update with version display (\inlinecode{v3.3.6 → v3.3.7}). Uses absolute paths to prevent nested clones. \item \inlinecode{uninstall.sh}: Added one-liner support (\inlinecode{curl | bash}). Added ``Remove 100\%'' nuclear option (option 4) to interactive menu. Added \inlinecode{--repo} flag. \item Updated Chapter 6 with optional component prompts and update detection. Updated Chapter 7 with one-liner update/uninstall and full menu documentation.}
   \changelogentry{3.3.0}{\today}{\item Moved pre-compiled setup guide to \inlinecode{setup-guide/} folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to understand the installation process. \item Updated Makefile \inlinecode{setup-guide} target to generate and copy all four formats. \item Updated README with pre-compiled setup guide section and format comparison table. \item Updated .gitignore to track all four formats in \inlinecode{setup-guide/}.}
   \changelogentry{3.2.1}{\today}{\item Renamed Chapter 7 from ``Clean Up'' to ``Operations and Maintenance''. Added subsections for updating and uninstalling both the MaaS Gateway and the document templates. Added cloud resource cleanup as an optional subsection.}

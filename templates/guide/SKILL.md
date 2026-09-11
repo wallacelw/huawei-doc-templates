@@ -83,9 +83,9 @@ up in the class file and this SKILL.md.
 - **Compile twice** on the first run so the TOC and page numbers settle.
   `latexmk` handles this automatically (`.latexmkrc` is included).
 - **fvextra ≥ 1.5** — provides `backgroundcolor` for code blocks. TeX Live
-  2024+ includes it; on older installs, update from CTAN or run `install.sh`.
+  2024+ includes it; on older installs, update from CTAN or run `scripts/install.sh`.
 - **Fonts:** HarmonyOS Sans (body) + Cascadia Code (code). Falls back with
-  a warning if missing (see AGENTS.md L8). `install.sh` installs both.
+  a warning if missing (see AGENTS.md L8). `scripts/install.sh` installs both.
 
 ---
 

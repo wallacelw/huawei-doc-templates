@@ -13,7 +13,7 @@ and changelog.
 **One-liner (clone + install):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh | bash
 ```
 
 If an existing installation is detected, the one-liner prompts to update
@@ -24,10 +24,10 @@ If an existing installation is detected, the one-liner prompts to update
 ```bash
 git clone https://github.com/wallacelw/huawei-doc-templates.git
 cd huawei-doc-templates
-./install.sh
+./scripts/install.sh
 ```
 
-When run interactively (`./install.sh`), you'll be prompted for optional
+When run interactively (`./scripts/install.sh`), you'll be prompted for optional
 components (default yes):
 
 - Install opencode skills? `[Y/n]`
@@ -84,17 +84,17 @@ to create a new guide document.
 **One-liner:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh | bash
 ```
 
 **Or from the repo:**
 
 ```bash
-./uninstall.sh                  # interactive menu (5 options)
-./uninstall.sh --all            # remove everything except apt packages
-./uninstall.sh --all --packages # also remove apt packages (WARNING: breaks other TeX)
-./uninstall.sh --all --repo     # also delete the repo directory
-./uninstall.sh --all --dry-run  # preview what would be removed
+./scripts/uninstall.sh                  # interactive menu (5 options)
+./scripts/uninstall.sh --all            # remove everything except apt packages
+./scripts/uninstall.sh --all --packages # also remove apt packages (WARNING: breaks other TeX)
+./scripts/uninstall.sh --all --repo     # also delete the repo directory
+./scripts/uninstall.sh --all --dry-run  # preview what would be removed
 ```
 
 Interactive menu options:

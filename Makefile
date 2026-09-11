@@ -43,7 +43,7 @@ examples: setup-guide ## Compile the setup-guide and copy all formats to setup-g
 
 setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
 	cd examples/setup-guide/src && latexmk setup-guide.tex
-	./build.sh --all examples/setup-guide >/dev/null 2>&1 || true
+	./scripts/build.sh --all examples/setup-guide >/dev/null 2>&1 || true
 	cp examples/setup-guide/setup-guide.pdf  setup-guide/setup-guide.pdf
 	cp examples/setup-guide/setup-guide.md   setup-guide/setup-guide.md
 	cp examples/setup-guide/setup-guide.docx setup-guide/setup-guide.docx
@@ -55,12 +55,12 @@ setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
 #   <t>-html-pt, <t>-html-en, <t>-html, <t>-formats
 
 define TEMPLATE_RULES
-$(1)-md-pt:   ; ./build.sh --md examples/$(1)/pt
-$(1)-md-en:   ; ./build.sh --md examples/$(1)/en
-$(1)-docx-pt: ; ./build.sh --docx examples/$(1)/pt
-$(1)-docx-en: ; ./build.sh --docx examples/$(1)/en
-$(1)-html-pt: ; ./build.sh --html examples/$(1)/pt
-$(1)-html-en: ; ./build.sh --html examples/$(1)/en
+$(1)-md-pt:   ; ./scripts/build.sh --md examples/$(1)/pt
+$(1)-md-en:   ; ./scripts/build.sh --md examples/$(1)/en
+$(1)-docx-pt: ; ./scripts/build.sh --docx examples/$(1)/pt
+$(1)-docx-en: ; ./scripts/build.sh --docx examples/$(1)/en
+$(1)-html-pt: ; ./scripts/build.sh --html examples/$(1)/pt
+$(1)-html-en: ; ./scripts/build.sh --html examples/$(1)/en
 
 $(1)-md:   $(1)-md-pt $(1)-md-en   ; @true
 $(1)-docx: $(1)-docx-pt $(1)-docx-en ; @true
@@ -102,9 +102,9 @@ en: guide-en ; @true
 ##@ Setup guide (uses guide template, lives at examples/setup-guide/)
 # ============================================================================
 
-md-sg:   ; ./build.sh --md examples/setup-guide
-docx-sg: ; ./build.sh --docx examples/setup-guide
-html-sg: ; ./build.sh --html examples/setup-guide
+md-sg:   ; ./scripts/build.sh --md examples/setup-guide
+docx-sg: ; ./scripts/build.sh --docx examples/setup-guide
+html-sg: ; ./scripts/build.sh --html examples/setup-guide
 
 # ============================================================================
 ##@ Multi-format output (DOCX, Markdown, HTML via Pandoc)
@@ -138,7 +138,7 @@ project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.tex
 	fi
 
 menu: ## Interactive format menu (delegates to build.sh)
-	./build.sh
+	./scripts/build.sh
 
 # ============================================================================
 ##@ Testing

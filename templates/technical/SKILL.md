@@ -73,7 +73,7 @@ Read all four files before proceeding to the Quick start below.
 - **Compile twice** on the first run so the TOC and page numbers settle.
   `latexmk` handles this automatically (`.latexmkrc` is included).
 - **Fonts:** HarmonyOS Sans (body) + Cascadia Code (code). Falls back with
-  a warning if missing (see AGENTS.md L8). `install.sh` installs both.
+  a warning if missing (see AGENTS.md L8). `scripts/install.sh` installs both.
 - **Pandoc >= 3.0** — required for multi-format output (DOCX, Markdown, HTML).
 
 ---

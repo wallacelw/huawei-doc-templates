@@ -46,7 +46,7 @@ Before committing, validate the change from **all** relevant perspectives:
      output.
    - Changed a sample `.tex`? Recompile and verify the PDF, then regenerate
      multi-format output.
-   - Changed `install.sh`? Check `README.md` setup section and `SKILL.md`
+   - Changed `scripts/install.sh`? Check `README.md` setup section and `SKILL.md`
      quick-start steps.
    - Added a new command/environment? Document in `SKILL.md` + `README.md`,
      demonstrate in all samples.
@@ -56,8 +56,8 @@ Before committing, validate the change from **all** relevant perspectives:
    descriptions should reflect current behavior — not stale descriptions.
 
 4. **Edge cases:** Consider:
-   - New template? Verify Makefile auto-discovery, `build.sh` auto-detection,
-     `install.sh` auto-discovery, all test scripts.
+   - New template? Verify Makefile auto-discovery, `scripts/build.sh` auto-detection,
+     `scripts/install.sh` auto-discovery, all test scripts.
    - New command? Check it renders correctly in PDF, DOCX, MD, and HTML.
    - New image asset? Verify TEXINPUTS resolution (project `assets/` first,
      then `common-assets/`).
@@ -108,7 +108,7 @@ approval. Changing them breaks existing documents and reproducibility.
 - Brand fonts are loaded with `\IfFontExistsTF`; if missing, a single
   fallback is used with a class warning.
 - Removed fallbacks: Arial, Consolas, fontspec default.
-- `install.sh` installs both brand fonts; the fallbacks are safety nets.
+- `scripts/install.sh` installs both brand fonts; the fallbacks are safety nets.
 
 ### L9. Colors are hardcoded to Huawei brand
 - `huaweired` (`#C7000B`), `codebg` (`#F6F8FA`), `codetext` (`#1F2328`),
@@ -292,7 +292,7 @@ at the repo root registers `templates/` as a discovery path.
    ---
    ```
    - The `name` field MUST have the `huawei-template-` prefix (see Conventions).
-   - `install.sh` reads this `name` field to determine the install directory.
+   - `scripts/install.sh` reads this `name` field to determine the install directory.
    - The `description` field determines when the skill triggers. Keep it
      specific to avoid false activations.
 
@@ -306,7 +306,7 @@ at the repo root registers `templates/` as a discovery path.
    - **Project folder convention** — always create a self-contained folder
    - **Timezone note** — document that TZ is per-project, not template-level
 
-4. **Add to `install.sh`** — the script auto-discovers templates by scanning
+4. **Add to `scripts/install.sh`** — the script auto-discovers templates by scanning
    `templates/*/SKILL.md`. No changes needed if the structure is correct.
 
 5. **Add to root `README.md`** — add a row to the Templates table.
@@ -363,8 +363,8 @@ at the repo root registers `templates/` as a discovery path.
 
 3. **Done** — no changes needed to:
    - Makefile (auto-discovers via `$(wildcard templates/*/)` + `eval`)
-   - build.sh (auto-detects template from `.latexmkrc` TEXINPUTS)
-   - install.sh (auto-discovers template sample dirs)
+   - scripts/build.sh (auto-detects template from `.latexmkrc` TEXINPUTS)
+   - scripts/install.sh (auto-discovers template sample dirs)
    - test-sync.sh, test-docx-fix.sh, round-trip.sh (auto-discover templates and samples). test-filter.sh needs a one-line addition per template (filter path).
 
 The naming convention is critical:
@@ -406,7 +406,7 @@ The naming convention is critical:
   decisions are made.
 - **Samples** — must always compile. They are the user's reference. Any new
   feature must be demonstrated in both samples.
-- **`install.sh`** — reads skill name from SKILL.md frontmatter. Do not
+- **`scripts/install.sh`** — reads skill name from SKILL.md frontmatter. Do not
   hardcode skill names in the script.
 
 ---
@@ -416,7 +416,7 @@ The naming convention is critical:
 - **LaTeX** (`.cls`, `.sty`, `.tex`): 2-space indent, no trailing whitespace,
   sentences end with period. Use `\newcommand` / `\newenvironment` — never
   redefine existing commands. Internal macros use `\lg@` prefix.
-- **Shell scripts** (`build.sh`, `install.sh`, `tests/*.sh`):
+- **Shell scripts** (`scripts/build.sh`, `scripts/install.sh`, `tests/*.sh`):
   `set -euo pipefail`, 2-space indent, `snake_case` for variables.
 - **Lua filters** (`pandoc-common.lua`, `*-pandoc.lua`): 2-space indent,
   `snake_case` for locals, global functions for Pandoc callbacks (no return
@@ -514,6 +514,6 @@ These are committed to git. Run `make setup-guide` to regenerate.
 
 - Ask the user before making architectural decisions.
 - Ask before changing locked decisions (L1–L18).
-- Ask before modifying the build system (Makefile, `build.sh`, `install.sh`).
+- Ask before modifying the build system (Makefile, `scripts/build.sh`, `scripts/install.sh`).
 - Ask before changing the template structure or adding new templates.
 - Do not guess — clarify first.
