@@ -77,10 +77,19 @@ up in the class file and this SKILL.md.
               `$aux_dir = '.'` keeps aux files in `src/`.
      - `assets/` subfolder for project-specific images and code files.
 
-3. **Compile and verify** with `make project DIR=documents/<project-name>`
-   (or `cd src/ && latexmk <filename>.tex` from inside the project folder).
+3. **Compile and verify** — generate all four output formats:
+   ```bash
+   make project DIR=documents/<project-name>                    # PDF
+   ./scripts/build.sh --all documents/<project-name>            # PDF + DOCX + MD + HTML
+   ```
+   Or from inside the project folder:
+   ```bash
+   cd src/ && latexmk main.tex                                  # PDF
+   cd ../../.. && ./scripts/build.sh --all documents/<project-name>  # all 4 formats
+   ```
 
-4. **Report** the page count and any warnings to the user.
+4. **Report** the page count, output file locations (PDF, DOCX, MD, HTML),
+   and any warnings to the user.
 
 ---
 
