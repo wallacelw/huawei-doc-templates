@@ -2,8 +2,8 @@
 
 A LaTeX template that produces a Huawei Cloud POC/acceptance test case PDF:
 cover page, header, table of contents, test cases organized by domain with
-structured tables (objective, prerequisites, procedure, expected result,
-remarks, test result), code blocks, callout boxes, and changelog.
+stacked fields in a breakable tcolorbox (red left-rule), code blocks, callout
+boxes, and changelog.
 
 > **Setup:** see the [root README](../../README.md) for installation,
 > environment setup, VS Code configuration, and compilation instructions.
@@ -30,7 +30,7 @@ and load `babel` with `brazilian` instead.
 | `notime` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
 | `nochangelog` | Suppresses the changelog section entirely (no-ops) and hides version, date, and time on the cover page. Use when it grows too large. Default off (changelog is shown). |
 | `noauthors` | Hides the authors on the cover page. Default off (authors shown if set via `\setdocauthors`). |
-| `noanswers` | Hides the **Remarks** and **Test Result** rows in all test cases. Use to produce a blank test book for testers to fill in by hand. Default off (all rows shown). |
+| `noanswers` | Hides the **Remarks** and **Test Result** fields in all test cases. Use to produce a blank test book for testers to fill in by hand. Default off (all fields shown). |
 
 ### Label translations
 
@@ -52,8 +52,9 @@ The body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sectio
 → `changelog` → `\end{document}`.
 
 Sections (`\section`) represent test domains. Each test case uses the
-`testcase` environment, which produces a subsection heading and a structured
-2-column table.
+`testcase` environment, which produces a subsection heading and a breakable
+tcolorbox with a red left-rule and stacked fields (label in bold red,
+content below).
 
 See [SKILL.md](SKILL.md) for the complete skeleton and all available commands
 and environments.
@@ -70,11 +71,11 @@ and environments.
 | Space between paragraphs | 4 pt |
 | H1 title | 20 pt bold right-aligned + 56 pt number left-aligned + 1.5 pt rule |
 | H2 / H3 / H4 titles | 18 / 16 / 14 pt, regular |
-| Test case label column | 3 cm, white bold on Huawei-red (`#C7000B`) |
+| Test case fields | Stacked paragraphs: bold red label + content below, in breakable tcolorbox with 3pt red left-rule |
 | Code background | `#F6F8FA` |
 | Code text color | `#1F2328` |
 | Link color | `#0000FF` (no underline) |
-| Brand red | `#C7000B` (`huaweired` — H1 chapter rules, test case labels, accents, badge) |
+| Brand red | `#C7000B` (`huaweired` — H1 chapter rules, test case left-rule and labels, accents, badge) |
 | Warning box | `#FFF8E1` bg / `#F57C00` border |
 | Tip box | `#E8F5E9` bg / `#2E7D32` border |
 | Info box | `#E3F2FD` bg / `#1565C0` border |

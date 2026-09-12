@@ -152,21 +152,15 @@ local config = {
       end
 
       local md_lines = {}
-      -- Header row
-      md_lines[#md_lines + 1] = "| Field | Description |"
-      md_lines[#md_lines + 1] = "| --- | --- |"
-      -- Body rows
+      -- Definition list: each field is "Label\n: Content\n"
       for _, row in ipairs(rows) do
         local label_md = cell_to_md(row.label)
         local content_md = cell_to_md(row.content)
-        -- Escape pipes in cell content
-        label_md = label_md:gsub("|", "\\|")
-        content_md = content_md:gsub("|", "\\|")
-        md_lines[#md_lines + 1] = "| " .. label_md .. " | " .. content_md .. " |"
+        md_lines[#md_lines + 1] = label_md .. "\n: " .. content_md .. "\n"
       end
 
-      local md_table = table.concat(md_lines, "\n") .. "\n"
-      local parsed = pandoc.read(md_table, "markdown")
+      local md_dl = table.concat(md_lines, "\n")
+      local parsed = pandoc.read(md_dl, "markdown")
       if #parsed.blocks > 0 then
         for _, blk in ipairs(parsed.blocks) do blocks:insert(blk) end
       end

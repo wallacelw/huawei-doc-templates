@@ -490,9 +490,10 @@ local function make_filter(config)
     end
   end
 
-  local function handle_hutable_env(text)
-    local body = text:match("\\begin%s*{hutable}%s*%b{}%s*(.-)%s*\\end%s*{hutable}")
-    local spec_arg = text:match("\\begin%s*{hutable}%s*({[^}]*})")
+  local function make_hutable_handler(env_name)
+    return function(text)
+    local body = text:match("\\begin%s*{" .. env_name .. "}%s*%b{}%s*(.-)%s*\\end%s*{" .. env_name .. "}")
+    local spec_arg = text:match("\\begin%s*{" .. env_name .. "}%s*({[^}]*})")
     if not body or not spec_arg then return nil end
 
     local col_spec_str = spec_arg:sub(2, -2)
@@ -597,7 +598,11 @@ local function make_filter(config)
       return parsed.blocks[1]
     end
     return pandoc.CodeBlock(md_table)
+    end
   end
+
+  local handle_hutable_env = make_hutable_handler("hutable")
+  local handle_longhutable_env = make_hutable_handler("longhutable")
 
   -- Section number counters + bookmark ID counter (used by Header function
   -- and handle_changelog_env for DOCX heading generation)
@@ -690,6 +695,7 @@ local function make_filter(config)
     infobox    = handle_callout_env("infobox", "infobox"),
     objectives = handle_objectives_env,
     hutable    = handle_hutable_env,
+    longhutable = handle_longhutable_env,
     changelog  = handle_changelog_env,
   }
   -- Add extra env handlers from config (e.g., technical's section environments)

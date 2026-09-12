@@ -1077,6 +1077,15 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.0.0**  *2026-09-12*
+
+Redesigned testbook `testcase` environment: replaced 2-column tabular
+with breakable tcolorbox (red left-rule, stacked paragraph fields).
+Images, code blocks, callouts, and nested tables now render correctly
+and break across pages. Added `longhutable` environment for
+page-breaking tables. Updated Lua filter to produce definition lists for
+DOCX/MD/HTML.
+
 **3.9.0**  *2026-09-12*
 
 Added testsummary environment, teststeps environment, and

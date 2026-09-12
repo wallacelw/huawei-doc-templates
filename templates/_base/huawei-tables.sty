@@ -51,11 +51,44 @@
   \par\medskip
   \begingroup
     \centering\small
+    \renewcommand{\arraystretch}{1.3}%
     \let\lg@arraycr\@arraycr
     \def\@arraycr{\lg@arraycr\hline}%
     \begin{tabular}{#1}\hline
 }{%
     \end{tabular}\par
+  \endgroup
+  \medskip
+}
+
+% =====================================================================
+%  LONG TABLES — longhutable environment
+%  Same visual style as hutable but uses longtable for page breaking.
+%
+%  Usage:
+%    \begin{longhutable}{|l|l|l|}
+%      \rowcolor{huaweired} \thd{Col A} & \thd{Col B} & \thd{Col C} \\
+%      \endhead
+%      \tbody
+%      row 1 & value & value \\
+%      row 2 & value & value \\
+%    \end{longhutable}
+%
+%  - MUST NOT be wrapped in \begin{table} — longtable is not a float.
+%  - Add \endhead after the header row to repeat it on page breaks.
+%  - Without \endhead, the header appears only on the first page.
+%  - Cannot be used inside tcolorbox (longtable requires top-level).
+\RequirePackage{longtable}
+\newenvironment{longhutable}[1]{%
+  \par\medskip
+  \begingroup
+    \small
+    \renewcommand{\arraystretch}{1.3}%
+    \let\lg@arraycr\@arraycr
+    \def\@arraycr{\lg@arraycr\hline}%
+    \begin{longtable}{#1}\hline
+}{%
+    \end{longtable}\par
   \endgroup
   \medskip
 }

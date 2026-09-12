@@ -14,11 +14,11 @@ compiled from LaTeX; DOCX, Markdown, and HTML are generated via Pandoc.
 Use this skill when the task is to **write, extend, or fix a Huawei Cloud
 POC or acceptance test case document**. Test books organize test cases by
 domain using `\section` headings, with each test case rendered as a
-structured table (objective, prerequisites, procedure, expected result,
-remarks, test result). Content defaults to English; pass the `portuguese`
-class option for Portuguese labels. Do **not** use this for general LaTeX
-documents — the formatting is hard-coded to the Huawei house style
-(AGENTS.md L9).
+breakable tcolorbox with stacked fields (objective, prerequisites,
+procedure, expected result, remarks, test result). Content defaults to
+English; pass the `portuguese` class option for Portuguese labels. Do
+**not** use this for general LaTeX documents — the formatting is
+hard-coded to the Huawei house style (AGENTS.md L9).
 
 ## Context loading (do this first)
 
@@ -283,8 +283,11 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 ### Test case environment
 
 The `testcase` environment is the core building block. Each test case is
-rendered as a subsection heading followed by a structured 2-column table
-with a Huawei-red label column and content column.
+rendered as a subsection heading followed by a **breakable tcolorbox** with a
+3pt Huawei-red left-rule. Fields are **stacked paragraphs**: each field
+shows a red bold label on its own line, with the content below it. This
+design allows images, code blocks, callout boxes, and nested `teststeps`
+tables to render correctly and break across pages.
 
 ```latex
 \begin{testcase}{TC-001: Verify ECS creation}
@@ -308,8 +311,9 @@ with a Huawei-red label column and content column.
 
 **Formatting notes:**
 - Use `\\` (double backslash) to separate numbered items within a field.
-- The label column is 3 cm wide, bold white text on Huawei-red background.
-- The content column fills the remaining width.
+- Each field label is rendered in bold Huawei-red text, followed by the
+  content as a paragraph below it.
+- The box has a 3pt Huawei-red left-rule and breaks across pages.
 - `\testremarks` and `\testresult` are suppressed by the `noanswers` class
   option — use this when generating a "blank" test book for testers to fill
   in by hand.
@@ -460,6 +464,28 @@ exactly) so they appear in source order and never drift. Wrap `hutable` in a
 \end{table}
 ```
 
+### `longhutable` — page-breaking table
+
+Same visual style as `hutable` (full-grid, Huawei-red header, alternating rows) but uses
+`longtable` for page breaking. Use for tables with many rows that don't fit on one page.
+
+Usage:
+```latex
+\begin{longhutable}{|l|l|l|}
+  \rowcolor{huaweired} \thd{Col A} & \thd{Col B} & \thd{Col C} \\
+  \endhead
+  \tbody
+  row 1 & value & value \\
+  row 2 & value & value \\
+\end{longhutable}
+```
+
+Rules:
+- **Must NOT be wrapped in `\begin{table}`** — longtable is not a float.
+- Add `\endhead` after the header row to repeat it on page breaks.
+- Without `\endhead`, the header appears only on the first page.
+- **Cannot be used inside `testcase`** — longtable requires top-level.
+
 ### Notes & links
 | Command | Result |
 |---|---|
@@ -582,7 +608,7 @@ rendered, but the content remains in the `.tex` file for future reference.
   (time is shown).
 - `nochangelog` — suppresses the changelog section entirely (heading + entries) and hides version, date, and time on the cover page. The `changelog` environment emits its own heading, so this one option hides everything. Default off (changelog is shown).
 - `noauthors` — hides the authors on the cover page. Default off (authors are shown if set via `\setdocauthors`).
-- `noanswers` — hides the **Remarks** and **Test Result** rows in all test cases. Use this to produce a "blank" test book for testers to fill in by hand. Default off (all rows shown).
+- `noanswers` — hides the **Remarks** and **Test Result** fields in all test cases. Use this to produce a "blank" test book for testers to fill in by hand. Default off (all fields shown).
 
 ---
 
@@ -592,7 +618,7 @@ rendered, but the content remains in the `.tex` file for future reference.
 | `codebg` | `#F6F8FA` | Code block background |
 | `codetext` | `#1F2328` | Code text |
 | `linkblue` | `#0000FF` | Links |
-| `huaweired` | `#C7000B` | Brand red (H1 chapter rules, test case label column, accents, badge) |
+| `huaweired` | `#C7000B` | Brand red (H1 chapter rules, test case left-rule and labels, accents, badge) |
 | `ruleblack` | `#000000` | Horizontal rules (TOC, objectives) |
 | `warningbg` | `#FFF8E1` | Warning box background |
 | `warningfg` | `#F57C00` | Warning box border |
@@ -674,4 +700,4 @@ See [templates/testbook/README.md](README.md) for customization options
 10. For Portuguese (`[portuguese]`) documents, after compiling run
    `grep -i "Missing character" main.log` — it must be empty.
 11. Use `noanswers` class option when producing blank test books for
-   manual test execution (hides Remarks and Test Result rows).
+    manual test execution (hides Remarks and Test Result fields).

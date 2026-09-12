@@ -288,6 +288,28 @@ The `workaround` environment contains six subsections:
 Use the `hutable` environment (full-grid, Huawei-red header, alternating
 body rows). Do not use raw `tabular` with manual rules.
 
+### `longhutable` — page-breaking table
+
+Same visual style as `hutable` (full-grid, Huawei-red header, alternating rows) but uses
+`longtable` for page breaking. Use for tables with many rows that don't fit on one page.
+
+Usage:
+```latex
+\begin{longhutable}{|l|l|l|}
+  \rowcolor{huaweired} \thd{Col A} & \thd{Col B} & \thd{Col C} \\
+  \endhead
+  \tbody
+  row 1 & value & value \\
+  row 2 & value & value \\
+\end{longhutable}
+```
+
+Rules:
+- **Must NOT be wrapped in `\begin{table}`** — longtable is not a float.
+- Add `\endhead` after the header row to repeat it on page breaks.
+- Without `\endhead`, the header appears only on the first page.
+- **Cannot be used inside `testcase`** — longtable requires top-level.
+
 ### Code
 | Command | Result |
 |---|---|

@@ -3,6 +3,36 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.0.0 (2026-09-13)
+
+### Breaking changes (visual)
+
+- **testcase environment redesigned**: Replaced 2-column `tabular` with a
+  breakable `tcolorbox` (red left-rule, stacked paragraph fields). The API
+  is unchanged (`\begin{testcase}{...}`, `\testobjective{}`, etc.) — no
+  `.tex` file changes required. The PDF visual changes from a table to
+  stacked fields with a red left border.
+  - Images, code blocks, callouts, and nested `teststeps` tables now render
+    correctly inside test cases.
+  - Test cases can break across pages.
+  - `\linewidth` is now correct inside test cases (was column width in tabular).
+
+### Features
+
+- **`longhutable` environment**: Same visual style as `hutable` but uses
+  `longtable` for page breaking. For standalone long tables. Cannot be used
+  inside `testcase` (longtable requires top-level).
+- **`hutable` improvement**: Added default `\arraystretch{1.3}` for consistent
+  row spacing.
+- **Lua filter**: `testcase` handler now produces Pandoc definition lists
+  (instead of tables) for DOCX/MD/HTML, matching the PDF's stacked layout.
+- **Lua filter**: `longhutable` handler added (reuses `hutable` parsing logic).
+
+### Fixes
+
+- `teststeps` and `testsummary`: Changed `\textwidth` to `\linewidth` in
+  column width calculations for correct width inside `tcolorbox`.
+
 ## v3.9.0 (2026-09-13)
 
 ### Features

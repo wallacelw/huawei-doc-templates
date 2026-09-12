@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v3.9.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.0.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -231,43 +231,65 @@
 % =====================================================================
 %  TEST CASE ENVIRONMENT
 % =====================================================================
-% The testcase environment creates a subsection and a structured table.
-% Uses tabularx for full-width layout that handles images and code blocks.
+% Each test case is a subsection heading followed by a breakable
+% tcolorbox with a red left-rule.  Fields are stacked paragraphs
+% (red bold label + content below).  This allows images, code blocks,
+% callout boxes, and nested teststeps tables to render correctly and
+% break across pages.
+%
 % Usage:
 %   \begin{testcase}{Test case title}
 %     \testobjective{Verify that X can be created.}
 %     \testprerequisites{1. X is running. \\ 2. Y is configured.}
-%     \testprocedure{1. Click Create. \\ 2. Set parameters. \\ 3. Click Save.}
-%     \testexpected{1. The instance is created. \\ 2. Settings are saved.}
+%     \testprocedure{See test steps below.}
+%     \begin{teststeps}
+%       \teststep{1}{Log in}{Login page shown}{\testresultbadge{Pass}}
+%     \end{teststeps}
+%     \image[width=0.8\linewidth]{common-assets/screenshot.png}
+%     \testexpected{1. The instance is created.}
 %     \testremarks{Optional remarks.}
-%     \testresult{Pass}
+%     \testresult{\testresultbadge{Pass}}
 %   \end{testcase}
 
 \newenvironment{testcase}[1]{%
   \subsection{#1}%
-  \renewcommand{\arraystretch}{1.4}%
-  \noindent
-  \begin{tabular}{|>{\columncolor{huaweired}\color{white}\bfseries\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{\dimexpr\textwidth-3.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}%
-  \hline
+  \begin{tcolorbox}[
+    enhanced jigsaw,
+    breakable,
+    parbox=false,
+    colback=white,
+    colframe=huaweired,
+    boxrule=0pt,
+    leftrule=3pt,
+    arc=0pt,
+    outer arc=0pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    before skip=10pt, after skip=10pt,
+  ]
 }{%
-  \hline
-  \end{tabular}%
-  \vspace{0.6cm}%
+  \end{tcolorbox}%
+}
+
+% Generic field: red bold label, then content as a paragraph.
+\newcommand{\lg@testfield}[2]{%
+  \par\medskip
+  {\color{huaweired}\bfseries #1}\par\nobreak\smallskip
+  #2\par
 }
 
 % Test case field commands (language-aware labels)
-\newcommand{\testobjective}[1]{\lg@objective & #1 \\ \hline}
-\newcommand{\testprerequisites}[1]{\lg@prerequisites & #1 \\ \hline}
-\newcommand{\testprocedure}[1]{\lg@procedure & #1 \\ \hline}
-\newcommand{\testexpected}[1]{\lg@expectedresult & #1 \\ \hline}
+\newcommand{\testobjective}[1]{\lg@testfield{\lg@objective}{#1}}
+\newcommand{\testprerequisites}[1]{\lg@testfield{\lg@prerequisites}{#1}}
+\newcommand{\testprocedure}[1]{\lg@testfield{\lg@procedure}{#1}}
+\newcommand{\testexpected}[1]{\lg@testfield{\lg@expectedresult}{#1}}
 \newcommand{\testremarks}[1]{%
   \if@showanswers
-    \lg@remarks & #1 \\ \hline
+    \lg@testfield{\lg@remarks}{#1}
   \fi
 }
 \newcommand{\testresult}[1]{%
   \if@showanswers
-    \lg@testresult & #1 \\ \hline
+    \lg@testfield{\lg@testresult}{#1}
   \fi
 }
 
@@ -284,7 +306,7 @@
 \newenvironment{testsummary}{%
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{\dimexpr\textwidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2.5cm}|}%
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{\dimexpr\linewidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2.5cm}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@testcaseid} &
@@ -312,7 +334,7 @@
 \newenvironment{teststeps}{%
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|>{\raggedright\arraybackslash}p{\dimexpr0.5\textwidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\raggedright\arraybackslash}p{\dimexpr0.5\textwidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2cm}|}%
+  \begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|>{\raggedright\arraybackslash}p{\dimexpr0.5\linewidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\raggedright\arraybackslash}p{\dimexpr0.5\linewidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2cm}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@step} &
