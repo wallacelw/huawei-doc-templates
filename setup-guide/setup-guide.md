@@ -915,134 +915,6 @@ Images, links, and other inline commands:
 | Sample PDFs | `make samples` compiles all | Guide + technical, PT + EN |
 | Skill | `/skill huawei-template-guide` | Available |
 
-# Tips and Tricks
-
-> **General Objective:** Learn practical tips for working efficiently
-> with the Huawei Cloud development environment, including persistent
-> terminal sessions with tmux.
-
-## Using tmux for persistent sessions
-
-When working over SSH, your opencode session is tied to the SSH
-connection. If the connection drops (network issue, VPN timeout, laptop
-sleep), the opencode process is killed and all context is lost. **tmux**
-solves this by decoupling the terminal from the SSH connection --- the
-session keeps running on the server even when you disconnect, and you
-can reattach to it when you reconnect.
-
-**Step by step:**
-
-1.  Install tmux (if not already installed):
-
-    ``` bash
-    sudo apt install tmux
-    ```
-
-2.  Start a new tmux session before launching opencode:
-
-    ``` bash
-    tmux new -s opencode
-    ```
-
-3.  Inside the tmux session, start opencode as usual:
-
-    ``` bash
-    opencode
-    ```
-
-4.  If SSH disconnects, the opencode session keeps running. Reconnect to
-    the server and reattach:
-
-    ``` bash
-    tmux attach -t opencode
-    ```
-
-5.  To list existing sessions:
-
-    ``` bash
-    tmux ls
-    ```
-
-> **Tip:** Always start your opencode session inside tmux. If you forget
-> and start opencode directly, you can't retroactively attach it to tmux
-> --- you'd need to restart opencode inside a new tmux session.
-
-### Essential tmux commands
-
-| Command | Purpose |
-| --- | --- |
-| `tmux new -s <name>` | Start a new named session |
-| `tmux attach -t <name>` | Reattach to an existing session |
-| `tmux ls` | List all sessions |
-| `tmux kill-session -t <name>` | Kill a specific session |
-| `Ctrl-b d` | Detach from session (keeps it running) |
-| `Ctrl-b c` | Create a new window |
-| `Ctrl-b %` | Split pane vertically |
-| `Ctrl-b "` | Split pane horizontally |
-| `Ctrl-b n` | Next window |
-| `Ctrl-b p` | Previous window |
-| `Ctrl-b [` | Enter scroll/copy mode |
-
-### tmux configuration for opencode
-
-Create or edit `\textasciitilde/.tmux.conf` with the following settings
-to optimize tmux for use with opencode:
-
-``` bash
-# Reduce escape key delay — critical for opencode (default is 500ms)
-set -g escape-time 10
-
-# Enable mouse support (scroll, select panes, resize)
-set -g mouse on
-
-# Enable clipboard integration (tmux 2.9+)
-set -g set-clipboard on
-
-# Allow nested apps to access system clipboard (WSL2 with WSLg)
-set -g allow-passthrough on
-
-# Enable extended keys so Shift+Enter works in opencode
-set -s extended-keys on
-set -as terminal-features 'xterm*:extkeys'
-
-# Use CSI-u encoding format (requires tmux 3.5+)
-set -s extended-keys-format csi-u
-```
-
-After editing the config, reload it without restarting tmux:
-
-``` bash
-tmux source-file ~/.tmux.conf
-```
-
-> **Important:** The `escape-time` setting is critical. The default
-> 500ms delay causes opencode to receive Escape key presses late, which
-> breaks modal editing and menu navigation. Always set it to `10` or
-> lower.
-
-> **Important:** The `extended-keys-format csi-u` setting requires
-> **tmux 3.5 or later**. If you get an
-> `invalid option: extended-keys-format` error, your tmux is too old.
-> Check with `tmux -V`. To upgrade tmux to 3.5+ from source:
->
-> ``` bash
-> sudo apt install build-essential autotools-dev libevent-dev libncurses-dev
-> cd /tmp && git clone https://github.com/tmux/tmux.git && cd tmux
-> sh autogen.sh && ./configure && make && sudo make install
-> ```
->
-> After upgrading, remove the old binary from `/usr/bin/tmux` if needed
-> (`which tmux` should point to `/usr/local/bin/tmux`). Then reload the
-> config: `tmux source-file  /.tmux.conf`.
-
-> **Tip:** If you cannot upgrade tmux, use `Ctrl+J` to insert a newline
-> in opencode --- it works with zero configuration on any tmux version.
-
-> **Info:** For more tips on using tmux with opencode, including WSL2
-> clipboard integration and keybinding workflows, see [Luke Manning's
-> blog
-> post](https://lukemanning.ie/blog/opencode-tmux-getting-used-to-keybindings).
-
 # Operations and Maintenance
 
 > **General Objective:** Update, uninstall, or clean up the software and
@@ -1207,9 +1079,8 @@ full command reference, see the template's README.md or run
 
 **3.8.0**  *2026-09-13*
 
-Added Chapter 7: Tips and Tricks with tmux for persistent SSH sessions,
-essential tmux commands, and tmux configuration for opencode
-(escape-time, mouse, clipboard, extended-keys for Shift+Enter).
+Removed Tips and Tricks chapter (tmux configuration) --- required VS
+Code-specific keybindings that don't generalize across terminal setups.
 
 **3.7.0**  *2026-09-13*
 

@@ -1380,209 +1380,62 @@ reference.</p>
 </tr>
 </tbody>
 </table>
-<h1 data-number="7" id="tips-and-tricks"><span class="header-section-number">7</span> Tips and Tricks</h1>
-<div class="objectives">
-<p><strong>General Objective:</strong> Learn practical tips for working
-efficiently with the Huawei Cloud development environment, including
-persistent terminal sessions with tmux.</p>
-</div>
-<h2 data-number="7.1" id="using-tmux-for-persistent-sessions"><span class="header-section-number">7.1</span> Using tmux for persistent
-sessions</h2>
-<p>When working over SSH, your opencode session is tied to the SSH
-connection. If the connection drops (network issue, VPN timeout, laptop
-sleep), the opencode process is killed and all context is lost.
-<strong>tmux</strong> solves this by decoupling the terminal from the
-SSH connection — the session keeps running on the server even when you
-disconnect, and you can reattach to it when you reconnect.</p>
-<p><strong>Step by step:</strong></p>
-<ol>
-<li><p>Install tmux (if not already installed):</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install tmux</span></code></pre></div></li>
-<li><p>Start a new tmux session before launching opencode:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> new <span class="at">-s</span> opencode</span></code></pre></div></li>
-<li><p>Inside the tmux session, start opencode as usual:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">opencode</span></span></code></pre></div></li>
-<li><p>If SSH disconnects, the opencode session keeps running. Reconnect
-to the server and reattach:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> attach <span class="at">-t</span> opencode</span></code></pre></div></li>
-<li><p>To list existing sessions:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> ls</span></code></pre></div></li>
-</ol>
-<div class="callout tip" role="note" aria-label="Tip">
-<p><strong>Tip</strong> </p>
-<p>Always start your opencode session inside tmux. If you forget and
-start opencode directly, you can’t retroactively attach it to tmux —
-you’d need to restart opencode inside a new tmux session.</p>
-</div>
-<h3 data-number="7.1.1" id="essential-tmux-commands"><span class="header-section-number">7.1.1</span> Essential tmux commands</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Command</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>tmux new -s &lt;name&gt;</code></td>
-<td>Start a new named session</td>
-</tr>
-<tr class="even">
-<td><code>tmux attach -t &lt;name&gt;</code></td>
-<td>Reattach to an existing session</td>
-</tr>
-<tr class="odd">
-<td><code>tmux ls</code></td>
-<td>List all sessions</td>
-</tr>
-<tr class="even">
-<td><code>tmux kill-session -t &lt;name&gt;</code></td>
-<td>Kill a specific session</td>
-</tr>
-<tr class="odd">
-<td><code>Ctrl-b d</code></td>
-<td>Detach from session (keeps it running)</td>
-</tr>
-<tr class="even">
-<td><code>Ctrl-b c</code></td>
-<td>Create a new window</td>
-</tr>
-<tr class="odd">
-<td><code>Ctrl-b %</code></td>
-<td>Split pane vertically</td>
-</tr>
-<tr class="even">
-<td><code>Ctrl-b &quot;</code></td>
-<td>Split pane horizontally</td>
-</tr>
-<tr class="odd">
-<td><code>Ctrl-b n</code></td>
-<td>Next window</td>
-</tr>
-<tr class="even">
-<td><code>Ctrl-b p</code></td>
-<td>Previous window</td>
-</tr>
-<tr class="odd">
-<td><code>Ctrl-b [</code></td>
-<td>Enter scroll/copy mode</td>
-</tr>
-</tbody>
-</table>
-<h3 data-number="7.1.2" id="tmux-configuration-for-opencode"><span class="header-section-number">7.1.2</span> tmux configuration for
-opencode</h3>
-<p>Create or edit <code>\textasciitilde/.tmux.conf</code> with the
-following settings to optimize tmux for use with opencode:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reduce escape key delay — critical for opencode (default is 500ms)</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> escape-time 10</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable mouse support (scroll, select panes, resize)</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> mouse on</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable clipboard integration (tmux 2.9+)</span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> set-clipboard on</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Allow nested apps to access system clipboard (WSL2 with WSLg)</span></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> allow-passthrough on</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable extended keys so Shift+Enter works in opencode</span></span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-s</span> extended-keys on</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-as</span> terminal-features <span class="st">&#39;xterm*:extkeys&#39;</span></span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Use CSI-u encoding format (requires tmux 3.5+)</span></span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-s</span> extended-keys-format csi-u</span></code></pre></div>
-<p>After editing the config, reload it without restarting tmux:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> source-file ~/.tmux.conf</span></code></pre></div>
-<div class="callout warning" role="alert" aria-label="Warning">
-<p><strong>Important</strong> </p>
-<p>The <code>escape-time</code> setting is critical. The default 500ms
-delay causes opencode to receive Escape key presses late, which breaks
-modal editing and menu navigation. Always set it to <code>10</code> or
-lower.</p>
-</div>
-<div class="callout warning" role="alert" aria-label="Warning">
-<p><strong>Important</strong> </p>
-<p>The <code>extended-keys-format csi-u</code> setting requires
-<strong>tmux 3.5 or later</strong>. If you get an
-<code>invalid option: extended-keys-format</code> error, your tmux is
-too old. Check with <code>tmux -V</code>. To upgrade tmux to 3.5+ from
-source:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install build-essential autotools-dev libevent-dev libncurses-dev</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp <span class="kw">&amp;&amp;</span> <span class="fu">git</span> clone https://github.com/tmux/tmux.git <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> tmux</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sh</span> autogen.sh <span class="kw">&amp;&amp;</span> <span class="ex">./configure</span> <span class="kw">&amp;&amp;</span> <span class="fu">make</span> <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> make install</span></code></pre></div>
-<p>After upgrading, remove the old binary from
-<code>/usr/bin/tmux</code> if needed (<code>which tmux</code> should
-point to <code>/usr/local/bin/tmux</code>). Then reload the config:
-<code>tmux source-file  /.tmux.conf</code>.</p>
-</div>
-<div class="callout tip" role="note" aria-label="Tip">
-<p><strong>Tip</strong> </p>
-<p>If you cannot upgrade tmux, use <code>Ctrl+J</code> to insert a
-newline in opencode — it works with zero configuration on any tmux
-version.</p>
-</div>
-<div class="callout infobox" role="note" aria-label="Info">
-<p><strong>Info</strong> </p>
-<p>For more tips on using tmux with opencode, including WSL2 clipboard
-integration and keybinding workflows, see <a href="https://lukemanning.ie/blog/opencode-tmux-getting-used-to-keybindings">Luke
-Manning’s blog post</a>.</p>
-</div>
-<h1 data-number="8" id="operations-and-maintenance"><span class="header-section-number">8</span> Operations and Maintenance</h1>
+<h1 data-number="7" id="operations-and-maintenance"><span class="header-section-number">7</span> Operations and Maintenance</h1>
 <div class="objectives">
 <p><strong>General Objective:</strong> Update, uninstall, or clean up
 the software and cloud resources created in this guide. All operations
 in this chapter are optional.</p>
 </div>
-<h2 data-number="8.1" id="updating-the-maas-gateway"><span class="header-section-number">8.1</span> Updating the MaaS Gateway</h2>
+<h2 data-number="7.1" id="updating-the-maas-gateway"><span class="header-section-number">7.1</span> Updating the MaaS Gateway</h2>
 <p>To update the oh-my-coding-maas-gateway to a newer version:</p>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Re-run the bootstrap script in the VS Code remote terminal:</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway/main/scripts/bootstrap.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway/main/scripts/bootstrap.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The installer detects the existing installation, pulls updates,
 and preserves all secrets, virtual keys, and data.</p></li>
 <li><p>To update only the coding tools (without touching the proxy
 stack):</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/update.sh</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/update.sh</span></span></code></pre></div></li>
 </ol>
-<h2 data-number="8.2" id="updating-the-document-templates"><span class="header-section-number">8.2</span> Updating the Document
+<h2 data-number="7.2" id="updating-the-document-templates"><span class="header-section-number">7.2</span> Updating the Document
 Templates</h2>
 <p>To update the Huawei document templates project:</p>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Re-run the one-liner — it detects the existing installation and
 prompts to update:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The script pulls the latest version, shows the version change
 (<code>v3.3.6 → v3.3.7</code>), and re-runs the installer. New
 templates, commands, or modules are installed automatically.</p></li>
 </ol>
-<h2 data-number="8.3" id="uninstalling-the-maas-gateway"><span class="header-section-number">8.3</span> Uninstalling the MaaS
+<h2 data-number="7.3" id="uninstalling-the-maas-gateway"><span class="header-section-number">7.3</span> Uninstalling the MaaS
 Gateway</h2>
 <p>To remove the oh-my-coding-maas-gateway:</p>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Run the uninstall script:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--yes</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb32"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--yes</span></span></code></pre></div></li>
 <li><p>This stops and removes Docker containers, volumes, and images,
 removes coding tool configs (opencode, Codex, Claude, Pi), and deletes
 the repository.</p></li>
 <li><p>To remove only specific components:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--tool</span><span class="op">=</span>opencode    <span class="co"># remove one tool</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--docker</span>           <span class="co"># remove Docker stack only</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb33"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--tool</span><span class="op">=</span>opencode    <span class="co"># remove one tool</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--docker</span>           <span class="co"># remove Docker stack only</span></span></code></pre></div></li>
 </ol>
-<h2 data-number="8.4" id="uninstalling-the-document-templates"><span class="header-section-number">8.4</span> Uninstalling the Document
+<h2 data-number="7.4" id="uninstalling-the-document-templates"><span class="header-section-number">7.4</span> Uninstalling the Document
 Templates</h2>
 <p>To remove the Huawei document templates installation:</p>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Run the uninstall script (interactive menu with 5 options):</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb34"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span></span></code></pre></div></li>
 <li><p>Or use the one-liner:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The interactive menu offers:</p>
 <ul>
 <li><p>Option 1: All installed components (skills, modules, font, VS
@@ -1596,10 +1449,10 @@ option)</p></li>
 <li><p>Option 5: Choose specific components individually</p></li>
 </ul></li>
 <li><p>To preview what would be removed before running:</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
 <li><p>To also remove apt packages (texlive, latexmk, fonts,
 pandoc):</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
 <div class="callout warning" role="alert" aria-label="Warning">
 <p><strong>Important</strong> </p>
 <p>Removing apt packages will break any other LaTeX documents on the
@@ -1607,7 +1460,7 @@ instance. Only use <code>–packages</code> if you are decommissioning the
 instance.</p>
 </div></li>
 </ol>
-<h2 data-number="8.5" id="deleting-cloud-resources-optional"><span class="header-section-number">8.5</span> Deleting cloud resources
+<h2 data-number="7.5" id="deleting-cloud-resources-optional"><span class="header-section-number">7.5</span> Deleting cloud resources
 (optional)</h2>
 <p>If you no longer need the Flexus X instance, delete it to stop
 incurring charges:</p>
@@ -1690,12 +1543,12 @@ in the configuration.</p>
 template. For the full command reference, see the template’s README.md
 or run <code>/skill huawei-template-guide</code> in your coding
 agent.</em></p>
-<h1 data-number="9"><span class="header-section-number">9</span>
+<h1 data-number="8"><span class="header-section-number">8</span>
 Changelog</h1>
 <p><strong>3.8.0</strong>  <em>2026-09-13</em></p>
-<p>Added Chapter 7: Tips and Tricks with tmux for persistent SSH
-sessions, essential tmux commands, and tmux configuration for opencode
-(escape-time, mouse, clipboard, extended-keys for Shift+Enter).</p>
+<p>Removed Tips and Tricks chapter (tmux configuration) — required VS
+Code-specific keybindings that don’t generalize across terminal
+setups.</p>
 <p><strong>3.7.0</strong>  <em>2026-09-13</em></p>
 <p>Added <code>testbook</code> template for POC/acceptance test case
 documents with <code>testcase</code> environment and
