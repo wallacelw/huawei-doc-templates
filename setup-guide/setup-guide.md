@@ -915,6 +915,113 @@ Images, links, and other inline commands:
 | Sample PDFs | `make samples` compiles all | Guide + technical, PT + EN |
 | Skill | `/skill huawei-template-guide` | Available |
 
+# Tips and Tricks
+
+> **General Objective:** Learn practical tips for working efficiently
+> with the Huawei Cloud development environment, including persistent
+> terminal sessions with tmux.
+
+## Using tmux for persistent sessions
+
+When working over SSH, your opencode session is tied to the SSH
+connection. If the connection drops (network issue, VPN timeout, laptop
+sleep), the opencode process is killed and all context is lost. **tmux**
+solves this by decoupling the terminal from the SSH connection --- the
+session keeps running on the server even when you disconnect, and you
+can reattach to it when you reconnect.
+
+**Step by step:**
+
+1.  Install tmux (if not already installed):
+
+    ``` bash
+    sudo apt install tmux
+    ```
+
+2.  Start a new tmux session before launching opencode:
+
+    ``` bash
+    tmux new -s opencode
+    ```
+
+3.  Inside the tmux session, start opencode as usual:
+
+    ``` bash
+    opencode
+    ```
+
+4.  If SSH disconnects, the opencode session keeps running. Reconnect to
+    the server and reattach:
+
+    ``` bash
+    tmux attach -t opencode
+    ```
+
+5.  To list existing sessions:
+
+    ``` bash
+    tmux ls
+    ```
+
+> **Tip:** Always start your opencode session inside tmux. If you forget
+> and start opencode directly, you can't retroactively attach it to tmux
+> --- you'd need to restart opencode inside a new tmux session.
+
+### Essential tmux commands
+
+| Command | Purpose |
+| --- | --- |
+| `tmux new -s <name>` | Start a new named session |
+| `tmux attach -t <name>` | Reattach to an existing session |
+| `tmux ls` | List all sessions |
+| `tmux kill-session -t <name>` | Kill a specific session |
+| `Ctrl-b d` | Detach from session (keeps it running) |
+| `Ctrl-b c` | Create a new window |
+| `Ctrl-b %` | Split pane vertically |
+| `Ctrl-b "` | Split pane horizontally |
+| `Ctrl-b n` | Next window |
+| `Ctrl-b p` | Previous window |
+| `Ctrl-b [` | Enter scroll/copy mode |
+
+### tmux configuration for opencode
+
+Create or edit `\textasciitilde/.tmux.conf` with the following settings
+to optimize tmux for use with opencode:
+
+``` bash
+# Reduce escape key delay — critical for opencode (default is 500ms)
+set -g escape-time 10
+
+# Enable mouse support (scroll, select panes, resize)
+set -g mouse on
+
+# Enable clipboard integration (tmux 2.9+)
+set -g set-clipboard on
+
+# Allow nested apps to access system clipboard (WSL2 with WSLg)
+set -g allow-passthrough on
+
+# Enable extended keys so Shift+Enter works in opencode
+set -g extended-keys on
+set -as terminal-features 'xterm*:extkeys'
+```
+
+After editing the config, reload it without restarting tmux:
+
+``` bash
+tmux source-file ~/.tmux.conf
+```
+
+> **Important:** The `escape-time` setting is critical. The default
+> 500ms delay causes opencode to receive Escape key presses late, which
+> breaks modal editing and menu navigation. Always set it to `10` or
+> lower.
+
+> **Info:** For more tips on using tmux with opencode, including WSL2
+> clipboard integration and keybinding workflows, see [Luke Manning's
+> blog
+> post](https://lukemanning.ie/blog/opencode-tmux-getting-used-to-keybindings).
+
 # Operations and Maintenance
 
 > **General Objective:** Update, uninstall, or clean up the software and
@@ -1077,26 +1184,32 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
-**3.7.0**  *2026-09-12*
+**3.8.0**  *2026-09-13*
+
+Added Chapter 7: Tips and Tricks with tmux for persistent SSH sessions,
+essential tmux commands, and tmux configuration for opencode
+(escape-time, mouse, clipboard, extended-keys for Shift+Enter).
+
+**3.7.0**  *2026-09-13*
 
 Added `testbook` template for POC/acceptance test case documents with
 `testcase` environment and `[noanswers]` option.
 
-**3.6.0**  *2026-09-12*
+**3.6.0**  *2026-09-13*
 
 Added `\setdocauthors` command and `[noauthors]` class option to both
 templates. Authors are displayed on the cover page (optional --- hidden
 if not set or if `[noauthors]` is passed). Demonstrated in all 4
 samples.
 
-**3.5.0**  *2026-09-12*
+**3.5.0**  *2026-09-13*
 
 Reorganized project structure: moved `build.sh`, `install.sh`, and
 `uninstall.sh` from repo root to `scripts/` directory. Updated all
 references in Makefile, README, AGENTS.md, SKILL.md, and setup guide.
 One-liner URLs now use `main/scripts/install.sh`.
 
-**3.4.0**  *2026-09-12*
+**3.4.0**  *2026-09-13*
 
 `install.sh`: opencode skills and VS Code LaTeX Workshop are now
 optional prompts (default yes). Removed LTeX extension (was failing to
@@ -1111,7 +1224,7 @@ Updated Chapter 6 with optional component prompts and update detection.
 Updated Chapter 7 with one-liner update/uninstall and full menu
 documentation.
 
-**3.3.0**  *2026-09-12*
+**3.3.0**  *2026-09-13*
 
 Moved pre-compiled setup guide to `setup-guide/` folder in repo root
 with all four formats (PDF, MD, DOCX, HTML). Users can read these before
@@ -1125,14 +1238,14 @@ comparison table.
 
 Updated .gitignore to track all four formats in `setup-guide/`.
 
-**3.2.1**  *2026-09-12*
+**3.2.1**  *2026-09-13*
 
 Renamed Chapter 7 from "Clean Up" to "Operations and Maintenance". Added
 subsections for updating and uninstalling both the MaaS Gateway and the
 document templates. Added cloud resource cleanup as an optional
 subsection.
 
-**3.2.0**  *2026-09-12*
+**3.2.0**  *2026-09-13*
 
 Added `uninstall.sh` script with interactive menu, `–all`, `–yes`, and
 `–dry-run` flags. Removes opencode skills, .sty modules, HarmonyOS Sans
@@ -1145,13 +1258,13 @@ success/failure reporting.
 
 Updated Chapter 7 with uninstall instructions.
 
-**3.1.2**  *2026-09-12*
+**3.1.2**  *2026-09-13*
 
 Added output format guide to README.md: comparison table of PDF,
 Markdown, DOCX, and HTML with purpose, copy-paste quality, and
 limitations. Recommends Markdown for copy-paste.
 
-**3.1.1**  *2026-09-12*
+**3.1.1**  *2026-09-13*
 
 Updated MaaS Gateway chapter to v1.10.9: non-interactive mode (`-y`) now
 suppresses all prompts (prerequisites, tool selection, skill install).
@@ -1162,7 +1275,7 @@ working directory.
 Added project standards to AGENTS.md: workflow, end-to-end validation,
 code style, git conventions, when unsure.
 
-**3.1.0**  *2026-09-12*
+**3.1.0**  *2026-09-13*
 
 Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider,
 flavor `x1.4u.16g`) --- more cost-efficient and robust. Updated creation
@@ -1186,20 +1299,20 @@ Added mandatory reboot warning in Chapter 2 (SSH port change). Added
 troubleshooting subsection in Chapter 4 with common SSH connection
 issues and ncat debugging commands.
 
-**3.0.1**  *2026-09-12*
+**3.0.1**  *2026-09-13*
 
 Minor fixes: test-filter.sh auto-discovery, build.sh help text, Makefile
 aggregate descriptions, 5-section comment correction, CHANGELOG version
 gap note, callout-in-code fix, CI font auto-discovery, dofile path
 comment, test-sync.sh header.
 
-**3.0.0**  *2026-09-12*
+**3.0.0**  *2026-09-13*
 
 Modular pipeline refactoring: shared Lua filter factory, shared DOCX fix
 logic, build system auto-discovery, unified format pipeline, GitHub
 Actions CI.
 
-**2.16.0**  *2026-09-12*
+**2.16.0**  *2026-09-13*
 
 Updated to match template v2.16.0 --- Lua filter fixes, build system
 updates, and technical template parity improvements.

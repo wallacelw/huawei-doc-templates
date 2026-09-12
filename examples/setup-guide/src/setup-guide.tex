@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.7.0}
+\setdocversion{3.8.0}
 \setdocauthors{Wallace Wu}
 
 \begin{document}
@@ -1060,7 +1060,124 @@ for the full command reference.
 \end{table}
 
 % =====================================================================
-%  Chapter 7 — Operations and Maintenance
+%  Chapter 7 — Tips and Tricks
+% =====================================================================
+\section{Tips and Tricks}
+
+\begin{objectives}
+  \generalobjective{Learn practical tips for working efficiently with the
+  Huawei Cloud development environment, including persistent terminal
+  sessions with tmux.}
+\end{objectives}
+
+\subsection{Using tmux for persistent sessions}
+
+When working over SSH, your opencode session is tied to the SSH connection.
+If the connection drops (network issue, VPN timeout, laptop sleep), the
+opencode process is killed and all context is lost. \textbf{tmux} solves
+this by decoupling the terminal from the SSH connection --- the session
+keeps running on the server even when you disconnect, and you can reattach
+to it when you reconnect.
+
+\stepbystep
+\begin{enumerate}
+  \item Install tmux (if not already installed):
+  \begin{code}[bash]
+sudo apt install tmux
+  \end{code}
+
+  \item Start a new tmux session before launching opencode:
+  \begin{code}[bash]
+tmux new -s opencode
+  \end{code}
+
+  \item Inside the tmux session, start opencode as usual:
+  \begin{code}[bash]
+opencode
+  \end{code}
+
+  \item If SSH disconnects, the opencode session keeps running. Reconnect
+        to the server and reattach:
+  \begin{code}[bash]
+tmux attach -t opencode
+  \end{code}
+
+  \item To list existing sessions:
+  \begin{code}[bash]
+tmux ls
+  \end{code}
+\end{enumerate}
+
+\begin{tip}
+Always start your opencode session inside tmux. If you forget and start
+opencode directly, you can't retroactively attach it to tmux --- you'd
+need to restart opencode inside a new tmux session.
+\end{tip}
+
+\subsubsection{Essential tmux commands}
+
+\begin{table}[H]
+  \begin{hutable}{|l|l|}
+    \rowcolor{huaweired} \thd{Command} & \thd{Purpose} \\
+    \tbody
+    \inlinecode{tmux new -s <name>}   & Start a new named session \\
+    \inlinecode{tmux attach -t <name>} & Reattach to an existing session \\
+    \inlinecode{tmux ls}              & List all sessions \\
+    \inlinecode{tmux kill-session -t <name>} & Kill a specific session \\
+    \inlinecode{Ctrl-b d}             & Detach from session (keeps it running) \\
+    \inlinecode{Ctrl-b c}             & Create a new window \\
+    \inlinecode{Ctrl-b \%}            & Split pane vertically \\
+    \inlinecode{Ctrl-b "}             & Split pane horizontally \\
+    \inlinecode{Ctrl-b n}             & Next window \\
+    \inlinecode{Ctrl-b p}             & Previous window \\
+    \inlinecode{Ctrl-b [}             & Enter scroll/copy mode \\
+  \end{hutable}
+  \caption{Essential tmux commands.}
+\end{table}
+
+\subsubsection{tmux configuration for opencode}
+
+Create or edit \inlinecode{\textasciitilde/.tmux.conf} with the following
+settings to optimize tmux for use with opencode:
+
+\begin{code}[bash]
+# Reduce escape key delay — critical for opencode (default is 500ms)
+set -g escape-time 10
+
+# Enable mouse support (scroll, select panes, resize)
+set -g mouse on
+
+# Enable clipboard integration (tmux 2.9+)
+set -g set-clipboard on
+
+# Allow nested apps to access system clipboard (WSL2 with WSLg)
+set -g allow-passthrough on
+
+# Enable extended keys so Shift+Enter works in opencode
+set -g extended-keys on
+set -as terminal-features 'xterm*:extkeys'
+\end{code}
+
+After editing the config, reload it without restarting tmux:
+
+\begin{code}[bash]
+tmux source-file ~/.tmux.conf
+\end{code}
+
+\begin{warning}
+The \inlinecode{escape-time} setting is critical. The default 500ms delay
+causes opencode to receive Escape key presses late, which breaks modal
+editing and menu navigation. Always set it to \inlinecode{10} or lower.
+\end{warning}
+
+\begin{infobox}
+For more tips on using tmux with opencode, including WSL2 clipboard
+integration and keybinding workflows, see
+\weblink{https://lukemanning.ie/blog/opencode-tmux-getting-used-to-keybindings}{Luke Manning's blog post}.
+\end{infobox}
+
+% =====================================================================
+%  Chapter 8 — Operations and Maintenance
 % =====================================================================
 \section{Operations and Maintenance}
 
@@ -1200,7 +1317,7 @@ configuration.
     Security group   & \inlinecode{sg-xgate} deleted               & No SG charges \\
     SSH config       & Host entry removed                          & Clean config \\
   \end{hutable}
-  \caption{Chapter 7 verification checklist.}
+  \caption{Chapter 8 verification checklist.}
 \end{table}
 
 \note{This guide was generated using the \inlinecode{guide.cls} template. For the
@@ -1211,6 +1328,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.8.0}{\today}{\item Added Chapter 7: Tips and Tricks with tmux for persistent SSH sessions, essential tmux commands, and tmux configuration for opencode (escape-time, mouse, clipboard, extended-keys for Shift+Enter).}
   \changelogentry{3.7.0}{\today}{\item Added \inlinecode{testbook} template for POC/acceptance test case documents with \inlinecode{testcase} environment and \inlinecode{[noanswers]} option.}
   \changelogentry{3.6.0}{\today}{\item Added \inlinecode{\textbackslash setdocauthors} command and \inlinecode{[noauthors]} class option to both templates. Authors are displayed on the cover page (optional --- hidden if not set or if \inlinecode{[noauthors]} is passed). Demonstrated in all 4 samples.}
   \changelogentry{3.5.0}{\today}{\item Reorganized project structure: moved \inlinecode{build.sh}, \inlinecode{install.sh}, and \inlinecode{uninstall.sh} from repo root to \inlinecode{scripts/} directory. Updated all references in Makefile, README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use \inlinecode{main/scripts/install.sh}.}
