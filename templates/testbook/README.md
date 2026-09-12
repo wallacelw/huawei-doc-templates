@@ -124,9 +124,9 @@ from either folder.
   \testobjective{Verify that an ECS instance can be created.}
   \testprerequisites{1. Account is active. \\ 2. VPC exists.}
   \begin{testprocedure}
-    \teststep{1}{Navigate to ECS}
-    \teststep{2}{Click Create}
-    \teststep{3}{Fill parameters and click OK}
+    \teststep{Navigate to ECS}
+    \teststep{Click Create}
+    \teststep{Fill parameters and click OK}
   \end{testprocedure}
   \testexpected{1. Instance is created. \\ 2. Status is Running.}
   \testresult{\testresultbadge{Pass}}

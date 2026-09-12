@@ -119,15 +119,12 @@ Pré-requisitos
 
 Procedimento
 
-:   
-      Passo   Ação
-      ------- -------------------------------------------------
-      1       Acessar o Console do Huawei Cloud
-      2       Navegar em Console, MapReduce Service, Clusters
-      3       Localizar cluster mrs-poc-cluster
-      4       Verificar status do cluster
-      5       Revisar aba Componente
-      6       Revisar aba Nó
+:   1.  Acessar o Console do Huawei Cloud
+    2.  Navegar em Console, MapReduce Service, Clusters
+    3.  Localizar cluster mrs-poc-cluster
+    4.  Verificar status do cluster
+    5.  Revisar aba Componente
+    6.  Revisar aba Nó
 
 Resultado Esperado
 
@@ -158,16 +155,13 @@ Pré-requisitos
 
 Procedimento
 
-:   
-      Passo   Ação
-      ------- ----------------------------------------------------------
-      1       Acessar o Console
-      2       Navegar em Console, Object Storage Service
-      3       Localizar o bucket (ex.: poc-datalake-raw)
-      4       Verificar se a classe de armazenamento é Standard
-      5       Carregar um arquivo de teste (test-upload.txt) no bucket
-      6       Baixar o arquivo e comparar seu conteúdo com o original
-      7       Excluir o arquivo de teste
+:   1.  Acessar o Console
+    2.  Navegar em Console, Object Storage Service
+    3.  Localizar o bucket (ex.: poc-datalake-raw)
+    4.  Verificar se a classe de armazenamento é Standard
+    5.  Carregar um arquivo de teste (test-upload.txt) no bucket
+    6.  Baixar o arquivo e comparar seu conteúdo com o original
+    7.  Excluir o arquivo de teste
 
 Resultado Esperado
 
@@ -198,30 +192,14 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------
-      1                                   Acessar o Console
-
-      2                                   Navegar em Console, Virtual Private
-                                          Cloud, VPCs
-
-      3                                   Localizar a VPC (ex.: vpc-poc) e
-                                          verificar se o bloco CIDR
-                                          corresponde à arquitetura (ex.:
-                                          10.0.0.0/16)
-
-      4                                   Clicar na sub-rede e verificar seu
-                                          CIDR (ex.: 10.0.1.0/24)
-
-      5                                   Navegar até Security Groups e
-                                          verificar regras de entrada: TCP 22
-                                          da sub-rede bastion, TCP 443 do
-                                          proxy corporativo
-
-      6                                   Verificar se as regras de saída
-                                          permitem todo o tráfego (padrão)
-      -----------------------------------------------------------------------
+:   1.  Acessar o Console
+    2.  Navegar em Console, Virtual Private Cloud, VPCs
+    3.  Localizar a VPC (ex.: vpc-poc) e verificar se o bloco CIDR
+        corresponde à arquitetura (ex.: 10.0.0.0/16)
+    4.  Clicar na sub-rede e verificar seu CIDR (ex.: 10.0.1.0/24)
+    5.  Navegar até Security Groups e verificar regras de entrada: TCP
+        22 da sub-rede bastion, TCP 443 do proxy corporativo
+    6.  Verificar se as regras de saída permitem todo o tráfego (padrão)
 
 Resultado Esperado
 
@@ -255,27 +233,14 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------
-      1                                   Acessar o Console com o usuário IAM
-                                          de teste
-
-      2                                   Navegar em Console, DataArts
-                                          Studio, Workspaces
-
-      3                                   Localizar o workspace (ex.:
-                                          poc-workspace)
-
-      4                                   Clicar em Acessar Workspace para
-                                          abrir o console do DataArts Studio
-
-      5                                   Verificar se o painel de navegação
-                                          à esquerda carrega com os módulos
-                                          esperados: Integração de Dados,
-                                          Desenvolvimento de Dados,
-                                          Arquitetura de Dados
-      -----------------------------------------------------------------------
+:   1.  Acessar o Console com o usuário IAM de teste
+    2.  Navegar em Console, DataArts Studio, Workspaces
+    3.  Localizar o workspace (ex.: poc-workspace)
+    4.  Clicar em Acessar Workspace para abrir o console do DataArts
+        Studio
+    5.  Verificar se o painel de navegação à esquerda carrega com os
+        módulos esperados: Integração de Dados, Desenvolvimento de
+        Dados, Arquitetura de Dados
 
 Resultado Esperado
 
@@ -308,15 +273,12 @@ Pré-requisitos
 
 Procedimento
 
-:   
-      Passo   Ação
-      ------- ---------------------------------------------------------
-      1       Navegar até Desenvolvimento de Dados no DataArts Studio
-      2       Localizar pipeline pl-ingest-customers
-      3       Clicar em Executar para iniciar o pipeline
-      4       Aguardar status do pipeline (timeout: 10 min)
-      5       Verificar arquivo de saída no OBS
-      6       Baixar e verificar contagem de linhas
+:   1.  Navegar até Desenvolvimento de Dados no DataArts Studio
+    2.  Localizar pipeline pl-ingest-customers
+    3.  Clicar em Executar para iniciar o pipeline
+    4.  Aguardar status do pipeline (timeout: 10 min)
+    5.  Verificar arquivo de saída no OBS
+    6.  Baixar e verificar contagem de linhas
 
 Resultado Esperado
 
@@ -349,29 +311,16 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------------
-      1                                   Acessar o nó master do MRS via SSH
-
-      2                                   Executar a CLI do Spark SQL: spark-sql
-                                          --master yarn -{}-conf
-                                          spark.sql.hive.convertMetastoreOrc=true
-                                          -e "SELECT COUNT(\*) FROM
-                                          poc_db.customers;"
-
-      3                                   Verificar se a contagem retornada
-                                          corresponde ao esperado (10.000)
-
-      4                                   Executar uma consulta de amostra para
-                                          verificar a integridade dos dados:
-                                          spark-sql --master yarn -e "SELECT
-                                          customer_id, name FROM poc_db.customers
-                                          LIMIT 5;"
-
-      5                                   Confirmar que a consulta retorna 5 linhas
-                                          com valores não nulos
-      -----------------------------------------------------------------------------
+:   1.  Acessar o nó master do MRS via SSH
+    2.  Executar a CLI do Spark SQL: spark-sql --master yarn -{}-conf
+        spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(\*)
+        FROM poc_db.customers;"
+    3.  Verificar se a contagem retornada corresponde ao esperado
+        (10.000)
+    4.  Executar uma consulta de amostra para verificar a integridade
+        dos dados: spark-sql --master yarn -e "SELECT customer_id, name
+        FROM poc_db.customers LIMIT 5;"
+    5.  Confirmar que a consulta retorna 5 linhas com valores não nulos
 
 Resultado Esperado
 
@@ -405,31 +354,17 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------
-      1                                   Usando o usuário autorizado,
-                                          carregar um arquivo de teste em
-                                          poc-datalake-raw
-
-      2                                   Usando o usuário autorizado, baixar
-                                          e verificar o conteúdo do arquivo
-
-      3                                   Usando o usuário não autorizado,
-                                          tentar carregar um arquivo ---
-                                          verificar se a requisição é negada
-                                          (HTTP 403)
-
-      4                                   Usando o usuário não autorizado,
-                                          tentar listar objetos no bucket ---
-                                          verificar se a requisição é negada
-
-      5                                   Revisar a política do bucket no
-                                          Console em Console, Object Storage
-                                          Service, Bucket Policies e
-                                          confirmar que concede apenas as
-                                          permissões pretendidas
-      -----------------------------------------------------------------------
+:   1.  Usando o usuário autorizado, carregar um arquivo de teste em
+        poc-datalake-raw
+    2.  Usando o usuário autorizado, baixar e verificar o conteúdo do
+        arquivo
+    3.  Usando o usuário não autorizado, tentar carregar um arquivo ---
+        verificar se a requisição é negada (HTTP 403)
+    4.  Usando o usuário não autorizado, tentar listar objetos no bucket
+        --- verificar se a requisição é negada
+    5.  Revisar a política do bucket no Console em Console, Object
+        Storage Service, Bucket Policies e confirmar que concede apenas
+        as permissões pretendidas
 
 Resultado Esperado
 
@@ -463,31 +398,16 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------
-      1                                   No console do DataArts Studio,
-                                          navegar até Arquitetura de Dados
-                                          \$\$ Mascaramento de Dados
-
-      2                                   Verificar se a regra de
-                                          mascaramento para customers.ssn
-                                          está ativa e utiliza a estratégia
-                                          Mascarar Tudo
-
-      3                                   Consultar a tabela customers como
-                                          usuário de teste via console SQL do
-                                          DataArts Studio
-
-      4                                   Verificar se a coluna ssn retorna
-                                          valores mascarados (ex.:
-                                          \*\*\*\*\*\*\*\*\*) em vez dos
-                                          dados reais
-
-      5                                   Consultar a mesma tabela como
-                                          usuário administrador e verificar
-                                          se os valores reais são retornados
-      -----------------------------------------------------------------------
+:   1.  No console do DataArts Studio, navegar até Arquitetura de Dados
+        \$\$ Mascaramento de Dados
+    2.  Verificar se a regra de mascaramento para customers.ssn está
+        ativa e utiliza a estratégia Mascarar Tudo
+    3.  Consultar a tabela customers como usuário de teste via console
+        SQL do DataArts Studio
+    4.  Verificar se a coluna ssn retorna valores mascarados (ex.:
+        \*\*\*\*\*\*\*\*\*) em vez dos dados reais
+    5.  Consultar a mesma tabela como usuário administrador e verificar
+        se os valores reais são retornados
 
 Resultado Esperado
 
@@ -521,32 +441,15 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------
-      1                                   Navegar até o diretório do projeto
-                                          Terraform
-
-      2                                   Executar terraform init para
-                                          inicializar o diretório de trabalho
-
-      3                                   Executar terraform plan e revisar
-                                          as alterações planejadas ---
-                                          confirmar que todos os recursos
-                                          esperados estão listados
-
-      4                                   Executar terraform apply
-                                          -auto-approve e aguardar a
-                                          conclusão
-
-      5                                   Executar terraform output e
-                                          verificar se todos os valores de
-                                          saída estão preenchidos
-
-      6                                   Executar terraform state list e
-                                          confirmar que a contagem de
-                                          recursos corresponde à arquitetura
-      -----------------------------------------------------------------------
+:   1.  Navegar até o diretório do projeto Terraform
+    2.  Executar terraform init para inicializar o diretório de trabalho
+    3.  Executar terraform plan e revisar as alterações planejadas ---
+        confirmar que todos os recursos esperados estão listados
+    4.  Executar terraform apply -auto-approve e aguardar a conclusão
+    5.  Executar terraform output e verificar se todos os valores de
+        saída estão preenchidos
+    6.  Executar terraform state list e confirmar que a contagem de
+        recursos corresponde à arquitetura
 
 Resultado Esperado
 
@@ -579,28 +482,15 @@ Pré-requisitos
 
 Procedimento
 
-:   -----------------------------------------------------------------------
-      Passo                               Ação
-      ----------------------------------- -----------------------------------
-      1                                   Listar os arquivos de dados de
-                                          teste locais e verificar sua
-                                          integridade (contagem de linhas,
-                                          esquema)
-
-      2                                   Carregar todos os arquivos no
-                                          bucket OBS raw usando obsutil
-
-      3                                   Verificar se cada arquivo existe no
-                                          OBS listando o conteúdo do bucket
-
-      4                                   Baixar um arquivo de amostra do OBS
-                                          e compará-lo com o original local
-                                          (checksum)
-
-      5                                   No DataArts Studio, verificar se a
-                                          conexão de fonte de dados consegue
-                                          ler os arquivos carregados
-      -----------------------------------------------------------------------
+:   1.  Listar os arquivos de dados de teste locais e verificar sua
+        integridade (contagem de linhas, esquema)
+    2.  Carregar todos os arquivos no bucket OBS raw usando obsutil
+    3.  Verificar se cada arquivo existe no OBS listando o conteúdo do
+        bucket
+    4.  Baixar um arquivo de amostra do OBS e compará-lo com o original
+        local (checksum)
+    5.  No DataArts Studio, verificar se a conexão de fonte de dados
+        consegue ler os arquivos carregados
 
 Resultado Esperado
 
@@ -621,6 +511,12 @@ Observações
 *\[Image placeholder: Captura de tela do painel de execução de testes mostrando os resultados de todos os casos de teste\]*
 
 # Histórico de versões
+
+**2.1.0**  *2026-09-12*
+
+Alteração de teststeps de tabela tabular para parágrafos auto-numerados.
+`\teststep` agora aceita 1 argumento (ação apenas). Imagens, blocos de
+código e callouts podem ser inseridos livremente entre os passos.
 
 **2.0.0**  *2026-09-12*
 

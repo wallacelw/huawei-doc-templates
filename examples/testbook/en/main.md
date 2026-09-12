@@ -115,15 +115,12 @@ Prerequisites
 
 Procedure
 
-:   
-      Step   Action
-      ------ --------------------------------------------------
-      1      Log in to the Huawei Cloud Console
-      2      Navigate to Console, MapReduce Service, Clusters
-      3      Locate cluster mrs-poc-cluster
-      4      Verify cluster status
-      5      Review Component tab
-      6      Review Node tab
+:   1.  Log in to the Huawei Cloud Console
+    2.  Navigate to Console, MapReduce Service, Clusters
+    3.  Locate cluster mrs-poc-cluster
+    4.  Verify cluster status
+    5.  Review Component tab
+    6.  Review Node tab
 
 Expected Result
 
@@ -154,16 +151,13 @@ Prerequisites
 
 Procedure
 
-:   
-      Step   Action
-      ------ -------------------------------------------------------------
-      1      Log in to the Console
-      2      Navigate to Console, Object Storage Service
-      3      Locate the bucket (e.g. poc-datalake-raw)
-      4      Verify the storage class is Standard
-      5      Upload a test file (test-upload.txt) to the bucket
-      6      Download the file and compare its content with the original
-      7      Delete the test file
+:   1.  Log in to the Console
+    2.  Navigate to Console, Object Storage Service
+    3.  Locate the bucket (e.g. poc-datalake-raw)
+    4.  Verify the storage class is Standard
+    5.  Upload a test file (test-upload.txt) to the bucket
+    6.  Download the file and compare its content with the original
+    7.  Delete the test file
 
 Expected Result
 
@@ -194,29 +188,14 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------
-      1                                   Log in to the Console
-
-      2                                   Navigate to Console, Virtual
-                                          Private Cloud, VPCs
-
-      3                                   Locate the VPC (e.g. vpc-poc) and
-                                          verify its CIDR block matches the
-                                          architecture (e.g. 10.0.0.0/16)
-
-      4                                   Click the subnet and verify its
-                                          CIDR (e.g. 10.0.1.0/24)
-
-      5                                   Navigate to Security Groups and
-                                          verify inbound rules: TCP 22 from
-                                          the bastion subnet, TCP 443 from
-                                          the corporate proxy
-
-      6                                   Verify outbound rules allow all
-                                          traffic (default)
-      -----------------------------------------------------------------------
+:   1.  Log in to the Console
+    2.  Navigate to Console, Virtual Private Cloud, VPCs
+    3.  Locate the VPC (e.g. vpc-poc) and verify its CIDR block matches
+        the architecture (e.g. 10.0.0.0/16)
+    4.  Click the subnet and verify its CIDR (e.g. 10.0.1.0/24)
+    5.  Navigate to Security Groups and verify inbound rules: TCP 22
+        from the bastion subnet, TCP 443 from the corporate proxy
+    6.  Verify outbound rules allow all traffic (default)
 
 Expected Result
 
@@ -250,26 +229,12 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------
-      1                                   Log in to the Console with the test
-                                          IAM user
-
-      2                                   Navigate to Console, DataArts
-                                          Studio, Workspaces
-
-      3                                   Locate the workspace
-                                          (e.g. poc-workspace)
-
-      4                                   Click Access Workspace to open the
-                                          DataArts Studio console
-
-      5                                   Verify the left navigation panel
-                                          loads with the expected modules:
-                                          Data Integration, Data Development,
-                                          Data Architecture
-      -----------------------------------------------------------------------
+:   1.  Log in to the Console with the test IAM user
+    2.  Navigate to Console, DataArts Studio, Workspaces
+    3.  Locate the workspace (e.g. poc-workspace)
+    4.  Click Access Workspace to open the DataArts Studio console
+    5.  Verify the left navigation panel loads with the expected
+        modules: Data Integration, Data Development, Data Architecture
 
 Expected Result
 
@@ -301,15 +266,12 @@ Prerequisites
 
 Procedure
 
-:   
-      Step   Action
-      ------ -------------------------------------------------
-      1      Navigate to Data Development in DataArts Studio
-      2      Locate pipeline pl-ingest-customers
-      3      Click Run to execute the pipeline
-      4      Wait for pipeline status (timeout: 10 min)
-      5      Verify output file in OBS
-      6      Download and verify row count
+:   1.  Navigate to Data Development in DataArts Studio
+    2.  Locate pipeline pl-ingest-customers
+    3.  Click Run to execute the pipeline
+    4.  Wait for pipeline status (timeout: 10 min)
+    5.  Verify output file in OBS
+    6.  Download and verify row count
 
 Expected Result
 
@@ -340,28 +302,16 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------------
-      1                                   SSH into the MRS master node
-
-      2                                   Run the Spark SQL CLI: spark-sql --master
-                                          yarn -{}-conf
-                                          spark.sql.hive.convertMetastoreOrc=true
-                                          -e "SELECT COUNT(\*) FROM
-                                          poc_db.customers;"
-
-      3                                   Verify the returned count matches the
-                                          expected row count (10,000)
-
-      4                                   Run a sample query to verify data
-                                          integrity: spark-sql --master yarn -e
-                                          "SELECT customer_id, name FROM
-                                          poc_db.customers LIMIT 5;"
-
-      5                                   Confirm the query returns 5 rows with
-                                          non-null values
-      -----------------------------------------------------------------------------
+:   1.  SSH into the MRS master node
+    2.  Run the Spark SQL CLI: spark-sql --master yarn -{}-conf
+        spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(\*)
+        FROM poc_db.customers;"
+    3.  Verify the returned count matches the expected row count
+        (10,000)
+    4.  Run a sample query to verify data integrity: spark-sql --master
+        yarn -e "SELECT customer_id, name FROM poc_db.customers LIMIT
+        5;"
+    5.  Confirm the query returns 5 rows with non-null values
 
 Expected Result
 
@@ -395,30 +345,16 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------
-      1                                   Using the authorized user, upload a
-                                          test file to poc-datalake-raw
-
-      2                                   Using the authorized user, download
-                                          and verify the file content
-
-      3                                   Using the unauthorized user,
-                                          attempt to upload a file --- verify
-                                          the request is denied (HTTP 403)
-
-      4                                   Using the unauthorized user,
-                                          attempt to list objects in the
-                                          bucket --- verify the request is
-                                          denied
-
-      5                                   Review the bucket policy in the
-                                          Console at Console, Object Storage
-                                          Service, Bucket Policies and
-                                          confirm it grants only the intended
-                                          permissions
-      -----------------------------------------------------------------------
+:   1.  Using the authorized user, upload a test file to
+        poc-datalake-raw
+    2.  Using the authorized user, download and verify the file content
+    3.  Using the unauthorized user, attempt to upload a file --- verify
+        the request is denied (HTTP 403)
+    4.  Using the unauthorized user, attempt to list objects in the
+        bucket --- verify the request is denied
+    5.  Review the bucket policy in the Console at Console, Object
+        Storage Service, Bucket Policies and confirm it grants only the
+        intended permissions
 
 Expected Result
 
@@ -452,30 +388,16 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------
-      1                                   In the DataArts Studio console,
-                                          navigate to Data Architecture \$\$
-                                          Data Masking
-
-      2                                   Verify the masking rule for
-                                          customers.ssn is active and uses
-                                          the Mask All strategy
-
-      3                                   Query the customers table as the
-                                          test user via DataArts Studio SQL
-                                          console
-
-      4                                   Verify the ssn column returns
-                                          masked values
-                                          (e.g. \*\*\*\*\*\*\*\*\*) instead
-                                          of real data
-
-      5                                   Query the same table as an admin
-                                          user and verify real values are
-                                          returned
-      -----------------------------------------------------------------------
+:   1.  In the DataArts Studio console, navigate to Data Architecture
+        \$\$ Data Masking
+    2.  Verify the masking rule for customers.ssn is active and uses the
+        Mask All strategy
+    3.  Query the customers table as the test user via DataArts Studio
+        SQL console
+    4.  Verify the ssn column returns masked values
+        (e.g. \*\*\*\*\*\*\*\*\*) instead of real data
+    5.  Query the same table as an admin user and verify real values are
+        returned
 
 Expected Result
 
@@ -508,29 +430,14 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------
-      1                                   Navigate to the Terraform project
-                                          directory
-
-      2                                   Run terraform init to initialize
-                                          the working directory
-
-      3                                   Run terraform plan and review the
-                                          planned changes --- confirm all
-                                          expected resources are listed
-
-      4                                   Run terraform apply -auto-approve
-                                          and wait for completion
-
-      5                                   Run terraform output and verify all
-                                          output values are populated
-
-      6                                   Run terraform state list and
-                                          confirm the resource count matches
-                                          the architecture
-      -----------------------------------------------------------------------
+:   1.  Navigate to the Terraform project directory
+    2.  Run terraform init to initialize the working directory
+    3.  Run terraform plan and review the planned changes --- confirm
+        all expected resources are listed
+    4.  Run terraform apply -auto-approve and wait for completion
+    5.  Run terraform output and verify all output values are populated
+    6.  Run terraform state list and confirm the resource count matches
+        the architecture
 
 Expected Result
 
@@ -561,27 +468,14 @@ Prerequisites
 
 Procedure
 
-:   -----------------------------------------------------------------------
-      Step                                Action
-      ----------------------------------- -----------------------------------
-      1                                   List the local test data files and
-                                          verify their integrity (row count,
-                                          schema)
-
-      2                                   Upload all files to the OBS raw
-                                          bucket using obsutil
-
-      3                                   Verify each file exists in OBS by
-                                          listing the bucket contents
-
-      4                                   Download a sample file from OBS and
-                                          compare it with the local original
-                                          (checksum)
-
-      5                                   In DataArts Studio, verify the data
-                                          source connection can read the
-                                          uploaded files
-      -----------------------------------------------------------------------
+:   1.  List the local test data files and verify their integrity (row
+        count, schema)
+    2.  Upload all files to the OBS raw bucket using obsutil
+    3.  Verify each file exists in OBS by listing the bucket contents
+    4.  Download a sample file from OBS and compare it with the local
+        original (checksum)
+    5.  In DataArts Studio, verify the data source connection can read
+        the uploaded files
 
 Expected Result
 
@@ -600,6 +494,12 @@ Remarks
 *\[Image placeholder: Screenshot of the test execution dashboard showing all test case results\]*
 
 # Changelog
+
+**2.1.0**  *2026-09-12*
+
+Changed teststeps from tabular table to auto-numbered paragraphs.
+`\teststep` now takes 1 arg (action only). Images, code blocks, and
+callouts can be placed freely between steps.
 
 **2.0.0**  *2026-09-12*
 

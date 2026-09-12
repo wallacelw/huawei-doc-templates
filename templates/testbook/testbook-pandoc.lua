@@ -144,17 +144,16 @@ local config = {
             -- Extract environment body (e.g. testprocedure)
             local env_body = body:match("\\begin%s*{" .. field.env .. "}%s*(.-)%s*\\end%s*{" .. field.env .. "}")
             if env_body then
-              -- Parse teststeps from the environment body into a markdown table
+              -- Parse \teststep{action} commands (1 arg, auto-numbered)
               local steps = {}
-              for step, action in env_body:gmatch("\\teststep%s*(%b{})%s*(%b{})") do
-                table.insert(steps, { step:sub(2, -2), action:sub(2, -2) })
+              for action in env_body:gmatch("\\teststep%s*(%b{})") do
+                table.insert(steps, action:sub(2, -2))
               end
               if #steps > 0 then
+                -- Render as a numbered list
                 local step_lines = {}
-                step_lines[#step_lines + 1] = "| " .. L("step") .. " | " .. L("action") .. " |"
-                step_lines[#step_lines + 1] = "| --- | --- |"
-                for _, s in ipairs(steps) do
-                  step_lines[#step_lines + 1] = "| " .. cell_to_md(s[1]) .. " | " .. cell_to_md(s[2]) .. " |"
+                for i, action in ipairs(steps) do
+                  step_lines[#step_lines + 1] = i .. ". " .. cell_to_md(action)
                 end
                 content = table.concat(step_lines, "\n")
               end
@@ -243,61 +242,9 @@ local config = {
       return blocks
     end
 
-    -- Handler for the teststeps environment.
-    -- Converts \begin{teststeps}...\end{teststeps} into a 2-column
-    -- Pandoc Table (Step, Action).
-    local function handle_teststeps_env(text)
-      local body = text:match("\\begin%s*{teststeps}%s*(.-)%s*\\end%s*{teststeps}")
-      if not body then return nil end
-
-      local function cell_to_md(cell_text)
-        cell_text = cell_text:gsub("\\\\", "\n")
-        local prev = nil
-        while prev ~= cell_text do
-          prev = cell_text
-          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
-        end
-        cell_text = cell_text:gsub("\\_", "_")
-        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
-        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
-      end
-
-      -- Parse \teststep{Step}{Action} commands
-      local rows = {}
-      for step, action in body:gmatch("\\teststep%s*(%b{})%s*(%b{})") do
-        table.insert(rows, {
-          step:sub(2, -2),
-          action:sub(2, -2),
-        })
-      end
-
-      if #rows == 0 then return nil end
-
-      local md_lines = {}
-      md_lines[#md_lines + 1] = "| " .. L("step") .. " | " .. L("action") .. " |"
-      md_lines[#md_lines + 1] = "| --- | --- |"
-      for _, row in ipairs(rows) do
-        local cells = {}
-        for _, cell in ipairs(row) do
-          local md = cell_to_md(cell):gsub("|", "\\|")
-          cells[#cells + 1] = md
-        end
-        md_lines[#md_lines + 1] = "| " .. table.concat(cells, " | ") .. " |"
-      end
-
-      local md_table = table.concat(md_lines, "\n") .. "\n"
-      local parsed = pandoc.read(md_table, "markdown")
-      local blocks = pandoc.Blocks({})
-      if #parsed.blocks > 0 then
-        for _, blk in ipairs(parsed.blocks) do blocks:insert(blk) end
-      end
-      return blocks
-    end
-
     return {
       testcase = handle_testcase_env,
       testsummary = handle_testsummary_env,
-      teststeps = handle_teststeps_env,
     }
   end,
 }

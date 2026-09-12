@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{4.1.0}
+\setdocversion{4.2.0}
 
 \begin{document}
 
@@ -1209,6 +1209,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{4.2.0}{\today}{\item Changed teststeps from tabular table to auto-numbered paragraphs. \inlinecode{\textbackslash teststep} now takes 1 arg (action only, numbering automatic). Removed \inlinecode{teststeps} environment. Images, code blocks, and callouts can be placed freely between steps inside \inlinecode{testprocedure}.}
   \changelogentry{4.1.0}{\today}{\item Testcase field redesign: full-width red mini header bars for each field. Changed \inlinecode{testprocedure} from command to environment wrapping 2-column teststeps (Step | Action). Reordered fields: Test Result before Remarks. Updated Lua filter and round-trip test for grid table counting.}
   \changelogentry{4.0.0}{\today}{\item Redesigned testbook \inlinecode{testcase} environment: replaced 2-column tabular with breakable tcolorbox (red left-rule, stacked paragraph fields). Images, code blocks, callouts, and nested tables now render correctly and break across pages. Added \inlinecode{longhutable} environment for page-breaking tables. Updated Lua filter to produce definition lists for DOCX/MD/HTML.}
   \changelogentry{3.9.0}{\today}{\item Added testsummary environment, teststeps environment, and \inlinecode{\textbackslash testresultbadge} command to testbook template. Fixed testcase layout (full-width tabular with proper text alignment).}

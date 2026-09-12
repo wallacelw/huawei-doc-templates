@@ -314,7 +314,7 @@ width: auto;
 <body>
   <h1 class="title">POC Test Cases — Data Platform Validation</h1>
   <p class="date">2026-09-12</p>
-<p class="version">v2.0.0</p>
+<p class="version">v2.1.0</p>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Info</strong> </p>
 <p>This document demonstrates the <code>testbook</code> template
@@ -532,40 +532,14 @@ healthy status.
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Log in to the Huawei Cloud Console</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navigate to Console, MapReduce Service, Clusters</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Locate cluster mrs-poc-cluster</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Verify cluster status</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Review Component tab</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Review Node tab</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Log in to the Huawei Cloud Console</li>
+<li>Navigate to Console, MapReduce Service, Clusters</li>
+<li>Locate cluster mrs-poc-cluster</li>
+<li>Verify cluster status</li>
+<li>Review Component tab</li>
+<li>Review Node tab</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -605,44 +579,15 @@ the test user.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Log in to the Console</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navigate to Console, Object Storage Service</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Locate the bucket (e.g. poc-datalake-raw)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Verify the storage class is Standard</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Upload a test file (test-upload.txt) to the bucket</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Download the file and compare its content with the original</td>
-</tr>
-<tr class="odd">
-<td>7</td>
-<td>Delete the test file</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Log in to the Console</li>
+<li>Navigate to Console, Object Storage Service</li>
+<li>Locate the bucket (e.g. poc-datalake-raw)</li>
+<li>Verify the storage class is Standard</li>
+<li>Upload a test file (test-upload.txt) to the bucket</li>
+<li>Download the file and compare its content with the original</li>
+<li>Delete the test file</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -682,46 +627,16 @@ architecture.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Log in to the Console</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navigate to Console, Virtual Private Cloud, VPCs</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Locate the VPC (e.g. vpc-poc) and verify its CIDR block matches the
-architecture (e.g. 10.0.0.0/16)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Click the subnet and verify its CIDR (e.g. 10.0.1.0/24)</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Navigate to Security Groups and verify inbound rules: TCP 22 from
-the bastion subnet, TCP 443 from the corporate proxy</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Verify outbound rules allow all traffic (default)</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Log in to the Console</li>
+<li>Navigate to Console, Virtual Private Cloud, VPCs</li>
+<li>Locate the VPC (e.g. vpc-poc) and verify its CIDR block matches the
+architecture (e.g. 10.0.0.0/16)</li>
+<li>Click the subnet and verify its CIDR (e.g. 10.0.1.0/24)</li>
+<li>Navigate to Security Groups and verify inbound rules: TCP 22 from
+the bastion subnet, TCP 443 from the corporate proxy</li>
+<li>Verify outbound rules allow all traffic (default)</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -763,41 +678,14 @@ Running.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Log in to the Console with the test IAM user</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navigate to Console, DataArts Studio, Workspaces</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Locate the workspace (e.g. poc-workspace)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Click Access Workspace to open the DataArts Studio console</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Verify the left navigation panel loads with the expected modules:
-Data Integration, Data Development, Data Architecture</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Log in to the Console with the test IAM user</li>
+<li>Navigate to Console, DataArts Studio, Workspaces</li>
+<li>Locate the workspace (e.g. poc-workspace)</li>
+<li>Click Access Workspace to open the DataArts Studio console</li>
+<li>Verify the left navigation panel loads with the expected modules:
+Data Integration, Data Development, Data Architecture</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -839,40 +727,14 @@ configured.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Navigate to Data Development in DataArts Studio</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Locate pipeline pl-ingest-customers</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Click Run to execute the pipeline</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Wait for pipeline status (timeout: 10 min)</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Verify output file in OBS</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Download and verify row count</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Navigate to Data Development in DataArts Studio</li>
+<li>Locate pipeline pl-ingest-customers</li>
+<li>Click Run to execute the pipeline</li>
+<li>Wait for pipeline status (timeout: 10 min)</li>
+<li>Verify output file in OBS</li>
+<li>Download and verify row count</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -912,44 +774,17 @@ ingestion pipeline.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>SSH into the MRS master node</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Run the Spark SQL CLI: spark-sql –master yarn -{}-conf
+<ol type="1">
+<li>SSH into the MRS master node</li>
+<li>Run the Spark SQL CLI: spark-sql –master yarn -{}-conf
 spark.sql.hive.convertMetastoreOrc=true -e “SELECT COUNT(*) FROM
-poc_db.customers;”</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Verify the returned count matches the expected row count
-(10,000)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Run a sample query to verify data integrity: spark-sql –master yarn
--e “SELECT customer_id, name FROM poc_db.customers LIMIT 5;”</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Confirm the query returns 5 rows with non-null values</td>
-</tr>
-</tbody>
-</table>
+poc_db.customers;”</li>
+<li>Verify the returned count matches the expected row count
+(10,000)</li>
+<li>Run a sample query to verify data integrity: spark-sql –master yarn
+-e “SELECT customer_id, name FROM poc_db.customers LIMIT 5;”</li>
+<li>Confirm the query returns 5 rows with non-null values</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -991,45 +826,18 @@ permissions.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Using the authorized user, upload a test file to
-poc-datalake-raw</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Using the authorized user, download and verify the file content</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Using the unauthorized user, attempt to upload a file — verify the
-request is denied (HTTP 403)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Using the unauthorized user, attempt to list objects in the bucket —
-verify the request is denied</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Review the bucket policy in the Console at Console, Object Storage
+<ol type="1">
+<li>Using the authorized user, upload a test file to
+poc-datalake-raw</li>
+<li>Using the authorized user, download and verify the file content</li>
+<li>Using the unauthorized user, attempt to upload a file — verify the
+request is denied (HTTP 403)</li>
+<li>Using the unauthorized user, attempt to list objects in the bucket —
+verify the request is denied</li>
+<li>Review the bucket policy in the Console at Console, Object Storage
 Service, Bucket Policies and confirm it grants only the intended
-permissions</td>
-</tr>
-</tbody>
-</table>
+permissions</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -1071,45 +879,18 @@ Security Number).</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>In the DataArts Studio console, navigate to Data Architecture $$
-Data Masking</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Verify the masking rule for customers.ssn is active and uses the
-Mask All strategy</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Query the customers table as the test user via DataArts Studio SQL
-console</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Verify the ssn column returns masked values (e.g. *********) instead
-of real data</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Query the same table as an admin user and verify real values are
-returned</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>In the DataArts Studio console, navigate to Data Architecture $$
+Data Masking</li>
+<li>Verify the masking rule for customers.ssn is active and uses the
+Mask All strategy</li>
+<li>Query the customers table as the test user via DataArts Studio SQL
+console</li>
+<li>Verify the ssn column returns masked values (e.g. *********) instead
+of real data</li>
+<li>Query the same table as an admin user and verify real values are
+returned</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -1151,46 +932,16 @@ provider.tf.</li>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Navigate to the Terraform project directory</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Run terraform init to initialize the working directory</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Run terraform plan and review the planned changes — confirm all
-expected resources are listed</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Run terraform apply -auto-approve and wait for completion</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Run terraform output and verify all output values are populated</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Run terraform state list and confirm the resource count matches the
-architecture</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Navigate to the Terraform project directory</li>
+<li>Run terraform init to initialize the working directory</li>
+<li>Run terraform plan and review the planned changes — confirm all
+expected resources are listed</li>
+<li>Run terraform apply -auto-approve and wait for completion</li>
+<li>Run terraform output and verify all output values are populated</li>
+<li>Run terraform state list and confirm the resource count matches the
+architecture</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -1230,43 +981,16 @@ pipeline.
 </dd>
 <dt>Procedure</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>List the local test data files and verify their integrity (row
-count, schema)</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Upload all files to the OBS raw bucket using obsutil</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Verify each file exists in OBS by listing the bucket contents</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Download a sample file from OBS and compare it with the local
-original (checksum)</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>In DataArts Studio, verify the data source connection can read the
-uploaded files</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>List the local test data files and verify their integrity (row
+count, schema)</li>
+<li>Upload all files to the OBS raw bucket using obsutil</li>
+<li>Verify each file exists in OBS by listing the bucket contents</li>
+<li>Download a sample file from OBS and compare it with the local
+original (checksum)</li>
+<li>In DataArts Studio, verify the data source connection can read the
+uploaded files</li>
+</ol>
 </dd>
 <dt>Expected Result</dt>
 <dd>
@@ -1291,6 +1015,10 @@ upload feature for better reliability.
 showing all test case results]</em></p>
 <h1 data-number="6"><span class="header-section-number">6</span>
 Changelog</h1>
+<p><strong>2.1.0</strong>  <em>2026-09-12</em></p>
+<p>Changed teststeps from tabular table to auto-numbered paragraphs.
+<code>\teststep</code> now takes 1 arg (action only). Images, code
+blocks, and callouts can be placed freely between steps.</p>
 <p><strong>2.0.0</strong>  <em>2026-09-12</em></p>
 <p>Redesigned testcase layout: full-width mini header bars for each
 field, testprocedure environment with 2-column step table, field order

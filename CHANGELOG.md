@@ -3,6 +3,26 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.2.0 (2026-09-13)
+
+### Features
+
+- **Numbered paragraph steps**: Replaced the `teststeps` tabular table with
+  auto-numbered paragraphs. `\teststep` now takes 1 arg (action text only);
+  numbering is automatic. This makes the testcase block fully uniform —
+  all content is paragraphs inside the breakable tcolorbox.
+- **Free content between steps**: Images, code blocks, and callouts can now
+  be placed freely between `\teststep` commands inside `testprocedure`,
+  with no tabular restrictions.
+- **Removed `teststeps` environment**: Steps are now directly inside
+  `testprocedure`. The `teststeps` environment is no longer needed.
+
+### Fixes
+
+- **Lua filter**: Updated `handle_testcase_env` to parse 1-arg `\teststep`
+  and render as a numbered list in DOCX/MD/HTML. Removed
+  `handle_teststeps_env` (no longer needed).
+
 ## v4.1.0 (2026-09-13)
 
 ### Features

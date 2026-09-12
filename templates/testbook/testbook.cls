@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.1.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.2.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -339,49 +339,34 @@
 \newcommand{\testsummaryrow}[3]{#1 & #2 & #3 \\ \hline}
 
 % =====================================================================
-%  TEST STEPS TABLE
-% =====================================================================
-% 2-column step table (Step | Action) for detailed procedures.
-% Used inside the testprocedure environment.
-% Usage:
-%   \begin{teststeps}
-%     \teststep{1}{Log in to Console}
-%     \teststep{2}{Click Create and set parameters}
-%   \end{teststeps}
-
-\newenvironment{teststeps}{%
-  \renewcommand{\arraystretch}{1.3}%
-  \noindent
-  \begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|>{\raggedright\arraybackslash}p{\dimexpr\linewidth-1.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}%
-  \hline
-  \rowcolor{huaweired}
-  {\color{white}\bfseries\lg@step} &
-  {\color{white}\bfseries\lg@action} \\
-  \hline
-}{%
-  \hline
-  \end{tabular}%
-  \vspace{0.3cm}%
-}
-
-\newcommand{\teststep}[2]{#1 & #2 \\ \hline}
-
-% =====================================================================
 %  TEST PROCEDURE ENVIRONMENT
 % =====================================================================
-% Renders the "Procedure" mini header bar followed by a teststeps table.
-% Replaces the old \testprocedure{text} command.
+% Renders the "Procedure" mini header bar followed by auto-numbered
+% paragraph steps.  Each \teststep is a numbered paragraph (red bold
+% number).  Images, code blocks, and callouts can be placed freely
+% between steps — no tabular restrictions.
 % Usage:
 %   \begin{testprocedure}
-%     \teststep{1}{Log in to Console}
-%     \teststep{2}{Click Create and set parameters}
+%     \teststep{Log in to Console}
+%     \teststep{Click Create and set parameters}
+%     \image[width=0.8\linewidth]{common-assets/screenshot.png}
+%     \teststep{Verify the instance is created}
 %   \end{testprocedure}
+
+\newcounter{lg@teststep}
 
 \newenvironment{testprocedure}{%
   \lg@testfieldheader{\lg@procedure}%
-  \begin{teststeps}
+  \setcounter{lg@teststep}{0}%
 }{%
-  \end{teststeps}
+  \par\medskip
+}
+
+% Auto-numbered step paragraph.  Red bold number, then action text.
+\newcommand{\teststep}[1]{%
+  \refstepcounter{lg@teststep}%
+  \par\smallskip
+  \noindent\textcolor{huaweired}{\bfseries\arabic{lg@teststep}.}\hspace{0.6em}#1\par
 }
 
 % =====================================================================

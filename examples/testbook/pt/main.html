@@ -315,7 +315,7 @@ width: auto;
   <h1 class="title">Casos de Teste POC — Validação da Plataforma de
 Dados</h1>
   <p class="date">2026-09-12</p>
-<p class="version">v2.0.0</p>
+<p class="version">v2.1.0</p>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Informação</strong> </p>
 <p>Este documento demonstra o template <code>testbook</code>
@@ -537,40 +537,14 @@ apresentam status saudável.
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Acessar o Console do Huawei Cloud</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navegar em Console, MapReduce Service, Clusters</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Localizar cluster mrs-poc-cluster</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Verificar status do cluster</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Revisar aba Componente</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Revisar aba Nó</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Acessar o Console do Huawei Cloud</li>
+<li>Navegar em Console, MapReduce Service, Clusters</li>
+<li>Localizar cluster mrs-poc-cluster</li>
+<li>Verificar status do cluster</li>
+<li>Revisar aba Componente</li>
+<li>Revisar aba Nó</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -610,44 +584,15 @@ anexada ao usuário de teste.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Acessar o Console</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navegar em Console, Object Storage Service</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Localizar o bucket (ex.: poc-datalake-raw)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Verificar se a classe de armazenamento é Standard</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Carregar um arquivo de teste (test-upload.txt) no bucket</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Baixar o arquivo e comparar seu conteúdo com o original</td>
-</tr>
-<tr class="odd">
-<td>7</td>
-<td>Excluir o arquivo de teste</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Acessar o Console</li>
+<li>Navegar em Console, Object Storage Service</li>
+<li>Localizar o bucket (ex.: poc-datalake-raw)</li>
+<li>Verificar se a classe de armazenamento é Standard</li>
+<li>Carregar um arquivo de teste (test-upload.txt) no bucket</li>
+<li>Baixar o arquivo e comparar seu conteúdo com o original</li>
+<li>Excluir o arquivo de teste</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -687,47 +632,17 @@ solução.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Acessar o Console</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navegar em Console, Virtual Private Cloud, VPCs</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Localizar a VPC (ex.: vpc-poc) e verificar se o bloco CIDR
-corresponde à arquitetura (ex.: 10.0.0.0/16)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Clicar na sub-rede e verificar seu CIDR (ex.: 10.0.1.0/24)</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Navegar até Security Groups e verificar regras de entrada: TCP 22 da
-sub-rede bastion, TCP 443 do proxy corporativo</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Verificar se as regras de saída permitem todo o tráfego
-(padrão)</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Acessar o Console</li>
+<li>Navegar em Console, Virtual Private Cloud, VPCs</li>
+<li>Localizar a VPC (ex.: vpc-poc) e verificar se o bloco CIDR
+corresponde à arquitetura (ex.: 10.0.0.0/16)</li>
+<li>Clicar na sub-rede e verificar seu CIDR (ex.: 10.0.1.0/24)</li>
+<li>Navegar até Security Groups e verificar regras de entrada: TCP 22 da
+sub-rede bastion, TCP 443 do proxy corporativo</li>
+<li>Verificar se as regras de saída permitem todo o tráfego
+(padrão)</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -769,43 +684,16 @@ Executando.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Acessar o Console com o usuário IAM de teste</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Navegar em Console, DataArts Studio, Workspaces</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Localizar o workspace (ex.: poc-workspace)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Clicar em Acessar Workspace para abrir o console do DataArts
-Studio</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Verificar se o painel de navegação à esquerda carrega com os módulos
+<ol type="1">
+<li>Acessar o Console com o usuário IAM de teste</li>
+<li>Navegar em Console, DataArts Studio, Workspaces</li>
+<li>Localizar o workspace (ex.: poc-workspace)</li>
+<li>Clicar em Acessar Workspace para abrir o console do DataArts
+Studio</li>
+<li>Verificar se o painel de navegação à esquerda carrega com os módulos
 esperados: Integração de Dados, Desenvolvimento de Dados, Arquitetura de
-Dados</td>
-</tr>
-</tbody>
-</table>
+Dados</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -847,40 +735,14 @@ configurado.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Navegar até Desenvolvimento de Dados no DataArts Studio</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Localizar pipeline pl-ingest-customers</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Clicar em Executar para iniciar o pipeline</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Aguardar status do pipeline (timeout: 10 min)</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Verificar arquivo de saída no OBS</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Baixar e verificar contagem de linhas</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Navegar até Desenvolvimento de Dados no DataArts Studio</li>
+<li>Localizar pipeline pl-ingest-customers</li>
+<li>Clicar em Executar para iniciar o pipeline</li>
+<li>Aguardar status do pipeline (timeout: 10 min)</li>
+<li>Verificar arquivo de saída no OBS</li>
+<li>Baixar e verificar contagem de linhas</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -921,45 +783,18 @@ pipeline de ingestão.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Acessar o nó master do MRS via SSH</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Executar a CLI do Spark SQL: spark-sql –master yarn -{}-conf
+<ol type="1">
+<li>Acessar o nó master do MRS via SSH</li>
+<li>Executar a CLI do Spark SQL: spark-sql –master yarn -{}-conf
 spark.sql.hive.convertMetastoreOrc=true -e “SELECT COUNT(*) FROM
-poc_db.customers;”</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Verificar se a contagem retornada corresponde ao esperado
-(10.000)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Executar uma consulta de amostra para verificar a integridade dos
+poc_db.customers;”</li>
+<li>Verificar se a contagem retornada corresponde ao esperado
+(10.000)</li>
+<li>Executar uma consulta de amostra para verificar a integridade dos
 dados: spark-sql –master yarn -e “SELECT customer_id, name FROM
-poc_db.customers LIMIT 5;”</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Confirmar que a consulta retorna 5 linhas com valores não nulos</td>
-</tr>
-</tbody>
-</table>
+poc_db.customers LIMIT 5;”</li>
+<li>Confirmar que a consulta retorna 5 linhas com valores não nulos</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -1003,46 +838,19 @@ permissões OBS.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Usando o usuário autorizado, carregar um arquivo de teste em
-poc-datalake-raw</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Usando o usuário autorizado, baixar e verificar o conteúdo do
-arquivo</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Usando o usuário não autorizado, tentar carregar um arquivo —
-verificar se a requisição é negada (HTTP 403)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Usando o usuário não autorizado, tentar listar objetos no bucket —
-verificar se a requisição é negada</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Revisar a política do bucket no Console em Console, Object Storage
+<ol type="1">
+<li>Usando o usuário autorizado, carregar um arquivo de teste em
+poc-datalake-raw</li>
+<li>Usando o usuário autorizado, baixar e verificar o conteúdo do
+arquivo</li>
+<li>Usando o usuário não autorizado, tentar carregar um arquivo —
+verificar se a requisição é negada (HTTP 403)</li>
+<li>Usando o usuário não autorizado, tentar listar objetos no bucket —
+verificar se a requisição é negada</li>
+<li>Revisar a política do bucket no Console em Console, Object Storage
 Service, Bucket Policies e confirmar que concede apenas as permissões
-pretendidas</td>
-</tr>
-</tbody>
-</table>
+pretendidas</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -1085,45 +893,18 @@ consultadas por usuários não administradores.
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>No console do DataArts Studio, navegar até Arquitetura de Dados $$
-Mascaramento de Dados</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Verificar se a regra de mascaramento para customers.ssn está ativa e
-utiliza a estratégia Mascarar Tudo</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Consultar a tabela customers como usuário de teste via console SQL
-do DataArts Studio</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Verificar se a coluna ssn retorna valores mascarados (ex.:
-*********) em vez dos dados reais</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Consultar a mesma tabela como usuário administrador e verificar se
-os valores reais são retornados</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>No console do DataArts Studio, navegar até Arquitetura de Dados $$
+Mascaramento de Dados</li>
+<li>Verificar se a regra de mascaramento para customers.ssn está ativa e
+utiliza a estratégia Mascarar Tudo</li>
+<li>Consultar a tabela customers como usuário de teste via console SQL
+do DataArts Studio</li>
+<li>Verificar se a coluna ssn retorna valores mascarados (ex.:
+*********) em vez dos dados reais</li>
+<li>Consultar a mesma tabela como usuário administrador e verificar se
+os valores reais são retornados</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -1166,48 +947,18 @@ provider.tf.</li>
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Navegar até o diretório do projeto Terraform</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Executar terraform init para inicializar o diretório de
-trabalho</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Executar terraform plan e revisar as alterações planejadas —
-confirmar que todos os recursos esperados estão listados</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Executar terraform apply -auto-approve e aguardar a conclusão</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Executar terraform output e verificar se todos os valores de saída
-estão preenchidos</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>Executar terraform state list e confirmar que a contagem de recursos
-corresponde à arquitetura</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Navegar até o diretório do projeto Terraform</li>
+<li>Executar terraform init para inicializar o diretório de
+trabalho</li>
+<li>Executar terraform plan e revisar as alterações planejadas —
+confirmar que todos os recursos esperados estão listados</li>
+<li>Executar terraform apply -auto-approve e aguardar a conclusão</li>
+<li>Executar terraform output e verificar se todos os valores de saída
+estão preenchidos</li>
+<li>Executar terraform state list e confirmar que a contagem de recursos
+corresponde à arquitetura</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -1249,44 +1000,17 @@ pipeline do DataArts Studio.
 </dd>
 <dt>Procedimento</dt>
 <dd>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Passo</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Listar os arquivos de dados de teste locais e verificar sua
-integridade (contagem de linhas, esquema)</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Carregar todos os arquivos no bucket OBS raw usando obsutil</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Verificar se cada arquivo existe no OBS listando o conteúdo do
-bucket</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Baixar um arquivo de amostra do OBS e compará-lo com o original
-local (checksum)</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>No DataArts Studio, verificar se a conexão de fonte de dados
-consegue ler os arquivos carregados</td>
-</tr>
-</tbody>
-</table>
+<ol type="1">
+<li>Listar os arquivos de dados de teste locais e verificar sua
+integridade (contagem de linhas, esquema)</li>
+<li>Carregar todos os arquivos no bucket OBS raw usando obsutil</li>
+<li>Verificar se cada arquivo existe no OBS listando o conteúdo do
+bucket</li>
+<li>Baixar um arquivo de amostra do OBS e compará-lo com o original
+local (checksum)</li>
+<li>No DataArts Studio, verificar se a conexão de fonte de dados
+consegue ler os arquivos carregados</li>
+</ol>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
@@ -1313,6 +1037,11 @@ upload multipart do OBS para maior confiabilidade.
 testes mostrando os resultados de todos os casos de teste]</em></p>
 <h1 data-number="6"><span class="header-section-number">6</span>
 Histórico de versões</h1>
+<p><strong>2.1.0</strong>  <em>2026-09-12</em></p>
+<p>Alteração de teststeps de tabela tabular para parágrafos
+auto-numerados. <code>\teststep</code> agora aceita 1 argumento (ação
+apenas). Imagens, blocos de código e callouts podem ser inseridos
+livremente entre os passos.</p>
 <p><strong>2.0.0</strong>  <em>2026-09-12</em></p>
 <p>Layout de casos de teste redesenhado: barras de cabeçalho mini de
 largura total para cada campo, ambiente testprocedure com tabela de

@@ -1077,6 +1077,13 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.2.0**  *2026-09-12*
+
+Changed teststeps from tabular table to auto-numbered paragraphs.
+`\teststep` now takes 1 arg (action only, numbering automatic). Removed
+`teststeps` environment. Images, code blocks, and callouts can be placed
+freely between steps inside `testprocedure`.
+
 **4.1.0**  *2026-09-12*
 
 Testcase field redesign: full-width red mini header bars for each field.

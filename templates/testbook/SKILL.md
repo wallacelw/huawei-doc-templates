@@ -137,9 +137,9 @@ up in the class file and this SKILL.md.
   \testobjective{Verify that <functionality> works as expected.}
   \testprerequisites{1. System is running. \\ 2. User is logged in.}
   \begin{testprocedure}
-    \teststep{1}{Navigate to <page>}
-    \teststep{2}{Click <button>}
-    \teststep{3}{Enter <data> and click Save}
+    \teststep{Navigate to <page>}
+    \teststep{Click <button>}
+    \teststep{Enter <data> and click Save}
   \end{testprocedure}
   \testexpected{1. The resource is created successfully. \\ 2. Data is persisted.}
   \testresult{\testresultbadge{Pass}}
@@ -150,8 +150,8 @@ up in the class file and this SKILL.md.
   \testobjective{Verify that <other functionality> behaves correctly.}
   \testprerequisites{1. Resource from TC-001 exists.}
   \begin{testprocedure}
-    \teststep{1}{Select the resource}
-    \teststep{2}{Click Delete and confirm}
+    \teststep{Select the resource}
+    \teststep{Click Delete and confirm}
   \end{testprocedure}
   \testexpected{1. The resource is removed. \\ 2. No orphan data remains.}
   \testresult{\testresultbadge{Pass}}
@@ -164,7 +164,7 @@ up in the class file and this SKILL.md.
   \testobjective{...}
   \testprerequisites{...}
   \begin{testprocedure}
-    \teststep{1}{...}
+    \teststep{...}
   \end{testprocedure}
   \testexpected{...}
   \testresult{...}
@@ -297,7 +297,7 @@ rendered as a subsection heading followed by a **breakable tcolorbox** with a
 3pt Huawei-red left-rule. Fields are **stacked blocks**: each field shows a
 full-width red mini header bar (Huawei-red background, white bold text)
 followed by the content below it. This design allows images, code blocks,
-callout boxes, and nested `teststeps` tables to render correctly and break
+callout boxes, and nested content to render correctly and break
 across pages.
 
 **Field order:** Objective → Prerequisites → Procedure → Expected Result →
@@ -310,9 +310,9 @@ Remarks fields.
   \testobjective{Confirm that the MRS cluster is deployed.}
   \testprerequisites{1. Terraform apply completed.}
   \begin{testprocedure}
-    \teststep{1}{Log in to the Huawei Cloud Console}
-    \teststep{2}{Navigate to MapReduce Service, Clusters}
-    \teststep{3}{Verify cluster status is Running}
+    \teststep{Log in to the Huawei Cloud Console}
+    \teststep{Navigate to MapReduce Service, Clusters}
+    \teststep{Verify cluster status is Running}
   \end{testprocedure}
   \testexpected{1. Cluster status is Running.}
   \testresult{\testresultbadge{Pass}}
@@ -363,47 +363,50 @@ of all test cases and their results.
 
 ### `testprocedure` environment
 
-Renders the "Procedure" mini header bar followed by a 2-column step table
-(Step | Action). Use inside `testcase` for the procedure field.
+Renders the "Procedure" mini header bar followed by auto-numbered step
+paragraphs. Each `\teststep` is rendered as a red bold step number followed
+by the action text. Steps are numbered automatically (1, 2, 3, …).
+Images, code blocks, and callouts can be placed freely between steps.
 
 ```latex
 \begin{testprocedure}
-  \teststep{1}{Log in to Console}
-  \teststep{2}{Click Create and set parameters}
-  \teststep{3}{Click Save}
+  \teststep{Log in to Console}
+  \teststep{Click Create and set parameters}
+  \image[width=0.8\linewidth]{common-assets/screenshot.png}
+  \teststep{Verify the instance is created}
 \end{testprocedure}
 ```
 
 | Command | Purpose |
 |---|---|
-| `\begin{testprocedure} ... \end{testprocedure}` | Procedure mini header bar + 2-column step table (Step, Action). |
+| `\begin{testprocedure} ... \end{testprocedure}` | Procedure mini header bar + auto-numbered step paragraphs. |
+| `\teststep{action_description}` | One step: red bold auto-numbered step number + action text. Numbering is automatic. |
 
 **Language-aware label:** The mini header bar text adapts to the class option:
 - English (default): **Procedure**
 - Portuguese (`[portuguese]`): **Procedimento**
 
-### Test steps table
+### Test steps
 
-The `teststeps` environment renders a 2-column step table (Step, Action)
-with a Huawei-red header. Use it inside a `testprocedure` environment to
-break down the procedure into discrete steps.
+The `\teststep` command renders an auto-numbered step paragraph inside
+`testprocedure`. Each step shows a red bold step number followed by the
+action text. Numbering is automatic — do not include the step number as
+an argument.
 
 ```latex
-\begin{teststeps}
-  \teststep{1}{Log in to Console}
-  \teststep{2}{Click Create}
-  \teststep{3}{Enter parameters and submit}
-\end{teststeps}
+\begin{testprocedure}
+  \teststep{Log in to Console}
+  \teststep{Click Create}
+  \teststep{Enter parameters and submit}
+\end{testprocedure}
 ```
 
 | Command | Purpose |
 |---|---|
-| `\begin{teststeps} ... \end{teststeps}` | 2-column step table (Step, Action). |
-| `\teststep{number}{action}` | One row in the steps table. |
+| `\teststep{action}` | One step: red bold auto-numbered step number + action text. |
 
-**Language-aware labels:** Column headers adapt to the class option:
-- English (default): **Step**, **Action**
-- Portuguese (`[portuguese]`): **Passo**, **Ação**
+**Note:** The `teststeps` environment (2-column step table) was removed in
+v4.2.0. Steps are now auto-numbered paragraphs inside `testprocedure`.
 
 ### Result badge
 
