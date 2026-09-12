@@ -1486,9 +1486,11 @@ following settings to optimize tmux for use with opencode:</p>
 <span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> allow-passthrough on</span>
 <span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable extended keys so Shift+Enter works in opencode</span></span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> extended-keys on</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-s</span> extended-keys on</span>
 <span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-as</span> terminal-features <span class="st">&#39;xterm*:extkeys&#39;</span></span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> extended-keys-format csi-u</span></code></pre></div>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Use CSI-u encoding format (requires tmux 3.5+)</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-s</span> extended-keys-format csi-u</span></code></pre></div>
 <p>After editing the config, reload it without restarting tmux:</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> source-file ~/.tmux.conf</span></code></pre></div>
 <div class="callout warning" role="alert" aria-label="Warning">
@@ -1497,6 +1499,27 @@ following settings to optimize tmux for use with opencode:</p>
 delay causes opencode to receive Escape key presses late, which breaks
 modal editing and menu navigation. Always set it to <code>10</code> or
 lower.</p>
+</div>
+<div class="callout warning" role="alert" aria-label="Warning">
+<p><strong>Important</strong> </p>
+<p>The <code>extended-keys-format csi-u</code> setting requires
+<strong>tmux 3.5 or later</strong>. If you get an
+<code>invalid option: extended-keys-format</code> error, your tmux is
+too old. Check with <code>tmux -V</code>. To upgrade tmux to 3.5+ from
+source:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install build-essential autotools-dev libevent-dev libncurses-dev</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp <span class="kw">&amp;&amp;</span> <span class="fu">git</span> clone https://github.com/tmux/tmux.git <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> tmux</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sh</span> autogen.sh <span class="kw">&amp;&amp;</span> <span class="ex">./configure</span> <span class="kw">&amp;&amp;</span> <span class="fu">make</span> <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> make install</span></code></pre></div>
+<p>After upgrading, remove the old binary from
+<code>/usr/bin/tmux</code> if needed (<code>which tmux</code> should
+point to <code>/usr/local/bin/tmux</code>). Then reload the config:
+<code>tmux source-file  /.tmux.conf</code>.</p>
+</div>
+<div class="callout tip" role="note" aria-label="Tip">
+<p><strong>Tip</strong> </p>
+<p>If you cannot upgrade tmux, use <code>Ctrl+J</code> to insert a
+newline in opencode — it works with zero configuration on any tmux
+version.</p>
 </div>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Info</strong> </p>
@@ -1515,13 +1538,13 @@ in this chapter are optional.</p>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Re-run the bootstrap script in the VS Code remote terminal:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway/main/scripts/bootstrap.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/oh-my-coding-maas-gateway/main/scripts/bootstrap.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The installer detects the existing installation, pulls updates,
 and preserves all secrets, virtual keys, and data.</p></li>
 <li><p>To update only the coding tools (without touching the proxy
 stack):</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/update.sh</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb38"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/update.sh</span></span></code></pre></div></li>
 </ol>
 <h2 data-number="8.2" id="updating-the-document-templates"><span class="header-section-number">8.2</span> Updating the Document
 Templates</h2>
@@ -1530,7 +1553,7 @@ Templates</h2>
 <ol>
 <li><p>Re-run the one-liner — it detects the existing installation and
 prompts to update:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb39"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The script pulls the latest version, shows the version change
 (<code>v3.3.6 → v3.3.7</code>), and re-runs the installer. New
 templates, commands, or modules are installed automatically.</p></li>
@@ -1541,14 +1564,14 @@ Gateway</h2>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Run the uninstall script:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--yes</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/oh-my-coding-maas-gateway</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--yes</span></span></code></pre></div></li>
 <li><p>This stops and removes Docker containers, volumes, and images,
 removes coding tool configs (opencode, Codex, Claude, Pi), and deletes
 the repository.</p></li>
 <li><p>To remove only specific components:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--tool</span><span class="op">=</span>opencode    <span class="co"># remove one tool</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--docker</span>           <span class="co"># remove Docker stack only</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb41"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--tool</span><span class="op">=</span>opencode    <span class="co"># remove one tool</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--docker</span>           <span class="co"># remove Docker stack only</span></span></code></pre></div></li>
 </ol>
 <h2 data-number="8.4" id="uninstalling-the-document-templates"><span class="header-section-number">8.4</span> Uninstalling the Document
 Templates</h2>
@@ -1556,10 +1579,10 @@ Templates</h2>
 <p><strong>Step by step:</strong></p>
 <ol>
 <li><p>Run the uninstall script (interactive menu with 5 options):</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb42"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/huawei-doc-templates</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span></span></code></pre></div></li>
 <li><p>Or use the one-liner:</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb43"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/uninstall.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div></li>
 <li><p>The interactive menu offers:</p>
 <ul>
 <li><p>Option 1: All installed components (skills, modules, font, VS
@@ -1573,10 +1596,10 @@ option)</p></li>
 <li><p>Option 5: Choose specific components individually</p></li>
 </ul></li>
 <li><p>To preview what would be removed before running:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb44"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--dry-run</span></span></code></pre></div></li>
 <li><p>To also remove apt packages (texlive, latexmk, fonts,
 pandoc):</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/uninstall.sh</span> <span class="at">--all</span> <span class="at">--packages</span> <span class="at">--yes</span></span></code></pre></div>
 <div class="callout warning" role="alert" aria-label="Warning">
 <p><strong>Important</strong> </p>
 <p>Removing apt packages will break any other LaTeX documents on the

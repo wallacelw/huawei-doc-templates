@@ -1154,9 +1154,11 @@ set -g set-clipboard on
 set -g allow-passthrough on
 
 # Enable extended keys so Shift+Enter works in opencode
-set -g extended-keys on
+set -s extended-keys on
 set -as terminal-features 'xterm*:extkeys'
-set -g extended-keys-format csi-u
+
+# Use CSI-u encoding format (requires tmux 3.5+)
+set -s extended-keys-format csi-u
 \end{code}
 
 After editing the config, reload it without restarting tmux:
@@ -1170,6 +1172,26 @@ The \inlinecode{escape-time} setting is critical. The default 500ms delay
 causes opencode to receive Escape key presses late, which breaks modal
 editing and menu navigation. Always set it to \inlinecode{10} or lower.
 \end{warning}
+
+\begin{warning}
+The \inlinecode{extended-keys-format csi-u} setting requires \textbf{tmux 3.5
+or later}. If you get an \inlinecode{invalid option: extended-keys-format}
+error, your tmux is too old. Check with \inlinecode{tmux -V}. To upgrade
+tmux to 3.5+ from source:
+\begin{code}[bash]
+sudo apt install build-essential autotools-dev libevent-dev libncurses-dev
+cd /tmp && git clone https://github.com/tmux/tmux.git && cd tmux
+sh autogen.sh && ./configure && make && sudo make install
+\end{code}
+After upgrading, remove the old binary from \inlinecode{/usr/bin/tmux} if
+needed (\inlinecode{which tmux} should point to \inlinecode{/usr/local/bin/tmux}).
+Then reload the config: \inlinecode{tmux source-file ~/.tmux.conf}.
+\end{warning}
+
+\begin{tip}
+If you cannot upgrade tmux, use \inlinecode{Ctrl+J} to insert a newline
+in opencode --- it works with zero configuration on any tmux version.
+\end{tip}
 
 \begin{infobox}
 For more tips on using tmux with opencode, including WSL2 clipboard
