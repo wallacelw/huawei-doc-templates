@@ -3,6 +3,34 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.1.0 (2026-09-13)
+
+### Features
+
+- **Mini header bars**: Each testcase field now has a full-width red bar
+  (huaweired background, white bold text) followed by content below.
+  Replaces the plain red bold labels from v4.0.0.
+- **`testprocedure` environment**: Replaces the `\testprocedure{text}`
+  command. Wraps teststeps with a "Procedure" mini header bar.
+  Usage: `\begin{testprocedure}...\end{testprocedure}`.
+- **Simplified `teststeps`**: Reduced from 4 columns (Step | Action |
+  Expected Result | Status) to 2 columns (Step | Action). Per-step
+  expected results and status removed — use the overall Expected Result
+  and Test Result fields instead.
+- **Field order**: Reordered to match the execution workflow:
+  Objective → Prerequisites → Procedure → Expected Result →
+  Test Result → Remarks. Test Result and Remarks are filled after
+  execution, hence they come last.
+
+### Fixes
+
+- **Round-trip test**: Updated to count grid tables (Pandoc renders tables
+  inside definition lists as grid tables, not pipe tables). Added ±10
+  tolerance for testbook to account for definition list rendering.
+- **Lua filter**: Updated `handle_testcase_env` to handle `testprocedure`
+  as an environment (not a command). Updated `handle_teststeps_env` for
+  2-column format. Reordered fields in definition list output.
+
 ## v4.0.0 (2026-09-13)
 
 ### Breaking changes (visual)

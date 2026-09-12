@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.0.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.1.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -232,23 +232,31 @@
 %  TEST CASE ENVIRONMENT
 % =====================================================================
 % Each test case is a subsection heading followed by a breakable
-% tcolorbox with a red left-rule.  Fields are stacked paragraphs
-% (red bold label + content below).  This allows images, code blocks,
-% callout boxes, and nested teststeps tables to render correctly and
-% break across pages.
+% tcolorbox with a red left-rule.  Each field has a full-width red
+% mini header bar (white bold label) followed by content below.
+% This allows images, code blocks, callout boxes, and nested
+% teststeps tables to render correctly and break across pages.
+%
+% Field order (workflow: design → execute):
+%   1. Objective       — what to verify
+%   2. Prerequisites   — what must be true before starting
+%   3. Procedure       — step-by-step actions (testprocedure environment)
+%   4. Expected Result — what should happen
+%   5. Test Result     — pass/fail badge (filled after execution)
+%   6. Remarks         — observations (filled after execution)
 %
 % Usage:
 %   \begin{testcase}{Test case title}
 %     \testobjective{Verify that X can be created.}
 %     \testprerequisites{1. X is running. \\ 2. Y is configured.}
-%     \testprocedure{See test steps below.}
-%     \begin{teststeps}
-%       \teststep{1}{Log in}{Login page shown}{\testresultbadge{Pass}}
-%     \end{teststeps}
+%     \begin{testprocedure}
+%       \teststep{1}{Log in to Console}
+%       \teststep{2}{Click Create and set parameters}
+%     \end{testprocedure}
 %     \image[width=0.8\linewidth]{common-assets/screenshot.png}
 %     \testexpected{1. The instance is created.}
-%     \testremarks{Optional remarks.}
 %     \testresult{\testresultbadge{Pass}}
+%     \testremarks{Optional remarks.}
 %   \end{testcase}
 
 \newenvironment{testcase}[1]{%
@@ -270,26 +278,35 @@
   \end{tcolorbox}%
 }
 
-% Generic field: red bold label, then content as a paragraph.
-\newcommand{\lg@testfield}[2]{%
+% Generic field header: full-width red bar with white bold label.
+\newcommand{\lg@testfieldheader}[1]{%
   \par\medskip
-  {\color{huaweired}\bfseries #1}\par\nobreak\smallskip
+  \noindent\colorbox{huaweired}{%
+    \makebox[\dimexpr\linewidth-2\fboxsep\relax][l]{%
+      \textcolor{white}{\bfseries\strut~#1}%
+    }%
+  }\par\nobreak\smallskip
+}
+
+% Generic field: header bar + content paragraph.
+\newcommand{\lg@testfield}[2]{%
+  \lg@testfieldheader{#1}%
   #2\par
 }
 
 % Test case field commands (language-aware labels)
+% Order: Objective, Prerequisites, [Procedure env], Expected, Test Result, Remarks
 \newcommand{\testobjective}[1]{\lg@testfield{\lg@objective}{#1}}
 \newcommand{\testprerequisites}[1]{\lg@testfield{\lg@prerequisites}{#1}}
-\newcommand{\testprocedure}[1]{\lg@testfield{\lg@procedure}{#1}}
 \newcommand{\testexpected}[1]{\lg@testfield{\lg@expectedresult}{#1}}
-\newcommand{\testremarks}[1]{%
-  \if@showanswers
-    \lg@testfield{\lg@remarks}{#1}
-  \fi
-}
 \newcommand{\testresult}[1]{%
   \if@showanswers
     \lg@testfield{\lg@testresult}{#1}
+  \fi
+}
+\newcommand{\testremarks}[1]{%
+  \if@showanswers
+    \lg@testfield{\lg@remarks}{#1}
   \fi
 }
 
@@ -324,23 +341,22 @@
 % =====================================================================
 %  TEST STEPS TABLE
 % =====================================================================
-% Structured step-by-step table for detailed procedures.
+% 2-column step table (Step | Action) for detailed procedures.
+% Used inside the testprocedure environment.
 % Usage:
 %   \begin{teststeps}
-%     \teststep{1}{Log in to Console}{Login page displayed}{Pass}
-%     \teststep{2}{Click Create}{Create dialog opens}{Pass}
+%     \teststep{1}{Log in to Console}
+%     \teststep{2}{Click Create and set parameters}
 %   \end{teststeps}
 
 \newenvironment{teststeps}{%
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|>{\raggedright\arraybackslash}p{\dimexpr0.5\linewidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\raggedright\arraybackslash}p{\dimexpr0.5\linewidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2cm}|}%
+  \begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|>{\raggedright\arraybackslash}p{\dimexpr\linewidth-1.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@step} &
-  {\color{white}\bfseries\lg@action} &
-  {\color{white}\bfseries\lg@expectedresult} &
-  {\color{white}\bfseries\lg@teststatus} \\
+  {\color{white}\bfseries\lg@action} \\
   \hline
 }{%
   \hline
@@ -348,7 +364,25 @@
   \vspace{0.3cm}%
 }
 
-\newcommand{\teststep}[4]{#1 & #2 & #3 & #4 \\ \hline}
+\newcommand{\teststep}[2]{#1 & #2 \\ \hline}
+
+% =====================================================================
+%  TEST PROCEDURE ENVIRONMENT
+% =====================================================================
+% Renders the "Procedure" mini header bar followed by a teststeps table.
+% Replaces the old \testprocedure{text} command.
+% Usage:
+%   \begin{testprocedure}
+%     \teststep{1}{Log in to Console}
+%     \teststep{2}{Click Create and set parameters}
+%   \end{testprocedure}
+
+\newenvironment{testprocedure}{%
+  \lg@testfieldheader{\lg@procedure}%
+  \begin{teststeps}
+}{%
+  \end{teststeps}
+}
 
 % =====================================================================
 %  TEST RESULT BADGE

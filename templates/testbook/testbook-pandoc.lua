@@ -107,16 +107,30 @@ local config = {
       -- Add subsection heading for the test case title
       blocks:insert(pandoc.Header(2, pandoc.Inlines({pandoc.Str(title)})))
 
+      -- cell_to_md: strip LaTeX commands and convert to markdown-safe text.
+      local function cell_to_md(cell_text)
+        cell_text = cell_text:gsub("\\\\", "\n")
+        local prev = nil
+        while prev ~= cell_text do
+          prev = cell_text
+          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        end
+        cell_text = cell_text:gsub("\\_", "_")
+        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
+        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
+      end
+
       -- Parse test field commands from the body.
       -- Each \testfield{content} becomes a row: label | content.
       -- When noanswers option is true, skip testremarks and testresult.
+      -- testprocedure is an environment (not a command), handled specially.
       local field_order = {
         { cmd = "testobjective",   label_key = "objective" },
         { cmd = "testprerequisites", label_key = "prerequisites" },
-        { cmd = "testprocedure",  label_key = "procedure" },
+        { env = "testprocedure",  label_key = "procedure" },
         { cmd = "testexpected",   label_key = "expectedresult" },
-        { cmd = "testremarks",    label_key = "remarks",     answer = true },
         { cmd = "testresult",     label_key = "testresult",  answer = true },
+        { cmd = "testremarks",    label_key = "remarks",     answer = true },
       }
 
       local noanswers = preamble and preamble.options and preamble.options.noanswers
@@ -125,9 +139,33 @@ local config = {
         if noanswers and field.answer then
           -- Skip answer fields when noanswers is set
         else
-          local content = body:match("\\" .. field.cmd .. "%s*(%b{})")
+          local content
+          if field.env then
+            -- Extract environment body (e.g. testprocedure)
+            local env_body = body:match("\\begin%s*{" .. field.env .. "}%s*(.-)%s*\\end%s*{" .. field.env .. "}")
+            if env_body then
+              -- Parse teststeps from the environment body into a markdown table
+              local steps = {}
+              for step, action in env_body:gmatch("\\teststep%s*(%b{})%s*(%b{})") do
+                table.insert(steps, { step:sub(2, -2), action:sub(2, -2) })
+              end
+              if #steps > 0 then
+                local step_lines = {}
+                step_lines[#step_lines + 1] = "| " .. L("step") .. " | " .. L("action") .. " |"
+                step_lines[#step_lines + 1] = "| --- | --- |"
+                for _, s in ipairs(steps) do
+                  step_lines[#step_lines + 1] = "| " .. cell_to_md(s[1]) .. " | " .. cell_to_md(s[2]) .. " |"
+                end
+                content = table.concat(step_lines, "\n")
+              end
+            end
+          else
+            local raw = body:match("\\" .. field.cmd .. "%s*(%b{})")
+            if raw then
+              content = raw:sub(2, -2)
+            end
+          end
           if content then
-            content = content:sub(2, -2)  -- strip braces
             local label = L(field.label_key)
             table.insert(rows, { label = label, content = content })
           end
@@ -135,21 +173,6 @@ local config = {
       end
 
       if #rows == 0 then return blocks end
-
-      -- Build a markdown table and parse it (same approach as hutable handler).
-      local function cell_to_md(cell_text)
-        cell_text = cell_text:gsub("\\\\", "\n")  -- line breaks → newlines
-        -- Strip remaining LaTeX commands that aren't meaningful in MD
-        -- Apply \cmd{arg} → arg iteratively to handle nested commands
-        local prev = nil
-        while prev ~= cell_text do
-          prev = cell_text
-          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
-        end
-        cell_text = cell_text:gsub("\\_", "_")  -- escaped underscores
-        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
-        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))  -- trim
-      end
 
       local md_lines = {}
       -- Definition list: each field is "Label\n: Content\n"
@@ -221,8 +244,8 @@ local config = {
     end
 
     -- Handler for the teststeps environment.
-    -- Converts \begin{teststeps}...\end{teststeps} into a 4-column
-    -- Pandoc Table (Step, Action, Expected Result, Status).
+    -- Converts \begin{teststeps}...\end{teststeps} into a 2-column
+    -- Pandoc Table (Step, Action).
     local function handle_teststeps_env(text)
       local body = text:match("\\begin%s*{teststeps}%s*(.-)%s*\\end%s*{teststeps}")
       if not body then return nil end
@@ -239,22 +262,20 @@ local config = {
         return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
       end
 
-      -- Parse \teststep{Step}{Action}{Expected}{Status} commands
+      -- Parse \teststep{Step}{Action} commands
       local rows = {}
-      for step, action, expected, status in body:gmatch("\\teststep%s*(%b{})%s*(%b{})%s*(%b{})%s*(%b{})") do
+      for step, action in body:gmatch("\\teststep%s*(%b{})%s*(%b{})") do
         table.insert(rows, {
           step:sub(2, -2),
           action:sub(2, -2),
-          expected:sub(2, -2),
-          status:sub(2, -2),
         })
       end
 
       if #rows == 0 then return nil end
 
       local md_lines = {}
-      md_lines[#md_lines + 1] = "| " .. L("step") .. " | " .. L("action") .. " | " .. L("expectedresult") .. " | " .. L("teststatus") .. " |"
-      md_lines[#md_lines + 1] = "| --- | --- | --- | --- |"
+      md_lines[#md_lines + 1] = "| " .. L("step") .. " | " .. L("action") .. " |"
+      md_lines[#md_lines + 1] = "| --- | --- |"
       for _, row in ipairs(rows) do
         local cells = {}
         for _, cell in ipairs(row) do

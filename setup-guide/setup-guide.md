@@ -1077,6 +1077,13 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.1.0**  *2026-09-12*
+
+Testcase field redesign: full-width red mini header bars for each field.
+Changed `testprocedure` from command to environment wrapping 2-column
+teststeps (Step \| Action). Reordered fields: Test Result before
+Remarks. Updated Lua filter and round-trip test for grid table counting.
+
 **4.0.0**  *2026-09-12*
 
 Redesigned testbook `testcase` environment: replaced 2-column tabular

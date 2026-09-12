@@ -14,11 +14,12 @@ compiled from LaTeX; DOCX, Markdown, and HTML are generated via Pandoc.
 Use this skill when the task is to **write, extend, or fix a Huawei Cloud
 POC or acceptance test case document**. Test books organize test cases by
 domain using `\section` headings, with each test case rendered as a
-breakable tcolorbox with stacked fields (objective, prerequisites,
-procedure, expected result, remarks, test result). Content defaults to
-English; pass the `portuguese` class option for Portuguese labels. Do
-**not** use this for general LaTeX documents — the formatting is
-hard-coded to the Huawei house style (AGENTS.md L9).
+breakable tcolorbox with stacked fields, each preceded by a full-width
+red mini header bar. Field order: Objective → Prerequisites → Procedure
+→ Expected Result → Test Result → Remarks. Content defaults to English;
+pass the `portuguese` class option for Portuguese labels. Do **not** use
+this for general LaTeX documents — the formatting is hard-coded to the
+Huawei house style (AGENTS.md L9).
 
 ## Context loading (do this first)
 
@@ -135,19 +136,26 @@ up in the class file and this SKILL.md.
 \begin{testcase}{TC-001: <test case title>}
   \testobjective{Verify that <functionality> works as expected.}
   \testprerequisites{1. System is running. \\ 2. User is logged in.}
-  \testprocedure{1. Navigate to <page>. \\ 2. Click <button>. \\ 3. Enter <data>. \\ 4. Click Save.}
+  \begin{testprocedure}
+    \teststep{1}{Navigate to <page>}
+    \teststep{2}{Click <button>}
+    \teststep{3}{Enter <data> and click Save}
+  \end{testprocedure}
   \testexpected{1. The resource is created successfully. \\ 2. Data is persisted.}
+  \testresult{\testresultbadge{Pass}}
   \testremarks{Optional notes about this test case.}
-  \testresult{Pass}
 \end{testcase}
 
 \begin{testcase}{TC-002: <another test case title>}
   \testobjective{Verify that <other functionality> behaves correctly.}
   \testprerequisites{1. Resource from TC-001 exists.}
-  \testprocedure{1. Select the resource. \\ 2. Click Delete. \\ 3. Confirm.}
+  \begin{testprocedure}
+    \teststep{1}{Select the resource}
+    \teststep{2}{Click Delete and confirm}
+  \end{testprocedure}
   \testexpected{1. The resource is removed. \\ 2. No orphan data remains.}
+  \testresult{\testresultbadge{Pass}}
   \testremarks{}
-  \testresult{Pass}
 \end{testcase}
 
 \section{<Test Domain 2>}
@@ -155,10 +163,12 @@ up in the class file and this SKILL.md.
 \begin{testcase}{TC-003: <test case in domain 2>}
   \testobjective{...}
   \testprerequisites{...}
-  \testprocedure{...}
+  \begin{testprocedure}
+    \teststep{1}{...}
+  \end{testprocedure}
   \testexpected{...}
-  \testremarks{...}
   \testresult{...}
+  \testremarks{...}
 \end{testcase}
 
 % --- Changelog (after all sections, before \end{document}) ---
@@ -175,7 +185,7 @@ up in the class file and this SKILL.md.
 
 Same skeleton but with `\documentclass[portuguese]{testbook}`. Labels switch
 automatically: *Casos de Teste*, *Objetivo*, *Pré-requisitos*, *Procedimento*,
-*Resultado Esperado*, *Observações*, *Resultado do Teste*.
+*Resultado Esperado*, *Resultado do Teste*, *Observações*.
 
 Body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections →
 `changelog` → `\end{document}`.
@@ -284,19 +294,29 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 
 The `testcase` environment is the core building block. Each test case is
 rendered as a subsection heading followed by a **breakable tcolorbox** with a
-3pt Huawei-red left-rule. Fields are **stacked paragraphs**: each field
-shows a red bold label on its own line, with the content below it. This
-design allows images, code blocks, callout boxes, and nested `teststeps`
-tables to render correctly and break across pages.
+3pt Huawei-red left-rule. Fields are **stacked blocks**: each field shows a
+full-width red mini header bar (Huawei-red background, white bold text)
+followed by the content below it. This design allows images, code blocks,
+callout boxes, and nested `teststeps` tables to render correctly and break
+across pages.
+
+**Field order:** Objective → Prerequisites → Procedure → Expected Result →
+Test Result → Remarks. Test Result and Remarks are filled after execution,
+hence they appear last. The `noanswers` class option hides Test Result and
+Remarks fields.
 
 ```latex
-\begin{testcase}{TC-001: Verify ECS creation}
-  \testobjective{Verify that an ECS instance can be created with valid parameters.}
-  \testprerequisites{1. Huawei Cloud account is active. \\ 2. VPC and subnet exist.}
-  \testprocedure{1. Log in to the console. \\ 2. Navigate to ECS. \\ 3. Click Create. \\ 4. Fill parameters. \\ 5. Click OK.}
-  \testexpected{1. ECS instance is created. \\ 2. Status shows "Running".}
-  \testremarks{Test with both basic and general-purpose specs.}
-  \testresult{Pass}
+\begin{testcase}{TC-001: Verify MRS cluster deployment}
+  \testobjective{Confirm that the MRS cluster is deployed.}
+  \testprerequisites{1. Terraform apply completed.}
+  \begin{testprocedure}
+    \teststep{1}{Log in to the Huawei Cloud Console}
+    \teststep{2}{Navigate to MapReduce Service, Clusters}
+    \teststep{3}{Verify cluster status is Running}
+  \end{testprocedure}
+  \testexpected{1. Cluster status is Running.}
+  \testresult{\testresultbadge{Pass}}
+  \testremarks{If any component shows Abnormal, check alarms.}
 \end{testcase}
 ```
 
@@ -304,17 +324,17 @@ tables to render correctly and break across pages.
 |---|---|---|---|
 | `\testobjective{...}` | Objective | Objetivo | Yes |
 | `\testprerequisites{...}` | Prerequisites | Pré-requisitos | Yes |
-| `\testprocedure{...}` | Procedure | Procedimento | Yes |
+| `\begin{testprocedure}...\end{testprocedure}` | Procedure | Procedimento | Yes |
 | `\testexpected{...}` | Expected Result | Resultado Esperado | Yes |
-| `\testremarks{...}` | Remarks | Observações | No (hidden by `noanswers`) |
 | `\testresult{...}` | Test Result | Resultado do Teste | No (hidden by `noanswers`) |
+| `\testremarks{...}` | Remarks | Observações | No (hidden by `noanswers`) |
 
 **Formatting notes:**
 - Use `\\` (double backslash) to separate numbered items within a field.
-- Each field label is rendered in bold Huawei-red text, followed by the
-  content as a paragraph below it.
+- Each field is preceded by a full-width red mini header bar (Huawei-red
+  background, white bold text), with the content rendered below it.
 - The box has a 3pt Huawei-red left-rule and breaks across pages.
-- `\testremarks` and `\testresult` are suppressed by the `noanswers` class
+- `\testresult` and `\testremarks` are suppressed by the `noanswers` class
   option — use this when generating a "blank" test book for testers to fill
   in by hand.
 
@@ -341,29 +361,49 @@ of all test cases and their results.
 - English (default): **ID**, **Title**, **Status**
 - Portuguese (`[portuguese]`): **ID**, **Título**, **Status**
 
+### `testprocedure` environment
+
+Renders the "Procedure" mini header bar followed by a 2-column step table
+(Step | Action). Use inside `testcase` for the procedure field.
+
+```latex
+\begin{testprocedure}
+  \teststep{1}{Log in to Console}
+  \teststep{2}{Click Create and set parameters}
+  \teststep{3}{Click Save}
+\end{testprocedure}
+```
+
+| Command | Purpose |
+|---|---|
+| `\begin{testprocedure} ... \end{testprocedure}` | Procedure mini header bar + 2-column step table (Step, Action). |
+
+**Language-aware label:** The mini header bar text adapts to the class option:
+- English (default): **Procedure**
+- Portuguese (`[portuguese]`): **Procedimento**
+
 ### Test steps table
 
-The `teststeps` environment renders a 4-column step table (Step, Action,
-Expected Result, Status) with a Huawei-red header. Use it inside a
-`testcase` environment to break down the procedure into discrete,
-verifiable steps with per-step result badges.
+The `teststeps` environment renders a 2-column step table (Step, Action)
+with a Huawei-red header. Use it inside a `testprocedure` environment to
+break down the procedure into discrete steps.
 
 ```latex
 \begin{teststeps}
-  \teststep{1}{Log in to Console}{Login page displayed}{\testresultbadge{Pass}}
-  \teststep{2}{Click Create}{Create dialog opens}{\testresultbadge{Pass}}
-  \teststep{3}{Enter parameters and submit}{Resource created}{\testresultbadge{Fail}}
+  \teststep{1}{Log in to Console}
+  \teststep{2}{Click Create}
+  \teststep{3}{Enter parameters and submit}
 \end{teststeps}
 ```
 
 | Command | Purpose |
 |---|---|
-| `\begin{teststeps} ... \end{teststeps}` | 4-column step table (Step, Action, Expected Result, Status). |
-| `\teststep{number}{action}{expected}{status}` | One row in the steps table. |
+| `\begin{teststeps} ... \end{teststeps}` | 2-column step table (Step, Action). |
+| `\teststep{number}{action}` | One row in the steps table. |
 
 **Language-aware labels:** Column headers adapt to the class option:
-- English (default): **Step**, **Action**, **Expected Result**, **Status**
-- Portuguese (`[portuguese]`): **Passo**, **Ação**, **Resultado Esperado**, **Status**
+- English (default): **Step**, **Action**
+- Portuguese (`[portuguese]`): **Passo**, **Ação**
 
 ### Result badge
 
@@ -389,7 +429,7 @@ gray for Untested.
 (Pass, Fail, Blocked, Untested) regardless of the `portuguese` class option.
 
 **Tip:** Use `\testresultbadge` inside `\testresult{}` for the test case
-result row, and inside `\teststep` for per-step status:
+result:
 
 ```latex
 \testresult{\testresultbadge{Pass}}
@@ -608,7 +648,7 @@ rendered, but the content remains in the `.tex` file for future reference.
   (time is shown).
 - `nochangelog` — suppresses the changelog section entirely (heading + entries) and hides version, date, and time on the cover page. The `changelog` environment emits its own heading, so this one option hides everything. Default off (changelog is shown).
 - `noauthors` — hides the authors on the cover page. Default off (authors are shown if set via `\setdocauthors`).
-- `noanswers` — hides the **Remarks** and **Test Result** fields in all test cases. Use this to produce a "blank" test book for testers to fill in by hand. Default off (all fields shown).
+- `noanswers` — hides the **Test Result** and **Remarks** fields in all test cases. Use this to produce a "blank" test book for testers to fill in by hand. Default off (all fields shown).
 
 ---
 
@@ -700,4 +740,4 @@ See [templates/testbook/README.md](README.md) for customization options
 10. For Portuguese (`[portuguese]`) documents, after compiling run
    `grep -i "Missing character" main.log` — it must be empty.
 11. Use `noanswers` class option when producing blank test books for
-    manual test execution (hides Remarks and Test Result fields).
+     manual test execution (hides Test Result and Remarks fields).

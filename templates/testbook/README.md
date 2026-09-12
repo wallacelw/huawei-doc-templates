@@ -2,8 +2,9 @@
 
 A LaTeX template that produces a Huawei Cloud POC/acceptance test case PDF:
 cover page, header, table of contents, test cases organized by domain with
-stacked fields in a breakable tcolorbox (red left-rule), code blocks, callout
-boxes, and changelog.
+stacked fields in a breakable tcolorbox (red left-rule), each field preceded
+by a full-width red mini header bar, code blocks, callout boxes, and
+changelog.
 
 > **Setup:** see the [root README](../../README.md) for installation,
 > environment setup, VS Code configuration, and compilation instructions.
@@ -12,8 +13,8 @@ boxes, and changelog.
 ## Language
 
 By default the test book renders in **English** — built-in labels such as
-*Objective*, *Prerequisites*, *Procedure*, *Expected Result*, *Remarks* and
-*Test Result* are in English. Pass the **`portuguese`** class option
+*Objective*, *Prerequisites*, *Procedure*, *Expected Result*, *Test Result*
+and *Remarks* are in English. Pass the **`portuguese`** class option
 (`\documentclass[portuguese]{testbook}`) to switch all labels to Portuguese
 and load `babel` with `brazilian` instead.
 
@@ -30,7 +31,7 @@ and load `babel` with `brazilian` instead.
 | `notime` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
 | `nochangelog` | Suppresses the changelog section entirely (no-ops) and hides version, date, and time on the cover page. Use when it grows too large. Default off (changelog is shown). |
 | `noauthors` | Hides the authors on the cover page. Default off (authors shown if set via `\setdocauthors`). |
-| `noanswers` | Hides the **Remarks** and **Test Result** fields in all test cases. Use to produce a blank test book for testers to fill in by hand. Default off (all fields shown). |
+| `noanswers` | Hides the **Test Result** and **Remarks** fields in all test cases. Use to produce a blank test book for testers to fill in by hand. Default off (all fields shown). |
 
 ### Label translations
 
@@ -53,8 +54,9 @@ The body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sectio
 
 Sections (`\section`) represent test domains. Each test case uses the
 `testcase` environment, which produces a subsection heading and a breakable
-tcolorbox with a red left-rule and stacked fields (label in bold red,
-content below).
+tcolorbox with a red left-rule and stacked fields, each preceded by a
+full-width red mini header bar (Huawei-red background, white bold text)
+with content below.
 
 See [SKILL.md](SKILL.md) for the complete skeleton and all available commands
 and environments.
@@ -71,7 +73,7 @@ and environments.
 | Space between paragraphs | 4 pt |
 | H1 title | 20 pt bold right-aligned + 56 pt number left-aligned + 1.5 pt rule |
 | H2 / H3 / H4 titles | 18 / 16 / 14 pt, regular |
-| Test case fields | Stacked paragraphs: bold red label + content below, in breakable tcolorbox with 3pt red left-rule |
+| Test case fields | Stacked blocks: full-width red mini header bar (Huawei-red bg, white bold text) + content below, in breakable tcolorbox with 3pt red left-rule |
 | Code background | `#F6F8FA` |
 | Code text color | `#1F2328` |
 | Link color | `#0000FF` (no underline) |
@@ -121,10 +123,14 @@ from either folder.
 \begin{testcase}{TC-001: Create ECS instance}
   \testobjective{Verify that an ECS instance can be created.}
   \testprerequisites{1. Account is active. \\ 2. VPC exists.}
-  \testprocedure{1. Navigate to ECS. \\ 2. Click Create. \\ 3. Fill parameters. \\ 4. Click OK.}
+  \begin{testprocedure}
+    \teststep{1}{Navigate to ECS}
+    \teststep{2}{Click Create}
+    \teststep{3}{Fill parameters and click OK}
+  \end{testprocedure}
   \testexpected{1. Instance is created. \\ 2. Status is Running.}
+  \testresult{\testresultbadge{Pass}}
   \testremarks{Test with basic and general-purpose specs.}
-  \testresult{Pass}
 \end{testcase}
 
 \begin{changelog}

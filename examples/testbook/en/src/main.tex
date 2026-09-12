@@ -16,7 +16,7 @@
 \settestbooktitle{POC Test Cases — Data Platform Validation}
 \setheadertitle{Huawei Cloud -- POC Test Cases}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{1.1.0}
+\setdocversion{2.0.0}
 \setdocdate{\today}
 
 \begin{document}
@@ -34,10 +34,11 @@
 This document demonstrates the \inlinecode{testbook} template (\inlinecode{testbook.cls}) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
 commands and environments: cover page, table of contents, test case environment
-with all field commands, objectives block, code blocks, images, callouts
+with all field commands, mini header bars, testprocedure environment with
+step-by-step actions, objectives block, code blocks, images, callouts
 (\inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox}), tables, badge,
-menu paths, weblinks, notes, param references, test summary table, test steps
-tables, result badges, and changelog.
+menu paths, weblinks, notes, param references, test summary table,
+result badges, and changelog.
 \end{infobox}
 
 % =====================================================================
@@ -140,21 +141,20 @@ infrastructure changes and avoid unintended resource modifications.
     with the required components (HDFS, YARN, Spark, Hive) and all nodes
     report a healthy status.}
   \testprerequisites{1. Terraform infrastructure apply completed successfully. \\ 2. MRS cluster ID is available in the Terraform output. \\ 3. IAM user has \textbf{MRS\_Viewer} or higher role.}
-  \testprocedure{See test steps below.}
-  \begin{teststeps}
-    \teststep{1}{Log in to the Huawei Cloud Console}{Console dashboard displayed}{\testresultbadge{Pass}}
-    \teststep{2}{Navigate to \menu{Console, MapReduce Service, Clusters}}{Clusters list page shown}{\testresultbadge{Pass}}
-    \teststep{3}{Locate cluster \inlinecode{mrs-poc-cluster}}{Cluster found in list}{\testresultbadge{Pass}}
-    \teststep{4}{Verify cluster status}{Status is \textbf{Running}}{\testresultbadge{Pass}}
-    \teststep{5}{Review Component tab}{HDFS, YARN, Spark, Hive all \textbf{Normal}}{\testresultbadge{Pass}}
-    \teststep{6}{Review Node tab}{All nodes show \textbf{Running}}{\testresultbadge{Pass}}
-  \end{teststeps}
+  \begin{testprocedure}
+    \teststep{1}{Log in to the Huawei Cloud Console}
+    \teststep{2}{Navigate to \menu{Console, MapReduce Service, Clusters}}
+    \teststep{3}{Locate cluster \inlinecode{mrs-poc-cluster}}
+    \teststep{4}{Verify cluster status}
+    \teststep{5}{Review Component tab}
+    \teststep{6}{Review Node tab}
+  \end{testprocedure}
 
   \image[width=0.8\linewidth]{common-assets/exemplo-menu.png}
 
   \testexpected{1. Cluster status is \textbf{Running}. \\ 2. All four components (HDFS, YARN, Spark, Hive) are listed with status \textbf{Normal}. \\ 3. All nodes report status \textbf{Running} with no alarms.}
-  \testremarks{If any component shows \textbf{Abnormal}, check the MRS alarm page before marking the result.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{If any component shows \textbf{Abnormal}, check the MRS alarm page before marking the result.}
 \end{testcase}
 
 \begin{testcase}{TC-002: Verify OBS bucket creation and accessibility}
@@ -162,10 +162,18 @@ infrastructure changes and avoid unintended resource modifications.
     for the POC data lake is created, has the correct storage class, and
     is accessible with the designated IAM policy.}
   \testprerequisites{1. OBS bucket name is defined in the Terraform configuration. \\ 2. IAM policy granting read/write access to the bucket is attached to the test user.}
-  \testprocedure{1. Log in to the Console. \\ 2. Navigate to \menu{Console, Object Storage Service}. \\ 3. Locate the bucket (e.g. \inlinecode{poc-datalake-raw}). \\ 4. Verify the storage class is \textbf{Standard}. \\ 5. Upload a test file (\inlinecode{test-upload.txt}) to the bucket. \\ 6. Download the file and compare its content with the original. \\ 7. Delete the test file.}
+  \begin{testprocedure}
+    \teststep{1}{Log in to the Console}
+    \teststep{2}{Navigate to \menu{Console, Object Storage Service}}
+    \teststep{3}{Locate the bucket (e.g. \inlinecode{poc-datalake-raw})}
+    \teststep{4}{Verify the storage class is \textbf{Standard}}
+    \teststep{5}{Upload a test file (\inlinecode{test-upload.txt}) to the bucket}
+    \teststep{6}{Download the file and compare its content with the original}
+    \teststep{7}{Delete the test file}
+  \end{testprocedure}
   \testexpected{1. Bucket exists with storage class \textbf{Standard}. \\ 2. File upload completes without error. \\ 3. Downloaded file content matches the original. \\ 4. File deletion succeeds.}
-  \testremarks{OBS eventual consistency may cause a brief delay before a newly uploaded object appears in listings.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{OBS eventual consistency may cause a brief delay before a newly uploaded object appears in listings.}
 \end{testcase}
 
 \begin{testcase}{TC-003: Verify VPC and security group configuration}
@@ -173,10 +181,17 @@ infrastructure changes and avoid unintended resource modifications.
     configured according to the network architecture diagram, with the
     correct CIDR blocks and inbound/outbound rules.}
   \testprerequisites{1. VPC and subnet IDs are available from the Terraform output. \\ 2. Security group names are documented in the solution architecture.}
-  \testprocedure{1. Log in to the Console. \\ 2. Navigate to \menu{Console, Virtual Private Cloud, VPCs}. \\ 3. Locate the VPC (e.g. \inlinecode{vpc-poc}) and verify its CIDR block matches the architecture (e.g. \inlinecode{10.0.0.0/16}). \\ 4. Click the subnet and verify its CIDR (e.g. \inlinecode{10.0.1.0/24}). \\ 5. Navigate to \textbf{Security Groups} and verify inbound rules: TCP 22 from the bastion subnet, TCP 443 from the corporate proxy. \\ 6. Verify outbound rules allow all traffic (default).}
+  \begin{testprocedure}
+    \teststep{1}{Log in to the Console}
+    \teststep{2}{Navigate to \menu{Console, Virtual Private Cloud, VPCs}}
+    \teststep{3}{Locate the VPC (e.g. \inlinecode{vpc-poc}) and verify its CIDR block matches the architecture (e.g. \inlinecode{10.0.0.0/16})}
+    \teststep{4}{Click the subnet and verify its CIDR (e.g. \inlinecode{10.0.1.0/24})}
+    \teststep{5}{Navigate to \textbf{Security Groups} and verify inbound rules: TCP 22 from the bastion subnet, TCP 443 from the corporate proxy}
+    \teststep{6}{Verify outbound rules allow all traffic (default)}
+  \end{testprocedure}
   \testexpected{1. VPC CIDR is \inlinecode{10.0.0.0/16}. \\ 2. Subnet CIDR is \inlinecode{10.0.1.0/24}. \\ 3. Inbound rules match the architecture: TCP 22 and TCP 443 from the specified sources. \\ 4. Outbound allows all traffic.}
-  \testremarks{If the security group has additional rules beyond the architecture spec, document them in the Remarks field.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{If the security group has additional rules beyond the architecture spec, document them in the Remarks field.}
 \end{testcase}
 
 % =====================================================================
@@ -189,10 +204,16 @@ infrastructure changes and avoid unintended resource modifications.
     provisioned, the workspace is accessible, and the designated IAM
     users can log in with the \textbf{Dayu\_User} role.}
   \testprerequisites{1. DataArts Studio instance is provisioned and its status is \textbf{Running}. \\ 2. Test IAM user has the \textbf{Dayu\_User} role assigned.}
-  \testprocedure{1. Log in to the Console with the test IAM user. \\ 2. Navigate to \menu{Console, DataArts Studio, Workspaces}. \\ 3. Locate the workspace (e.g. \inlinecode{poc-workspace}). \\ 4. Click \textbf{Access Workspace} to open the DataArts Studio console. \\ 5. Verify the left navigation panel loads with the expected modules: \textbf{Data Integration}, \textbf{Data Development}, \textbf{Data Architecture}.}
+  \begin{testprocedure}
+    \teststep{1}{Log in to the Console with the test IAM user}
+    \teststep{2}{Navigate to \menu{Console, DataArts Studio, Workspaces}}
+    \teststep{3}{Locate the workspace (e.g. \inlinecode{poc-workspace})}
+    \teststep{4}{Click \textbf{Access Workspace} to open the DataArts Studio console}
+    \teststep{5}{Verify the left navigation panel loads with the expected modules: \textbf{Data Integration}, \textbf{Data Development}, \textbf{Data Architecture}}
+  \end{testprocedure}
   \testexpected{1. Workspace is listed and accessible. \\ 2. DataArts Studio console opens without errors. \\ 3. All three modules (Data Integration, Data Development, Data Architecture) are visible in the navigation.}
-  \testremarks{If the workspace fails to load, check the Dayu instance status and the IAM role assignment.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{If the workspace fails to load, check the Dayu instance status and the IAM role assignment.}
 \end{testcase}
 
 \begin{testcase}{TC-005: Verify data ingestion pipeline execution}
@@ -200,15 +221,14 @@ infrastructure changes and avoid unintended resource modifications.
     successfully ingest CSV data from OBS, apply a basic transformation,
     and write the result to the target OBS path.}
   \testprerequisites{1. TC-004 completed (DataArts Studio workspace accessible). \\ 2. Source CSV file (\inlinecode{customers.csv}) exists in the OBS raw bucket. \\ 3. Target OBS path (\inlinecode{poc-datalake-curated/customers/}) is configured. \\ 4. Pipeline \inlinecode{pl-ingest-customers} is published in DataArts Studio.}
-  \testprocedure{See test steps below.}
-  \begin{teststeps}
-    \teststep{1}{Navigate to Data Development in DataArts Studio}{Data Development page loads}{\testresultbadge{Pass}}
-    \teststep{2}{Locate pipeline \inlinecode{pl-ingest-customers}}{Pipeline found in job list}{\testresultbadge{Pass}}
-    \teststep{3}{Click Run to execute the pipeline}{Pipeline starts execution}{\testresultbadge{Pass}}
-    \teststep{4}{Wait for pipeline status (timeout: 10 min)}{Status changes to \textbf{Success}}{\testresultbadge{Pass}}
-    \teststep{5}{Verify output file in OBS}{File exists in target path}{\testresultbadge{Pass}}
-    \teststep{6}{Download and verify row count}{Row count matches source}{\testresultbadge{Pass}}
-  \end{teststeps}
+  \begin{testprocedure}
+    \teststep{1}{Navigate to Data Development in DataArts Studio}
+    \teststep{2}{Locate pipeline \inlinecode{pl-ingest-customers}}
+    \teststep{3}{Click Run to execute the pipeline}
+    \teststep{4}{Wait for pipeline status (timeout: 10 min)}
+    \teststep{5}{Verify output file in OBS}
+    \teststep{6}{Download and verify row count}
+  \end{testprocedure}
 
   \begin{code}[bash]
 # Verify the output file in OBS via CLI
@@ -217,8 +237,8 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
   \end{code}
 
   \testexpected{1. Pipeline execution completes with status \textbf{Success}. \\ 2. Output file is created in the target OBS path. \\ 3. Row count of the output file matches the source file.}
-  \testremarks{Pipeline execution time varies with data volume. For the POC, the source file contains approximately 10,000 rows.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{Pipeline execution time varies with data volume. For the POC, the source file contains approximately 10,000 rows.}
 \end{testcase}
 
 \begin{testcase}{TC-006: Verify Spark SQL query on MRS cluster}
@@ -226,7 +246,13 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
     MRS cluster to read data from a Hive table and return correct
     results, validating the integration between MRS and the data lake.}
   \testprerequisites{1. TC-001 completed (MRS cluster healthy). \\ 2. Hive table \inlinecode{poc\_db.customers} exists and contains data loaded by the ingestion pipeline. \\ 3. SSH access to the MRS master node is configured.}
-  \testprocedure{1. SSH into the MRS master node. \\ 2. Run the Spark SQL CLI: \inlinecode{spark-sql --master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc\_db.customers;"} \\ 3. Verify the returned count matches the expected row count (10,000). \\ 4. Run a sample query to verify data integrity: \inlinecode{spark-sql --master yarn -e "SELECT customer\_id, name FROM poc\_db.customers LIMIT 5;"} \\ 5. Confirm the query returns 5 rows with non-null values.}
+  \begin{testprocedure}
+    \teststep{1}{SSH into the MRS master node}
+    \teststep{2}{Run the Spark SQL CLI: \inlinecode{spark-sql --master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc\_db.customers;"}}
+    \teststep{3}{Verify the returned count matches the expected row count (10,000)}
+    \teststep{4}{Run a sample query to verify data integrity: \inlinecode{spark-sql --master yarn -e "SELECT customer\_id, name FROM poc\_db.customers LIMIT 5;"}}
+    \teststep{5}{Confirm the query returns 5 rows with non-null values}
+  \end{testprocedure}
 
   \begin{code}[bash]
 # SSH into MRS master node
@@ -239,8 +265,8 @@ spark-sql --master yarn \
   \end{code}
 
   \testexpected{1. \inlinecode{COUNT(*)} returns 10,000. \\ 2. The sample query returns 5 rows with valid \inlinecode{customer\_id} and \inlinecode{name} values.}
-  \testremarks{If the Spark SQL CLI is not available, use the MRS Spark2x component's web UI to submit the query instead.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{If the Spark SQL CLI is not available, use the MRS Spark2x component's web UI to submit the query instead.}
 \end{testcase}
 
 % =====================================================================
@@ -253,7 +279,13 @@ spark-sql --master yarn \
     access — authorized users can read/write while unauthorized users are
     denied, and the bucket policy matches the principle of least privilege.}
   \testprerequisites{1. OBS bucket \inlinecode{poc-datalake-raw} exists with the designated IAM policy. \\ 2. Two test IAM users: one with \textbf{OBS\_ReadWrite} role, one with no OBS permissions. \\ 3. \inlinecode{obsutil} CLI configured for both users.}
-  \testprocedure{1. Using the authorized user, upload a test file to \inlinecode{poc-datalake-raw}. \\ 2. Using the authorized user, download and verify the file content. \\ 3. Using the unauthorized user, attempt to upload a file — verify the request is denied (HTTP 403). \\ 4. Using the unauthorized user, attempt to list objects in the bucket — verify the request is denied. \\ 5. Review the bucket policy in the Console at \menu{Console, Object Storage Service, Bucket Policies} and confirm it grants only the intended permissions.}
+  \begin{testprocedure}
+    \teststep{1}{Using the authorized user, upload a test file to \inlinecode{poc-datalake-raw}}
+    \teststep{2}{Using the authorized user, download and verify the file content}
+    \teststep{3}{Using the unauthorized user, attempt to upload a file — verify the request is denied (HTTP 403)}
+    \teststep{4}{Using the unauthorized user, attempt to list objects in the bucket — verify the request is denied}
+    \teststep{5}{Review the bucket policy in the Console at \menu{Console, Object Storage Service, Bucket Policies} and confirm it grants only the intended permissions}
+  \end{testprocedure}
 
   \begin{code}[bash]
 # Authorized user — upload and verify
@@ -266,12 +298,11 @@ obsutil ls obs://poc-datalake-raw/
   \end{code}
 
   \testexpected{1. Authorized user can upload and download successfully. \\ 2. Unauthorized user receives HTTP 403 on both upload and list operations. \\ 3. Bucket policy grants only the intended read/write permissions to the designated roles.}
+  \testresult{\testresultbadge{Pass}}
   \testremarks{Check the Cloud Trail logs if access denial is not returned as expected — there may be a policy inheritance from the project or domain level.}
 
   \note{IAM policy changes can take up to 5 minutes to propagate. Wait before
     re-testing after modifying a policy.}
-
-  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-008: Verify DataArts Studio data masking rule}
@@ -279,10 +310,16 @@ obsutil ls obs://poc-datalake-raw/
     masked according to the DataArts Studio data masking rule when queried
     by non-admin users.}
   \testprerequisites{1. TC-004 completed (DataArts Studio workspace accessible). \\ 2. Data masking rule configured for column \inlinecode{customers.ssn} (Social Security Number). \\ 3. Test user has \textbf{Dayu\_User} role (not admin).}
-  \testprocedure{1. In the DataArts Studio console, navigate to \textbf{Data Architecture} $\rightarrow$ \textbf{Data Masking}. \\ 2. Verify the masking rule for \inlinecode{customers.ssn} is active and uses the \textbf{Mask All} strategy. \\ 3. Query the \inlinecode{customers} table as the test user via DataArts Studio SQL console. \\ 4. Verify the \inlinecode{ssn} column returns masked values (e.g. \inlinecode{*********}) instead of real data. \\ 5. Query the same table as an admin user and verify real values are returned.}
+  \begin{testprocedure}
+    \teststep{1}{In the DataArts Studio console, navigate to \textbf{Data Architecture} $\rightarrow$ \textbf{Data Masking}}
+    \teststep{2}{Verify the masking rule for \inlinecode{customers.ssn} is active and uses the \textbf{Mask All} strategy}
+    \teststep{3}{Query the \inlinecode{customers} table as the test user via DataArts Studio SQL console}
+    \teststep{4}{Verify the \inlinecode{ssn} column returns masked values (e.g. \inlinecode{*********}) instead of real data}
+    \teststep{5}{Query the same table as an admin user and verify real values are returned}
+  \end{testprocedure}
   \testexpected{1. Masking rule is active for \inlinecode{customers.ssn}. \\ 2. Non-admin user sees masked values in the \inlinecode{ssn} column. \\ 3. Admin user sees real values in the \inlinecode{ssn} column.}
-  \testremarks{Data masking rules apply at query time — the underlying data in OBS/HDFS is not modified.}
   \testresult{\testresultbadge{Pass}}
+  \testremarks{Data masking rules apply at query time — the underlying data in OBS/HDFS is not modified.}
 \end{testcase}
 
 % =====================================================================
@@ -295,7 +332,14 @@ obsutil ls obs://poc-datalake-raw/
     required infrastructure resources (VPC, MRS, OBS, DataArts Studio)
     without errors and the state file reflects the expected resources.}
   \testprerequisites{1. \inlinecode{terraform} CLI installed (version $\geq$ 1.0). \\ 2. AK/SK credentials configured via environment variables or \param{provider.tf}. \\ 3. Terraform configuration files in the project directory.}
-  \testprocedure{1. Navigate to the Terraform project directory. \\ 2. Run \inlinecode{terraform init} to initialize the working directory. \\ 3. Run \inlinecode{terraform plan} and review the planned changes — confirm all expected resources are listed. \\ 4. Run \inlinecode{terraform apply -auto-approve} and wait for completion. \\ 5. Run \inlinecode{terraform output} and verify all output values are populated. \\ 6. Run \inlinecode{terraform state list} and confirm the resource count matches the architecture.}
+  \begin{testprocedure}
+    \teststep{1}{Navigate to the Terraform project directory}
+    \teststep{2}{Run \inlinecode{terraform init} to initialize the working directory}
+    \teststep{3}{Run \inlinecode{terraform plan} and review the planned changes — confirm all expected resources are listed}
+    \teststep{4}{Run \inlinecode{terraform apply -auto-approve} and wait for completion}
+    \teststep{5}{Run \inlinecode{terraform output} and verify all output values are populated}
+    \teststep{6}{Run \inlinecode{terraform state list} and confirm the resource count matches the architecture}
+  \end{testprocedure}
 
   \begin{code}[bash]
 # Initialize and deploy infrastructure
@@ -310,6 +354,7 @@ terraform state list | wc -l
   \end{code}
 
   \testexpected{1. \inlinecode{terraform apply} completes with no errors. \\ 2. All output values are populated (cluster ID, bucket name, VPC ID). \\ 3. Resource count in state matches the architecture specification.}
+  \testresult{\testresultbadge{Pass}}
   \testremarks{If \inlinecode{terraform apply} fails, check the AK/SK credentials and the \inlinecode{sa-brazil-1} region quota limits.}
 
   \begin{warning}
@@ -317,8 +362,6 @@ terraform state list | wc -l
   changes to production-adjacent environments can cause data loss or service
   disruption.
   \end{warning}
-
-  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-010: Verify test data upload to OBS}
@@ -326,7 +369,13 @@ terraform state list | wc -l
     be uploaded to the designated OBS bucket and are accessible by the
     DataArts Studio pipeline.}
   \testprerequisites{1. TC-002 completed (OBS bucket accessible). \\ 2. Test data files prepared in the local directory \param{./test-data/}. \\ 3. \inlinecode{obsutil} CLI configured with the test user credentials.}
-  \testprocedure{1. List the local test data files and verify their integrity (row count, schema). \\ 2. Upload all files to the OBS raw bucket using \inlinecode{obsutil}. \\ 3. Verify each file exists in OBS by listing the bucket contents. \\ 4. Download a sample file from OBS and compare it with the local original (checksum). \\ 5. In DataArts Studio, verify the data source connection can read the uploaded files.}
+  \begin{testprocedure}
+    \teststep{1}{List the local test data files and verify their integrity (row count, schema)}
+    \teststep{2}{Upload all files to the OBS raw bucket using \inlinecode{obsutil}}
+    \teststep{3}{Verify each file exists in OBS by listing the bucket contents}
+    \teststep{4}{Download a sample file from OBS and compare it with the local original (checksum)}
+    \teststep{5}{In DataArts Studio, verify the data source connection can read the uploaded files}
+  \end{testprocedure}
 
   \begin{code}[bash]
 # Upload test data files to OBS
@@ -338,11 +387,10 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
   \end{code}
 
   \testexpected{1. All test data files are uploaded without errors. \\ 2. Bucket listing shows all uploaded files with correct sizes. \\ 3. Downloaded file checksum matches the local original. \\ 4. DataArts Studio data source connection can read the files.}
+  \testresult{\testresultbadge{Pass}}
   \testremarks{Large files ($>$1 GB) should be uploaded using the OBS multipart upload feature for better reliability.}
 
   \note{Refer to the \weblink{https://support.huaweicloud.com/intl/en-us/obs/index.html}{Huawei Cloud OBS Documentation} for advanced upload options and troubleshooting.}
-
-  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the test execution dashboard showing all test case results}
@@ -351,6 +399,9 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{2.0.0}{\today}{
+    \item Redesigned testcase layout: full-width mini header bars for each field, testprocedure environment with 2-column step table, field order updated (Test Result before Remarks).
+  }
   \changelogentry{1.1.0}{\today}{
     \item Added comprehensive feature demonstrations: \inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox} callouts; \inlinecode{code} blocks; \inlinecode{badge}; \inlinecode{weblink}; \inlinecode{note}; \inlinecode{param}; \inlinecode{image}, \inlinecode{imagecap}, and \inlinecode{imageplaceholder}; \inlinecode{menu} paths; and \inlinecode{inlinecode} references.
     \item Added Security and Access Control test cases (TC-007, TC-008).

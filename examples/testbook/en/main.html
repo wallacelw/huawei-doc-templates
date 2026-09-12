@@ -314,15 +314,18 @@ width: auto;
 <body>
   <h1 class="title">POC Test Cases — Data Platform Validation</h1>
   <p class="date">2026-09-12</p>
-<p class="version">v1.0.0</p>
+<p class="version">v2.0.0</p>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Info</strong> </p>
 <p>This document demonstrates the <code>testbook</code> template
 (<code>testbook.cls</code>) for Huawei Cloud POC/acceptance test case
 documents. It exercises all available commands and environments: cover
 page, table of contents, test case environment with all field commands,
-objectives block, code blocks, images, callouts, tables, badge, and
-changelog.</p>
+mini header bars, testprocedure environment with step-by-step actions,
+objectives block, code blocks, images, callouts (<code>warning</code>,
+<code>tip</code>, <code>infobox</code>), tables, badge, menu paths,
+weblinks, notes, param references, test summary table, result badges,
+and changelog.</p>
 </div>
 <h1 data-number="1" id="test-cases-description"><span class="header-section-number">1</span> Test Cases Description</h1>
 <div class="objectives">
@@ -345,6 +348,8 @@ YARN, Spark, Hive).</p></li>
 policy.</p></li>
 <li><p>Test execution environment with network connectivity to the
 Huawei Cloud Console.</p></li>
+<li><p><code>latexmk</code> and <code>terraform</code> CLI tools
+installed locally.</p></li>
 </ul>
 </div>
 <h2 data-number="1.1" id="test-scope"><span class="header-section-number">1.1</span> Test Scope</h2>
@@ -397,6 +402,19 @@ bucket prior to pipeline execution.</p></li>
 <li><p>Network firewall rules must allow inbound TCP 22 (SSH) and TCP
 443 (HTTPS) from the test execution subnet.</p></li>
 </ul>
+<p><em>Note: Ensure the test execution environment has the correct
+timezone set to <code>America/Sao_Paulo</code> (GMT-3) so that log
+timestamps align with the Huawei Cloud Console.</em></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify CLI tools are installed</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> version</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">obsutil</span> version</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> version <span class="at">--client</span></span></code></pre></div>
+<div class="callout tip" role="note" aria-label="Tip">
+<p><strong>Tip</strong> </p>
+<p>Use <code>terraform plan</code> before <code>terraform apply</code>
+to preview infrastructure changes and avoid unintended resource
+modifications.</p>
+</div>
 <h2 data-number="1.3" id="acceptance-method"><span class="header-section-number">1.3</span> Acceptance Method</h2>
 <table>
 <colgroup>
@@ -432,213 +450,860 @@ environment issues.</td>
 </tr>
 </tbody>
 </table>
+<h2 data-number="1.4" id="test-case-summary"><span class="header-section-number">1.4</span> Test Case Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Title</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>TC-001</td>
+<td>Verify MRS cluster deployment and health</td>
+<td>Pass</td>
+</tr>
+<tr class="even">
+<td>TC-002</td>
+<td>Verify OBS bucket creation and accessibility</td>
+<td>Pass</td>
+</tr>
+<tr class="odd">
+<td>TC-003</td>
+<td>Verify VPC and security group configuration</td>
+<td>Pass</td>
+</tr>
+<tr class="even">
+<td>TC-004</td>
+<td>Verify DataArts Studio workspace creation</td>
+<td>Pass</td>
+</tr>
+<tr class="odd">
+<td>TC-005</td>
+<td>Verify data ingestion pipeline execution</td>
+<td>Pass</td>
+</tr>
+<tr class="even">
+<td>TC-006</td>
+<td>Verify Spark SQL query on MRS cluster</td>
+<td>Pass</td>
+</tr>
+<tr class="odd">
+<td>TC-007</td>
+<td>Verify IAM policy enforcement on OBS buckets</td>
+<td>Pass</td>
+</tr>
+<tr class="even">
+<td>TC-008</td>
+<td>Verify DataArts Studio data masking rule</td>
+<td>Pass</td>
+</tr>
+<tr class="odd">
+<td>TC-009</td>
+<td>Verify Terraform infrastructure deployment</td>
+<td>Pass</td>
+</tr>
+<tr class="even">
+<td>TC-010</td>
+<td>Verify test data upload to OBS</td>
+<td>Pass</td>
+</tr>
+</tbody>
+</table>
 <h1 data-number="2" id="platform-architecture"><span class="header-section-number">2</span> Platform Architecture</h1>
 <h2 data-number="2.1"><span class="header-section-number">2.1</span>
 TC-001: Verify MRS cluster deployment and health</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that the MapReduce Service (MRS) cluster is deployed with the
+required components (HDFS, YARN, Spark, Hive) and all nodes report a
+healthy status.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>Terraform infrastructure apply completed successfully.</li>
+<li>MRS cluster ID is available in the Terraform output.</li>
+<li>IAM user has MRS_Viewer or higher role.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
 <table>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Description</th>
+<th>Step</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Objective</td>
-<td>Confirm that the MapReduce Service (MRS) cluster is deployed</td>
+<td>1</td>
+<td>Log in to the Huawei Cloud Console</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Navigate to Console, MapReduce Service, Clusters</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Locate cluster mrs-poc-cluster</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Verify cluster status</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Review Component tab</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Review Node tab</td>
 </tr>
 </tbody>
 </table>
-<pre><code>with the required components (HDFS, YARN, Spark, Hive) and all nodes
-report a healthy status. |</code></pre>
-<div class="line-block">Prerequisites | 1. Terraform infrastructure
-apply completed successfully. 2. MRS cluster ID is available in the
-Terraform output. 3. IAM user has MRS_Viewer or higher role. |<br />
-Procedure | 1. Log in to the Huawei Cloud Console. 2. Navigate to
-Console, MapReduce Service, Clusters. 3. Locate the cluster by its name
-(e.g. mrs-poc-cluster). 4. Verify the cluster status is Running. 5.
-Click the cluster name and review the Component tab — confirm HDFS,
-YARN, Spark, and Hive are listed with status Normal. 6. Review the Node
-tab — confirm all master and core nodes show status Running. |<br />
-Expected Result | 1. Cluster status is Running. 2. All four components
-(HDFS, YARN, Spark, Hive) are listed with status Normal. 3. All nodes
-report status Running with no alarms. |<br />
-Remarks | If any component shows Abnormal, check the MRS alarm page
-before marking the result. |<br />
-Test Result | Pass |</div>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>Cluster status is Running.</li>
+<li>All four components (HDFS, YARN, Spark, Hive) are listed with status
+Normal.</li>
+<li>All nodes report status Running with no alarms.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+If any component shows Abnormal, check the MRS alarm page before marking
+the result.
+</dd>
+</dl>
 <h2 data-number="2.2"><span class="header-section-number">2.2</span>
 TC-002: Verify OBS bucket creation and accessibility</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that the Object Storage Service (OBS) bucket used for the POC
+data lake is created, has the correct storage class, and is accessible
+with the designated IAM policy.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>OBS bucket name is defined in the Terraform configuration.</li>
+<li>IAM policy granting read/write access to the bucket is attached to
+the test user.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
 <table>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Description</th>
+<th>Step</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Objective</td>
-<td>Confirm that the Object Storage Service (OBS) bucket used</td>
+<td>1</td>
+<td>Log in to the Console</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Navigate to Console, Object Storage Service</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Locate the bucket (e.g. poc-datalake-raw)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Verify the storage class is Standard</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Upload a test file (test-upload.txt) to the bucket</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Download the file and compare its content with the original</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Delete the test file</td>
 </tr>
 </tbody>
 </table>
-<pre><code>for the POC data lake is created, has the correct storage class, and
-is accessible with the designated IAM policy. |</code></pre>
-<div class="line-block">Prerequisites | 1. OBS bucket name is defined in
-the Terraform configuration. 2. IAM policy granting read/write access to
-the bucket is attached to the test user. |<br />
-Procedure | 1. Log in to the Console. 2. Navigate to Console, Object
-Storage Service. 3. Locate the bucket (e.g. poc-datalake-raw). 4. Verify
-the storage class is Standard. 5. Upload a test file (test-upload.txt)
-to the bucket. 6. Download the file and compare its content with the
-original. 7. Delete the test file. |<br />
-Expected Result | 1. Bucket exists with storage class Standard. 2. File
-upload completes without error. 3. Downloaded file content matches the
-original. 4. File deletion succeeds. |<br />
-Remarks | OBS eventual consistency may cause a brief delay before a
-newly uploaded object appears in listings. |<br />
-Test Result | Pass |</div>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>Bucket exists with storage class Standard.</li>
+<li>File upload completes without error.</li>
+<li>Downloaded file content matches the original.</li>
+<li>File deletion succeeds.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+OBS eventual consistency may cause a brief delay before a newly uploaded
+object appears in listings.
+</dd>
+</dl>
 <h2 data-number="2.3"><span class="header-section-number">2.3</span>
 TC-003: Verify VPC and security group configuration</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that the VPC, subnet, and security groups are configured
+according to the network architecture diagram, with the correct CIDR
+blocks and inbound/outbound rules.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>VPC and subnet IDs are available from the Terraform output.</li>
+<li>Security group names are documented in the solution
+architecture.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Description</th>
+<th>Step</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Objective</td>
-<td>Confirm that the VPC, subnet, and security groups are</td>
+<td>1</td>
+<td>Log in to the Console</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Navigate to Console, Virtual Private Cloud, VPCs</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Locate the VPC (e.g. vpc-poc) and verify its CIDR block matches the
+architecture (e.g. 10.0.0.0/16)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Click the subnet and verify its CIDR (e.g. 10.0.1.0/24)</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Navigate to Security Groups and verify inbound rules: TCP 22 from
+the bastion subnet, TCP 443 from the corporate proxy</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Verify outbound rules allow all traffic (default)</td>
 </tr>
 </tbody>
 </table>
-<pre><code>configured according to the network architecture diagram, with the
-correct CIDR blocks and inbound/outbound rules. |</code></pre>
-<div class="line-block">Prerequisites | 1. VPC and subnet IDs are
-available from the Terraform output. 2. Security group names are
-documented in the solution architecture. |<br />
-Procedure | 1. Log in to the Console. 2. Navigate to Console, Virtual
-Private Cloud, VPCs. 3. Locate the VPC (e.g. vpc-poc) and verify its
-CIDR block matches the architecture (e.g. 10.0.0.0/16). 4. Click the
-subnet and verify its CIDR (e.g. 10.0.1.0/24). 5. Navigate to Security
-Groups and verify inbound rules: TCP 22 from the bastion subnet, TCP 443
-from the corporate proxy. 6. Verify outbound rules allow all traffic
-(default). |<br />
-Expected Result | 1. VPC CIDR is 10.0.0.0/16. 2. Subnet CIDR is
-10.0.1.0/24. 3. Inbound rules match the architecture: TCP 22 and TCP 443
-from the specified sources. 4. Outbound allows all traffic. |<br />
-Remarks | If the security group has additional rules beyond the
-architecture spec, document them in the Remarks field. |<br />
-Test Result | Pass |</div>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>VPC CIDR is 10.0.0.0/16.</li>
+<li>Subnet CIDR is 10.0.1.0/24.</li>
+<li>Inbound rules match the architecture: TCP 22 and TCP 443 from the
+specified sources.</li>
+<li>Outbound allows all traffic.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+If the security group has additional rules beyond the architecture spec,
+document them in the Remarks field.
+</dd>
+</dl>
 <h1 data-number="3" id="data-engineering"><span class="header-section-number">3</span> Data Engineering</h1>
 <h2 data-number="3.1"><span class="header-section-number">3.1</span>
 TC-004: Verify DataArts Studio workspace creation</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that the DataArts Studio (Dayu) instance is provisioned, the
+workspace is accessible, and the designated IAM users can log in with
+the Dayu_User role.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>DataArts Studio instance is provisioned and its status is
+Running.</li>
+<li>Test IAM user has the Dayu_User role assigned.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Description</th>
+<th>Step</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Objective</td>
-<td>Confirm that the DataArts Studio (Dayu) instance is</td>
+<td>1</td>
+<td>Log in to the Console with the test IAM user</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Navigate to Console, DataArts Studio, Workspaces</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Locate the workspace (e.g. poc-workspace)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Click Access Workspace to open the DataArts Studio console</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Verify the left navigation panel loads with the expected modules:
+Data Integration, Data Development, Data Architecture</td>
 </tr>
 </tbody>
 </table>
-<pre><code>provisioned, the workspace is accessible, and the designated IAM
-users can log in with the Dayu\_User role. |</code></pre>
-<div class="line-block">Prerequisites | 1. DataArts Studio instance is
-provisioned and its status is Running. 2. Test IAM user has the
-Dayu_User role assigned. |<br />
-Procedure | 1. Log in to the Console with the test IAM user. 2. Navigate
-to Console, DataArts Studio, Workspaces. 3. Locate the workspace
-(e.g. poc-workspace). 4. Click Access Workspace to open the DataArts
-Studio console. 5. Verify the left navigation panel loads with the
-expected modules: Data Integration, Data Development, Data Architecture.
-|<br />
-Expected Result | 1. Workspace is listed and accessible. 2. DataArts
-Studio console opens without errors. 3. All three modules (Data
-Integration, Data Development, Data Architecture) are visible in the
-navigation. |<br />
-Remarks | If the workspace fails to load, check the Dayu instance status
-and the IAM role assignment. |<br />
-Test Result | Pass |</div>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>Workspace is listed and accessible.</li>
+<li>DataArts Studio console opens without errors.</li>
+<li>All three modules (Data Integration, Data Development, Data
+Architecture) are visible in the navigation.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+If the workspace fails to load, check the Dayu instance status and the
+IAM role assignment.
+</dd>
+</dl>
 <h2 data-number="3.2"><span class="header-section-number">3.2</span>
 TC-005: Verify data ingestion pipeline execution</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that a DataArts Studio batch pipeline can successfully ingest
+CSV data from OBS, apply a basic transformation, and write the result to
+the target OBS path.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>TC-004 completed (DataArts Studio workspace accessible).</li>
+<li>Source CSV file (customers.csv) exists in the OBS raw bucket.</li>
+<li>Target OBS path (poc-datalake-curated/customers/) is
+configured.</li>
+<li>Pipeline pl-ingest-customers is published in DataArts Studio.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
 <table>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Description</th>
+<th>Step</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Objective</td>
-<td>Confirm that a DataArts Studio batch pipeline can</td>
+<td>1</td>
+<td>Navigate to Data Development in DataArts Studio</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Locate pipeline pl-ingest-customers</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Click Run to execute the pipeline</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Wait for pipeline status (timeout: 10 min)</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Verify output file in OBS</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Download and verify row count</td>
 </tr>
 </tbody>
 </table>
-<pre><code>successfully ingest CSV data from OBS, apply a basic transformation,
-and write the result to the target OBS path. |</code></pre>
-<div class="line-block">Prerequisites | 1. TC-004 completed (DataArts
-Studio workspace accessible). 2. Source CSV file (customers.csv) exists
-in the OBS raw bucket. 3. Target OBS path
-(poc-datalake-curated/customers/) is configured. 4. Pipeline
-pl-ingest-customers is published in DataArts Studio. |<br />
-Procedure | 1. In the DataArts Studio console, navigate to Data
-Development. 2. Locate the pipeline pl-ingest-customers in the job list.
-3. Click Run to execute the pipeline. 4. Wait for the pipeline status to
-change to Success (timeout: 10 minutes). 5. Navigate to OBS and verify
-the output file exists in poc-datalake-curated/customers/. 6. Download
-the output file and verify the row count matches the source (no data
-loss). |<br />
-Expected Result | 1. Pipeline execution completes with status Success.
-2. Output file is created in the target OBS path. 3. Row count of the
-output file matches the source file. |<br />
-Remarks | Pipeline execution time varies with data volume. For the POC,
-the source file contains approximately 10,000 rows. |<br />
-Test Result | Pass |</div>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>Pipeline execution completes with status Success.</li>
+<li>Output file is created in the target OBS path.</li>
+<li>Row count of the output file matches the source file.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+Pipeline execution time varies with data volume. For the POC, the source
+file contains approximately 10,000 rows.
+</dd>
+</dl>
 <h2 data-number="3.3"><span class="header-section-number">3.3</span>
 TC-006: Verify Spark SQL query on MRS cluster</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that a Spark SQL query can be executed on the MRS cluster to
+read data from a Hive table and return correct results, validating the
+integration between MRS and the data lake.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>TC-001 completed (MRS cluster healthy).</li>
+<li>Hive table poc_db.customers exists and contains data loaded by the
+ingestion pipeline.</li>
+<li>SSH access to the MRS master node is configured.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Description</th>
+<th>Step</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Objective</td>
-<td>Confirm that a Spark SQL query can be executed on the</td>
+<td>1</td>
+<td>SSH into the MRS master node</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Run the Spark SQL CLI: spark-sql –master yarn -{}-conf
+spark.sql.hive.convertMetastoreOrc=true -e “SELECT COUNT(*) FROM
+poc_db.customers;”</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Verify the returned count matches the expected row count
+(10,000)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Run a sample query to verify data integrity: spark-sql –master yarn
+-e “SELECT customer_id, name FROM poc_db.customers LIMIT 5;”</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Confirm the query returns 5 rows with non-null values</td>
 </tr>
 </tbody>
 </table>
-<pre><code>MRS cluster to read data from a Hive table and return correct
-results, validating the integration between MRS and the data lake. |</code></pre>
-<div class="line-block">Prerequisites | 1. TC-001 completed (MRS cluster
-healthy). 2. Hive table poc_db.customers exists and contains data loaded
-by the ingestion pipeline. 3. SSH access to the MRS master node is
-configured. |<br />
-Procedure | 1. SSH into the MRS master node. 2. Run the Spark SQL CLI:
-spark-sql –master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true
--e “SELECT COUNT(*) FROM poc_db.customers;” 3. Verify the returned count
-matches the expected row count (10,000). 4. Run a sample query to verify
-data integrity: spark-sql –master yarn -e “SELECT customer_id, name FROM
-poc_db.customers LIMIT 5;” 5. Confirm the query returns 5 rows with
-non-null values. |<br />
-Expected Result | 1. COUNT(*) returns 10,000. 2. The sample query
-returns 5 rows with valid customer_id and name values. |<br />
-Remarks | If the Spark SQL CLI is not available, use the MRS Spark2x
-component’s web UI to submit the query instead. |<br />
-Test Result | Pass |</div>
-<h1 data-number="4"><span class="header-section-number">4</span>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>COUNT(*) returns 10,000.</li>
+<li>The sample query returns 5 rows with valid customer_id and name
+values.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+If the Spark SQL CLI is not available, use the MRS Spark2x component’s
+web UI to submit the query instead.
+</dd>
+</dl>
+<h1 data-number="4" id="security-and-access-control"><span class="header-section-number">4</span> Security and Access Control</h1>
+<h2 data-number="4.1"><span class="header-section-number">4.1</span>
+TC-007: Verify IAM policy enforcement on OBS buckets</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that IAM policies correctly restrict OBS bucket access —
+authorized users can read/write while unauthorized users are denied, and
+the bucket policy matches the principle of least privilege.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>OBS bucket poc-datalake-raw exists with the designated IAM
+policy.</li>
+<li>Two test IAM users: one with OBS_ReadWrite role, one with no OBS
+permissions.</li>
+<li>obsutil CLI configured for both users.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Using the authorized user, upload a test file to
+poc-datalake-raw</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Using the authorized user, download and verify the file content</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Using the unauthorized user, attempt to upload a file — verify the
+request is denied (HTTP 403)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Using the unauthorized user, attempt to list objects in the bucket —
+verify the request is denied</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Review the bucket policy in the Console at Console, Object Storage
+Service, Bucket Policies and confirm it grants only the intended
+permissions</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>Authorized user can upload and download successfully.</li>
+<li>Unauthorized user receives HTTP 403 on both upload and list
+operations.</li>
+<li>Bucket policy grants only the intended read/write permissions to the
+designated roles.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+Check the Cloud Trail logs if access denial is not returned as expected
+— there may be a policy inheritance from the project or domain level.
+</dd>
+</dl>
+<h2 data-number="4.2"><span class="header-section-number">4.2</span>
+TC-008: Verify DataArts Studio data masking rule</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that sensitive data columns (e.g. PII fields) are masked
+according to the DataArts Studio data masking rule when queried by
+non-admin users.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>TC-004 completed (DataArts Studio workspace accessible).</li>
+<li>Data masking rule configured for column customers.ssn (Social
+Security Number).</li>
+<li>Test user has Dayu_User role (not admin).</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>In the DataArts Studio console, navigate to Data Architecture $$
+Data Masking</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Verify the masking rule for customers.ssn is active and uses the
+Mask All strategy</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Query the customers table as the test user via DataArts Studio SQL
+console</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Verify the ssn column returns masked values (e.g. *********) instead
+of real data</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Query the same table as an admin user and verify real values are
+returned</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>Masking rule is active for customers.ssn.</li>
+<li>Non-admin user sees masked values in the ssn column.</li>
+<li>Admin user sees real values in the ssn column.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+Data masking rules apply at query time — the underlying data in OBS/HDFS
+is not modified.
+</dd>
+</dl>
+<h1 data-number="5" id="environment-setup-and-tooling"><span class="header-section-number">5</span> Environment Setup and
+Tooling</h1>
+<h2 data-number="5.1"><span class="header-section-number">5.1</span>
+TC-009: Verify Terraform infrastructure deployment</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that the Terraform configuration deploys all required
+infrastructure resources (VPC, MRS, OBS, DataArts Studio) without errors
+and the state file reflects the expected resources.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>terraform CLI installed (version $$ 1.0).</li>
+<li>AK/SK credentials configured via environment variables or
+provider.tf.</li>
+<li>Terraform configuration files in the project directory.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Navigate to the Terraform project directory</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Run terraform init to initialize the working directory</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Run terraform plan and review the planned changes — confirm all
+expected resources are listed</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Run terraform apply -auto-approve and wait for completion</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Run terraform output and verify all output values are populated</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Run terraform state list and confirm the resource count matches the
+architecture</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>terraform apply completes with no errors.</li>
+<li>All output values are populated (cluster ID, bucket name, VPC
+ID).</li>
+<li>Resource count in state matches the architecture specification.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+If terraform apply fails, check the AK/SK credentials and the
+sa-brazil-1 region quota limits.
+</dd>
+</dl>
+<h2 data-number="5.2"><span class="header-section-number">5.2</span>
+TC-010: Verify test data upload to OBS</h2>
+<dl>
+<dt>Objective</dt>
+<dd>
+Confirm that all required test data files (CSV, JSON) can be uploaded to
+the designated OBS bucket and are accessible by the DataArts Studio
+pipeline.
+</dd>
+<dt>Prerequisites</dt>
+<dd>
+<ol type="1">
+<li>TC-002 completed (OBS bucket accessible).</li>
+<li>Test data files prepared in the local directory ./test-data/.</li>
+<li>obsutil CLI configured with the test user credentials.</li>
+</ol>
+</dd>
+<dt>Procedure</dt>
+<dd>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>List the local test data files and verify their integrity (row
+count, schema)</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Upload all files to the OBS raw bucket using obsutil</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Verify each file exists in OBS by listing the bucket contents</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Download a sample file from OBS and compare it with the local
+original (checksum)</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>In DataArts Studio, verify the data source connection can read the
+uploaded files</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Expected Result</dt>
+<dd>
+<ol type="1">
+<li>All test data files are uploaded without errors.</li>
+<li>Bucket listing shows all uploaded files with correct sizes.</li>
+<li>Downloaded file checksum matches the local original.</li>
+<li>DataArts Studio data source connection can read the files.</li>
+</ol>
+</dd>
+<dt>Test Result</dt>
+<dd>
+Pass
+</dd>
+<dt>Remarks</dt>
+<dd>
+Large files ($&gt;$1 GB) should be uploaded using the OBS multipart
+upload feature for better reliability.
+</dd>
+</dl>
+<p><em>[Image placeholder: Screenshot of the test execution dashboard
+showing all test case results]</em></p>
+<h1 data-number="6"><span class="header-section-number">6</span>
 Changelog</h1>
+<p><strong>2.0.0</strong>  <em>2026-09-12</em></p>
+<p>Redesigned testcase layout: full-width mini header bars for each
+field, testprocedure environment with 2-column step table, field order
+updated (Test Result before Remarks).</p>
+<p><strong>1.1.0</strong>  <em>2026-09-12</em></p>
+<p>Added comprehensive feature demonstrations: <code>warning</code>,
+<code>tip</code>, <code>infobox</code> callouts; <code>code</code>
+blocks; <code>badge</code>; <code>weblink</code>; <code>note</code>;
+<code>param</code>; <code>image</code>, <code>imagecap</code>, and
+<code>imageplaceholder</code>; <code>menu</code> paths; and
+<code>inlinecode</code> references.</p>
+<p>Added Security and Access Control test cases (TC-007, TC-008).</p>
+<p>Added Environment Setup and Tooling test cases (TC-009, TC-010).</p>
 <p><strong>1.0.0</strong>  <em>2026-09-12</em></p>
 <p>Initial version.</p>
 <p>Added Platform Architecture test cases (TC-001 to TC-003).</p>
