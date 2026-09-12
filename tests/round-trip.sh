@@ -457,7 +457,7 @@ PYEOF
     echo "  PASS: No raw LaTeX in DOCX"
     PASS=$((PASS + 1))
   else
-    echo "  FAIL: Raw LaTeX in DOCX ($raw_doc occurrence(s) outside code blocks)"
+    echo "  FAIL: Raw LaTeX in DOCX ($raw_docx occurrence(s) outside code blocks)"
     FAIL=$((FAIL + 1))
   fi
 done

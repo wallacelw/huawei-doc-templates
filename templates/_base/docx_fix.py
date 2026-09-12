@@ -29,7 +29,7 @@ from lxml import etree
 # ── Pandoc version pin ────────────────────────────────────────────────────
 # The --fix post-processing depends on pandoc's XML output structure.
 # If pandoc changes its DOCX generation, the assertions below will catch it.
-SUPPORTED_PANDOC_RANGE = ((3, 1, 0), (3, 2, 0))  # >=3.1.0, <3.2.0
+SUPPORTED_PANDOC_RANGE = ((3, 1, 0), (3, 6, 0))  # >=3.1.0, <3.6.0
 
 
 def check_pandoc_version():

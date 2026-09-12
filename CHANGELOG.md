@@ -3,6 +3,49 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.8.1 (2026-09-13)
+
+### Fixes
+
+- **testbook PDF metadata**: Fixed `pdftitle` showing "Guide" instead of the
+  testbook title. Added `\lg@guidetitle` alias in `testbook.cls`.
+- **Removed stray user DOCX**: Deleted `templates/testbook/SERPRO POC1 Test CasesV1.1.docx`
+  (1.7 MB user document committed to template directory in error).
+- **round-trip.sh**: Fixed variable typo `$raw_doc` → `$raw_docx` in error message.
+- **build.sh**: Set `TZ=America/Sao_Paulo` before pandoc invocation for cover time
+  consistency between PDF and DOCX/MD/HTML.
+- **docx_fix.py**: Widened pandoc version range from 3.1-3.2 to 3.1-3.6.
+- **testbook sample PDFs**: Added to `.gitignore` un-ignore list (consistent with
+  guide and technical).
+- **AGENTS.md**: Fixed stale references — added testbook to Lua filter list (L16),
+  sample list, and "Compiled PDFs" section. Fixed typos in file editing rules.
+- **README.md**: Updated `make samples` and `make all` descriptions to include testbook.
+- **technical SKILL.md**: Fixed `indentbody` description (indents all running text,
+  not just first line).
+- **test-docx-fix.sh**: Updated stale comment and fixed global variable usage.
+- **install.sh**: Fixed indentation inconsistency.
+
+## v3.8.0 (2026-09-13)
+
+### Features
+
+- **Authors feature**: `\setdocauthors{...}` command and `[noauthors]` class option
+  added to all three templates (guide, technical, testbook). Shared implementation
+  in `huawei-changelog.sty`.
+
+### Changes
+
+- **Root folder reorganized**: `build.sh`, `install.sh`, `uninstall.sh` moved to
+  `scripts/` directory. All references updated.
+- **Optional install prompts**: `install.sh` prompts for opencode skills and VS Code
+  LaTeX Workshop (default yes). LTeX extension removed.
+- **Nuclear uninstall**: `uninstall.sh` option 4 removes everything including fonts.
+  One-liner support added.
+- **Update detection**: One-liner detects existing installation and prompts to update
+  with version display.
+- **testbook.cls bumped to v3.8.0** (was missed in initial v3.8.0 commit).
+- **Quality Pass standard** added to AGENTS.md.
+
 ## v3.7.0 (2026-09-12)
 
 ### Features

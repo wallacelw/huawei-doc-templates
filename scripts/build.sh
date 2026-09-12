@@ -350,7 +350,7 @@ generate_pandoc_format() {
     fi
     echo "  Generating ${label}..."
     local err
-    err=$(cd "$PROJECT_DIR" && pandoc -f latex+raw_tex \
+    err=$(cd "$PROJECT_DIR" && export TZ="America/Sao_Paulo" && pandoc -f latex+raw_tex \
         --lua-filter="$LUA_FILTER" \
         --resource-path=".:${REPO_ROOT}/templates/${TEMPLATE}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
         --number-sections \

@@ -273,9 +273,10 @@ approval. Changing them breaks existing documents and reproducibility.
 ### L16. Multi-format output via Pandoc + Lua filter
 - LaTeX remains the single source of truth. DOCX, Markdown, and HTML are
   generated outputs, not hand-edited.
-- The Lua filters `templates/guide/guide-pandoc.lua` and
-  `templates/technical/technical-pandoc.lua` are thin wrappers that call a shared
-  factory in `templates/_base/pandoc-common.lua`.
+- The Lua filters `templates/guide/guide-pandoc.lua`,
+   `templates/technical/technical-pandoc.lua`, and
+   `templates/testbook/testbook-pandoc.lua` are thin wrappers that call a shared
+   factory in `templates/_base/pandoc-common.lua`.
 - The factory uses **global functions** (`Pandoc`, `RawBlock`, `RawInline`) —
   do NOT add a `return` table at the end; return tables silently fail.
 - Format check is `raw.format ~= "latex"` (not `"tex"`).
@@ -441,7 +442,7 @@ at the repo root registers `templates/` as a discovery path.
 1. Define the command in the appropriate `.cls` file (`guide.cls`, `technical.cls`, or `testbook.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the command to the reference tables in `SKILL.md` and `README.md`.
-4. Demonstrate the command in all template samples (`examples/guide/pt/`, `examples/guide/en/`, `examples/technical/pt/`, `examples/technical/en/`).
+4. Demonstrate the command in all template samples (`examples/guide/pt/`, `examples/guide/en/`, `examples/technical/pt/`, `examples/technical/en/`, `examples/testbook/pt/`, `examples/testbook/en/`).
 5. Compile both samples to verify: `make samples`.
 6. Commit only if both samples compile without errors.
 
@@ -497,8 +498,8 @@ The naming convention is critical:
 - **`guide.cls`** — guide-specific formatting (cover, TOC, titles). Shared
   formatting lives in `templates/_base/huawei-*.sty` modules. Changes here
   affect every document. Test with both samples before committing.
-- **`technical.cls`** — technical-report-specific formatting9 formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
-- **`testbook.cls`** — test-book-specific formatting (cover, TOC, titles, testcase environment). Same rules as `guide.cls+ samples before committing.
+- **`technical.cls`** — technical-report-specific formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
+- **`testbook.cls`** — test-book-specific formatting (cover, TOC, titles, testcase environment). Same rules as `guide.cls`. Test with both samples before committing.
 - **`templates/_base/pandoc-common.lua`** — shared Lua filter factory. Changes
   affect ALL templates' multi-format output. Test with `make test` and
   `make all-formats` before committing.

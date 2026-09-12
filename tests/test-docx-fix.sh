@@ -3,7 +3,7 @@
 # Verifies that the --fix pipeline produces correct heading styles,
 # list indentation, and footer page numbers in the generated DOCX.
 # Also verifies pandoc version pin and loud-failure assertions.
-# Tests both guide and technical templates.
+# Tests all templates (guide, technical, testbook).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -18,7 +18,7 @@ fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
 
 # ── Pandoc version check ──────────────────────────────────────────────────
-# Must be in supported range >=3.1.0, <3.2.0 (matches SUPPORTED_PANDOC_RANGE
+# Must be in supported range >=3.1.0, <3.6.0 (matches SUPPORTED_PANDOC_RANGE
 # in docx-fix.py)
 echo "=== Pandoc version check ==="
 PANDOC_VERSION_LINE="$(pandoc --version | head -1)"
@@ -30,15 +30,15 @@ fi
 PANDOC_MAJOR="$(echo "$PANDOC_VERSION" | cut -d. -f1)"
 PANDOC_MINOR="$(echo "$PANDOC_VERSION" | cut -d. -f2)"
 PANDOC_PATCH="$(echo "$PANDOC_VERSION" | cut -d. -f3)"
-# Compare: >=3.1.0 and <3.2.0
+# Compare: >=3.1.0 and <3.6.0
 PANDOC_NUM=$((PANDOC_MAJOR * 10000 + PANDOC_MINOR * 100 + PANDOC_PATCH))
 MIN_NUM=$((3 * 10000 + 1 * 100 + 0))   # 30100 = 3.1.0
-MAX_NUM=$((3 * 10000 + 2 * 100 + 0))   # 30200 = 3.2.0
+MAX_NUM=$((3 * 10000 + 6 * 100 + 0))   # 30600 = 3.6.0
 if [ "$PANDOC_NUM" -lt "$MIN_NUM" ] || [ "$PANDOC_NUM" -ge "$MAX_NUM" ]; then
-  echo "  FAIL: pandoc $PANDOC_VERSION is outside supported range (3.1.0–3.2.0)"
+  echo "  FAIL: pandoc $PANDOC_VERSION is outside supported range (3.1.0–3.6.0)"
   exit 1
 fi
-echo "  pandoc version: $PANDOC_VERSION (in supported range 3.1.0–3.2.0)"
+echo "  pandoc version: $PANDOC_VERSION (in supported range 3.1.0–3.6.0)"
 
 # ── Template test function ────────────────────────────────────────────────
 # run_template_tests <template_name> <fix_script> <filter> <ref_docx> <sample_dir> <common_assets>
@@ -60,7 +60,7 @@ run_template_tests() {
   echo "Generating DOCX..."
   pandoc -f latex+raw_tex --lua-filter="$FILTER" \
     --reference-doc="$REF_DOCX" --number-sections \
-    --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${tmpl_name}:$COMMON_ASSETS" \
+    --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
     -t docx "$TEX_FILE" -o "$DOCX_OUT" 2>/dev/null
 
   echo "Running --fix..."

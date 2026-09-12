@@ -31,6 +31,8 @@
 !examples/setup-guide/setup-guide.pdf
 !examples/technical/pt/main.pdf
 !examples/technical/en/main.pdf
+!examples/testbook/pt/main.pdf
+!examples/testbook/en/main.pdf
 # Keep root setup-guide/ formats (pre-compiled for users to read)
 !setup-guide/setup-guide.pdf
 !setup-guide/setup-guide.md

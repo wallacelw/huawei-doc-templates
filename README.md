@@ -116,8 +116,8 @@ also delete the repository directory (requires typing `yes` to confirm).
 
 ```bash
 make                 # show help (list all available targets)
-make all             # compile everything: samples + setup-guide + technical reports + all formats
-make samples         # compile all template samples (guide + technical, PT + EN)
+make all             # compile everything: all samples + setup-guide + all formats (MD + DOCX + HTML)
+make samples         # compile all template samples (guide + technical + testbook, PT + EN)
 make examples        # compile setup-guide, copy PDF to repo root
 make pt              # compile Portuguese sample only (guide-only legacy alias)
 make en              # compile English sample only (guide-only legacy alias)

@@ -394,7 +394,7 @@ pandoc --lua-filter=templates/technical/technical-pandoc.lua \
 | `notime` | Hide compilation time on cover page. |
 | `nochangelog` | Suppress changelog section and cover page version/date/time. |
 | `noauthors` | Hide authors on the cover page (default: show if set via `\setdocauthors`). |
-| `indentbody` | Indent first line of paragraphs. |
+| `indentbody` | Indent all running text by `\contentindent`. |
 
 ---
 
