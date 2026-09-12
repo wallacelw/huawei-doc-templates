@@ -42,6 +42,11 @@ local config = {
       expectedresult = "Expected Result",
       remarks = "Remarks",
       testresult = "Test Result",
+      testcaseid = "ID",
+      testcasetitle = "Title",
+      teststatus = "Status",
+      step = "Step",
+      action = "Action",
     },
     pt = {
       warning = "Importante", tip = "Dica", infobox = "Informação",
@@ -56,6 +61,11 @@ local config = {
       expectedresult = "Resultado Esperado",
       remarks = "Observações",
       testresult = "Resultado do Teste",
+      testcaseid = "ID",
+      testcasetitle = "Título",
+      teststatus = "Status",
+      step = "Passo",
+      action = "Ação",
     },
   },
   strip_commands = {
@@ -164,8 +174,115 @@ local config = {
       return blocks
     end
 
+    -- Handler for the testsummary environment.
+    -- Converts \begin{testsummary}...\end{testsummary} into a 3-column
+    -- Pandoc Table (ID, Title, Status) with Huawei-red header styling.
+    local function handle_testsummary_env(text)
+      local body = text:match("\\begin%s*{testsummary}%s*(.-)%s*\\end%s*{testsummary}")
+      if not body then return nil end
+
+      local function cell_to_md(cell_text)
+        cell_text = cell_text:gsub("\\\\", "\n")
+        local prev = nil
+        while prev ~= cell_text do
+          prev = cell_text
+          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        end
+        cell_text = cell_text:gsub("\\_", "_")
+        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
+        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
+      end
+
+      -- Parse \testsummaryrow{ID}{Title}{Status} commands
+      local rows = {}
+      for id, title, status in body:gmatch("\\testsummaryrow%s*(%b{})%s*(%b{})%s*(%b{})") do
+        table.insert(rows, {
+          id:sub(2, -2),
+          title:sub(2, -2),
+          status:sub(2, -2),
+        })
+      end
+
+      if #rows == 0 then return nil end
+
+      local md_lines = {}
+      md_lines[#md_lines + 1] = "| " .. L("testcaseid") .. " | " .. L("testcasetitle") .. " | " .. L("teststatus") .. " |"
+      md_lines[#md_lines + 1] = "| --- | --- | --- |"
+      for _, row in ipairs(rows) do
+        local cells = {}
+        for _, cell in ipairs(row) do
+          local md = cell_to_md(cell):gsub("|", "\\|")
+          cells[#cells + 1] = md
+        end
+        md_lines[#md_lines + 1] = "| " .. table.concat(cells, " | ") .. " |"
+      end
+
+      local md_table = table.concat(md_lines, "\n") .. "\n"
+      local parsed = pandoc.read(md_table, "markdown")
+      local blocks = pandoc.Blocks({})
+      if #parsed.blocks > 0 then
+        for _, blk in ipairs(parsed.blocks) do blocks:insert(blk) end
+      end
+      return blocks
+    end
+
+    -- Handler for the teststeps environment.
+    -- Converts \begin{teststeps}...\end{teststeps} into a 4-column
+    -- Pandoc Table (Step, Action, Expected Result, Status).
+    local function handle_teststeps_env(text)
+      local body = text:match("\\begin%s*{teststeps}%s*(.-)%s*\\end%s*{teststeps}")
+      if not body then return nil end
+
+      local function cell_to_md(cell_text)
+        cell_text = cell_text:gsub("\\\\", "\n")
+        local prev = nil
+        while prev ~= cell_text do
+          prev = cell_text
+          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        end
+        cell_text = cell_text:gsub("\\_", "_")
+        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
+        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
+      end
+
+      -- Parse \teststep{Step}{Action}{Expected}{Status} commands
+      local rows = {}
+      for step, action, expected, status in body:gmatch("\\teststep%s*(%b{})%s*(%b{})%s*(%b{})%s*(%b{})") do
+        table.insert(rows, {
+          step:sub(2, -2),
+          action:sub(2, -2),
+          expected:sub(2, -2),
+          status:sub(2, -2),
+        })
+      end
+
+      if #rows == 0 then return nil end
+
+      local md_lines = {}
+      md_lines[#md_lines + 1] = "| " .. L("step") .. " | " .. L("action") .. " | " .. L("expectedresult") .. " | " .. L("teststatus") .. " |"
+      md_lines[#md_lines + 1] = "| --- | --- | --- | --- |"
+      for _, row in ipairs(rows) do
+        local cells = {}
+        for _, cell in ipairs(row) do
+          local md = cell_to_md(cell):gsub("|", "\\|")
+          cells[#cells + 1] = md
+        end
+        md_lines[#md_lines + 1] = "| " .. table.concat(cells, " | ") .. " |"
+      end
+
+      local md_table = table.concat(md_lines, "\n") .. "\n"
+      local parsed = pandoc.read(md_table, "markdown")
+      local blocks = pandoc.Blocks({})
+      if #parsed.blocks > 0 then
+        for _, blk in ipairs(parsed.blocks) do blocks:insert(blk) end
+      end
+      return blocks
+    end
+
     return {
       testcase = handle_testcase_env,
+      testsummary = handle_testsummary_env,
+      teststeps = handle_teststeps_env,
     }
   end,
 }

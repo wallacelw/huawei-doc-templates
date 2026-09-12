@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v3.8.1]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v3.9.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -62,6 +62,7 @@
 \RequirePackage{etoolbox}
 \RequirePackage{booktabs}
 \RequirePackage{array}
+\RequirePackage{tabularx}
 \RequirePackage{babel}
 \if@portuguese
   \babelprovide[import,main]{brazilian}
@@ -95,6 +96,12 @@
   \newcommand{\lg@expectedresult}{Resultado Esperado}
   \newcommand{\lg@remarks}{Observações}
   \newcommand{\lg@testresult}{Resultado do Teste}
+  \newcommand{\lg@testcaseid}{ID}
+  \newcommand{\lg@testcasetitle}{Título}
+  \newcommand{\lg@teststatus}{Status}
+  \newcommand{\lg@step}{Passo}
+  \newcommand{\lg@action}{Ação}
+  \newcommand{\lg@actualresult}{Resultado Obtido}
 \else
   \newcommand{\lg@testcases}{Test Cases}
   \newcommand{\lg@objective}{Objective}
@@ -103,6 +110,12 @@
   \newcommand{\lg@expectedresult}{Expected Result}
   \newcommand{\lg@remarks}{Remarks}
   \newcommand{\lg@testresult}{Test Result}
+  \newcommand{\lg@testcaseid}{ID}
+  \newcommand{\lg@testcasetitle}{Title}
+  \newcommand{\lg@teststatus}{Status}
+  \newcommand{\lg@step}{Step}
+  \newcommand{\lg@action}{Action}
+  \newcommand{\lg@actualresult}{Actual Result}
 \fi
 
 % =====================================================================
@@ -219,6 +232,7 @@
 %  TEST CASE ENVIRONMENT
 % =====================================================================
 % The testcase environment creates a subsection and a structured table.
+% Uses tabularx for full-width layout that handles images and code blocks.
 % Usage:
 %   \begin{testcase}{Test case title}
 %     \testobjective{Verify that X can be created.}
@@ -226,19 +240,19 @@
 %     \testprocedure{1. Click Create. \\ 2. Set parameters. \\ 3. Click Save.}
 %     \testexpected{1. The instance is created. \\ 2. Settings are saved.}
 %     \testremarks{Optional remarks.}
-%     \testresult{Pass/Fail}
+%     \testresult{Pass}
 %   \end{testcase}
 
 \newenvironment{testcase}[1]{%
   \subsection{#1}%
-  \renewcommand{\arraystretch}{1.3}%
+  \renewcommand{\arraystretch}{1.4}%
   \noindent
-  \begin{tabular}{|>{\columncolor{huaweired}\color{white}\bfseries}p{3cm}|p{0.72\textwidth}|}%
+  \begin{tabular}{|>{\columncolor{huaweired}\color{white}\bfseries\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{\dimexpr\textwidth-3.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}%
   \hline
 }{%
   \hline
   \end{tabular}%
-  \vspace{0.5cm}%
+  \vspace{0.6cm}%
 }
 
 % Test case field commands (language-aware labels)
@@ -255,6 +269,89 @@
   \if@showanswers
     \lg@testresult & #1 \\ \hline
   \fi
+}
+
+% =====================================================================
+%  TEST SUMMARY TABLE
+% =====================================================================
+% Overview table showing all test cases with ID, title, and result.
+% Usage:
+%   \begin{testsummary}
+%     \testsummaryrow{TC-001}{Verify MRS cluster}{Pass}
+%     \testsummaryrow{TC-002}{Verify OBS bucket}{Pass}
+%   \end{testsummary}
+
+\newenvironment{testsummary}{%
+  \renewcommand{\arraystretch}{1.3}%
+  \noindent
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{\dimexpr\textwidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2.5cm}|}%
+  \hline
+  \rowcolor{huaweired}
+  {\color{white}\bfseries\lg@testcaseid} &
+  {\color{white}\bfseries\lg@testcasetitle} &
+  {\color{white}\bfseries\lg@teststatus} \\
+  \hline
+}{%
+  \hline
+  \end{tabular}%
+  \vspace{0.5cm}%
+}
+
+\newcommand{\testsummaryrow}[3]{#1 & #2 & #3 \\ \hline}
+
+% =====================================================================
+%  TEST STEPS TABLE
+% =====================================================================
+% Structured step-by-step table for detailed procedures.
+% Usage:
+%   \begin{teststeps}
+%     \teststep{1}{Log in to Console}{Login page displayed}{Pass}
+%     \teststep{2}{Click Create}{Create dialog opens}{Pass}
+%   \end{teststeps}
+
+\newenvironment{teststeps}{%
+  \renewcommand{\arraystretch}{1.3}%
+  \noindent
+  \begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|>{\raggedright\arraybackslash}p{\dimexpr0.5\textwidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\raggedright\arraybackslash}p{\dimexpr0.5\textwidth-1.6cm-4\tabcolsep-2.5\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2cm}|}%
+  \hline
+  \rowcolor{huaweired}
+  {\color{white}\bfseries\lg@step} &
+  {\color{white}\bfseries\lg@action} &
+  {\color{white}\bfseries\lg@expectedresult} &
+  {\color{white}\bfseries\lg@teststatus} \\
+  \hline
+}{%
+  \hline
+  \end{tabular}%
+  \vspace{0.3cm}%
+}
+
+\newcommand{\teststep}[4]{#1 & #2 & #3 & #4 \\ \hline}
+
+% =====================================================================
+%  TEST RESULT BADGE
+% =====================================================================
+% Visual badge for pass/fail/blocked status.
+% Usage: \testresultbadge{Pass}  \testresultbadge{Fail}  \testresultbadge{Blocked}
+
+\newcommand{\testresultbadge}[1]{%
+  \ifstrequal{#1}{Pass}{%
+    \tcbox[on line,colback=green!15,colframe=green!50!black,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Pass\,}%
+  }{%
+    \ifstrequal{#1}{Fail}{%
+      \tcbox[on line,colback=red!15,colframe=red!70!black,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Fail\,}%
+    }{%
+      \ifstrequal{#1}{Blocked}{%
+        \tcbox[on line,colback=orange!15,colframe=orange!80!black,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Blocked\,}%
+      }{%
+        \ifstrequal{#1}{Untested}{%
+          \tcbox[on line,colback=gray!15,colframe=gray!60,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Untested\,}%
+        }{%
+          \tcbox[on line,colback=gray!15,colframe=gray!60,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,#1\,}%
+        }%
+      }%
+    }%
+  }%
 }
 
 \endinput

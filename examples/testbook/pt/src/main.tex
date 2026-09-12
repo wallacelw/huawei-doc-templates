@@ -37,7 +37,8 @@ documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos
 comandos e ambientes disponíveis: capa, sumário, ambiente de caso de teste
 com todos os comandos de campo, bloco de objetivos, blocos de código, imagens,
 caixas de destaque (\inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox}), tabelas, badge,
-caminhos de menu, weblinks, notas, referências param e histórico de versões.
+caminhos de menu, weblinks, notas, referências param, tabela de resumo dos testes,
+tabelas de passos dos testes, emblemas de resultado e histórico de versões.
 \end{infobox}
 
 % =====================================================================
@@ -115,6 +116,21 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \caption{Critérios de aceitação.}
 \end{table}
 
+\subsection{Resumo dos Casos de Teste}
+
+\begin{testsummary}
+  \testsummaryrow{TC-001}{Verificar implantação e saúde do cluster MRS}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-002}{Verificar criação e acessibilidade do bucket OBS}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-003}{Verificar configuração de VPC e grupo de segurança}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-004}{Verificar criação do workspace do DataArts Studio}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-005}{Verificar execução do pipeline de ingestão de dados}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-006}{Verificar consulta Spark SQL no cluster MRS}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-007}{Verificar aplicação de política IAM nos buckets OBS}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-008}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-009}{Verificar implantação de infraestrutura via Terraform}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-010}{Verificar carregamento de dados de teste no OBS}{\testresultbadge{Pass}}
+\end{testsummary}
+
 % =====================================================================
 %  Seção 2 — Arquitetura da Plataforma
 % =====================================================================
@@ -125,13 +141,21 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
     com os componentes necessários (HDFS, YARN, Spark, Hive) e que todos os nós
     apresentam status saudável.}
   \testprerequisites{1. Aplicação da infraestrutura Terraform concluída com sucesso. \\ 2. ID do cluster MRS disponível na saída do Terraform. \\ 3. Usuário IAM possui função \textbf{MRS\_Viewer} ou superior.}
-  \testprocedure{1. Acessar o Console do Huawei Cloud. \\ 2. Navegar em \menu{Console, MapReduce Service, Clusters}. \\ 3. Localizar o cluster pelo nome (ex.: \inlinecode{mrs-poc-cluster}). \\ 4. Verificar se o status do cluster é \textbf{Executando}. \\ 5. Clicar no nome do cluster e revisar a aba \textbf{Componente} — confirmar que HDFS, YARN, Spark e Hive estão listados com status \textbf{Normal}. \\ 6. Revisar a aba \textbf{Nó} — confirmar que todos os nós master e core apresentam status \textbf{Executando}.}
+  \testprocedure{Ver passos de teste abaixo.}
+  \begin{teststeps}
+    \teststep{1}{Acessar o Console do Huawei Cloud}{Painel do Console exibido}{\testresultbadge{Pass}}
+    \teststep{2}{Navegar em \menu{Console, MapReduce Service, Clusters}}{Página de clusters exibida}{\testresultbadge{Pass}}
+    \teststep{3}{Localizar cluster \inlinecode{mrs-poc-cluster}}{Cluster encontrado na lista}{\testresultbadge{Pass}}
+    \teststep{4}{Verificar status do cluster}{Status é \textbf{Executando}}{\testresultbadge{Pass}}
+    \teststep{5}{Revisar aba Componente}{HDFS, YARN, Spark, Hive todos \textbf{Normal}}{\testresultbadge{Pass}}
+    \teststep{6}{Revisar aba Nó}{Todos os nós mostram \textbf{Executando}}{\testresultbadge{Pass}}
+  \end{teststeps}
 
   \image[width=0.8\linewidth]{common-assets/exemplo-menu.png}
 
   \testexpected{1. Status do cluster é \textbf{Executando}. \\ 2. Todos os quatro componentes (HDFS, YARN, Spark, Hive) estão listados com status \textbf{Normal}. \\ 3. Todos os nós apresentam status \textbf{Executando} sem alarmes.}
   \testremarks{Se algum componente apresentar status \textbf{Anormal}, verificar a página de alarmes do MRS antes de registrar o resultado.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-002: Verificar criação e acessibilidade do bucket OBS}
@@ -142,7 +166,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testprocedure{1. Acessar o Console. \\ 2. Navegar em \menu{Console, Object Storage Service}. \\ 3. Localizar o bucket (ex.: \inlinecode{poc-datalake-raw}). \\ 4. Verificar se a classe de armazenamento é \textbf{Standard}. \\ 5. Carregar um arquivo de teste (\inlinecode{test-upload.txt}) no bucket. \\ 6. Baixar o arquivo e comparar seu conteúdo com o original. \\ 7. Excluir o arquivo de teste.}
   \testexpected{1. O bucket existe com classe de armazenamento \textbf{Standard}. \\ 2. O carregamento do arquivo conclui sem erro. \\ 3. O conteúdo do arquivo baixado corresponde ao original. \\ 4. A exclusão do arquivo é realizada com sucesso.}
   \testremarks{A consistência eventual do OBS pode causar um breve atraso antes que um objeto recém-carregado apareça nas listagens.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-003: Verificar configuração de VPC e grupo de segurança}
@@ -153,7 +177,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testprocedure{1. Acessar o Console. \\ 2. Navegar em \menu{Console, Virtual Private Cloud, VPCs}. \\ 3. Localizar a VPC (ex.: \inlinecode{vpc-poc}) e verificar se o bloco CIDR corresponde à arquitetura (ex.: \inlinecode{10.0.0.0/16}). \\ 4. Clicar na sub-rede e verificar seu CIDR (ex.: \inlinecode{10.0.1.0/24}). \\ 5. Navegar até \textbf{Security Groups} e verificar regras de entrada: TCP 22 da sub-rede bastion, TCP 443 do proxy corporativo. \\ 6. Verificar se as regras de saída permitem todo o tráfego (padrão).}
   \testexpected{1. CIDR da VPC é \inlinecode{10.0.0.0/16}. \\ 2. CIDR da sub-rede é \inlinecode{10.0.1.0/24}. \\ 3. Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443 das origens especificadas. \\ 4. Saída permite todo o tráfego.}
   \testremarks{Se o grupo de segurança possuir regras adicionais além da especificação da arquitetura, documentá-las no campo de Observações.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 % =====================================================================
@@ -169,7 +193,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testprocedure{1. Acessar o Console com o usuário IAM de teste. \\ 2. Navegar em \menu{Console, DataArts Studio, Workspaces}. \\ 3. Localizar o workspace (ex.: \inlinecode{poc-workspace}). \\ 4. Clicar em \textbf{Acessar Workspace} para abrir o console do DataArts Studio. \\ 5. Verificar se o painel de navegação à esquerda carrega com os módulos esperados: \textbf{Integração de Dados}, \textbf{Desenvolvimento de Dados}, \textbf{Arquitetura de Dados}.}
   \testexpected{1. O workspace está listado e acessível. \\ 2. O console do DataArts Studio abre sem erros. \\ 3. Todos os três módulos (Integração de Dados, Desenvolvimento de Dados, Arquitetura de Dados) estão visíveis na navegação.}
   \testremarks{Se o workspace falhar ao carregar, verificar o status da instância Dayu e a atribuição da função IAM.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-005: Verificar execução do pipeline de ingestão de dados}
@@ -177,7 +201,15 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
     ingerir dados CSV do OBS, aplicar uma transformação básica
     e gravar o resultado no caminho OBS de destino.}
   \testprerequisites{1. TC-004 concluído (workspace do DataArts Studio acessível). \\ 2. Arquivo CSV de origem (\inlinecode{customers.csv}) existe no bucket OBS raw. \\ 3. Caminho OBS de destino (\inlinecode{poc-datalake-curated/customers/}) está configurado. \\ 4. Pipeline \inlinecode{pl-ingest-customers} está publicado no DataArts Studio.}
-  \testprocedure{1. No console do DataArts Studio, navegar até \textbf{Desenvolvimento de Dados}. \\ 2. Localizar o pipeline \inlinecode{pl-ingest-customers} na lista de jobs. \\ 3. Clicar em \textbf{Executar} para iniciar o pipeline. \\ 4. Aguardar o status do pipeline mudar para \textbf{Sucesso} (timeout: 10 minutos). \\ 5. Navegar até o OBS e verificar se o arquivo de saída existe em \inlinecode{poc-datalake-curated/customers/}. \\ 6. Baixar o arquivo de saída e verificar se a contagem de linhas corresponde à origem (sem perda de dados).}
+  \testprocedure{Ver passos de teste abaixo.}
+  \begin{teststeps}
+    \teststep{1}{Navegar até Desenvolvimento de Dados no DataArts Studio}{Página de Desenvolvimento de Dados carrega}{\testresultbadge{Pass}}
+    \teststep{2}{Localizar pipeline \inlinecode{pl-ingest-customers}}{Pipeline encontrado na lista de jobs}{\testresultbadge{Pass}}
+    \teststep{3}{Clicar em Executar para iniciar o pipeline}{Pipeline inicia execução}{\testresultbadge{Pass}}
+    \teststep{4}{Aguardar status do pipeline (timeout: 10 min)}{Status muda para \textbf{Sucesso}}{\testresultbadge{Pass}}
+    \teststep{5}{Verificar arquivo de saída no OBS}{Arquivo existe no caminho de destino}{\testresultbadge{Pass}}
+    \teststep{6}{Baixar e verificar contagem de linhas}{Contagem de linhas corresponde à origem}{\testresultbadge{Pass}}
+  \end{teststeps}
 
   \begin{code}[bash]
 # Verificar o arquivo de saída no OBS via CLI
@@ -187,7 +219,7 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
 
   \testexpected{1. A execução do pipeline conclui com status \textbf{Sucesso}. \\ 2. O arquivo de saída é criado no caminho OBS de destino. \\ 3. A contagem de linhas do arquivo de saída corresponde ao arquivo de origem.}
   \testremarks{O tempo de execução do pipeline varia conforme o volume de dados. Para a POC, o arquivo de origem contém aproximadamente 10.000 linhas.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-006: Verificar consulta Spark SQL no cluster MRS}
@@ -209,7 +241,7 @@ spark-sql --master yarn \
 
   \testexpected{1. \inlinecode{COUNT(*)} retorna 10.000. \\ 2. A consulta de amostra retorna 5 linhas com valores válidos de \inlinecode{customer\_id} e \inlinecode{name}.}
   \testremarks{Se a CLI do Spark SQL não estiver disponível, utilizar a interface web do componente Spark2x do MRS para submeter a consulta.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 % =====================================================================
@@ -240,7 +272,7 @@ obsutil ls obs://poc-datalake-raw/
 
   \note{Alterações em políticas IAM podem levar até 5 minutos para propagar. Aguardar antes de retestar após modificar uma política.}
 
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-008: Verificar regra de mascaramento de dados do DataArts Studio}
@@ -251,7 +283,7 @@ obsutil ls obs://poc-datalake-raw/
   \testprocedure{1. No console do DataArts Studio, navegar até \textbf{Arquitetura de Dados} $\rightarrow$ \textbf{Mascaramento de Dados}. \\ 2. Verificar se a regra de mascaramento para \inlinecode{customers.ssn} está ativa e utiliza a estratégia \textbf{Mascarar Tudo}. \\ 3. Consultar a tabela \inlinecode{customers} como usuário de teste via console SQL do DataArts Studio. \\ 4. Verificar se a coluna \inlinecode{ssn} retorna valores mascarados (ex.: \inlinecode{*********}) em vez dos dados reais. \\ 5. Consultar a mesma tabela como usuário administrador e verificar se os valores reais são retornados.}
   \testexpected{1. Regra de mascaramento ativa para \inlinecode{customers.ssn}. \\ 2. Usuário não administrador visualiza valores mascarados na coluna \inlinecode{ssn}. \\ 3. Usuário administrador visualiza valores reais na coluna \inlinecode{ssn}.}
   \testremarks{Regras de mascaramento de dados são aplicadas no momento da consulta — os dados subjacentes no OBS/HDFS não são modificados.}
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 % =====================================================================
@@ -287,7 +319,7 @@ terraform state list | wc -l
   ou interrupção de serviços.
   \end{warning}
 
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \begin{testcase}{TC-010: Verificar carregamento de dados de teste no OBS}
@@ -311,7 +343,7 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
 
   \note{Consulte a \weblink{https://support.huaweicloud.com/obs/index.html}{Documentação do Huawei Cloud OBS} para opções avançadas de upload e solução de problemas.}
 
-  \testresult{Aprovado}
+  \testresult{\testresultbadge{Pass}}
 \end{testcase}
 
 \imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do painel de execução de testes mostrando os resultados de todos os casos de teste}

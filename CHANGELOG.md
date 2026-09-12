@@ -3,6 +3,27 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v3.9.0 (2026-09-13)
+
+### Features
+
+- **testsummary environment**: Overview table showing all test cases with ID,
+  title, and pass/fail status. Huawei-red header, full-width layout.
+- **teststeps environment**: Structured 4-column step table (Step, Action,
+  Expected Result, Status) for detailed test procedures. Replaces numbered
+  lists in the `procedure` field.
+- **`\testresultbadge` command**: Visual badge for test results — green for
+  Pass, red for Fail, orange for Blocked, gray for Untested.
+- **Fixed testcase layout**: Switched from `tabular` with fixed `p{0.72\textwidth}`
+  to full-width `tabular` with `\dimexpr`-calculated column width. Images and
+  code blocks now position correctly inside test cases. Text is properly
+  left-aligned with `\raggedright`.
+- **Lua filter**: Added handlers for `testsummary` and `teststeps` environments
+  in `testbook-pandoc.lua` for DOCX/MD/HTML output.
+- **Samples updated**: Both PT and EN samples now demonstrate `testsummary`,
+  `teststeps`, and `\testresultbadge`. TC-001 and TC-005 use `teststeps` tables.
+- **SKILL.md**: Documented all new commands with examples.
+
 ## v3.8.1 (2026-09-13)
 
 ### Fixes

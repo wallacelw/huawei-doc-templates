@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{3.8.1}
+\setdocversion{3.9.0}
 \setdocauthors{Wallace Wu}
 
 \begin{document}
@@ -1210,6 +1210,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{3.9.0}{\today}{\item Added testsummary environment, teststeps environment, and \inlinecode{\textbackslash testresultbadge} command to testbook template. Fixed testcase layout (full-width tabular with proper text alignment).}
   \changelogentry{3.8.1}{\today}{\item End-to-end quality review: fixed testbook PDF metadata title, removed stray user DOCX from template dir, fixed round-trip.sh variable typo, updated stale references in AGENTS.md and README.md, committed testbook sample PDFs, set TZ for pandoc cover time consistency, widened pandoc version range.}
   \changelogentry{3.8.0}{\today}{\item Removed Tips and Tricks chapter (tmux configuration) — required VS Code-specific keybindings that don't generalize across terminal setups.}
   \changelogentry{3.7.0}{\today}{\item Added \inlinecode{testbook} template for POC/acceptance test case documents with \inlinecode{testcase} environment and \inlinecode{[noanswers]} option.}

@@ -314,6 +314,83 @@ with a Huawei-red label column and content column.
   option — use this when generating a "blank" test book for testers to fill
   in by hand.
 
+### Test summary table
+
+The `testsummary` environment renders a 3-column overview table (ID, Title,
+Status) with a Huawei-red header. Use it to provide an at-a-glance summary
+of all test cases and their results.
+
+```latex
+\begin{testsummary}
+  \testsummaryrow{TC-001}{Verify MRS cluster deployment}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-002}{Verify OBS bucket creation}{\testresultbadge{Pass}}
+  \testsummaryrow{TC-003}{Verify VPC configuration}{\testresultbadge{Fail}}
+\end{testsummary}
+```
+
+| Command | Purpose |
+|---|---|
+| `\begin{testsummary} ... \end{testsummary}` | 3-column summary table (ID, Title, Status). |
+| `\testsummaryrow{id}{title}{status}` | One row in the summary table. |
+
+**Language-aware labels:** Column headers adapt to the class option:
+- English (default): **ID**, **Title**, **Status**
+- Portuguese (`[portuguese]`): **ID**, **Título**, **Status**
+
+### Test steps table
+
+The `teststeps` environment renders a 4-column step table (Step, Action,
+Expected Result, Status) with a Huawei-red header. Use it inside a
+`testcase` environment to break down the procedure into discrete,
+verifiable steps with per-step result badges.
+
+```latex
+\begin{teststeps}
+  \teststep{1}{Log in to Console}{Login page displayed}{\testresultbadge{Pass}}
+  \teststep{2}{Click Create}{Create dialog opens}{\testresultbadge{Pass}}
+  \teststep{3}{Enter parameters and submit}{Resource created}{\testresultbadge{Fail}}
+\end{teststeps}
+```
+
+| Command | Purpose |
+|---|---|
+| `\begin{teststeps} ... \end{teststeps}` | 4-column step table (Step, Action, Expected Result, Status). |
+| `\teststep{number}{action}{expected}{status}` | One row in the steps table. |
+
+**Language-aware labels:** Column headers adapt to the class option:
+- English (default): **Step**, **Action**, **Expected Result**, **Status**
+- Portuguese (`[portuguese]`): **Passo**, **Ação**, **Resultado Esperado**, **Status**
+
+### Result badge
+
+The `\testresultbadge` command renders a visual status badge with
+color-coded background: green for Pass, red for Fail, orange for Blocked,
+gray for Untested.
+
+```latex
+\testresultbadge{Pass}      % green badge
+\testresultbadge{Fail}      % red badge
+\testresultbadge{Blocked}   % orange badge
+\testresultbadge{Untested}  % gray badge
+```
+
+| Command | Color | Use |
+|---|---|---|
+| `\testresultbadge{Pass}` | Green background, white text | Test step/case passed. |
+| `\testresultbadge{Fail}` | Red background, white text | Test step/case failed. |
+| `\testresultbadge{Blocked}` | Orange background, white text | Test step/case blocked by dependency. |
+| `\testresultbadge{Untested}` | Gray background, white text | Test step/case not yet executed. |
+
+**Badge labels are not translated** — they always display in English
+(Pass, Fail, Blocked, Untested) regardless of the `portuguese` class option.
+
+**Tip:** Use `\testresultbadge` inside `\testresult{}` for the test case
+result row, and inside `\teststep` for per-step status:
+
+```latex
+\testresult{\testresultbadge{Pass}}
+```
+
 ### Code
 | Command | Result |
 |---|---|
