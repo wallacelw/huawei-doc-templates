@@ -1004,6 +1004,7 @@ set -g allow-passthrough on
 # Enable extended keys so Shift+Enter works in opencode
 set -g extended-keys on
 set -as terminal-features 'xterm*:extkeys'
+set -g extended-keys-format csi-u
 ```
 
 After editing the config, reload it without restarting tmux:

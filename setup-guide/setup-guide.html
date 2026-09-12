@@ -1487,7 +1487,8 @@ following settings to optimize tmux for use with opencode:</p>
 <span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable extended keys so Shift+Enter works in opencode</span></span>
 <span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> extended-keys on</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-as</span> terminal-features <span class="st">&#39;xterm*:extkeys&#39;</span></span></code></pre></div>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-as</span> terminal-features <span class="st">&#39;xterm*:extkeys&#39;</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-g</span> extended-keys-format csi-u</span></code></pre></div>
 <p>After editing the config, reload it without restarting tmux:</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> source-file ~/.tmux.conf</span></code></pre></div>
 <div class="callout warning" role="alert" aria-label="Warning">
