@@ -1077,6 +1077,14 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.4.0**  *2026-09-13*
+
+Code review fixes: removed dead labels, badge now uses Huawei brand
+colors (tipbg/tipfg, huaweired, warningbg/warningfg), Lua filter
+preserves formatting in DOCX/MD/HTML via parse_latex_blocks,
+testprocedure handler preserves non-step content (images, code,
+callouts).
+
 **4.3.0**  *2026-09-13*
 
 Added `testlist` environment for numbered lists with red bold numbers in

@@ -89,18 +89,48 @@ kubectl version --client
 
 ## Resumo dos Casos de Teste
 
-  ID       Título                                                        Status
-  -------- ------------------------------------------------------------- --------
-  TC-001   Verificar implantação e saúde do cluster MRS                  Pass
-  TC-002   Verificar criação e acessibilidade do bucket OBS              Pass
-  TC-003   Verificar configuração de VPC e grupo de segurança            Pass
-  TC-004   Verificar criação do workspace do DataArts Studio             Pass
-  TC-005   Verificar execução do pipeline de ingestão de dados           Pass
-  TC-006   Verificar consulta Spark SQL no cluster MRS                   Pass
-  TC-007   Verificar aplicação de política IAM nos buckets OBS           Pass
-  TC-008   Verificar regra de mascaramento de dados do DataArts Studio   Pass
-  TC-009   Verificar implantação de infraestrutura via Terraform         Pass
-  TC-010   Verificar carregamento de dados de teste no OBS               Pass
+  -----------------------------------------------------------------------
+  ID                      Título                  Status
+  ----------------------- ----------------------- -----------------------
+  TC-001                  Verificar implantação e **Pass**
+                          saúde do cluster MRS    
+
+  TC-002                  Verificar criação e     **Pass**
+                          acessibilidade do       
+                          bucket OBS              
+
+  TC-003                  Verificar configuração  **Pass**
+                          de VPC e grupo de       
+                          segurança               
+
+  TC-004                  Verificar criação do    **Pass**
+                          workspace do DataArts   
+                          Studio                  
+
+  TC-005                  Verificar execução do   **Pass**
+                          pipeline de ingestão de 
+                          dados                   
+
+  TC-006                  Verificar consulta      **Pass**
+                          Spark SQL no cluster    
+                          MRS                     
+
+  TC-007                  Verificar aplicação de  **Pass**
+                          política IAM nos        
+                          buckets OBS             
+
+  TC-008                  Verificar regra de      **Pass**
+                          mascaramento de dados   
+                          do DataArts Studio      
+
+  TC-009                  Verificar implantação   **Pass**
+                          de infraestrutura via   
+                          Terraform               
+
+  TC-010                  Verificar carregamento  **Pass**
+                          de dados de teste no    
+                          OBS                     
+  -----------------------------------------------------------------------
 
 # Arquitetura da Plataforma
 
@@ -112,30 +142,30 @@ Objetivo
     nós apresentam status saudável.
 
 Pré-requisitos
-:   testlist Aplicação da infraestrutura Terraform concluída com
-    sucesso. ID do cluster MRS disponível na saída do Terraform. Usuário
-    IAM possui função MRS_Viewer ou superior. testlist
+
+:   -   Aplicação da infraestrutura Terraform concluída com sucesso. -
+        ID do cluster MRS disponível na saída do Terraform. - Usuário
+        IAM possui função **MRS_Viewer** ou superior.
 
 Procedimento
-
-:   1.  Acessar o Console do Huawei Cloud
-    2.  Navegar em Console, MapReduce Service, Clusters
-    3.  Localizar cluster mrs-poc-cluster
-    4.  Verificar status do cluster
-    5.  Revisar aba Componente
-    6.  Revisar aba Nó
+:   1\. Acessar o Console do Huawei Cloud 2. Navegar em **Console**
+    **→** **MapReduce Service** **→** **Clusters** 3. Localizar cluster
+    `mrs-poc-cluster` 4. Verificar status do cluster 5. Revisar aba
+    Componente 6. Revisar aba Nó
 
 Resultado Esperado
-:   testlist Status do cluster é Executando. Todos os quatro componentes
-    (HDFS, YARN, Spark, Hive) estão listados com status Normal. Todos os
-    nós apresentam status Executando sem alarmes. testlist
+
+:   -   Status do cluster é **Executando**. - Todos os quatro
+        componentes (HDFS, YARN, Spark, Hive) estão listados com status
+        **Normal**. - Todos os nós apresentam status **Executando** sem
+        alarmes.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
-:   Se algum componente apresentar status Anormal, verificar a página de
-    alarmes do MRS antes de registrar o resultado.
+:   Se algum componente apresentar status **Anormal**, verificar a
+    página de alarmes do MRS antes de registrar o resultado.
 
 ## TC-002: Verificar criação e acessibilidade do bucket OBS
 
@@ -145,28 +175,27 @@ Objetivo
     armazenamento correta e é acessível com a política IAM designada.
 
 Pré-requisitos
-:   testlist Nome do bucket OBS definido na configuração Terraform.
-    Política IAM concedendo acesso de leitura/escrita ao bucket está
-    anexada ao usuário de teste. testlist
+
+:   -   Nome do bucket OBS definido na configuração Terraform. -
+        Política IAM concedendo acesso de leitura/escrita ao bucket está
+        anexada ao usuário de teste.
 
 Procedimento
-
-:   1.  Acessar o Console
-    2.  Navegar em Console, Object Storage Service
-    3.  Localizar o bucket (ex.: poc-datalake-raw)
-    4.  Verificar se a classe de armazenamento é Standard
-    5.  Carregar um arquivo de teste (test-upload.txt) no bucket
-    6.  Baixar o arquivo e comparar seu conteúdo com o original
-    7.  Excluir o arquivo de teste
+:   1\. Acessar o Console 2. Navegar em **Console** **→** **Object
+    Storage Service** 3. Localizar o bucket (ex.: `poc-datalake-raw`) 4.
+    Verificar se a classe de armazenamento é **Standard** 5. Carregar um
+    arquivo de teste (`test-upload.txt`) no bucket 6. Baixar o arquivo e
+    comparar seu conteúdo com o original 7. Excluir o arquivo de teste
 
 Resultado Esperado
-:   testlist O bucket existe com classe de armazenamento Standard. O
-    carregamento do arquivo conclui sem erro. O conteúdo do arquivo
-    baixado corresponde ao original. A exclusão do arquivo é realizada
-    com sucesso. testlist
+
+:   -   O bucket existe com classe de armazenamento **Standard**. - O
+        carregamento do arquivo conclui sem erro. - O conteúdo do
+        arquivo baixado corresponde ao original. - A exclusão do arquivo
+        é realizada com sucesso.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   A consistência eventual do OBS pode causar um breve atraso antes que
@@ -180,28 +209,30 @@ Objetivo
     blocos CIDR e regras de entrada/saída corretos.
 
 Pré-requisitos
-:   testlist IDs da VPC e da sub-rede disponíveis na saída do Terraform.
-    Nomes dos grupos de segurança documentados na arquitetura da
-    solução. testlist
+
+:   -   IDs da VPC e da sub-rede disponíveis na saída do Terraform. -
+        Nomes dos grupos de segurança documentados na arquitetura da
+        solução.
 
 Procedimento
-
-:   1.  Acessar o Console
-    2.  Navegar em Console, Virtual Private Cloud, VPCs
-    3.  Localizar a VPC (ex.: vpc-poc) e verificar se o bloco CIDR
-        corresponde à arquitetura (ex.: 10.0.0.0/16)
-    4.  Clicar na sub-rede e verificar seu CIDR (ex.: 10.0.1.0/24)
-    5.  Navegar até Security Groups e verificar regras de entrada: TCP
-        22 da sub-rede bastion, TCP 443 do proxy corporativo
-    6.  Verificar se as regras de saída permitem todo o tráfego (padrão)
+:   1\. Acessar o Console 2. Navegar em **Console** **→** **Virtual
+    Private Cloud** **→** **VPCs** 3. Localizar a VPC (ex.: `vpc-poc`) e
+    verificar se o bloco CIDR corresponde à arquitetura (ex.:
+    `10.0.0.0/16`) 4. Clicar na sub-rede e verificar seu CIDR (ex.:
+    `10.0.1.0/24`) 5. Navegar até **Security Groups** e verificar regras
+    de entrada: TCP 22 da sub-rede bastion, TCP 443 do proxy
+    corporativo 6. Verificar se as regras de saída permitem todo o
+    tráfego (padrão)
 
 Resultado Esperado
-:   testlist CIDR da VPC é 10.0.0.0/16. CIDR da sub-rede é 10.0.1.0/24.
-    Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443 das
-    origens especificadas. Saída permite todo o tráfego. testlist
+
+:   -   CIDR da VPC é `10.0.0.0/16`. - CIDR da sub-rede é
+        `10.0.1.0/24`. - Regras de entrada correspondem à arquitetura:
+        TCP 22 e TCP 443 das origens especificadas. - Saída permite todo
+        o tráfego.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   Se o grupo de segurança possuir regras adicionais além da
@@ -214,32 +245,32 @@ Observações
 Objetivo
 :   Confirmar que a instância do DataArts Studio (Dayu) está
     provisionada, o workspace está acessível e os usuários IAM
-    designados conseguem acessar com a função Dayu_User.
+    designados conseguem acessar com a função **Dayu_User**.
 
 Pré-requisitos
-:   testlist Instância do DataArts Studio provisionada e com status
-    Executando. Usuário IAM de teste possui a função Dayu_User
-    atribuída. testlist
+
+:   -   Instância do DataArts Studio provisionada e com status
+        **Executando**. - Usuário IAM de teste possui a função
+        **Dayu_User** atribuída.
 
 Procedimento
-
-:   1.  Acessar o Console com o usuário IAM de teste
-    2.  Navegar em Console, DataArts Studio, Workspaces
-    3.  Localizar o workspace (ex.: poc-workspace)
-    4.  Clicar em Acessar Workspace para abrir o console do DataArts
-        Studio
-    5.  Verificar se o painel de navegação à esquerda carrega com os
-        módulos esperados: Integração de Dados, Desenvolvimento de
-        Dados, Arquitetura de Dados
+:   1\. Acessar o Console com o usuário IAM de teste 2. Navegar em
+    **Console** **→** **DataArts Studio** **→** **Workspaces** 3.
+    Localizar o workspace (ex.: `poc-workspace`) 4. Clicar em **Acessar
+    Workspace** para abrir o console do DataArts Studio 5. Verificar se
+    o painel de navegação à esquerda carrega com os módulos esperados:
+    **Integração de Dados**, **Desenvolvimento de Dados**, **Arquitetura
+    de Dados**
 
 Resultado Esperado
-:   testlist O workspace está listado e acessível. O console do DataArts
-    Studio abre sem erros. Todos os três módulos (Integração de Dados,
-    Desenvolvimento de Dados, Arquitetura de Dados) estão visíveis na
-    navegação. testlist
+
+:   -   O workspace está listado e acessível. - O console do DataArts
+        Studio abre sem erros. - Todos os três módulos (Integração de
+        Dados, Desenvolvimento de Dados, Arquitetura de Dados) estão
+        visíveis na navegação.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   Se o workspace falhar ao carregar, verificar o status da instância
@@ -253,29 +284,29 @@ Objetivo
     o resultado no caminho OBS de destino.
 
 Pré-requisitos
-:   testlist TC-004 concluído (workspace do DataArts Studio acessível).
-    Arquivo CSV de origem (customers.csv) existe no bucket OBS raw.
-    Caminho OBS de destino (poc-datalake-curated/customers/) está
-    configurado. Pipeline pl-ingest-customers está publicado no DataArts
-    Studio. testlist
+
+:   -   TC-004 concluído (workspace do DataArts Studio acessível). -
+        Arquivo CSV de origem (`customers.csv`) existe no bucket OBS
+        raw. - Caminho OBS de destino
+        (`poc-datalake-curated/customers/`) está configurado. - Pipeline
+        `pl-ingest-customers` está publicado no DataArts Studio.
 
 Procedimento
-
-:   1.  Navegar até Desenvolvimento de Dados no DataArts Studio
-    2.  Localizar pipeline pl-ingest-customers
-    3.  Clicar em Executar para iniciar o pipeline
-    4.  Aguardar status do pipeline (timeout: 10 min)
-    5.  Verificar arquivo de saída no OBS
-    6.  Baixar e verificar contagem de linhas
+:   1\. Navegar até Desenvolvimento de Dados no DataArts Studio 2.
+    Localizar pipeline `pl-ingest-customers` 3. Clicar em Executar para
+    iniciar o pipeline 4. Aguardar status do pipeline (timeout: 10
+    min) 5. Verificar arquivo de saída no OBS 6. Baixar e verificar
+    contagem de linhas
 
 Resultado Esperado
-:   testlist A execução do pipeline conclui com status Sucesso. O
-    arquivo de saída é criado no caminho OBS de destino. A contagem de
-    linhas do arquivo de saída corresponde ao arquivo de origem.
-    testlist
+
+:   -   A execução do pipeline conclui com status **Sucesso**. - O
+        arquivo de saída é criado no caminho OBS de destino. - A
+        contagem de linhas do arquivo de saída corresponde ao arquivo de
+        origem.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   O tempo de execução do pipeline varia conforme o volume de dados.
@@ -290,29 +321,29 @@ Objetivo
     corretos, validando a integração entre o MRS e o data lake.
 
 Pré-requisitos
-:   testlist TC-001 concluído (cluster MRS saudável). Tabela Hive
-    poc_db.customers existe e contém dados carregados pelo pipeline de
-    ingestão. Acesso SSH ao nó master do MRS configurado. testlist
+
+:   -   TC-001 concluído (cluster MRS saudável). - Tabela Hive
+        `poc_db.customers` existe e contém dados carregados pelo
+        pipeline de ingestão. - Acesso SSH ao nó master do MRS
+        configurado.
 
 Procedimento
-
-:   1.  Acessar o nó master do MRS via SSH
-    2.  Executar a CLI do Spark SQL: spark-sql --master yarn -{}-conf
-        spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(\*)
-        FROM poc_db.customers;"
-    3.  Verificar se a contagem retornada corresponde ao esperado
-        (10.000)
-    4.  Executar uma consulta de amostra para verificar a integridade
-        dos dados: spark-sql --master yarn -e "SELECT customer_id, name
-        FROM poc_db.customers LIMIT 5;"
-    5.  Confirmar que a consulta retorna 5 linhas com valores não nulos
+:   1\. Acessar o nó master do MRS via SSH 2. Executar a CLI do Spark
+    SQL:
+    `spark-sql –master yarn --conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc_db.customers;"` 3.
+    Verificar se a contagem retornada corresponde ao esperado
+    (10.000) 4. Executar uma consulta de amostra para verificar a
+    integridade dos dados:
+    `spark-sql –master yarn -e "SELECT customer_id, name FROM poc_db.customers LIMIT 5;"` 5.
+    Confirmar que a consulta retorna 5 linhas com valores não nulos
 
 Resultado Esperado
-:   testlist COUNT(\*) retorna 10.000. A consulta de amostra retorna 5
-    linhas com valores válidos de customer_id e name. testlist
+
+:   -   `COUNT(*)` retorna 10.000. - A consulta de amostra retorna 5
+        linhas com valores válidos de `customer_id` e `name`.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   Se a CLI do Spark SQL não estiver disponível, utilizar a interface
@@ -329,33 +360,32 @@ Objetivo
     princípio do menor privilégio.
 
 Pré-requisitos
-:   testlist Bucket OBS poc-datalake-raw existe com a política IAM
-    designada. Dois usuários IAM de teste: um com função OBS_ReadWrite,
-    outro sem permissões OBS. CLI obsutil configurada para ambos os
-    usuários. testlist
+
+:   -   Bucket OBS `poc-datalake-raw` existe com a política IAM
+        designada. - Dois usuários IAM de teste: um com função
+        **OBS_ReadWrite**, outro sem permissões OBS. - CLI `obsutil`
+        configurada para ambos os usuários.
 
 Procedimento
-
-:   1.  Usando o usuário autorizado, carregar um arquivo de teste em
-        poc-datalake-raw
-    2.  Usando o usuário autorizado, baixar e verificar o conteúdo do
-        arquivo
-    3.  Usando o usuário não autorizado, tentar carregar um arquivo ---
-        verificar se a requisição é negada (HTTP 403)
-    4.  Usando o usuário não autorizado, tentar listar objetos no bucket
-        --- verificar se a requisição é negada
-    5.  Revisar a política do bucket no Console em Console, Object
-        Storage Service, Bucket Policies e confirmar que concede apenas
-        as permissões pretendidas
+:   1\. Usando o usuário autorizado, carregar um arquivo de teste em
+    `poc-datalake-raw` 2. Usando o usuário autorizado, baixar e
+    verificar o conteúdo do arquivo 3. Usando o usuário não autorizado,
+    tentar carregar um arquivo --- verificar se a requisição é negada
+    (HTTP 403) 4. Usando o usuário não autorizado, tentar listar objetos
+    no bucket --- verificar se a requisição é negada 5. Revisar a
+    política do bucket no Console em **Console** **→** **Object Storage
+    Service** **→** **Bucket Policies** e confirmar que concede apenas
+    as permissões pretendidas
 
 Resultado Esperado
-:   testlist Usuário autorizado consegue carregar e baixar com sucesso.
-    Usuário não autorizado recebe HTTP 403 nas operações de carregamento
-    e listagem. Política do bucket concede apenas as permissões de
-    leitura/escrita pretendidas às funções designadas. testlist
+
+:   -   Usuário autorizado consegue carregar e baixar com sucesso. -
+        Usuário não autorizado recebe HTTP 403 nas operações de
+        carregamento e listagem. - Política do bucket concede apenas as
+        permissões de leitura/escrita pretendidas às funções designadas.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   Verificar os logs do Cloud Trail se a negação de acesso não for
@@ -370,31 +400,30 @@ Objetivo
     quando consultadas por usuários não administradores.
 
 Pré-requisitos
-:   testlist TC-004 concluído (workspace do DataArts Studio acessível).
-    Regra de mascaramento configurada para a coluna customers.ssn
-    (Número de Seguro Social). Usuário de teste possui função Dayu_User
-    (não administrador). testlist
+
+:   -   TC-004 concluído (workspace do DataArts Studio acessível). -
+        Regra de mascaramento configurada para a coluna `customers.ssn`
+        (Número de Seguro Social). - Usuário de teste possui função
+        **Dayu_User** (não administrador).
 
 Procedimento
-
-:   1.  No console do DataArts Studio, navegar até Arquitetura de Dados
-        \$\$ Mascaramento de Dados
-    2.  Verificar se a regra de mascaramento para customers.ssn está
-        ativa e utiliza a estratégia Mascarar Tudo
-    3.  Consultar a tabela customers como usuário de teste via console
-        SQL do DataArts Studio
-    4.  Verificar se a coluna ssn retorna valores mascarados (ex.:
-        \*\*\*\*\*\*\*\*\*) em vez dos dados reais
-    5.  Consultar a mesma tabela como usuário administrador e verificar
-        se os valores reais são retornados
+:   1\. No console do DataArts Studio, navegar até **Arquitetura de
+    Dados** $\rightarrow$ **Mascaramento de Dados** 2. Verificar se a
+    regra de mascaramento para `customers.ssn` está ativa e utiliza a
+    estratégia **Mascarar Tudo** 3. Consultar a tabela `customers` como
+    usuário de teste via console SQL do DataArts Studio 4. Verificar se
+    a coluna `ssn` retorna valores mascarados (ex.: `*********`) em vez
+    dos dados reais 5. Consultar a mesma tabela como usuário
+    administrador e verificar se os valores reais são retornados
 
 Resultado Esperado
-:   testlist Regra de mascaramento ativa para customers.ssn. Usuário não
-    administrador visualiza valores mascarados na coluna ssn. Usuário
-    administrador visualiza valores reais na coluna ssn. testlist
+
+:   -   Regra de mascaramento ativa para `customers.ssn`. - Usuário não
+        administrador visualiza valores mascarados na coluna `ssn`. -
+        Usuário administrador visualiza valores reais na coluna `ssn`.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
 :   Regras de mascaramento de dados são aplicadas no momento da consulta
@@ -410,34 +439,34 @@ Objetivo
     erros e que o arquivo de estado reflete os recursos esperados.
 
 Pré-requisitos
-:   testlist CLI terraform instalada (versão \$\$ 1.0). Credenciais
-    AK/SK configuradas via variáveis de ambiente ou provider.tf.
-    Arquivos de configuração Terraform no diretório do projeto. testlist
+
+:   -   CLI `terraform` instalada (versão $\geq$ 1.0). - Credenciais
+        AK/SK configuradas via variáveis de ambiente ou *provider.tf*. -
+        Arquivos de configuração Terraform no diretório do projeto.
 
 Procedimento
-
-:   1.  Navegar até o diretório do projeto Terraform
-    2.  Executar terraform init para inicializar o diretório de trabalho
-    3.  Executar terraform plan e revisar as alterações planejadas ---
-        confirmar que todos os recursos esperados estão listados
-    4.  Executar terraform apply -auto-approve e aguardar a conclusão
-    5.  Executar terraform output e verificar se todos os valores de
-        saída estão preenchidos
-    6.  Executar terraform state list e confirmar que a contagem de
-        recursos corresponde à arquitetura
+:   1\. Navegar até o diretório do projeto Terraform 2. Executar
+    `terraform init` para inicializar o diretório de trabalho 3.
+    Executar `terraform plan` e revisar as alterações planejadas ---
+    confirmar que todos os recursos esperados estão listados 4. Executar
+    `terraform apply -auto-approve` e aguardar a conclusão 5. Executar
+    `terraform output` e verificar se todos os valores de saída estão
+    preenchidos 6. Executar `terraform state list` e confirmar que a
+    contagem de recursos corresponde à arquitetura
 
 Resultado Esperado
-:   testlist terraform apply conclui sem erros. Todos os valores de
-    saída estão preenchidos (ID do cluster, nome do bucket, ID da VPC).
-    Contagem de recursos no estado corresponde à especificação da
-    arquitetura. testlist
+
+:   -   `terraform apply` conclui sem erros. - Todos os valores de saída
+        estão preenchidos (ID do cluster, nome do bucket, ID da VPC). -
+        Contagem de recursos no estado corresponde à especificação da
+        arquitetura.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
-:   Se terraform apply falhar, verificar as credenciais AK/SK e os
-    limites de cota da região sa-brazil-1.
+:   Se `terraform apply` falhar, verificar as credenciais AK/SK e os
+    limites de cota da região `sa-brazil-1`.
 
 ## TC-010: Verificar carregamento de dados de teste no OBS
 
@@ -447,35 +476,35 @@ Objetivo
     pelo pipeline do DataArts Studio.
 
 Pré-requisitos
-:   testlist TC-002 concluído (bucket OBS acessível). Arquivos de dados
-    de teste preparados no diretório local ./test-data/. CLI obsutil
-    configurada com as credenciais do usuário de teste. testlist
+
+:   -   TC-002 concluído (bucket OBS acessível). - Arquivos de dados de
+        teste preparados no diretório local *./test-data/*. - CLI
+        `obsutil` configurada com as credenciais do usuário de teste.
 
 Procedimento
-
-:   1.  Listar os arquivos de dados de teste locais e verificar sua
-        integridade (contagem de linhas, esquema)
-    2.  Carregar todos os arquivos no bucket OBS raw usando obsutil
-    3.  Verificar se cada arquivo existe no OBS listando o conteúdo do
-        bucket
-    4.  Baixar um arquivo de amostra do OBS e compará-lo com o original
-        local (checksum)
-    5.  No DataArts Studio, verificar se a conexão de fonte de dados
-        consegue ler os arquivos carregados
+:   1\. Listar os arquivos de dados de teste locais e verificar sua
+    integridade (contagem de linhas, esquema) 2. Carregar todos os
+    arquivos no bucket OBS raw usando `obsutil` 3. Verificar se cada
+    arquivo existe no OBS listando o conteúdo do bucket 4. Baixar um
+    arquivo de amostra do OBS e compará-lo com o original local
+    (checksum) 5. No DataArts Studio, verificar se a conexão de fonte de
+    dados consegue ler os arquivos carregados
 
 Resultado Esperado
-:   testlist Todos os arquivos de dados de teste são carregados sem
-    erros. A listagem do bucket mostra todos os arquivos carregados com
-    tamanhos corretos. O checksum do arquivo baixado corresponde ao
-    original local. A conexão de fonte de dados do DataArts Studio
-    consegue ler os arquivos. testlist
+
+:   -   Todos os arquivos de dados de teste são carregados sem erros. -
+        A listagem do bucket mostra todos os arquivos carregados com
+        tamanhos corretos. - O checksum do arquivo baixado corresponde
+        ao original local. - A conexão de fonte de dados do DataArts
+        Studio consegue ler os arquivos.
 
 Resultado do Teste
-:   Pass
+:   **Pass**
 
 Observações
-:   Arquivos grandes (\$\>\$1 GB) devem ser carregados usando o recurso
-    de upload multipart do OBS para maior confiabilidade.
+:   Arquivos grandes ($>$`<!-- -->`{=html}1 GB) devem ser carregados
+    usando o recurso de upload multipart do OBS para maior
+    confiabilidade.
 
 *\[Image placeholder: Captura de tela do painel de execução de testes mostrando os resultados de todos os casos de teste\]*
 

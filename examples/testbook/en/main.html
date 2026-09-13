@@ -463,52 +463,52 @@ environment issues.</td>
 <tr class="odd">
 <td>TC-001</td>
 <td>Verify MRS cluster deployment and health</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="even">
 <td>TC-002</td>
 <td>Verify OBS bucket creation and accessibility</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="odd">
 <td>TC-003</td>
 <td>Verify VPC and security group configuration</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="even">
 <td>TC-004</td>
 <td>Verify DataArts Studio workspace creation</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="odd">
 <td>TC-005</td>
 <td>Verify data ingestion pipeline execution</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="even">
 <td>TC-006</td>
 <td>Verify Spark SQL query on MRS cluster</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="odd">
 <td>TC-007</td>
 <td>Verify IAM policy enforcement on OBS buckets</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="even">
 <td>TC-008</td>
 <td>Verify DataArts Studio data masking rule</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="odd">
 <td>TC-009</td>
 <td>Verify Terraform infrastructure deployment</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 <tr class="even">
 <td>TC-010</td>
 <td>Verify test data upload to OBS</td>
-<td>Pass</td>
+<td><strong>Pass</strong></td>
 </tr>
 </tbody>
 </table>
@@ -524,35 +524,37 @@ healthy status.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist Terraform infrastructure apply completed successfully. MRS
-cluster ID is available in the Terraform output. IAM user has MRS_Viewer
-or higher role. testlist
+<ul>
+<li>Terraform infrastructure apply completed successfully. - MRS cluster
+ID is available in the Terraform output. - IAM user has
+<strong>MRS_Viewer</strong> or higher role.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Log in to the Huawei Cloud Console</li>
-<li>Navigate to Console, MapReduce Service, Clusters</li>
-<li>Locate cluster mrs-poc-cluster</li>
-<li>Verify cluster status</li>
-<li>Review Component tab</li>
-<li>Review Node tab</li>
-</ol>
+1. Log in to the Huawei Cloud Console 2. Navigate to
+<strong>Console</strong> <strong>→</strong> <strong>MapReduce
+Service</strong> <strong>→</strong> <strong>Clusters</strong> 3. Locate
+cluster <code>mrs-poc-cluster</code> 4. Verify cluster status 5. Review
+Component tab 6. Review Node tab
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist Cluster status is Running. All four components (HDFS, YARN,
-Spark, Hive) are listed with status Normal. All nodes report status
-Running with no alarms. testlist
+<ul>
+<li>Cluster status is <strong>Running</strong>. - All four components
+(HDFS, YARN, Spark, Hive) are listed with status
+<strong>Normal</strong>. - All nodes report status
+<strong>Running</strong> with no alarms.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
-If any component shows Abnormal, check the MRS alarm page before marking
-the result.
+If any component shows <strong>Abnormal</strong>, check the MRS alarm
+page before marking the result.
 </dd>
 </dl>
 <h2 data-number="2.2"><span class="header-section-number">2.2</span>
@@ -566,31 +568,32 @@ with the designated IAM policy.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist OBS bucket name is defined in the Terraform configuration. IAM
+<ul>
+<li>OBS bucket name is defined in the Terraform configuration. - IAM
 policy granting read/write access to the bucket is attached to the test
-user. testlist
+user.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Log in to the Console</li>
-<li>Navigate to Console, Object Storage Service</li>
-<li>Locate the bucket (e.g. poc-datalake-raw)</li>
-<li>Verify the storage class is Standard</li>
-<li>Upload a test file (test-upload.txt) to the bucket</li>
-<li>Download the file and compare its content with the original</li>
-<li>Delete the test file</li>
-</ol>
+1. Log in to the Console 2. Navigate to <strong>Console</strong>
+<strong>→</strong> <strong>Object Storage Service</strong> 3. Locate the
+bucket (e.g. <code>poc-datalake-raw</code>) 4. Verify the storage class
+is <strong>Standard</strong> 5. Upload a test file
+(<code>test-upload.txt</code>) to the bucket 6. Download the file and
+compare its content with the original 7. Delete the test file
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist Bucket exists with storage class Standard. File upload
-completes without error. Downloaded file content matches the original.
-File deletion succeeds. testlist
+<ul>
+<li>Bucket exists with storage class <strong>Standard</strong>. - File
+upload completes without error. - Downloaded file content matches the
+original. - File deletion succeeds.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -609,32 +612,35 @@ blocks and inbound/outbound rules.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist VPC and subnet IDs are available from the Terraform output.
-Security group names are documented in the solution architecture.
-testlist
+<ul>
+<li>VPC and subnet IDs are available from the Terraform output. -
+Security group names are documented in the solution architecture.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Log in to the Console</li>
-<li>Navigate to Console, Virtual Private Cloud, VPCs</li>
-<li>Locate the VPC (e.g. vpc-poc) and verify its CIDR block matches the
-architecture (e.g. 10.0.0.0/16)</li>
-<li>Click the subnet and verify its CIDR (e.g. 10.0.1.0/24)</li>
-<li>Navigate to Security Groups and verify inbound rules: TCP 22 from
-the bastion subnet, TCP 443 from the corporate proxy</li>
-<li>Verify outbound rules allow all traffic (default)</li>
-</ol>
+1. Log in to the Console 2. Navigate to <strong>Console</strong>
+<strong>→</strong> <strong>Virtual Private Cloud</strong>
+<strong>→</strong> <strong>VPCs</strong> 3. Locate the VPC
+(e.g. <code>vpc-poc</code>) and verify its CIDR block matches the
+architecture (e.g. <code>10.0.0.0/16</code>) 4. Click the subnet and
+verify its CIDR (e.g. <code>10.0.1.0/24</code>) 5. Navigate to
+<strong>Security Groups</strong> and verify inbound rules: TCP 22 from
+the bastion subnet, TCP 443 from the corporate proxy 6. Verify outbound
+rules allow all traffic (default)
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist VPC CIDR is 10.0.0.0/16. Subnet CIDR is 10.0.1.0/24. Inbound
-rules match the architecture: TCP 22 and TCP 443 from the specified
-sources. Outbound allows all traffic. testlist
+<ul>
+<li>VPC CIDR is <code>10.0.0.0/16</code>. - Subnet CIDR is
+<code>10.0.1.0/24</code>. - Inbound rules match the architecture: TCP 22
+and TCP 443 from the specified sources. - Outbound allows all
+traffic.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -650,33 +656,38 @@ TC-004: Verify DataArts Studio workspace creation</h2>
 <dd>
 Confirm that the DataArts Studio (Dayu) instance is provisioned, the
 workspace is accessible, and the designated IAM users can log in with
-the Dayu_User role.
+the <strong>Dayu_User</strong> role.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist DataArts Studio instance is provisioned and its status is
-Running. Test IAM user has the Dayu_User role assigned. testlist
+<ul>
+<li>DataArts Studio instance is provisioned and its status is
+<strong>Running</strong>. - Test IAM user has the
+<strong>Dayu_User</strong> role assigned.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Log in to the Console with the test IAM user</li>
-<li>Navigate to Console, DataArts Studio, Workspaces</li>
-<li>Locate the workspace (e.g. poc-workspace)</li>
-<li>Click Access Workspace to open the DataArts Studio console</li>
-<li>Verify the left navigation panel loads with the expected modules:
-Data Integration, Data Development, Data Architecture</li>
-</ol>
+1. Log in to the Console with the test IAM user 2. Navigate to
+<strong>Console</strong> <strong>→</strong> <strong>DataArts
+Studio</strong> <strong>→</strong> <strong>Workspaces</strong> 3. Locate
+the workspace (e.g. <code>poc-workspace</code>) 4. Click <strong>Access
+Workspace</strong> to open the DataArts Studio console 5. Verify the
+left navigation panel loads with the expected modules: <strong>Data
+Integration</strong>, <strong>Data Development</strong>, <strong>Data
+Architecture</strong>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist Workspace is listed and accessible. DataArts Studio console
-opens without errors. All three modules (Data Integration, Data
-Development, Data Architecture) are visible in the navigation. testlist
+<ul>
+<li>Workspace is listed and accessible. - DataArts Studio console opens
+without errors. - All three modules (Data Integration, Data Development,
+Data Architecture) are visible in the navigation.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -695,31 +706,32 @@ the target OBS path.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist TC-004 completed (DataArts Studio workspace accessible). Source
-CSV file (customers.csv) exists in the OBS raw bucket. Target OBS path
-(poc-datalake-curated/customers/) is configured. Pipeline
-pl-ingest-customers is published in DataArts Studio. testlist
+<ul>
+<li>TC-004 completed (DataArts Studio workspace accessible). - Source
+CSV file (<code>customers.csv</code>) exists in the OBS raw bucket. -
+Target OBS path (<code>poc-datalake-curated/customers/</code>) is
+configured. - Pipeline <code>pl-ingest-customers</code> is published in
+DataArts Studio.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Navigate to Data Development in DataArts Studio</li>
-<li>Locate pipeline pl-ingest-customers</li>
-<li>Click Run to execute the pipeline</li>
-<li>Wait for pipeline status (timeout: 10 min)</li>
-<li>Verify output file in OBS</li>
-<li>Download and verify row count</li>
-</ol>
+1. Navigate to Data Development in DataArts Studio 2. Locate pipeline
+<code>pl-ingest-customers</code> 3. Click Run to execute the pipeline 4.
+Wait for pipeline status (timeout: 10 min) 5. Verify output file in OBS
+6. Download and verify row count
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist Pipeline execution completes with status Success. Output file
-is created in the target OBS path. Row count of the output file matches
-the source file. testlist
+<ul>
+<li>Pipeline execution completes with status <strong>Success</strong>. -
+Output file is created in the target OBS path. - Row count of the output
+file matches the source file.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -738,32 +750,33 @@ integration between MRS and the data lake.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist TC-001 completed (MRS cluster healthy). Hive table
-poc_db.customers exists and contains data loaded by the ingestion
-pipeline. SSH access to the MRS master node is configured. testlist
+<ul>
+<li>TC-001 completed (MRS cluster healthy). - Hive table
+<code>poc_db.customers</code> exists and contains data loaded by the
+ingestion pipeline. - SSH access to the MRS master node is
+configured.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>SSH into the MRS master node</li>
-<li>Run the Spark SQL CLI: spark-sql –master yarn -{}-conf
-spark.sql.hive.convertMetastoreOrc=true -e “SELECT COUNT(*) FROM
-poc_db.customers;”</li>
-<li>Verify the returned count matches the expected row count
-(10,000)</li>
-<li>Run a sample query to verify data integrity: spark-sql –master yarn
--e “SELECT customer_id, name FROM poc_db.customers LIMIT 5;”</li>
-<li>Confirm the query returns 5 rows with non-null values</li>
-</ol>
+1. SSH into the MRS master node 2. Run the Spark SQL CLI:
+<code>spark-sql –master yarn --conf spark.sql.hive.convertMetastoreOrc=true -e &quot;SELECT COUNT(*) FROM poc_db.customers;&quot;</code>
+3. Verify the returned count matches the expected row count (10,000) 4.
+Run a sample query to verify data integrity:
+<code>spark-sql –master yarn -e &quot;SELECT customer_id, name FROM poc_db.customers LIMIT 5;&quot;</code>
+5. Confirm the query returns 5 rows with non-null values
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist COUNT(*) returns 10,000. The sample query returns 5 rows with
-valid customer_id and name values. testlist
+<ul>
+<li><code>COUNT(*)</code> returns 10,000. - The sample query returns 5
+rows with valid <code>customer_id</code> and <code>name</code>
+values.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -783,35 +796,37 @@ the bucket policy matches the principle of least privilege.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist OBS bucket poc-datalake-raw exists with the designated IAM
-policy. Two test IAM users: one with OBS_ReadWrite role, one with no OBS
-permissions. obsutil CLI configured for both users. testlist
+<ul>
+<li>OBS bucket <code>poc-datalake-raw</code> exists with the designated
+IAM policy. - Two test IAM users: one with
+<strong>OBS_ReadWrite</strong> role, one with no OBS permissions. -
+<code>obsutil</code> CLI configured for both users.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Using the authorized user, upload a test file to
-poc-datalake-raw</li>
-<li>Using the authorized user, download and verify the file content</li>
-<li>Using the unauthorized user, attempt to upload a file — verify the
-request is denied (HTTP 403)</li>
-<li>Using the unauthorized user, attempt to list objects in the bucket —
-verify the request is denied</li>
-<li>Review the bucket policy in the Console at Console, Object Storage
-Service, Bucket Policies and confirm it grants only the intended
-permissions</li>
-</ol>
+1. Using the authorized user, upload a test file to
+<code>poc-datalake-raw</code> 2. Using the authorized user, download and
+verify the file content 3. Using the unauthorized user, attempt to
+upload a file — verify the request is denied (HTTP 403) 4. Using the
+unauthorized user, attempt to list objects in the bucket — verify the
+request is denied 5. Review the bucket policy in the Console at
+<strong>Console</strong> <strong>→</strong> <strong>Object Storage
+Service</strong> <strong>→</strong> <strong>Bucket Policies</strong> and
+confirm it grants only the intended permissions
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist Authorized user can upload and download successfully.
-Unauthorized user receives HTTP 403 on both upload and list operations.
-Bucket policy grants only the intended read/write permissions to the
-designated roles. testlist
+<ul>
+<li>Authorized user can upload and download successfully. - Unauthorized
+user receives HTTP 403 on both upload and list operations. - Bucket
+policy grants only the intended read/write permissions to the designated
+roles.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -830,34 +845,36 @@ non-admin users.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist TC-004 completed (DataArts Studio workspace accessible). Data
-masking rule configured for column customers.ssn (Social Security
-Number). Test user has Dayu_User role (not admin). testlist
+<ul>
+<li>TC-004 completed (DataArts Studio workspace accessible). - Data
+masking rule configured for column <code>customers.ssn</code> (Social
+Security Number). - Test user has <strong>Dayu_User</strong> role (not
+admin).</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>In the DataArts Studio console, navigate to Data Architecture $$
-Data Masking</li>
-<li>Verify the masking rule for customers.ssn is active and uses the
-Mask All strategy</li>
-<li>Query the customers table as the test user via DataArts Studio SQL
-console</li>
-<li>Verify the ssn column returns masked values (e.g. *********) instead
-of real data</li>
-<li>Query the same table as an admin user and verify real values are
-returned</li>
-</ol>
+1. In the DataArts Studio console, navigate to <strong>Data
+Architecture</strong> <span class="math inline">→</span> <strong>Data
+Masking</strong> 2. Verify the masking rule for
+<code>customers.ssn</code> is active and uses the <strong>Mask
+All</strong> strategy 3. Query the <code>customers</code> table as the
+test user via DataArts Studio SQL console 4. Verify the <code>ssn</code>
+column returns masked values (e.g. <code>*********</code>) instead of
+real data 5. Query the same table as an admin user and verify real
+values are returned
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist Masking rule is active for customers.ssn. Non-admin user sees
-masked values in the ssn column. Admin user sees real values in the ssn
-column. testlist
+<ul>
+<li>Masking rule is active for <code>customers.ssn</code>. - Non-admin
+user sees masked values in the <code>ssn</code> column. - Admin user
+sees real values in the <code>ssn</code> column.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
@@ -878,37 +895,39 @@ and the state file reflects the expected resources.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist terraform CLI installed (version $$ 1.0). AK/SK credentials
-configured via environment variables or provider.tf. Terraform
-configuration files in the project directory. testlist
+<ul>
+<li><code>terraform</code> CLI installed (version <span class="math inline">≥</span> 1.0). - AK/SK credentials configured via
+environment variables or <em>provider.tf</em>. - Terraform configuration
+files in the project directory.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>Navigate to the Terraform project directory</li>
-<li>Run terraform init to initialize the working directory</li>
-<li>Run terraform plan and review the planned changes — confirm all
-expected resources are listed</li>
-<li>Run terraform apply -auto-approve and wait for completion</li>
-<li>Run terraform output and verify all output values are populated</li>
-<li>Run terraform state list and confirm the resource count matches the
-architecture</li>
-</ol>
+1. Navigate to the Terraform project directory 2. Run
+<code>terraform init</code> to initialize the working directory 3. Run
+<code>terraform plan</code> and review the planned changes — confirm all
+expected resources are listed 4. Run
+<code>terraform apply -auto-approve</code> and wait for completion 5.
+Run <code>terraform output</code> and verify all output values are
+populated 6. Run <code>terraform state list</code> and confirm the
+resource count matches the architecture
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist terraform apply completes with no errors. All output values are
-populated (cluster ID, bucket name, VPC ID). Resource count in state
-matches the architecture specification. testlist
+<ul>
+<li><code>terraform apply</code> completes with no errors. - All output
+values are populated (cluster ID, bucket name, VPC ID). - Resource count
+in state matches the architecture specification.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
-If terraform apply fails, check the AK/SK credentials and the
-sa-brazil-1 region quota limits.
+If <code>terraform apply</code> fails, check the AK/SK credentials and
+the <code>sa-brazil-1</code> region quota limits.
 </dd>
 </dl>
 <h2 data-number="5.2"><span class="header-section-number">5.2</span>
@@ -922,38 +941,39 @@ pipeline.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-testlist TC-002 completed (OBS bucket accessible). Test data files
-prepared in the local directory ./test-data/. obsutil CLI configured
-with the test user credentials. testlist
+<ul>
+<li>TC-002 completed (OBS bucket accessible). - Test data files prepared
+in the local directory <em>./test-data/</em>. - <code>obsutil</code> CLI
+configured with the test user credentials.</li>
+</ul>
 </dd>
 <dt>Procedure</dt>
 <dd>
-<ol type="1">
-<li>List the local test data files and verify their integrity (row
-count, schema)</li>
-<li>Upload all files to the OBS raw bucket using obsutil</li>
-<li>Verify each file exists in OBS by listing the bucket contents</li>
-<li>Download a sample file from OBS and compare it with the local
-original (checksum)</li>
-<li>In DataArts Studio, verify the data source connection can read the
-uploaded files</li>
-</ol>
+1. List the local test data files and verify their integrity (row count,
+schema) 2. Upload all files to the OBS raw bucket using
+<code>obsutil</code> 3. Verify each file exists in OBS by listing the
+bucket contents 4. Download a sample file from OBS and compare it with
+the local original (checksum) 5. In DataArts Studio, verify the data
+source connection can read the uploaded files
 </dd>
 <dt>Expected Result</dt>
 <dd>
-testlist All test data files are uploaded without errors. Bucket listing
-shows all uploaded files with correct sizes. Downloaded file checksum
-matches the local original. DataArts Studio data source connection can
-read the files. testlist
+<ul>
+<li>All test data files are uploaded without errors. - Bucket listing
+shows all uploaded files with correct sizes. - Downloaded file checksum
+matches the local original. - DataArts Studio data source connection can
+read the files.</li>
+</ul>
 </dd>
 <dt>Test Result</dt>
 <dd>
-Pass
+<strong>Pass</strong>
 </dd>
 <dt>Remarks</dt>
 <dd>
-Large files ($&gt;$1 GB) should be uploaded using the OBS multipart
-upload feature for better reliability.
+Large files (<span class="math inline">&gt;</span><!-- -->1 GB) should
+be uploaded using the OBS multipart upload feature for better
+reliability.
 </dd>
 </dl>
 <p><em>[Image placeholder: Screenshot of the test execution dashboard

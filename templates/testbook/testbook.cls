@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.3.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.4.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -99,9 +99,6 @@
   \newcommand{\lg@testcaseid}{ID}
   \newcommand{\lg@testcasetitle}{Título}
   \newcommand{\lg@teststatus}{Status}
-  \newcommand{\lg@step}{Passo}
-  \newcommand{\lg@action}{Ação}
-  \newcommand{\lg@actualresult}{Resultado Obtido}
 \else
   \newcommand{\lg@testcases}{Test Cases}
   \newcommand{\lg@objective}{Objective}
@@ -113,9 +110,6 @@
   \newcommand{\lg@testcaseid}{ID}
   \newcommand{\lg@testcasetitle}{Title}
   \newcommand{\lg@teststatus}{Status}
-  \newcommand{\lg@step}{Step}
-  \newcommand{\lg@action}{Action}
-  \newcommand{\lg@actualresult}{Actual Result}
 \fi
 
 % =====================================================================
@@ -405,18 +399,18 @@
 
 \newcommand{\testresultbadge}[1]{%
   \ifstrequal{#1}{Pass}{%
-    \tcbox[on line,colback=green!15,colframe=green!50!black,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Pass\,}%
+    \tcbox[on line,colback=tipbg,colframe=tipfg,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Pass\,}%
   }{%
     \ifstrequal{#1}{Fail}{%
-      \tcbox[on line,colback=red!15,colframe=red!70!black,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Fail\,}%
+      \tcbox[on line,colback=red!15,colframe=huaweired,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Fail\,}%
     }{%
       \ifstrequal{#1}{Blocked}{%
-        \tcbox[on line,colback=orange!15,colframe=orange!80!black,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Blocked\,}%
+        \tcbox[on line,colback=warningbg,colframe=warningfg,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Blocked\,}%
       }{%
         \ifstrequal{#1}{Untested}{%
-          \tcbox[on line,colback=gray!15,colframe=gray!60,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Untested\,}%
+          \tcbox[on line,colback=codebg,colframe=ruleblack,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Untested\,}%
         }{%
-          \tcbox[on line,colback=gray!15,colframe=gray!60,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,#1\,}%
+          \tcbox[on line,colback=codebg,colframe=ruleblack,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,#1\,}%
         }%
       }%
     }%

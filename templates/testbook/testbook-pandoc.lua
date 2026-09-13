@@ -45,8 +45,6 @@ local config = {
       testcaseid = "ID",
       testcasetitle = "Title",
       teststatus = "Status",
-      step = "Step",
-      action = "Action",
     },
     pt = {
       warning = "Importante", tip = "Dica", infobox = "Informação",
@@ -64,8 +62,6 @@ local config = {
       testcaseid = "ID",
       testcasetitle = "Título",
       teststatus = "Status",
-      step = "Passo",
-      action = "Ação",
     },
   },
   strip_commands = {
@@ -107,14 +103,21 @@ local config = {
       -- Add subsection heading for the test case title
       blocks:insert(pandoc.Header(2, pandoc.Inlines({pandoc.Str(title)})))
 
-      -- cell_to_md: strip LaTeX commands and convert to markdown-safe text.
+      -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
       local function cell_to_md(cell_text)
         cell_text = cell_text:gsub("\\\\", "\n")
-        local prev = nil
-        while prev ~= cell_text do
-          prev = cell_text
-          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        -- Preprocess testbook-specific commands to standard LaTeX
+        cell_text = cell_text:gsub("\\testresultbadge%s*(%b{})", function(arg)
+          return "\\textbf{" .. arg:sub(2, -2) .. "}"
+        end)
+        cell_text = cell_text:gsub("\\begin%s*{testlist}", "\\begin{itemize}")
+        cell_text = cell_text:gsub("\\end%s*{testlist}", "\\end{itemize}")
+        local blocks = parse_latex_blocks(cell_text)
+        if blocks and #blocks > 0 then
+          local doc = pandoc.Pandoc(blocks)
+          return pandoc.write(doc, "markdown"):gsub("\n", " "):gsub("%s+$", "")
         end
+        -- Fallback: strip LaTeX commands naively
         cell_text = cell_text:gsub("\\_", "_")
         cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
         return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
@@ -144,19 +147,17 @@ local config = {
             -- Extract environment body (e.g. testprocedure)
             local env_body = body:match("\\begin%s*{" .. field.env .. "}%s*(.-)%s*\\end%s*{" .. field.env .. "}")
             if env_body then
-              -- Parse \teststep{action} commands (1 arg, auto-numbered)
-              local steps = {}
-              for action in env_body:gmatch("\\teststep%s*(%b{})") do
-                table.insert(steps, action:sub(2, -2))
-              end
-              if #steps > 0 then
-                -- Render as a numbered list
-                local step_lines = {}
-                for i, action in ipairs(steps) do
-                  step_lines[#step_lines + 1] = i .. ". " .. cell_to_md(action)
-                end
-                content = table.concat(step_lines, "\n")
-              end
+              -- Preprocess \teststep{action} → numbered list items
+              local step_num = 0
+              local processed = env_body:gsub("\\teststep%s*(%b{})", function(action)
+                step_num = step_num + 1
+                return "\n" .. step_num .. ". " .. action:sub(2, -2) .. "\n"
+              end)
+              -- Strip remaining \begin{testlist}/\end{testlist} and \item
+              processed = processed:gsub("\\begin%s*{testlist}", "")
+              processed = processed:gsub("\\end%s*{testlist}", "")
+              processed = processed:gsub("\\item%s*", "")
+              content = processed
             end
           else
             local raw = body:match("\\" .. field.cmd .. "%s*(%b{})")
@@ -197,13 +198,21 @@ local config = {
       local body = text:match("\\begin%s*{testsummary}%s*(.-)%s*\\end%s*{testsummary}")
       if not body then return nil end
 
+      -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
       local function cell_to_md(cell_text)
         cell_text = cell_text:gsub("\\\\", "\n")
-        local prev = nil
-        while prev ~= cell_text do
-          prev = cell_text
-          cell_text = cell_text:gsub("\\[a-zA-Z]+%s*(%b{})", function(m) return m:sub(2, -2) end)
+        -- Preprocess testbook-specific commands to standard LaTeX
+        cell_text = cell_text:gsub("\\testresultbadge%s*(%b{})", function(arg)
+          return "\\textbf{" .. arg:sub(2, -2) .. "}"
+        end)
+        cell_text = cell_text:gsub("\\begin%s*{testlist}", "\\begin{itemize}")
+        cell_text = cell_text:gsub("\\end%s*{testlist}", "\\end{itemize}")
+        local blocks = parse_latex_blocks(cell_text)
+        if blocks and #blocks > 0 then
+          local doc = pandoc.Pandoc(blocks)
+          return pandoc.write(doc, "markdown"):gsub("\n", " "):gsub("%s+$", "")
         end
+        -- Fallback: strip LaTeX commands naively
         cell_text = cell_text:gsub("\\_", "_")
         cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
         return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))

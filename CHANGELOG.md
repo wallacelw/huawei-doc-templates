@@ -3,6 +3,21 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.4.0 (2026-09-13)
+
+### Fixes (code review)
+
+- **Removed dead labels**: `\lg@step`, `\lg@action`, `\lg@actualresult` were
+  leftovers from the old tabular teststep format. Removed from cls and Lua.
+- **Badge brand colors**: `\testresultbadge` now uses Huawei brand colors
+  (`tipbg`/`tipfg` for Pass, `huaweired` for Fail, `warningbg`/`warningfg`
+  for Blocked, `codebg`/`ruleblack` for Untested) instead of raw xcolor mixes.
+- **Lua filter formatting**: Replaced naive `cell_to_md` with
+  `parse_latex_blocks`-aware version that preserves `\textbf`, `\inlinecode`,
+  `\menu`, and other formatting in DOCX/MD/HTML output.
+- **Lua filter testprocedure**: Handler now preserves non-step content (images,
+  code blocks, callouts) between `\teststep` commands, matching the PDF.
+
 ## v4.3.0 (2026-09-13)
 
 ### Features
