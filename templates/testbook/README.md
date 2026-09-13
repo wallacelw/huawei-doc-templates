@@ -122,23 +122,19 @@ from either folder.
 
 \begin{testcase}{TC-001: Create ECS instance}
   \testobjective{Verify that an ECS instance can be created.}
-  \testprerequisites{
-    \begin{testlist}
-      \item Account is active.
-      \item VPC exists.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{Account is active.}
+    \teststep{VPC exists.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Navigate to ECS}
     \teststep{Click Create}
     \teststep{Fill parameters and click OK}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item Instance is created.
-      \item Status is Running.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Instance is created.}
+    \teststep{Status is Running.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{Test with basic and general-purpose specs.}
 \end{testcase}

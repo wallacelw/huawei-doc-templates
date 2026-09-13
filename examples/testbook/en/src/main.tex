@@ -140,13 +140,11 @@ infrastructure changes and avoid unintended resource modifications.
   \testobjective{Confirm that the MapReduce Service (MRS) cluster is deployed
     with the required components (HDFS, YARN, Spark, Hive) and all nodes
     report a healthy status.}
-  \testprerequisites{
-    \begin{testlist}
-      \item Terraform infrastructure apply completed successfully.
-      \item MRS cluster ID is available in the Terraform output.
-      \item IAM user has \textbf{MRS\_Viewer} or higher role.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{Terraform infrastructure apply completed successfully.}
+    \teststep{MRS cluster ID is available in the Terraform output.}
+    \teststep{IAM user has \textbf{MRS\_Viewer} or higher role.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Log in to the Huawei Cloud Console}
     \teststep{Navigate to \menu{Console, MapReduce Service, Clusters}}
@@ -158,13 +156,11 @@ infrastructure changes and avoid unintended resource modifications.
 
   \image[width=0.8\linewidth]{common-assets/exemplo-menu.png}
 
-  \testexpected{
-    \begin{testlist}
-      \item Cluster status is \textbf{Running}.
-      \item All four components (HDFS, YARN, Spark, Hive) are listed with status \textbf{Normal}.
-      \item All nodes report status \textbf{Running} with no alarms.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Cluster status is \textbf{Running}.}
+    \teststep{All four components (HDFS, YARN, Spark, Hive) are listed with status \textbf{Normal}.}
+    \teststep{All nodes report status \textbf{Running} with no alarms.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{If any component shows \textbf{Abnormal}, check the MRS alarm page before marking the result.}
 \end{testcase}
@@ -173,12 +169,10 @@ infrastructure changes and avoid unintended resource modifications.
   \testobjective{Confirm that the Object Storage Service (OBS) bucket used
     for the POC data lake is created, has the correct storage class, and
     is accessible with the designated IAM policy.}
-  \testprerequisites{
-    \begin{testlist}
-      \item OBS bucket name is defined in the Terraform configuration.
-      \item IAM policy granting read/write access to the bucket is attached to the test user.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{OBS bucket name is defined in the Terraform configuration.}
+    \teststep{IAM policy granting read/write access to the bucket is attached to the test user.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Log in to the Console}
     \teststep{Navigate to \menu{Console, Object Storage Service}}
@@ -188,14 +182,12 @@ infrastructure changes and avoid unintended resource modifications.
     \teststep{Download the file and compare its content with the original}
     \teststep{Delete the test file}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item Bucket exists with storage class \textbf{Standard}.
-      \item File upload completes without error.
-      \item Downloaded file content matches the original.
-      \item File deletion succeeds.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Bucket exists with storage class \textbf{Standard}.}
+    \teststep{File upload completes without error.}
+    \teststep{Downloaded file content matches the original.}
+    \teststep{File deletion succeeds.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{OBS eventual consistency may cause a brief delay before a newly uploaded object appears in listings.}
 \end{testcase}
@@ -204,12 +196,10 @@ infrastructure changes and avoid unintended resource modifications.
   \testobjective{Confirm that the VPC, subnet, and security groups are
     configured according to the network architecture diagram, with the
     correct CIDR blocks and inbound/outbound rules.}
-  \testprerequisites{
-    \begin{testlist}
-      \item VPC and subnet IDs are available from the Terraform output.
-      \item Security group names are documented in the solution architecture.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{VPC and subnet IDs are available from the Terraform output.}
+    \teststep{Security group names are documented in the solution architecture.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Log in to the Console}
     \teststep{Navigate to \menu{Console, Virtual Private Cloud, VPCs}}
@@ -218,14 +208,12 @@ infrastructure changes and avoid unintended resource modifications.
     \teststep{Navigate to \textbf{Security Groups} and verify inbound rules: TCP 22 from the bastion subnet, TCP 443 from the corporate proxy}
     \teststep{Verify outbound rules allow all traffic (default)}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item VPC CIDR is \inlinecode{10.0.0.0/16}.
-      \item Subnet CIDR is \inlinecode{10.0.1.0/24}.
-      \item Inbound rules match the architecture: TCP 22 and TCP 443 from the specified sources.
-      \item Outbound allows all traffic.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{VPC CIDR is \inlinecode{10.0.0.0/16}.}
+    \teststep{Subnet CIDR is \inlinecode{10.0.1.0/24}.}
+    \teststep{Inbound rules match the architecture: TCP 22 and TCP 443 from the specified sources.}
+    \teststep{Outbound allows all traffic.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{If the security group has additional rules beyond the architecture spec, document them in the Remarks field.}
 \end{testcase}
@@ -239,12 +227,10 @@ infrastructure changes and avoid unintended resource modifications.
   \testobjective{Confirm that the DataArts Studio (Dayu) instance is
     provisioned, the workspace is accessible, and the designated IAM
     users can log in with the \textbf{Dayu\_User} role.}
-  \testprerequisites{
-    \begin{testlist}
-      \item DataArts Studio instance is provisioned and its status is \textbf{Running}.
-      \item Test IAM user has the \textbf{Dayu\_User} role assigned.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{DataArts Studio instance is provisioned and its status is \textbf{Running}.}
+    \teststep{Test IAM user has the \textbf{Dayu\_User} role assigned.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Log in to the Console with the test IAM user}
     \teststep{Navigate to \menu{Console, DataArts Studio, Workspaces}}
@@ -252,13 +238,11 @@ infrastructure changes and avoid unintended resource modifications.
     \teststep{Click \textbf{Access Workspace} to open the DataArts Studio console}
     \teststep{Verify the left navigation panel loads with the expected modules: \textbf{Data Integration}, \textbf{Data Development}, \textbf{Data Architecture}}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item Workspace is listed and accessible.
-      \item DataArts Studio console opens without errors.
-      \item All three modules (Data Integration, Data Development, Data Architecture) are visible in the navigation.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Workspace is listed and accessible.}
+    \teststep{DataArts Studio console opens without errors.}
+    \teststep{All three modules (Data Integration, Data Development, Data Architecture) are visible in the navigation.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{If the workspace fails to load, check the Dayu instance status and the IAM role assignment.}
 \end{testcase}
@@ -267,14 +251,12 @@ infrastructure changes and avoid unintended resource modifications.
   \testobjective{Confirm that a DataArts Studio batch pipeline can
     successfully ingest CSV data from OBS, apply a basic transformation,
     and write the result to the target OBS path.}
-  \testprerequisites{
-    \begin{testlist}
-      \item TC-004 completed (DataArts Studio workspace accessible).
-      \item Source CSV file (\inlinecode{customers.csv}) exists in the OBS raw bucket.
-      \item Target OBS path (\inlinecode{poc-datalake-curated/customers/}) is configured.
-      \item Pipeline \inlinecode{pl-ingest-customers} is published in DataArts Studio.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{TC-004 completed (DataArts Studio workspace accessible).}
+    \teststep{Source CSV file (\inlinecode{customers.csv}) exists in the OBS raw bucket.}
+    \teststep{Target OBS path (\inlinecode{poc-datalake-curated/customers/}) is configured.}
+    \teststep{Pipeline \inlinecode{pl-ingest-customers} is published in DataArts Studio.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Navigate to Data Development in DataArts Studio}
     \teststep{Locate pipeline \inlinecode{pl-ingest-customers}}
@@ -290,13 +272,11 @@ obsutil ls obs://poc-datalake-curated/customers/ -limit=10
 obsutil stat obs://poc-datalake-curated/customers/output.csv
   \end{code}
 
-  \testexpected{
-    \begin{testlist}
-      \item Pipeline execution completes with status \textbf{Success}.
-      \item Output file is created in the target OBS path.
-      \item Row count of the output file matches the source file.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Pipeline execution completes with status \textbf{Success}.}
+    \teststep{Output file is created in the target OBS path.}
+    \teststep{Row count of the output file matches the source file.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{Pipeline execution time varies with data volume. For the POC, the source file contains approximately 10,000 rows.}
 \end{testcase}
@@ -305,13 +285,11 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
   \testobjective{Confirm that a Spark SQL query can be executed on the
     MRS cluster to read data from a Hive table and return correct
     results, validating the integration between MRS and the data lake.}
-  \testprerequisites{
-    \begin{testlist}
-      \item TC-001 completed (MRS cluster healthy).
-      \item Hive table \inlinecode{poc\_db.customers} exists and contains data loaded by the ingestion pipeline.
-      \item SSH access to the MRS master node is configured.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{TC-001 completed (MRS cluster healthy).}
+    \teststep{Hive table \inlinecode{poc\_db.customers} exists and contains data loaded by the ingestion pipeline.}
+    \teststep{SSH access to the MRS master node is configured.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{SSH into the MRS master node}
     \teststep{Run the Spark SQL CLI: \inlinecode{spark-sql --master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc\_db.customers;"}}
@@ -330,12 +308,10 @@ spark-sql --master yarn \
   -e "SELECT COUNT(*) FROM poc_db.customers;"
   \end{code}
 
-  \testexpected{
-    \begin{testlist}
-      \item \inlinecode{COUNT(*)} returns 10,000.
-      \item The sample query returns 5 rows with valid \inlinecode{customer\_id} and \inlinecode{name} values.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{\inlinecode{COUNT(*)} returns 10,000.}
+    \teststep{The sample query returns 5 rows with valid \inlinecode{customer\_id} and \inlinecode{name} values.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{If the Spark SQL CLI is not available, use the MRS Spark2x component's web UI to submit the query instead.}
 \end{testcase}
@@ -349,13 +325,11 @@ spark-sql --master yarn \
   \testobjective{Confirm that IAM policies correctly restrict OBS bucket
     access — authorized users can read/write while unauthorized users are
     denied, and the bucket policy matches the principle of least privilege.}
-  \testprerequisites{
-    \begin{testlist}
-      \item OBS bucket \inlinecode{poc-datalake-raw} exists with the designated IAM policy.
-      \item Two test IAM users: one with \textbf{OBS\_ReadWrite} role, one with no OBS permissions.
-      \item \inlinecode{obsutil} CLI configured for both users.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{OBS bucket \inlinecode{poc-datalake-raw} exists with the designated IAM policy.}
+    \teststep{Two test IAM users: one with \textbf{OBS\_ReadWrite} role, one with no OBS permissions.}
+    \teststep{\inlinecode{obsutil} CLI configured for both users.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Using the authorized user, upload a test file to \inlinecode{poc-datalake-raw}}
     \teststep{Using the authorized user, download and verify the file content}
@@ -374,13 +348,11 @@ obsutil cp test-file.txt obs://poc-datalake-raw/unauthorized.txt
 obsutil ls obs://poc-datalake-raw/
   \end{code}
 
-  \testexpected{
-    \begin{testlist}
-      \item Authorized user can upload and download successfully.
-      \item Unauthorized user receives HTTP 403 on both upload and list operations.
-      \item Bucket policy grants only the intended read/write permissions to the designated roles.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Authorized user can upload and download successfully.}
+    \teststep{Unauthorized user receives HTTP 403 on both upload and list operations.}
+    \teststep{Bucket policy grants only the intended read/write permissions to the designated roles.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{Check the Cloud Trail logs if access denial is not returned as expected — there may be a policy inheritance from the project or domain level.}
 
@@ -392,13 +364,11 @@ obsutil ls obs://poc-datalake-raw/
   \testobjective{Confirm that sensitive data columns (e.g. PII fields) are
     masked according to the DataArts Studio data masking rule when queried
     by non-admin users.}
-  \testprerequisites{
-    \begin{testlist}
-      \item TC-004 completed (DataArts Studio workspace accessible).
-      \item Data masking rule configured for column \inlinecode{customers.ssn} (Social Security Number).
-      \item Test user has \textbf{Dayu\_User} role (not admin).
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{TC-004 completed (DataArts Studio workspace accessible).}
+    \teststep{Data masking rule configured for column \inlinecode{customers.ssn} (Social Security Number).}
+    \teststep{Test user has \textbf{Dayu\_User} role (not admin).}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{In the DataArts Studio console, navigate to \textbf{Data Architecture} $\rightarrow$ \textbf{Data Masking}}
     \teststep{Verify the masking rule for \inlinecode{customers.ssn} is active and uses the \textbf{Mask All} strategy}
@@ -406,13 +376,11 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Verify the \inlinecode{ssn} column returns masked values (e.g. \inlinecode{*********}) instead of real data}
     \teststep{Query the same table as an admin user and verify real values are returned}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item Masking rule is active for \inlinecode{customers.ssn}.
-      \item Non-admin user sees masked values in the \inlinecode{ssn} column.
-      \item Admin user sees real values in the \inlinecode{ssn} column.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Masking rule is active for \inlinecode{customers.ssn}.}
+    \teststep{Non-admin user sees masked values in the \inlinecode{ssn} column.}
+    \teststep{Admin user sees real values in the \inlinecode{ssn} column.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{Data masking rules apply at query time — the underlying data in OBS/HDFS is not modified.}
 \end{testcase}
@@ -426,13 +394,11 @@ obsutil ls obs://poc-datalake-raw/
   \testobjective{Confirm that the Terraform configuration deploys all
     required infrastructure resources (VPC, MRS, OBS, DataArts Studio)
     without errors and the state file reflects the expected resources.}
-  \testprerequisites{
-    \begin{testlist}
-      \item \inlinecode{terraform} CLI installed (version $\geq$ 1.0).
-      \item AK/SK credentials configured via environment variables or \param{provider.tf}.
-      \item Terraform configuration files in the project directory.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{\inlinecode{terraform} CLI installed (version $\geq$ 1.0).}
+    \teststep{AK/SK credentials configured via environment variables or \param{provider.tf}.}
+    \teststep{Terraform configuration files in the project directory.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Navigate to the Terraform project directory}
     \teststep{Run \inlinecode{terraform init} to initialize the working directory}
@@ -454,13 +420,11 @@ terraform output
 terraform state list | wc -l
   \end{code}
 
-  \testexpected{
-    \begin{testlist}
-      \item \inlinecode{terraform apply} completes with no errors.
-      \item All output values are populated (cluster ID, bucket name, VPC ID).
-      \item Resource count in state matches the architecture specification.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{\inlinecode{terraform apply} completes with no errors.}
+    \teststep{All output values are populated (cluster ID, bucket name, VPC ID).}
+    \teststep{Resource count in state matches the architecture specification.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{If \inlinecode{terraform apply} fails, check the AK/SK credentials and the \inlinecode{sa-brazil-1} region quota limits.}
 
@@ -475,13 +439,11 @@ terraform state list | wc -l
   \testobjective{Confirm that all required test data files (CSV, JSON) can
     be uploaded to the designated OBS bucket and are accessible by the
     DataArts Studio pipeline.}
-  \testprerequisites{
-    \begin{testlist}
-      \item TC-002 completed (OBS bucket accessible).
-      \item Test data files prepared in the local directory \param{./test-data/}.
-      \item \inlinecode{obsutil} CLI configured with the test user credentials.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{TC-002 completed (OBS bucket accessible).}
+    \teststep{Test data files prepared in the local directory \param{./test-data/}.}
+    \teststep{\inlinecode{obsutil} CLI configured with the test user credentials.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{List the local test data files and verify their integrity (row count, schema)}
     \teststep{Upload all files to the OBS raw bucket using \inlinecode{obsutil}}
@@ -499,14 +461,12 @@ obsutil cp ./test-data/transactions.json obs://poc-datalake-raw/transactions.jso
 obsutil ls obs://poc-datalake-raw/ -limit=20
   \end{code}
 
-  \testexpected{
-    \begin{testlist}
-      \item All test data files are uploaded without errors.
-      \item Bucket listing shows all uploaded files with correct sizes.
-      \item Downloaded file checksum matches the local original.
-      \item DataArts Studio data source connection can read the files.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{All test data files are uploaded without errors.}
+    \teststep{Bucket listing shows all uploaded files with correct sizes.}
+    \teststep{Downloaded file checksum matches the local original.}
+    \teststep{DataArts Studio data source connection can read the files.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{Large files ($>$1 GB) should be uploaded using the OBS multipart upload feature for better reliability.}
 

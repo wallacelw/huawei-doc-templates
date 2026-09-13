@@ -534,11 +534,9 @@ apresentam status saudável.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>Aplicação da infraestrutura Terraform concluída com sucesso. - ID do
-cluster MRS disponível na saída do Terraform. - Usuário IAM possui
-função <strong>MRS_Viewer</strong> ou superior.</li>
-</ul>
+1. Aplicação da infraestrutura Terraform concluída com sucesso. 2. ID do
+cluster MRS disponível na saída do Terraform. 3. Usuário IAM possui
+função <strong>MRS_Viewer</strong> ou superior.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -550,12 +548,10 @@ cluster 5. Revisar aba Componente 6. Revisar aba Nó
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>Status do cluster é <strong>Executando</strong>. - Todos os quatro
+1. Status do cluster é <strong>Executando</strong>. 2. Todos os quatro
 componentes (HDFS, YARN, Spark, Hive) estão listados com status
-<strong>Normal</strong>. - Todos os nós apresentam status
-<strong>Executando</strong> sem alarmes.</li>
-</ul>
+<strong>Normal</strong>. 3. Todos os nós apresentam status
+<strong>Executando</strong> sem alarmes.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -578,11 +574,9 @@ data lake da POC está criado, possui a classe de armazenamento correta e
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>Nome do bucket OBS definido na configuração Terraform. - Política
+1. Nome do bucket OBS definido na configuração Terraform. 2. Política
 IAM concedendo acesso de leitura/escrita ao bucket está anexada ao
-usuário de teste.</li>
-</ul>
+usuário de teste.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -595,12 +589,10 @@ comparar seu conteúdo com o original 7. Excluir o arquivo de teste
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>O bucket existe com classe de armazenamento
-<strong>Standard</strong>. - O carregamento do arquivo conclui sem erro.
-- O conteúdo do arquivo baixado corresponde ao original. - A exclusão do
-arquivo é realizada com sucesso.</li>
-</ul>
+1. O bucket existe com classe de armazenamento
+<strong>Standard</strong>. 2. O carregamento do arquivo conclui sem
+erro. 3. O conteúdo do arquivo baixado corresponde ao original. 4. A
+exclusão do arquivo é realizada com sucesso.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -623,10 +615,8 @@ CIDR e regras de entrada/saída corretos.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>IDs da VPC e da sub-rede disponíveis na saída do Terraform. - Nomes
-dos grupos de segurança documentados na arquitetura da solução.</li>
-</ul>
+1. IDs da VPC e da sub-rede disponíveis na saída do Terraform. 2. Nomes
+dos grupos de segurança documentados na arquitetura da solução.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -642,12 +632,10 @@ regras de saída permitem todo o tráfego (padrão)
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>CIDR da VPC é <code>10.0.0.0/16</code>. - CIDR da sub-rede é
-<code>10.0.1.0/24</code>. - Regras de entrada correspondem à
-arquitetura: TCP 22 e TCP 443 das origens especificadas. - Saída permite
-todo o tráfego.</li>
-</ul>
+1. CIDR da VPC é <code>10.0.0.0/16</code>. 2. CIDR da sub-rede é
+<code>10.0.1.0/24</code>. 3. Regras de entrada correspondem à
+arquitetura: TCP 22 e TCP 443 das origens especificadas. 4. Saída
+permite todo o tráfego.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -671,11 +659,9 @@ com a função <strong>Dayu_User</strong>.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>Instância do DataArts Studio provisionada e com status
-<strong>Executando</strong>. - Usuário IAM de teste possui a função
-<strong>Dayu_User</strong> atribuída.</li>
-</ul>
+1. Instância do DataArts Studio provisionada e com status
+<strong>Executando</strong>. 2. Usuário IAM de teste possui a função
+<strong>Dayu_User</strong> atribuída.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -691,12 +677,10 @@ Dados</strong>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>O workspace está listado e acessível. - O console do DataArts Studio
-abre sem erros. - Todos os três módulos (Integração de Dados,
+1. O workspace está listado e acessível. 2. O console do DataArts Studio
+abre sem erros. 3. Todos os três módulos (Integração de Dados,
 Desenvolvimento de Dados, Arquitetura de Dados) estão visíveis na
-navegação.</li>
-</ul>
+navegação.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -719,13 +703,11 @@ no caminho OBS de destino.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>TC-004 concluído (workspace do DataArts Studio acessível). - Arquivo
-CSV de origem (<code>customers.csv</code>) existe no bucket OBS raw. -
+1. TC-004 concluído (workspace do DataArts Studio acessível). 2. Arquivo
+CSV de origem (<code>customers.csv</code>) existe no bucket OBS raw. 3.
 Caminho OBS de destino (<code>poc-datalake-curated/customers/</code>)
-está configurado. - Pipeline <code>pl-ingest-customers</code> está
-publicado no DataArts Studio.</li>
-</ul>
+está configurado. 4. Pipeline <code>pl-ingest-customers</code> está
+publicado no DataArts Studio.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -737,11 +719,9 @@ linhas
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>A execução do pipeline conclui com status <strong>Sucesso</strong>.
-- O arquivo de saída é criado no caminho OBS de destino. - A contagem de
-linhas do arquivo de saída corresponde ao arquivo de origem.</li>
-</ul>
+1. A execução do pipeline conclui com status <strong>Sucesso</strong>.
+2. O arquivo de saída é criado no caminho OBS de destino. 3. A contagem
+de linhas do arquivo de saída corresponde ao arquivo de origem.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -764,11 +744,9 @@ validando a integração entre o MRS e o data lake.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>TC-001 concluído (cluster MRS saudável). - Tabela Hive
+1. TC-001 concluído (cluster MRS saudável). 2. Tabela Hive
 <code>poc_db.customers</code> existe e contém dados carregados pelo
-pipeline de ingestão. - Acesso SSH ao nó master do MRS configurado.</li>
-</ul>
+pipeline de ingestão. 3. Acesso SSH ao nó master do MRS configurado.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -781,11 +759,9 @@ Executar uma consulta de amostra para verificar a integridade dos dados:
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li><code>COUNT(*)</code> retorna 10.000. - A consulta de amostra
+1. <code>COUNT(*)</code> retorna 10.000. 2. A consulta de amostra
 retorna 5 linhas com valores válidos de <code>customer_id</code> e
-<code>name</code>.</li>
-</ul>
+<code>name</code>.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -811,12 +787,10 @@ menor privilégio.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>Bucket OBS <code>poc-datalake-raw</code> existe com a política IAM
-designada. - Dois usuários IAM de teste: um com função
-<strong>OBS_ReadWrite</strong>, outro sem permissões OBS. - CLI
-<code>obsutil</code> configurada para ambos os usuários.</li>
-</ul>
+1. Bucket OBS <code>poc-datalake-raw</code> existe com a política IAM
+designada. 2. Dois usuários IAM de teste: um com função
+<strong>OBS_ReadWrite</strong>, outro sem permissões OBS. 3. CLI
+<code>obsutil</code> configurada para ambos os usuários.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -833,12 +807,10 @@ pretendidas
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>Usuário autorizado consegue carregar e baixar com sucesso. - Usuário
+1. Usuário autorizado consegue carregar e baixar com sucesso. 2. Usuário
 não autorizado recebe HTTP 403 nas operações de carregamento e listagem.
-- Política do bucket concede apenas as permissões de leitura/escrita
-pretendidas às funções designadas.</li>
-</ul>
+3. Política do bucket concede apenas as permissões de leitura/escrita
+pretendidas às funções designadas.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -862,12 +834,10 @@ consultadas por usuários não administradores.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>TC-004 concluído (workspace do DataArts Studio acessível). - Regra
+1. TC-004 concluído (workspace do DataArts Studio acessível). 2. Regra
 de mascaramento configurada para a coluna <code>customers.ssn</code>
-(Número de Seguro Social). - Usuário de teste possui função
-<strong>Dayu_User</strong> (não administrador).</li>
-</ul>
+(Número de Seguro Social). 3. Usuário de teste possui função
+<strong>Dayu_User</strong> (não administrador).
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -884,12 +854,10 @@ valores reais são retornados
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>Regra de mascaramento ativa para <code>customers.ssn</code>. -
+1. Regra de mascaramento ativa para <code>customers.ssn</code>. 2.
 Usuário não administrador visualiza valores mascarados na coluna
-<code>ssn</code>. - Usuário administrador visualiza valores reais na
-coluna <code>ssn</code>.</li>
-</ul>
+<code>ssn</code>. 3. Usuário administrador visualiza valores reais na
+coluna <code>ssn</code>.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -914,11 +882,9 @@ que o arquivo de estado reflete os recursos esperados.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>CLI <code>terraform</code> instalada (versão <span class="math inline">≥</span> 1.0). - Credenciais AK/SK configuradas via
-variáveis de ambiente ou <em>provider.tf</em>. - Arquivos de
-configuração Terraform no diretório do projeto.</li>
-</ul>
+1. CLI <code>terraform</code> instalada (versão <span class="math inline">≥</span> 1.0). 2. Credenciais AK/SK configuradas via
+variáveis de ambiente ou <em>provider.tf</em>. 3. Arquivos de
+configuração Terraform no diretório do projeto.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -933,12 +899,10 @@ e confirmar que a contagem de recursos corresponde à arquitetura
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li><code>terraform apply</code> conclui sem erros. - Todos os valores
-de saída estão preenchidos (ID do cluster, nome do bucket, ID da VPC). -
-Contagem de recursos no estado corresponde à especificação da
-arquitetura.</li>
-</ul>
+1. <code>terraform apply</code> conclui sem erros. 2. Todos os valores
+de saída estão preenchidos (ID do cluster, nome do bucket, ID da VPC).
+3. Contagem de recursos no estado corresponde à especificação da
+arquitetura.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -961,12 +925,9 @@ pipeline do DataArts Studio.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ul>
-<li>TC-002 concluído (bucket OBS acessível). - Arquivos de dados de
-teste preparados no diretório local <em>./test-data/</em>. - CLI
-<code>obsutil</code> configurada com as credenciais do usuário de
-teste.</li>
-</ul>
+1. TC-002 concluído (bucket OBS acessível). 2. Arquivos de dados de
+teste preparados no diretório local <em>./test-data/</em>. 3. CLI
+<code>obsutil</code> configurada com as credenciais do usuário de teste.
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -980,13 +941,11 @@ os arquivos carregados
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ul>
-<li>Todos os arquivos de dados de teste são carregados sem erros. - A
+1. Todos os arquivos de dados de teste são carregados sem erros. 2. A
 listagem do bucket mostra todos os arquivos carregados com tamanhos
-corretos. - O checksum do arquivo baixado corresponde ao original local.
-- A conexão de fonte de dados do DataArts Studio consegue ler os
-arquivos.</li>
-</ul>
+corretos. 3. O checksum do arquivo baixado corresponde ao original
+local. 4. A conexão de fonte de dados do DataArts Studio consegue ler os
+arquivos.
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>

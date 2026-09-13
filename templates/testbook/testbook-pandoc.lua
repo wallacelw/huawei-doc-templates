@@ -129,9 +129,9 @@ local config = {
       -- testprocedure is an environment (not a command), handled specially.
       local field_order = {
         { cmd = "testobjective",   label_key = "objective" },
-        { cmd = "testprerequisites", label_key = "prerequisites" },
+        { env = "testprerequisites", label_key = "prerequisites" },
         { env = "testprocedure",  label_key = "procedure" },
-        { cmd = "testexpected",   label_key = "expectedresult" },
+        { env = "testexpected",   label_key = "expectedresult" },
         { cmd = "testresult",     label_key = "testresult",  answer = true },
         { cmd = "testremarks",    label_key = "remarks",     answer = true },
       }

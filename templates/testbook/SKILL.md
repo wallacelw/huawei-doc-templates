@@ -135,44 +135,36 @@ up in the class file and this SKILL.md.
 
 \begin{testcase}{TC-001: <test case title>}
   \testobjective{Verify that <functionality> works as expected.}
-  \testprerequisites{
-    \begin{testlist}
-      \item System is running.
-      \item User is logged in.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{System is running.}
+    \teststep{User is logged in.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Navigate to <page>}
     \teststep{Click <button>}
     \teststep{Enter <data> and click Save}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item The resource is created successfully.
-      \item Data is persisted.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{The resource is created successfully.}
+    \teststep{Data is persisted.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{Optional notes about this test case.}
 \end{testcase}
 
 \begin{testcase}{TC-002: <another test case title>}
   \testobjective{Verify that <other functionality> behaves correctly.}
-  \testprerequisites{
-    \begin{testlist}
-      \item Resource from TC-001 exists.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{Resource from TC-001 exists.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Select the resource}
     \teststep{Click Delete and confirm}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item The resource is removed.
-      \item No orphan data remains.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{The resource is removed.}
+    \teststep{No orphan data remains.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{}
 \end{testcase}
@@ -181,11 +173,15 @@ up in the class file and this SKILL.md.
 
 \begin{testcase}{TC-003: <test case in domain 2>}
   \testobjective{...}
-  \testprerequisites{...}
+  \begin{testprerequisites}
+    \teststep{...}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{...}
   \end{testprocedure}
-  \testexpected{...}
+  \begin{testexpected}
+    \teststep{...}
+  \end{testexpected}
   \testresult{...}
   \testremarks{...}
 \end{testcase}
@@ -327,21 +323,17 @@ Remarks fields.
 ```latex
 \begin{testcase}{TC-001: Verify MRS cluster deployment}
   \testobjective{Confirm that the MRS cluster is deployed.}
-  \testprerequisites{
-    \begin{testlist}
-      \item Terraform apply completed.
-    \end{testlist}
-  }
+  \begin{testprerequisites}
+    \teststep{Terraform apply completed.}
+  \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Log in to the Huawei Cloud Console}
     \teststep{Navigate to MapReduce Service, Clusters}
     \teststep{Verify cluster status is Running}
   \end{testprocedure}
-  \testexpected{
-    \begin{testlist}
-      \item Cluster status is Running.
-    \end{testlist}
-  }
+  \begin{testexpected}
+    \teststep{Cluster status is Running.}
+  \end{testexpected}
   \testresult{\testresultbadge{Pass}}
   \testremarks{If any component shows Abnormal, check alarms.}
 \end{testcase}
@@ -350,16 +342,17 @@ Remarks fields.
 | Field command | English label | Portuguese label | Required |
 |---|---|---|---|
 | `\testobjective{...}` | Objective | Objetivo | Yes |
-| `\testprerequisites{...}` | Prerequisites | Pré-requisitos | Yes |
+| `\begin{testprerequisites}...\end{testprerequisites}` | Prerequisites | Pré-requisitos | Yes |
 | `\begin{testprocedure}...\end{testprocedure}` | Procedure | Procedimento | Yes |
-| `\testexpected{...}` | Expected Result | Resultado Esperado | Yes |
+| `\begin{testexpected}...\end{testexpected}` | Expected Result | Resultado Esperado | Yes |
 | `\testresult{...}` | Test Result | Resultado do Teste | No (hidden by `noanswers`) |
 | `\testremarks{...}` | Remarks | Observações | No (hidden by `noanswers`) |
 
 **Formatting notes:**
-- Use the `testlist` environment for numbered lists within fields (prerequisites,
-  expected result, remarks). It auto-numbers items with red bold numbers
-  matching the teststep styling.
+- `testprerequisites` and `testexpected` are environments (like
+  `testprocedure`) that render a mini header bar followed by auto-numbered
+  `\teststep` items. Use `\teststep{...}` inside them — do not use
+  `testlist` or `\item`.
 - Each field is preceded by a full-width red mini header bar (Huawei-red
   background, white bold text), with the content rendered below it.
 - The box has a 3pt Huawei-red left-rule and breaks across pages.
@@ -418,29 +411,27 @@ Images, code blocks, and callouts can be placed freely between steps.
 ### `testlist` environment
 
 Styled enumerate with red bold numbers, matching the teststep styling.
-Use it inside testcase fields (prerequisites, expected result, remarks)
-for numbered lists. Items are auto-numbered — do not include the number
+Available for use inside `\testremarks{...}` or other fields that need
+a numbered list. Items are auto-numbered — do not include the number
 in the `\item` text.
 
+> **Note:** `testprerequisites` and `testexpected` are now environments
+> that use `\teststep` directly (like `testprocedure`). Do not use
+> `testlist` inside them.
+
 ```latex
-\testprerequisites{
+\testremarks{
   \begin{testlist}
-    \item Terraform apply completed.
-    \item MRS cluster ID is available.
-    \item IAM user has MRS\_Viewer role.
+    \item First observation.
+    \item Second observation.
   \end{testlist}
 }
 ```
 
 | Command | Purpose |
 |---|---|
-| `\begin{testlist} ... \end{testlist}` | Numbered list with red bold auto-numbered items. Use inside testcase fields. |
+| `\begin{testlist} ... \end{testlist}` | Numbered list with red bold auto-numbered items. Use inside `\testremarks{...}` or other fields. |
 | `\item` | One item in the list. Numbering is automatic. |
-
-**When to use:**
-- Inside `\testprerequisites{...}`, `\testexpected{...}`, or `\testremarks{...}`
-  when the content has two or more numbered items.
-- For a single sentence (not a list), write it directly without `testlist`.
 
 ### Test steps
 

@@ -142,10 +142,9 @@ Objetivo
     nós apresentam status saudável.
 
 Pré-requisitos
-
-:   -   Aplicação da infraestrutura Terraform concluída com sucesso. -
-        ID do cluster MRS disponível na saída do Terraform. - Usuário
-        IAM possui função **MRS_Viewer** ou superior.
+:   1\. Aplicação da infraestrutura Terraform concluída com sucesso. 2.
+    ID do cluster MRS disponível na saída do Terraform. 3. Usuário IAM
+    possui função **MRS_Viewer** ou superior.
 
 Procedimento
 :   1\. Acessar o Console do Huawei Cloud 2. Navegar em **Console**
@@ -154,11 +153,10 @@ Procedimento
     Componente 6. Revisar aba Nó
 
 Resultado Esperado
-
-:   -   Status do cluster é **Executando**. - Todos os quatro
-        componentes (HDFS, YARN, Spark, Hive) estão listados com status
-        **Normal**. - Todos os nós apresentam status **Executando** sem
-        alarmes.
+:   1\. Status do cluster é **Executando**. 2. Todos os quatro
+    componentes (HDFS, YARN, Spark, Hive) estão listados com status
+    **Normal**. 3. Todos os nós apresentam status **Executando** sem
+    alarmes.
 
 Resultado do Teste
 :   **Pass**
@@ -175,10 +173,9 @@ Objetivo
     armazenamento correta e é acessível com a política IAM designada.
 
 Pré-requisitos
-
-:   -   Nome do bucket OBS definido na configuração Terraform. -
-        Política IAM concedendo acesso de leitura/escrita ao bucket está
-        anexada ao usuário de teste.
+:   1\. Nome do bucket OBS definido na configuração Terraform. 2.
+    Política IAM concedendo acesso de leitura/escrita ao bucket está
+    anexada ao usuário de teste.
 
 Procedimento
 :   1\. Acessar o Console 2. Navegar em **Console** **→** **Object
@@ -188,11 +185,10 @@ Procedimento
     comparar seu conteúdo com o original 7. Excluir o arquivo de teste
 
 Resultado Esperado
-
-:   -   O bucket existe com classe de armazenamento **Standard**. - O
-        carregamento do arquivo conclui sem erro. - O conteúdo do
-        arquivo baixado corresponde ao original. - A exclusão do arquivo
-        é realizada com sucesso.
+:   1\. O bucket existe com classe de armazenamento **Standard**. 2. O
+    carregamento do arquivo conclui sem erro. 3. O conteúdo do arquivo
+    baixado corresponde ao original. 4. A exclusão do arquivo é
+    realizada com sucesso.
 
 Resultado do Teste
 :   **Pass**
@@ -209,10 +205,9 @@ Objetivo
     blocos CIDR e regras de entrada/saída corretos.
 
 Pré-requisitos
-
-:   -   IDs da VPC e da sub-rede disponíveis na saída do Terraform. -
-        Nomes dos grupos de segurança documentados na arquitetura da
-        solução.
+:   1\. IDs da VPC e da sub-rede disponíveis na saída do Terraform. 2.
+    Nomes dos grupos de segurança documentados na arquitetura da
+    solução.
 
 Procedimento
 :   1\. Acessar o Console 2. Navegar em **Console** **→** **Virtual
@@ -225,11 +220,10 @@ Procedimento
     tráfego (padrão)
 
 Resultado Esperado
-
-:   -   CIDR da VPC é `10.0.0.0/16`. - CIDR da sub-rede é
-        `10.0.1.0/24`. - Regras de entrada correspondem à arquitetura:
-        TCP 22 e TCP 443 das origens especificadas. - Saída permite todo
-        o tráfego.
+:   1\. CIDR da VPC é `10.0.0.0/16`. 2. CIDR da sub-rede é
+    `10.0.1.0/24`. 3. Regras de entrada correspondem à arquitetura: TCP
+    22 e TCP 443 das origens especificadas. 4. Saída permite todo o
+    tráfego.
 
 Resultado do Teste
 :   **Pass**
@@ -248,10 +242,9 @@ Objetivo
     designados conseguem acessar com a função **Dayu_User**.
 
 Pré-requisitos
-
-:   -   Instância do DataArts Studio provisionada e com status
-        **Executando**. - Usuário IAM de teste possui a função
-        **Dayu_User** atribuída.
+:   1\. Instância do DataArts Studio provisionada e com status
+    **Executando**. 2. Usuário IAM de teste possui a função
+    **Dayu_User** atribuída.
 
 Procedimento
 :   1\. Acessar o Console com o usuário IAM de teste 2. Navegar em
@@ -263,11 +256,10 @@ Procedimento
     de Dados**
 
 Resultado Esperado
-
-:   -   O workspace está listado e acessível. - O console do DataArts
-        Studio abre sem erros. - Todos os três módulos (Integração de
-        Dados, Desenvolvimento de Dados, Arquitetura de Dados) estão
-        visíveis na navegação.
+:   1\. O workspace está listado e acessível. 2. O console do DataArts
+    Studio abre sem erros. 3. Todos os três módulos (Integração de
+    Dados, Desenvolvimento de Dados, Arquitetura de Dados) estão
+    visíveis na navegação.
 
 Resultado do Teste
 :   **Pass**
@@ -284,12 +276,11 @@ Objetivo
     o resultado no caminho OBS de destino.
 
 Pré-requisitos
-
-:   -   TC-004 concluído (workspace do DataArts Studio acessível). -
-        Arquivo CSV de origem (`customers.csv`) existe no bucket OBS
-        raw. - Caminho OBS de destino
-        (`poc-datalake-curated/customers/`) está configurado. - Pipeline
-        `pl-ingest-customers` está publicado no DataArts Studio.
+:   1\. TC-004 concluído (workspace do DataArts Studio acessível). 2.
+    Arquivo CSV de origem (`customers.csv`) existe no bucket OBS raw. 3.
+    Caminho OBS de destino (`poc-datalake-curated/customers/`) está
+    configurado. 4. Pipeline `pl-ingest-customers` está publicado no
+    DataArts Studio.
 
 Procedimento
 :   1\. Navegar até Desenvolvimento de Dados no DataArts Studio 2.
@@ -299,11 +290,9 @@ Procedimento
     contagem de linhas
 
 Resultado Esperado
-
-:   -   A execução do pipeline conclui com status **Sucesso**. - O
-        arquivo de saída é criado no caminho OBS de destino. - A
-        contagem de linhas do arquivo de saída corresponde ao arquivo de
-        origem.
+:   1\. A execução do pipeline conclui com status **Sucesso**. 2. O
+    arquivo de saída é criado no caminho OBS de destino. 3. A contagem
+    de linhas do arquivo de saída corresponde ao arquivo de origem.
 
 Resultado do Teste
 :   **Pass**
@@ -321,11 +310,9 @@ Objetivo
     corretos, validando a integração entre o MRS e o data lake.
 
 Pré-requisitos
-
-:   -   TC-001 concluído (cluster MRS saudável). - Tabela Hive
-        `poc_db.customers` existe e contém dados carregados pelo
-        pipeline de ingestão. - Acesso SSH ao nó master do MRS
-        configurado.
+:   1\. TC-001 concluído (cluster MRS saudável). 2. Tabela Hive
+    `poc_db.customers` existe e contém dados carregados pelo pipeline de
+    ingestão. 3. Acesso SSH ao nó master do MRS configurado.
 
 Procedimento
 :   1\. Acessar o nó master do MRS via SSH 2. Executar a CLI do Spark
@@ -338,9 +325,8 @@ Procedimento
     Confirmar que a consulta retorna 5 linhas com valores não nulos
 
 Resultado Esperado
-
-:   -   `COUNT(*)` retorna 10.000. - A consulta de amostra retorna 5
-        linhas com valores válidos de `customer_id` e `name`.
+:   1\. `COUNT(*)` retorna 10.000. 2. A consulta de amostra retorna 5
+    linhas com valores válidos de `customer_id` e `name`.
 
 Resultado do Teste
 :   **Pass**
@@ -360,11 +346,10 @@ Objetivo
     princípio do menor privilégio.
 
 Pré-requisitos
-
-:   -   Bucket OBS `poc-datalake-raw` existe com a política IAM
-        designada. - Dois usuários IAM de teste: um com função
-        **OBS_ReadWrite**, outro sem permissões OBS. - CLI `obsutil`
-        configurada para ambos os usuários.
+:   1\. Bucket OBS `poc-datalake-raw` existe com a política IAM
+    designada. 2. Dois usuários IAM de teste: um com função
+    **OBS_ReadWrite**, outro sem permissões OBS. 3. CLI `obsutil`
+    configurada para ambos os usuários.
 
 Procedimento
 :   1\. Usando o usuário autorizado, carregar um arquivo de teste em
@@ -378,11 +363,10 @@ Procedimento
     as permissões pretendidas
 
 Resultado Esperado
-
-:   -   Usuário autorizado consegue carregar e baixar com sucesso. -
-        Usuário não autorizado recebe HTTP 403 nas operações de
-        carregamento e listagem. - Política do bucket concede apenas as
-        permissões de leitura/escrita pretendidas às funções designadas.
+:   1\. Usuário autorizado consegue carregar e baixar com sucesso. 2.
+    Usuário não autorizado recebe HTTP 403 nas operações de carregamento
+    e listagem. 3. Política do bucket concede apenas as permissões de
+    leitura/escrita pretendidas às funções designadas.
 
 Resultado do Teste
 :   **Pass**
@@ -400,11 +384,10 @@ Objetivo
     quando consultadas por usuários não administradores.
 
 Pré-requisitos
-
-:   -   TC-004 concluído (workspace do DataArts Studio acessível). -
-        Regra de mascaramento configurada para a coluna `customers.ssn`
-        (Número de Seguro Social). - Usuário de teste possui função
-        **Dayu_User** (não administrador).
+:   1\. TC-004 concluído (workspace do DataArts Studio acessível). 2.
+    Regra de mascaramento configurada para a coluna `customers.ssn`
+    (Número de Seguro Social). 3. Usuário de teste possui função
+    **Dayu_User** (não administrador).
 
 Procedimento
 :   1\. No console do DataArts Studio, navegar até **Arquitetura de
@@ -417,10 +400,9 @@ Procedimento
     administrador e verificar se os valores reais são retornados
 
 Resultado Esperado
-
-:   -   Regra de mascaramento ativa para `customers.ssn`. - Usuário não
-        administrador visualiza valores mascarados na coluna `ssn`. -
-        Usuário administrador visualiza valores reais na coluna `ssn`.
+:   1\. Regra de mascaramento ativa para `customers.ssn`. 2. Usuário não
+    administrador visualiza valores mascarados na coluna `ssn`. 3.
+    Usuário administrador visualiza valores reais na coluna `ssn`.
 
 Resultado do Teste
 :   **Pass**
@@ -439,10 +421,9 @@ Objetivo
     erros e que o arquivo de estado reflete os recursos esperados.
 
 Pré-requisitos
-
-:   -   CLI `terraform` instalada (versão $\geq$ 1.0). - Credenciais
-        AK/SK configuradas via variáveis de ambiente ou *provider.tf*. -
-        Arquivos de configuração Terraform no diretório do projeto.
+:   1\. CLI `terraform` instalada (versão $\geq$ 1.0). 2. Credenciais
+    AK/SK configuradas via variáveis de ambiente ou *provider.tf*. 3.
+    Arquivos de configuração Terraform no diretório do projeto.
 
 Procedimento
 :   1\. Navegar até o diretório do projeto Terraform 2. Executar
@@ -455,11 +436,10 @@ Procedimento
     contagem de recursos corresponde à arquitetura
 
 Resultado Esperado
-
-:   -   `terraform apply` conclui sem erros. - Todos os valores de saída
-        estão preenchidos (ID do cluster, nome do bucket, ID da VPC). -
-        Contagem de recursos no estado corresponde à especificação da
-        arquitetura.
+:   1\. `terraform apply` conclui sem erros. 2. Todos os valores de
+    saída estão preenchidos (ID do cluster, nome do bucket, ID da
+    VPC). 3. Contagem de recursos no estado corresponde à especificação
+    da arquitetura.
 
 Resultado do Teste
 :   **Pass**
@@ -476,10 +456,9 @@ Objetivo
     pelo pipeline do DataArts Studio.
 
 Pré-requisitos
-
-:   -   TC-002 concluído (bucket OBS acessível). - Arquivos de dados de
-        teste preparados no diretório local *./test-data/*. - CLI
-        `obsutil` configurada com as credenciais do usuário de teste.
+:   1\. TC-002 concluído (bucket OBS acessível). 2. Arquivos de dados de
+    teste preparados no diretório local *./test-data/*. 3. CLI `obsutil`
+    configurada com as credenciais do usuário de teste.
 
 Procedimento
 :   1\. Listar os arquivos de dados de teste locais e verificar sua
@@ -491,12 +470,11 @@ Procedimento
     dados consegue ler os arquivos carregados
 
 Resultado Esperado
-
-:   -   Todos os arquivos de dados de teste são carregados sem erros. -
-        A listagem do bucket mostra todos os arquivos carregados com
-        tamanhos corretos. - O checksum do arquivo baixado corresponde
-        ao original local. - A conexão de fonte de dados do DataArts
-        Studio consegue ler os arquivos.
+:   1\. Todos os arquivos de dados de teste são carregados sem erros. 2.
+    A listagem do bucket mostra todos os arquivos carregados com
+    tamanhos corretos. 3. O checksum do arquivo baixado corresponde ao
+    original local. 4. A conexão de fonte de dados do DataArts Studio
+    consegue ler os arquivos.
 
 Resultado do Teste
 :   **Pass**

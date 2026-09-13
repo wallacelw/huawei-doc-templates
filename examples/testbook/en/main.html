@@ -524,11 +524,9 @@ healthy status.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>Terraform infrastructure apply completed successfully. - MRS cluster
-ID is available in the Terraform output. - IAM user has
-<strong>MRS_Viewer</strong> or higher role.</li>
-</ul>
+1. Terraform infrastructure apply completed successfully. 2. MRS cluster
+ID is available in the Terraform output. 3. IAM user has
+<strong>MRS_Viewer</strong> or higher role.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -540,12 +538,10 @@ Component tab 6. Review Node tab
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>Cluster status is <strong>Running</strong>. - All four components
+1. Cluster status is <strong>Running</strong>. 2. All four components
 (HDFS, YARN, Spark, Hive) are listed with status
-<strong>Normal</strong>. - All nodes report status
-<strong>Running</strong> with no alarms.</li>
-</ul>
+<strong>Normal</strong>. 3. All nodes report status
+<strong>Running</strong> with no alarms.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -568,11 +564,9 @@ with the designated IAM policy.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>OBS bucket name is defined in the Terraform configuration. - IAM
+1. OBS bucket name is defined in the Terraform configuration. 2. IAM
 policy granting read/write access to the bucket is attached to the test
-user.</li>
-</ul>
+user.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -585,11 +579,9 @@ compare its content with the original 7. Delete the test file
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>Bucket exists with storage class <strong>Standard</strong>. - File
-upload completes without error. - Downloaded file content matches the
-original. - File deletion succeeds.</li>
-</ul>
+1. Bucket exists with storage class <strong>Standard</strong>. 2. File
+upload completes without error. 3. Downloaded file content matches the
+original. 4. File deletion succeeds.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -612,10 +604,8 @@ blocks and inbound/outbound rules.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>VPC and subnet IDs are available from the Terraform output. -
-Security group names are documented in the solution architecture.</li>
-</ul>
+1. VPC and subnet IDs are available from the Terraform output. 2.
+Security group names are documented in the solution architecture.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -631,12 +621,10 @@ rules allow all traffic (default)
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>VPC CIDR is <code>10.0.0.0/16</code>. - Subnet CIDR is
-<code>10.0.1.0/24</code>. - Inbound rules match the architecture: TCP 22
-and TCP 443 from the specified sources. - Outbound allows all
-traffic.</li>
-</ul>
+1. VPC CIDR is <code>10.0.0.0/16</code>. 2. Subnet CIDR is
+<code>10.0.1.0/24</code>. 3. Inbound rules match the architecture: TCP
+22 and TCP 443 from the specified sources. 4. Outbound allows all
+traffic.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -660,11 +648,9 @@ the <strong>Dayu_User</strong> role.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>DataArts Studio instance is provisioned and its status is
-<strong>Running</strong>. - Test IAM user has the
-<strong>Dayu_User</strong> role assigned.</li>
-</ul>
+1. DataArts Studio instance is provisioned and its status is
+<strong>Running</strong>. 2. Test IAM user has the
+<strong>Dayu_User</strong> role assigned.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -679,11 +665,9 @@ Architecture</strong>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>Workspace is listed and accessible. - DataArts Studio console opens
-without errors. - All three modules (Data Integration, Data Development,
-Data Architecture) are visible in the navigation.</li>
-</ul>
+1. Workspace is listed and accessible. 2. DataArts Studio console opens
+without errors. 3. All three modules (Data Integration, Data
+Development, Data Architecture) are visible in the navigation.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -706,13 +690,11 @@ the target OBS path.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>TC-004 completed (DataArts Studio workspace accessible). - Source
-CSV file (<code>customers.csv</code>) exists in the OBS raw bucket. -
+1. TC-004 completed (DataArts Studio workspace accessible). 2. Source
+CSV file (<code>customers.csv</code>) exists in the OBS raw bucket. 3.
 Target OBS path (<code>poc-datalake-curated/customers/</code>) is
-configured. - Pipeline <code>pl-ingest-customers</code> is published in
-DataArts Studio.</li>
-</ul>
+configured. 4. Pipeline <code>pl-ingest-customers</code> is published in
+DataArts Studio.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -723,11 +705,9 @@ Wait for pipeline status (timeout: 10 min) 5. Verify output file in OBS
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>Pipeline execution completes with status <strong>Success</strong>. -
-Output file is created in the target OBS path. - Row count of the output
-file matches the source file.</li>
-</ul>
+1. Pipeline execution completes with status <strong>Success</strong>. 2.
+Output file is created in the target OBS path. 3. Row count of the
+output file matches the source file.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -750,12 +730,9 @@ integration between MRS and the data lake.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>TC-001 completed (MRS cluster healthy). - Hive table
+1. TC-001 completed (MRS cluster healthy). 2. Hive table
 <code>poc_db.customers</code> exists and contains data loaded by the
-ingestion pipeline. - SSH access to the MRS master node is
-configured.</li>
-</ul>
+ingestion pipeline. 3. SSH access to the MRS master node is configured.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -768,11 +745,8 @@ Run a sample query to verify data integrity:
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li><code>COUNT(*)</code> returns 10,000. - The sample query returns 5
-rows with valid <code>customer_id</code> and <code>name</code>
-values.</li>
-</ul>
+1. <code>COUNT(*)</code> returns 10,000. 2. The sample query returns 5
+rows with valid <code>customer_id</code> and <code>name</code> values.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -796,12 +770,10 @@ the bucket policy matches the principle of least privilege.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>OBS bucket <code>poc-datalake-raw</code> exists with the designated
-IAM policy. - Two test IAM users: one with
-<strong>OBS_ReadWrite</strong> role, one with no OBS permissions. -
-<code>obsutil</code> CLI configured for both users.</li>
-</ul>
+1. OBS bucket <code>poc-datalake-raw</code> exists with the designated
+IAM policy. 2. Two test IAM users: one with
+<strong>OBS_ReadWrite</strong> role, one with no OBS permissions. 3.
+<code>obsutil</code> CLI configured for both users.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -817,12 +789,10 @@ confirm it grants only the intended permissions
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>Authorized user can upload and download successfully. - Unauthorized
-user receives HTTP 403 on both upload and list operations. - Bucket
+1. Authorized user can upload and download successfully. 2. Unauthorized
+user receives HTTP 403 on both upload and list operations. 3. Bucket
 policy grants only the intended read/write permissions to the designated
-roles.</li>
-</ul>
+roles.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -845,12 +815,10 @@ non-admin users.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>TC-004 completed (DataArts Studio workspace accessible). - Data
+1. TC-004 completed (DataArts Studio workspace accessible). 2. Data
 masking rule configured for column <code>customers.ssn</code> (Social
-Security Number). - Test user has <strong>Dayu_User</strong> role (not
-admin).</li>
-</ul>
+Security Number). 3. Test user has <strong>Dayu_User</strong> role (not
+admin).
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -866,11 +834,9 @@ values are returned
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>Masking rule is active for <code>customers.ssn</code>. - Non-admin
-user sees masked values in the <code>ssn</code> column. - Admin user
-sees real values in the <code>ssn</code> column.</li>
-</ul>
+1. Masking rule is active for <code>customers.ssn</code>. 2. Non-admin
+user sees masked values in the <code>ssn</code> column. 3. Admin user
+sees real values in the <code>ssn</code> column.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -895,11 +861,9 @@ and the state file reflects the expected resources.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li><code>terraform</code> CLI installed (version <span class="math inline">≥</span> 1.0). - AK/SK credentials configured via
-environment variables or <em>provider.tf</em>. - Terraform configuration
-files in the project directory.</li>
-</ul>
+1. <code>terraform</code> CLI installed (version <span class="math inline">≥</span> 1.0). 2. AK/SK credentials configured via
+environment variables or <em>provider.tf</em>. 3. Terraform
+configuration files in the project directory.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -914,11 +878,9 @@ resource count matches the architecture
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li><code>terraform apply</code> completes with no errors. - All output
-values are populated (cluster ID, bucket name, VPC ID). - Resource count
-in state matches the architecture specification.</li>
-</ul>
+1. <code>terraform apply</code> completes with no errors. 2. All output
+values are populated (cluster ID, bucket name, VPC ID). 3. Resource
+count in state matches the architecture specification.
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -941,11 +903,9 @@ pipeline.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ul>
-<li>TC-002 completed (OBS bucket accessible). - Test data files prepared
-in the local directory <em>./test-data/</em>. - <code>obsutil</code> CLI
-configured with the test user credentials.</li>
-</ul>
+1. TC-002 completed (OBS bucket accessible). 2. Test data files prepared
+in the local directory <em>./test-data/</em>. 3. <code>obsutil</code>
+CLI configured with the test user credentials.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -958,12 +918,10 @@ source connection can read the uploaded files
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ul>
-<li>All test data files are uploaded without errors. - Bucket listing
-shows all uploaded files with correct sizes. - Downloaded file checksum
-matches the local original. - DataArts Studio data source connection can
-read the files.</li>
-</ul>
+1. All test data files are uploaded without errors. 2. Bucket listing
+shows all uploaded files with correct sizes. 3. Downloaded file checksum
+matches the local original. 4. DataArts Studio data source connection
+can read the files.
 </dd>
 <dt>Test Result</dt>
 <dd>

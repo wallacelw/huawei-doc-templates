@@ -1077,6 +1077,13 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.5.0**  *2026-09-13*
+
+Unified field APIs: `testprerequisites` and `testexpected` changed from
+commands to environments, matching `testprocedure`. All three now use
+`\teststep` for auto-numbered items with red bold numbers. Uniform code,
+same visual style.
+
 **4.4.0**  *2026-09-13*
 
 Code review fixes: removed dead labels, badge now uses Huawei brand

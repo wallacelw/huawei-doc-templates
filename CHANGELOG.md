@@ -3,6 +3,17 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.5.0 (2026-09-13)
+
+### Breaking changes (API)
+
+- **`testprerequisites`**: Changed from command to environment.
+  `\testprerequisites{content}` becomes `\begin{testprerequisites}...\end{testprerequisites}`
+- **`testexpected`**: Changed from command to environment.
+  `\testexpected{content}` becomes `\begin{testexpected}...\end{testexpected}`
+- Both now use `\teststep{action}` for auto-numbered items, identical to
+  `testprocedure`. All three fields have uniform code and visual style.
+
 ## v4.4.0 (2026-09-13)
 
 ### Fixes (code review)

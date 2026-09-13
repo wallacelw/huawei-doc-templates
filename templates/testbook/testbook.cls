@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.4.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.5.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -289,11 +289,11 @@
   #2\par
 }
 
-% Test case field commands (language-aware labels)
-% Order: Objective, Prerequisites, [Procedure env], Expected, Test Result, Remarks
+% Test case field commands and environments.
+% Order: Objective, Prerequisites, Procedure, Expected, Test Result, Remarks
+% Prerequisites, Procedure, and Expected Result are environments with
+% auto-numbered \teststep items — uniform code, same visual style.
 \newcommand{\testobjective}[1]{\lg@testfield{\lg@objective}{#1}}
-\newcommand{\testprerequisites}[1]{\lg@testfield{\lg@prerequisites}{#1}}
-\newcommand{\testexpected}[1]{\lg@testfield{\lg@expectedresult}{#1}}
 \newcommand{\testresult}[1]{%
   \if@showanswers
     \lg@testfield{\lg@testresult}{#1}
@@ -360,24 +360,47 @@
 \newcommand{\testsummaryrow}[3]{#1 & #2 & #3 \\ \hline}
 
 % =====================================================================
-%  TEST PROCEDURE ENVIRONMENT
+%  TEST FIELD ENVIRONMENTS (prerequisites, procedure, expected)
 % =====================================================================
-% Renders the "Procedure" mini header bar followed by auto-numbered
-% paragraph steps.  Each \teststep is a numbered paragraph (red bold
-% number).  Images, code blocks, and callouts can be placed freely
-% between steps — no tabular restrictions.
+% All three use the same pattern: mini header bar + auto-numbered
+% \teststep items.  Images, code blocks, and callouts can be placed
+% freely between steps — no tabular restrictions.
+%
 % Usage:
+%   \begin{testprerequisites}
+%     \teststep{Terraform apply completed.}
+%     \teststep{MRS cluster ID is available.}
+%   \end{testprerequisites}
+%
 %   \begin{testprocedure}
 %     \teststep{Log in to Console}
-%     \teststep{Click Create and set parameters}
 %     \image[width=0.8\linewidth]{common-assets/screenshot.png}
 %     \teststep{Verify the instance is created}
 %   \end{testprocedure}
+%
+%   \begin{testexpected}
+%     \teststep{Cluster status is Running.}
+%     \teststep{All components are Normal.}
+%   \end{testexpected}
 
 \newcounter{lg@teststep}
 
+\newenvironment{testprerequisites}{%
+  \lg@testfieldheader{\lg@prerequisites}%
+  \setcounter{lg@teststep}{0}%
+}{%
+  \par\medskip
+}
+
 \newenvironment{testprocedure}{%
   \lg@testfieldheader{\lg@procedure}%
+  \setcounter{lg@teststep}{0}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{testexpected}{%
+  \lg@testfieldheader{\lg@expectedresult}%
   \setcounter{lg@teststep}{0}%
 }{%
   \par\medskip
