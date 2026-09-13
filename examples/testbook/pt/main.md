@@ -112,10 +112,9 @@ Objetivo
     nós apresentam status saudável.
 
 Pré-requisitos
-
-:   1.  Aplicação da infraestrutura Terraform concluída com sucesso.
-    2.  ID do cluster MRS disponível na saída do Terraform.
-    3.  Usuário IAM possui função MRS_Viewer ou superior.
+:   testlist Aplicação da infraestrutura Terraform concluída com
+    sucesso. ID do cluster MRS disponível na saída do Terraform. Usuário
+    IAM possui função MRS_Viewer ou superior. testlist
 
 Procedimento
 
@@ -127,11 +126,9 @@ Procedimento
     6.  Revisar aba Nó
 
 Resultado Esperado
-
-:   1.  Status do cluster é Executando.
-    2.  Todos os quatro componentes (HDFS, YARN, Spark, Hive) estão
-        listados com status Normal.
-    3.  Todos os nós apresentam status Executando sem alarmes.
+:   testlist Status do cluster é Executando. Todos os quatro componentes
+    (HDFS, YARN, Spark, Hive) estão listados com status Normal. Todos os
+    nós apresentam status Executando sem alarmes. testlist
 
 Resultado do Teste
 :   Pass
@@ -148,10 +145,9 @@ Objetivo
     armazenamento correta e é acessível com a política IAM designada.
 
 Pré-requisitos
-
-:   1.  Nome do bucket OBS definido na configuração Terraform.
-    2.  Política IAM concedendo acesso de leitura/escrita ao bucket está
-        anexada ao usuário de teste.
+:   testlist Nome do bucket OBS definido na configuração Terraform.
+    Política IAM concedendo acesso de leitura/escrita ao bucket está
+    anexada ao usuário de teste. testlist
 
 Procedimento
 
@@ -164,11 +160,10 @@ Procedimento
     7.  Excluir o arquivo de teste
 
 Resultado Esperado
-
-:   1.  O bucket existe com classe de armazenamento Standard.
-    2.  O carregamento do arquivo conclui sem erro.
-    3.  O conteúdo do arquivo baixado corresponde ao original.
-    4.  A exclusão do arquivo é realizada com sucesso.
+:   testlist O bucket existe com classe de armazenamento Standard. O
+    carregamento do arquivo conclui sem erro. O conteúdo do arquivo
+    baixado corresponde ao original. A exclusão do arquivo é realizada
+    com sucesso. testlist
 
 Resultado do Teste
 :   Pass
@@ -185,10 +180,9 @@ Objetivo
     blocos CIDR e regras de entrada/saída corretos.
 
 Pré-requisitos
-
-:   1.  IDs da VPC e da sub-rede disponíveis na saída do Terraform.
-    2.  Nomes dos grupos de segurança documentados na arquitetura da
-        solução.
+:   testlist IDs da VPC e da sub-rede disponíveis na saída do Terraform.
+    Nomes dos grupos de segurança documentados na arquitetura da
+    solução. testlist
 
 Procedimento
 
@@ -202,12 +196,9 @@ Procedimento
     6.  Verificar se as regras de saída permitem todo o tráfego (padrão)
 
 Resultado Esperado
-
-:   1.  CIDR da VPC é 10.0.0.0/16.
-    2.  CIDR da sub-rede é 10.0.1.0/24.
-    3.  Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443
-        das origens especificadas.
-    4.  Saída permite todo o tráfego.
+:   testlist CIDR da VPC é 10.0.0.0/16. CIDR da sub-rede é 10.0.1.0/24.
+    Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443 das
+    origens especificadas. Saída permite todo o tráfego. testlist
 
 Resultado do Teste
 :   Pass
@@ -226,10 +217,9 @@ Objetivo
     designados conseguem acessar com a função Dayu_User.
 
 Pré-requisitos
-
-:   1.  Instância do DataArts Studio provisionada e com status
-        Executando.
-    2.  Usuário IAM de teste possui a função Dayu_User atribuída.
+:   testlist Instância do DataArts Studio provisionada e com status
+    Executando. Usuário IAM de teste possui a função Dayu_User
+    atribuída. testlist
 
 Procedimento
 
@@ -243,11 +233,10 @@ Procedimento
         Dados, Arquitetura de Dados
 
 Resultado Esperado
-
-:   1.  O workspace está listado e acessível.
-    2.  O console do DataArts Studio abre sem erros.
-    3.  Todos os três módulos (Integração de Dados, Desenvolvimento de
-        Dados, Arquitetura de Dados) estão visíveis na navegação.
+:   testlist O workspace está listado e acessível. O console do DataArts
+    Studio abre sem erros. Todos os três módulos (Integração de Dados,
+    Desenvolvimento de Dados, Arquitetura de Dados) estão visíveis na
+    navegação. testlist
 
 Resultado do Teste
 :   Pass
@@ -264,12 +253,11 @@ Objetivo
     o resultado no caminho OBS de destino.
 
 Pré-requisitos
-
-:   1.  TC-004 concluído (workspace do DataArts Studio acessível).
-    2.  Arquivo CSV de origem (customers.csv) existe no bucket OBS raw.
-    3.  Caminho OBS de destino (poc-datalake-curated/customers/) está
-        configurado.
-    4.  Pipeline pl-ingest-customers está publicado no DataArts Studio.
+:   testlist TC-004 concluído (workspace do DataArts Studio acessível).
+    Arquivo CSV de origem (customers.csv) existe no bucket OBS raw.
+    Caminho OBS de destino (poc-datalake-curated/customers/) está
+    configurado. Pipeline pl-ingest-customers está publicado no DataArts
+    Studio. testlist
 
 Procedimento
 
@@ -281,11 +269,10 @@ Procedimento
     6.  Baixar e verificar contagem de linhas
 
 Resultado Esperado
-
-:   1.  A execução do pipeline conclui com status Sucesso.
-    2.  O arquivo de saída é criado no caminho OBS de destino.
-    3.  A contagem de linhas do arquivo de saída corresponde ao arquivo
-        de origem.
+:   testlist A execução do pipeline conclui com status Sucesso. O
+    arquivo de saída é criado no caminho OBS de destino. A contagem de
+    linhas do arquivo de saída corresponde ao arquivo de origem.
+    testlist
 
 Resultado do Teste
 :   Pass
@@ -303,11 +290,9 @@ Objetivo
     corretos, validando a integração entre o MRS e o data lake.
 
 Pré-requisitos
-
-:   1.  TC-001 concluído (cluster MRS saudável).
-    2.  Tabela Hive poc_db.customers existe e contém dados carregados
-        pelo pipeline de ingestão.
-    3.  Acesso SSH ao nó master do MRS configurado.
+:   testlist TC-001 concluído (cluster MRS saudável). Tabela Hive
+    poc_db.customers existe e contém dados carregados pelo pipeline de
+    ingestão. Acesso SSH ao nó master do MRS configurado. testlist
 
 Procedimento
 
@@ -323,10 +308,8 @@ Procedimento
     5.  Confirmar que a consulta retorna 5 linhas com valores não nulos
 
 Resultado Esperado
-
-:   1.  COUNT(\*) retorna 10.000.
-    2.  A consulta de amostra retorna 5 linhas com valores válidos de
-        customer_id e name.
+:   testlist COUNT(\*) retorna 10.000. A consulta de amostra retorna 5
+    linhas com valores válidos de customer_id e name. testlist
 
 Resultado do Teste
 :   Pass
@@ -346,11 +329,10 @@ Objetivo
     princípio do menor privilégio.
 
 Pré-requisitos
-
-:   1.  Bucket OBS poc-datalake-raw existe com a política IAM designada.
-    2.  Dois usuários IAM de teste: um com função OBS_ReadWrite, outro
-        sem permissões OBS.
-    3.  CLI obsutil configurada para ambos os usuários.
+:   testlist Bucket OBS poc-datalake-raw existe com a política IAM
+    designada. Dois usuários IAM de teste: um com função OBS_ReadWrite,
+    outro sem permissões OBS. CLI obsutil configurada para ambos os
+    usuários. testlist
 
 Procedimento
 
@@ -367,12 +349,10 @@ Procedimento
         as permissões pretendidas
 
 Resultado Esperado
-
-:   1.  Usuário autorizado consegue carregar e baixar com sucesso.
-    2.  Usuário não autorizado recebe HTTP 403 nas operações de
-        carregamento e listagem.
-    3.  Política do bucket concede apenas as permissões de
-        leitura/escrita pretendidas às funções designadas.
+:   testlist Usuário autorizado consegue carregar e baixar com sucesso.
+    Usuário não autorizado recebe HTTP 403 nas operações de carregamento
+    e listagem. Política do bucket concede apenas as permissões de
+    leitura/escrita pretendidas às funções designadas. testlist
 
 Resultado do Teste
 :   Pass
@@ -390,11 +370,10 @@ Objetivo
     quando consultadas por usuários não administradores.
 
 Pré-requisitos
-
-:   1.  TC-004 concluído (workspace do DataArts Studio acessível).
-    2.  Regra de mascaramento configurada para a coluna customers.ssn
-        (Número de Seguro Social).
-    3.  Usuário de teste possui função Dayu_User (não administrador).
+:   testlist TC-004 concluído (workspace do DataArts Studio acessível).
+    Regra de mascaramento configurada para a coluna customers.ssn
+    (Número de Seguro Social). Usuário de teste possui função Dayu_User
+    (não administrador). testlist
 
 Procedimento
 
@@ -410,11 +389,9 @@ Procedimento
         se os valores reais são retornados
 
 Resultado Esperado
-
-:   1.  Regra de mascaramento ativa para customers.ssn.
-    2.  Usuário não administrador visualiza valores mascarados na coluna
-        ssn.
-    3.  Usuário administrador visualiza valores reais na coluna ssn.
+:   testlist Regra de mascaramento ativa para customers.ssn. Usuário não
+    administrador visualiza valores mascarados na coluna ssn. Usuário
+    administrador visualiza valores reais na coluna ssn. testlist
 
 Resultado do Teste
 :   Pass
@@ -433,11 +410,9 @@ Objetivo
     erros e que o arquivo de estado reflete os recursos esperados.
 
 Pré-requisitos
-
-:   1.  CLI terraform instalada (versão \$\$ 1.0).
-    2.  Credenciais AK/SK configuradas via variáveis de ambiente ou
-        provider.tf.
-    3.  Arquivos de configuração Terraform no diretório do projeto.
+:   testlist CLI terraform instalada (versão \$\$ 1.0). Credenciais
+    AK/SK configuradas via variáveis de ambiente ou provider.tf.
+    Arquivos de configuração Terraform no diretório do projeto. testlist
 
 Procedimento
 
@@ -452,12 +427,10 @@ Procedimento
         recursos corresponde à arquitetura
 
 Resultado Esperado
-
-:   1.  terraform apply conclui sem erros.
-    2.  Todos os valores de saída estão preenchidos (ID do cluster, nome
-        do bucket, ID da VPC).
-    3.  Contagem de recursos no estado corresponde à especificação da
-        arquitetura.
+:   testlist terraform apply conclui sem erros. Todos os valores de
+    saída estão preenchidos (ID do cluster, nome do bucket, ID da VPC).
+    Contagem de recursos no estado corresponde à especificação da
+    arquitetura. testlist
 
 Resultado do Teste
 :   Pass
@@ -474,11 +447,9 @@ Objetivo
     pelo pipeline do DataArts Studio.
 
 Pré-requisitos
-
-:   1.  TC-002 concluído (bucket OBS acessível).
-    2.  Arquivos de dados de teste preparados no diretório local
-        ./test-data/.
-    3.  CLI obsutil configurada com as credenciais do usuário de teste.
+:   testlist TC-002 concluído (bucket OBS acessível). Arquivos de dados
+    de teste preparados no diretório local ./test-data/. CLI obsutil
+    configurada com as credenciais do usuário de teste. testlist
 
 Procedimento
 
@@ -493,13 +464,11 @@ Procedimento
         consegue ler os arquivos carregados
 
 Resultado Esperado
-
-:   1.  Todos os arquivos de dados de teste são carregados sem erros.
-    2.  A listagem do bucket mostra todos os arquivos carregados com
-        tamanhos corretos.
-    3.  O checksum do arquivo baixado corresponde ao original local.
-    4.  A conexão de fonte de dados do DataArts Studio consegue ler os
-        arquivos.
+:   testlist Todos os arquivos de dados de teste são carregados sem
+    erros. A listagem do bucket mostra todos os arquivos carregados com
+    tamanhos corretos. O checksum do arquivo baixado corresponde ao
+    original local. A conexão de fonte de dados do DataArts Studio
+    consegue ler os arquivos. testlist
 
 Resultado do Teste
 :   Pass
@@ -512,20 +481,20 @@ Observações
 
 # Histórico de versões
 
-**2.1.0**  *2026-09-12*
+**2.1.0**  *2026-09-13*
 
 Alteração de teststeps de tabela tabular para parágrafos auto-numerados.
 `\teststep` agora aceita 1 argumento (ação apenas). Imagens, blocos de
 código e callouts podem ser inseridos livremente entre os passos.
 
-**2.0.0**  *2026-09-12*
+**2.0.0**  *2026-09-13*
 
 Layout de casos de teste redesenhado: barras de cabeçalho mini de
 largura total para cada campo, ambiente testprocedure com tabela de
 passos de 2 colunas, ordem dos campos atualizada (Resultado do Teste
 antes de Observações).
 
-**1.1.0**  *2026-09-12*
+**1.1.0**  *2026-09-13*
 
 Adicionadas demonstrações abrangentes de recursos: caixas de destaque
 `warning`, `tip`, `infobox`; blocos `code`; `badge`; `weblink`; `note`;
@@ -538,7 +507,7 @@ TC-008).
 Adicionados casos de teste de Configuração do Ambiente e Ferramentas
 (TC-009, TC-010).
 
-**1.0.0**  *2026-09-12*
+**1.0.0**  *2026-09-13*
 
 Versão inicial.
 

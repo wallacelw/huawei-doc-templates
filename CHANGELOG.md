@@ -3,6 +3,21 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.3.0 (2026-09-13)
+
+### Features
+
+- **`testlist` environment**: Styled enumerate with red bold numbers for
+  use inside testcase fields (prerequisites, expected result, remarks).
+  Provides consistent numbered lists matching the teststep styling.
+
+### Fixes
+
+- **Alignment fix**: Zeroed `\parindent` inside the testcase tcolorbox to
+  prevent inconsistent paragraph indentation across fields.
+- **Procedure step indent**: Added `\hspace{1em}` before step numbers to
+  align with `testlist` items and push numbering to the right.
+
 ## v4.2.0 (2026-09-13)
 
 ### Features

@@ -108,10 +108,9 @@ Objective
     report a healthy status.
 
 Prerequisites
-
-:   1.  Terraform infrastructure apply completed successfully.
-    2.  MRS cluster ID is available in the Terraform output.
-    3.  IAM user has MRS_Viewer or higher role.
+:   testlist Terraform infrastructure apply completed successfully. MRS
+    cluster ID is available in the Terraform output. IAM user has
+    MRS_Viewer or higher role. testlist
 
 Procedure
 
@@ -123,11 +122,9 @@ Procedure
     6.  Review Node tab
 
 Expected Result
-
-:   1.  Cluster status is Running.
-    2.  All four components (HDFS, YARN, Spark, Hive) are listed with
-        status Normal.
-    3.  All nodes report status Running with no alarms.
+:   testlist Cluster status is Running. All four components (HDFS, YARN,
+    Spark, Hive) are listed with status Normal. All nodes report status
+    Running with no alarms. testlist
 
 Test Result
 :   Pass
@@ -144,10 +141,9 @@ Objective
     accessible with the designated IAM policy.
 
 Prerequisites
-
-:   1.  OBS bucket name is defined in the Terraform configuration.
-    2.  IAM policy granting read/write access to the bucket is attached
-        to the test user.
+:   testlist OBS bucket name is defined in the Terraform configuration.
+    IAM policy granting read/write access to the bucket is attached to
+    the test user. testlist
 
 Procedure
 
@@ -160,11 +156,9 @@ Procedure
     7.  Delete the test file
 
 Expected Result
-
-:   1.  Bucket exists with storage class Standard.
-    2.  File upload completes without error.
-    3.  Downloaded file content matches the original.
-    4.  File deletion succeeds.
+:   testlist Bucket exists with storage class Standard. File upload
+    completes without error. Downloaded file content matches the
+    original. File deletion succeeds. testlist
 
 Test Result
 :   Pass
@@ -181,10 +175,9 @@ Objective
     blocks and inbound/outbound rules.
 
 Prerequisites
-
-:   1.  VPC and subnet IDs are available from the Terraform output.
-    2.  Security group names are documented in the solution
-        architecture.
+:   testlist VPC and subnet IDs are available from the Terraform output.
+    Security group names are documented in the solution architecture.
+    testlist
 
 Procedure
 
@@ -198,12 +191,9 @@ Procedure
     6.  Verify outbound rules allow all traffic (default)
 
 Expected Result
-
-:   1.  VPC CIDR is 10.0.0.0/16.
-    2.  Subnet CIDR is 10.0.1.0/24.
-    3.  Inbound rules match the architecture: TCP 22 and TCP 443 from
-        the specified sources.
-    4.  Outbound allows all traffic.
+:   testlist VPC CIDR is 10.0.0.0/16. Subnet CIDR is 10.0.1.0/24.
+    Inbound rules match the architecture: TCP 22 and TCP 443 from the
+    specified sources. Outbound allows all traffic. testlist
 
 Test Result
 :   Pass
@@ -222,10 +212,8 @@ Objective
     with the Dayu_User role.
 
 Prerequisites
-
-:   1.  DataArts Studio instance is provisioned and its status is
-        Running.
-    2.  Test IAM user has the Dayu_User role assigned.
+:   testlist DataArts Studio instance is provisioned and its status is
+    Running. Test IAM user has the Dayu_User role assigned. testlist
 
 Procedure
 
@@ -237,11 +225,10 @@ Procedure
         modules: Data Integration, Data Development, Data Architecture
 
 Expected Result
-
-:   1.  Workspace is listed and accessible.
-    2.  DataArts Studio console opens without errors.
-    3.  All three modules (Data Integration, Data Development, Data
-        Architecture) are visible in the navigation.
+:   testlist Workspace is listed and accessible. DataArts Studio console
+    opens without errors. All three modules (Data Integration, Data
+    Development, Data Architecture) are visible in the navigation.
+    testlist
 
 Test Result
 :   Pass
@@ -258,11 +245,10 @@ Objective
     the result to the target OBS path.
 
 Prerequisites
-
-:   1.  TC-004 completed (DataArts Studio workspace accessible).
-    2.  Source CSV file (customers.csv) exists in the OBS raw bucket.
-    3.  Target OBS path (poc-datalake-curated/customers/) is configured.
-    4.  Pipeline pl-ingest-customers is published in DataArts Studio.
+:   testlist TC-004 completed (DataArts Studio workspace accessible).
+    Source CSV file (customers.csv) exists in the OBS raw bucket. Target
+    OBS path (poc-datalake-curated/customers/) is configured. Pipeline
+    pl-ingest-customers is published in DataArts Studio. testlist
 
 Procedure
 
@@ -274,10 +260,9 @@ Procedure
     6.  Download and verify row count
 
 Expected Result
-
-:   1.  Pipeline execution completes with status Success.
-    2.  Output file is created in the target OBS path.
-    3.  Row count of the output file matches the source file.
+:   testlist Pipeline execution completes with status Success. Output
+    file is created in the target OBS path. Row count of the output file
+    matches the source file. testlist
 
 Test Result
 :   Pass
@@ -294,11 +279,9 @@ Objective
     the integration between MRS and the data lake.
 
 Prerequisites
-
-:   1.  TC-001 completed (MRS cluster healthy).
-    2.  Hive table poc_db.customers exists and contains data loaded by
-        the ingestion pipeline.
-    3.  SSH access to the MRS master node is configured.
+:   testlist TC-001 completed (MRS cluster healthy). Hive table
+    poc_db.customers exists and contains data loaded by the ingestion
+    pipeline. SSH access to the MRS master node is configured. testlist
 
 Procedure
 
@@ -314,10 +297,8 @@ Procedure
     5.  Confirm the query returns 5 rows with non-null values
 
 Expected Result
-
-:   1.  COUNT(\*) returns 10,000.
-    2.  The sample query returns 5 rows with valid customer_id and name
-        values.
+:   testlist COUNT(\*) returns 10,000. The sample query returns 5 rows
+    with valid customer_id and name values. testlist
 
 Test Result
 :   Pass
@@ -336,12 +317,9 @@ Objective
     and the bucket policy matches the principle of least privilege.
 
 Prerequisites
-
-:   1.  OBS bucket poc-datalake-raw exists with the designated IAM
-        policy.
-    2.  Two test IAM users: one with OBS_ReadWrite role, one with no OBS
-        permissions.
-    3.  obsutil CLI configured for both users.
+:   testlist OBS bucket poc-datalake-raw exists with the designated IAM
+    policy. Two test IAM users: one with OBS_ReadWrite role, one with no
+    OBS permissions. obsutil CLI configured for both users. testlist
 
 Procedure
 
@@ -357,12 +335,10 @@ Procedure
         intended permissions
 
 Expected Result
-
-:   1.  Authorized user can upload and download successfully.
-    2.  Unauthorized user receives HTTP 403 on both upload and list
-        operations.
-    3.  Bucket policy grants only the intended read/write permissions to
-        the designated roles.
+:   testlist Authorized user can upload and download successfully.
+    Unauthorized user receives HTTP 403 on both upload and list
+    operations. Bucket policy grants only the intended read/write
+    permissions to the designated roles. testlist
 
 Test Result
 :   Pass
@@ -380,11 +356,9 @@ Objective
     non-admin users.
 
 Prerequisites
-
-:   1.  TC-004 completed (DataArts Studio workspace accessible).
-    2.  Data masking rule configured for column customers.ssn (Social
-        Security Number).
-    3.  Test user has Dayu_User role (not admin).
+:   testlist TC-004 completed (DataArts Studio workspace accessible).
+    Data masking rule configured for column customers.ssn (Social
+    Security Number). Test user has Dayu_User role (not admin). testlist
 
 Procedure
 
@@ -400,10 +374,9 @@ Procedure
         returned
 
 Expected Result
-
-:   1.  Masking rule is active for customers.ssn.
-    2.  Non-admin user sees masked values in the ssn column.
-    3.  Admin user sees real values in the ssn column.
+:   testlist Masking rule is active for customers.ssn. Non-admin user
+    sees masked values in the ssn column. Admin user sees real values in
+    the ssn column. testlist
 
 Test Result
 :   Pass
@@ -422,11 +395,9 @@ Objective
     errors and the state file reflects the expected resources.
 
 Prerequisites
-
-:   1.  terraform CLI installed (version \$\$ 1.0).
-    2.  AK/SK credentials configured via environment variables or
-        provider.tf.
-    3.  Terraform configuration files in the project directory.
+:   testlist terraform CLI installed (version \$\$ 1.0). AK/SK
+    credentials configured via environment variables or provider.tf.
+    Terraform configuration files in the project directory. testlist
 
 Procedure
 
@@ -440,11 +411,9 @@ Procedure
         the architecture
 
 Expected Result
-
-:   1.  terraform apply completes with no errors.
-    2.  All output values are populated (cluster ID, bucket name, VPC
-        ID).
-    3.  Resource count in state matches the architecture specification.
+:   testlist terraform apply completes with no errors. All output values
+    are populated (cluster ID, bucket name, VPC ID). Resource count in
+    state matches the architecture specification. testlist
 
 Test Result
 :   Pass
@@ -461,10 +430,9 @@ Objective
     DataArts Studio pipeline.
 
 Prerequisites
-
-:   1.  TC-002 completed (OBS bucket accessible).
-    2.  Test data files prepared in the local directory ./test-data/.
-    3.  obsutil CLI configured with the test user credentials.
+:   testlist TC-002 completed (OBS bucket accessible). Test data files
+    prepared in the local directory ./test-data/. obsutil CLI configured
+    with the test user credentials. testlist
 
 Procedure
 
@@ -478,11 +446,10 @@ Procedure
         the uploaded files
 
 Expected Result
-
-:   1.  All test data files are uploaded without errors.
-    2.  Bucket listing shows all uploaded files with correct sizes.
-    3.  Downloaded file checksum matches the local original.
-    4.  DataArts Studio data source connection can read the files.
+:   testlist All test data files are uploaded without errors. Bucket
+    listing shows all uploaded files with correct sizes. Downloaded file
+    checksum matches the local original. DataArts Studio data source
+    connection can read the files. testlist
 
 Test Result
 :   Pass
@@ -495,19 +462,19 @@ Remarks
 
 # Changelog
 
-**2.1.0**  *2026-09-12*
+**2.1.0**  *2026-09-13*
 
 Changed teststeps from tabular table to auto-numbered paragraphs.
 `\teststep` now takes 1 arg (action only). Images, code blocks, and
 callouts can be placed freely between steps.
 
-**2.0.0**  *2026-09-12*
+**2.0.0**  *2026-09-13*
 
 Redesigned testcase layout: full-width mini header bars for each field,
 testprocedure environment with 2-column step table, field order updated
 (Test Result before Remarks).
 
-**1.1.0**  *2026-09-12*
+**1.1.0**  *2026-09-13*
 
 Added comprehensive feature demonstrations: `warning`, `tip`, `infobox`
 callouts; `code` blocks; `badge`; `weblink`; `note`; `param`; `image`,
@@ -518,7 +485,7 @@ Added Security and Access Control test cases (TC-007, TC-008).
 
 Added Environment Setup and Tooling test cases (TC-009, TC-010).
 
-**1.0.0**  *2026-09-12*
+**1.0.0**  *2026-09-13*
 
 Initial version.
 

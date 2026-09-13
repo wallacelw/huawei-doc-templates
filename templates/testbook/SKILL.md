@@ -135,25 +135,44 @@ up in the class file and this SKILL.md.
 
 \begin{testcase}{TC-001: <test case title>}
   \testobjective{Verify that <functionality> works as expected.}
-  \testprerequisites{1. System is running. \\ 2. User is logged in.}
+  \testprerequisites{
+    \begin{testlist}
+      \item System is running.
+      \item User is logged in.
+    \end{testlist}
+  }
   \begin{testprocedure}
     \teststep{Navigate to <page>}
     \teststep{Click <button>}
     \teststep{Enter <data> and click Save}
   \end{testprocedure}
-  \testexpected{1. The resource is created successfully. \\ 2. Data is persisted.}
+  \testexpected{
+    \begin{testlist}
+      \item The resource is created successfully.
+      \item Data is persisted.
+    \end{testlist}
+  }
   \testresult{\testresultbadge{Pass}}
   \testremarks{Optional notes about this test case.}
 \end{testcase}
 
 \begin{testcase}{TC-002: <another test case title>}
   \testobjective{Verify that <other functionality> behaves correctly.}
-  \testprerequisites{1. Resource from TC-001 exists.}
+  \testprerequisites{
+    \begin{testlist}
+      \item Resource from TC-001 exists.
+    \end{testlist}
+  }
   \begin{testprocedure}
     \teststep{Select the resource}
     \teststep{Click Delete and confirm}
   \end{testprocedure}
-  \testexpected{1. The resource is removed. \\ 2. No orphan data remains.}
+  \testexpected{
+    \begin{testlist}
+      \item The resource is removed.
+      \item No orphan data remains.
+    \end{testlist}
+  }
   \testresult{\testresultbadge{Pass}}
   \testremarks{}
 \end{testcase}
@@ -308,13 +327,21 @@ Remarks fields.
 ```latex
 \begin{testcase}{TC-001: Verify MRS cluster deployment}
   \testobjective{Confirm that the MRS cluster is deployed.}
-  \testprerequisites{1. Terraform apply completed.}
+  \testprerequisites{
+    \begin{testlist}
+      \item Terraform apply completed.
+    \end{testlist}
+  }
   \begin{testprocedure}
     \teststep{Log in to the Huawei Cloud Console}
     \teststep{Navigate to MapReduce Service, Clusters}
     \teststep{Verify cluster status is Running}
   \end{testprocedure}
-  \testexpected{1. Cluster status is Running.}
+  \testexpected{
+    \begin{testlist}
+      \item Cluster status is Running.
+    \end{testlist}
+  }
   \testresult{\testresultbadge{Pass}}
   \testremarks{If any component shows Abnormal, check alarms.}
 \end{testcase}
@@ -330,7 +357,9 @@ Remarks fields.
 | `\testremarks{...}` | Remarks | Observações | No (hidden by `noanswers`) |
 
 **Formatting notes:**
-- Use `\\` (double backslash) to separate numbered items within a field.
+- Use the `testlist` environment for numbered lists within fields (prerequisites,
+  expected result, remarks). It auto-numbers items with red bold numbers
+  matching the teststep styling.
 - Each field is preceded by a full-width red mini header bar (Huawei-red
   background, white bold text), with the content rendered below it.
 - The box has a 3pt Huawei-red left-rule and breaks across pages.
@@ -385,6 +414,33 @@ Images, code blocks, and callouts can be placed freely between steps.
 **Language-aware label:** The mini header bar text adapts to the class option:
 - English (default): **Procedure**
 - Portuguese (`[portuguese]`): **Procedimento**
+
+### `testlist` environment
+
+Styled enumerate with red bold numbers, matching the teststep styling.
+Use it inside testcase fields (prerequisites, expected result, remarks)
+for numbered lists. Items are auto-numbered — do not include the number
+in the `\item` text.
+
+```latex
+\testprerequisites{
+  \begin{testlist}
+    \item Terraform apply completed.
+    \item MRS cluster ID is available.
+    \item IAM user has MRS\_Viewer role.
+  \end{testlist}
+}
+```
+
+| Command | Purpose |
+|---|---|
+| `\begin{testlist} ... \end{testlist}` | Numbered list with red bold auto-numbered items. Use inside testcase fields. |
+| `\item` | One item in the list. Numbering is automatic. |
+
+**When to use:**
+- Inside `\testprerequisites{...}`, `\testexpected{...}`, or `\testremarks{...}`
+  when the content has two or more numbered items.
+- For a single sentence (not a list), write it directly without `testlist`.
 
 ### Test steps
 

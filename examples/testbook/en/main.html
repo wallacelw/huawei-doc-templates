@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="date" content="2026-09-12" />
+  <meta name="date" content="2026-09-13" />
   <title>POC Test Cases — Data Platform Validation</title>
   <style>
 
@@ -313,7 +313,7 @@ width: auto;
 </head>
 <body>
   <h1 class="title">POC Test Cases — Data Platform Validation</h1>
-  <p class="date">2026-09-12</p>
+  <p class="date">2026-09-13</p>
 <p class="version">v2.1.0</p>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Info</strong> </p>
@@ -524,11 +524,9 @@ healthy status.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>Terraform infrastructure apply completed successfully.</li>
-<li>MRS cluster ID is available in the Terraform output.</li>
-<li>IAM user has MRS_Viewer or higher role.</li>
-</ol>
+testlist Terraform infrastructure apply completed successfully. MRS
+cluster ID is available in the Terraform output. IAM user has MRS_Viewer
+or higher role. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -543,12 +541,9 @@ healthy status.
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>Cluster status is Running.</li>
-<li>All four components (HDFS, YARN, Spark, Hive) are listed with status
-Normal.</li>
-<li>All nodes report status Running with no alarms.</li>
-</ol>
+testlist Cluster status is Running. All four components (HDFS, YARN,
+Spark, Hive) are listed with status Normal. All nodes report status
+Running with no alarms. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -571,11 +566,9 @@ with the designated IAM policy.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>OBS bucket name is defined in the Terraform configuration.</li>
-<li>IAM policy granting read/write access to the bucket is attached to
-the test user.</li>
-</ol>
+testlist OBS bucket name is defined in the Terraform configuration. IAM
+policy granting read/write access to the bucket is attached to the test
+user. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -591,12 +584,9 @@ the test user.</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>Bucket exists with storage class Standard.</li>
-<li>File upload completes without error.</li>
-<li>Downloaded file content matches the original.</li>
-<li>File deletion succeeds.</li>
-</ol>
+testlist Bucket exists with storage class Standard. File upload
+completes without error. Downloaded file content matches the original.
+File deletion succeeds. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -619,11 +609,9 @@ blocks and inbound/outbound rules.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>VPC and subnet IDs are available from the Terraform output.</li>
-<li>Security group names are documented in the solution
-architecture.</li>
-</ol>
+testlist VPC and subnet IDs are available from the Terraform output.
+Security group names are documented in the solution architecture.
+testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -640,13 +628,9 @@ the bastion subnet, TCP 443 from the corporate proxy</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>VPC CIDR is 10.0.0.0/16.</li>
-<li>Subnet CIDR is 10.0.1.0/24.</li>
-<li>Inbound rules match the architecture: TCP 22 and TCP 443 from the
-specified sources.</li>
-<li>Outbound allows all traffic.</li>
-</ol>
+testlist VPC CIDR is 10.0.0.0/16. Subnet CIDR is 10.0.1.0/24. Inbound
+rules match the architecture: TCP 22 and TCP 443 from the specified
+sources. Outbound allows all traffic. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -670,11 +654,8 @@ the Dayu_User role.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>DataArts Studio instance is provisioned and its status is
-Running.</li>
-<li>Test IAM user has the Dayu_User role assigned.</li>
-</ol>
+testlist DataArts Studio instance is provisioned and its status is
+Running. Test IAM user has the Dayu_User role assigned. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -689,12 +670,9 @@ Data Integration, Data Development, Data Architecture</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>Workspace is listed and accessible.</li>
-<li>DataArts Studio console opens without errors.</li>
-<li>All three modules (Data Integration, Data Development, Data
-Architecture) are visible in the navigation.</li>
-</ol>
+testlist Workspace is listed and accessible. DataArts Studio console
+opens without errors. All three modules (Data Integration, Data
+Development, Data Architecture) are visible in the navigation. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -717,13 +695,10 @@ the target OBS path.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>TC-004 completed (DataArts Studio workspace accessible).</li>
-<li>Source CSV file (customers.csv) exists in the OBS raw bucket.</li>
-<li>Target OBS path (poc-datalake-curated/customers/) is
-configured.</li>
-<li>Pipeline pl-ingest-customers is published in DataArts Studio.</li>
-</ol>
+testlist TC-004 completed (DataArts Studio workspace accessible). Source
+CSV file (customers.csv) exists in the OBS raw bucket. Target OBS path
+(poc-datalake-curated/customers/) is configured. Pipeline
+pl-ingest-customers is published in DataArts Studio. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -738,11 +713,9 @@ configured.</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>Pipeline execution completes with status Success.</li>
-<li>Output file is created in the target OBS path.</li>
-<li>Row count of the output file matches the source file.</li>
-</ol>
+testlist Pipeline execution completes with status Success. Output file
+is created in the target OBS path. Row count of the output file matches
+the source file. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -765,12 +738,9 @@ integration between MRS and the data lake.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>TC-001 completed (MRS cluster healthy).</li>
-<li>Hive table poc_db.customers exists and contains data loaded by the
-ingestion pipeline.</li>
-<li>SSH access to the MRS master node is configured.</li>
-</ol>
+testlist TC-001 completed (MRS cluster healthy). Hive table
+poc_db.customers exists and contains data loaded by the ingestion
+pipeline. SSH access to the MRS master node is configured. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -788,11 +758,8 @@ poc_db.customers;”</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>COUNT(*) returns 10,000.</li>
-<li>The sample query returns 5 rows with valid customer_id and name
-values.</li>
-</ol>
+testlist COUNT(*) returns 10,000. The sample query returns 5 rows with
+valid customer_id and name values. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -816,13 +783,9 @@ the bucket policy matches the principle of least privilege.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>OBS bucket poc-datalake-raw exists with the designated IAM
-policy.</li>
-<li>Two test IAM users: one with OBS_ReadWrite role, one with no OBS
-permissions.</li>
-<li>obsutil CLI configured for both users.</li>
-</ol>
+testlist OBS bucket poc-datalake-raw exists with the designated IAM
+policy. Two test IAM users: one with OBS_ReadWrite role, one with no OBS
+permissions. obsutil CLI configured for both users. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -841,13 +804,10 @@ permissions</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>Authorized user can upload and download successfully.</li>
-<li>Unauthorized user receives HTTP 403 on both upload and list
-operations.</li>
-<li>Bucket policy grants only the intended read/write permissions to the
-designated roles.</li>
-</ol>
+testlist Authorized user can upload and download successfully.
+Unauthorized user receives HTTP 403 on both upload and list operations.
+Bucket policy grants only the intended read/write permissions to the
+designated roles. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -870,12 +830,9 @@ non-admin users.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>TC-004 completed (DataArts Studio workspace accessible).</li>
-<li>Data masking rule configured for column customers.ssn (Social
-Security Number).</li>
-<li>Test user has Dayu_User role (not admin).</li>
-</ol>
+testlist TC-004 completed (DataArts Studio workspace accessible). Data
+masking rule configured for column customers.ssn (Social Security
+Number). Test user has Dayu_User role (not admin). testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -894,11 +851,9 @@ returned</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>Masking rule is active for customers.ssn.</li>
-<li>Non-admin user sees masked values in the ssn column.</li>
-<li>Admin user sees real values in the ssn column.</li>
-</ol>
+testlist Masking rule is active for customers.ssn. Non-admin user sees
+masked values in the ssn column. Admin user sees real values in the ssn
+column. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -923,12 +878,9 @@ and the state file reflects the expected resources.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>terraform CLI installed (version $$ 1.0).</li>
-<li>AK/SK credentials configured via environment variables or
-provider.tf.</li>
-<li>Terraform configuration files in the project directory.</li>
-</ol>
+testlist terraform CLI installed (version $$ 1.0). AK/SK credentials
+configured via environment variables or provider.tf. Terraform
+configuration files in the project directory. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -945,12 +897,9 @@ architecture</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>terraform apply completes with no errors.</li>
-<li>All output values are populated (cluster ID, bucket name, VPC
-ID).</li>
-<li>Resource count in state matches the architecture specification.</li>
-</ol>
+testlist terraform apply completes with no errors. All output values are
+populated (cluster ID, bucket name, VPC ID). Resource count in state
+matches the architecture specification. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -973,11 +922,9 @@ pipeline.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-<ol type="1">
-<li>TC-002 completed (OBS bucket accessible).</li>
-<li>Test data files prepared in the local directory ./test-data/.</li>
-<li>obsutil CLI configured with the test user credentials.</li>
-</ol>
+testlist TC-002 completed (OBS bucket accessible). Test data files
+prepared in the local directory ./test-data/. obsutil CLI configured
+with the test user credentials. testlist
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -994,12 +941,10 @@ uploaded files</li>
 </dd>
 <dt>Expected Result</dt>
 <dd>
-<ol type="1">
-<li>All test data files are uploaded without errors.</li>
-<li>Bucket listing shows all uploaded files with correct sizes.</li>
-<li>Downloaded file checksum matches the local original.</li>
-<li>DataArts Studio data source connection can read the files.</li>
-</ol>
+testlist All test data files are uploaded without errors. Bucket listing
+shows all uploaded files with correct sizes. Downloaded file checksum
+matches the local original. DataArts Studio data source connection can
+read the files. testlist
 </dd>
 <dt>Test Result</dt>
 <dd>
@@ -1015,15 +960,15 @@ upload feature for better reliability.
 showing all test case results]</em></p>
 <h1 data-number="6"><span class="header-section-number">6</span>
 Changelog</h1>
-<p><strong>2.1.0</strong>  <em>2026-09-12</em></p>
+<p><strong>2.1.0</strong>  <em>2026-09-13</em></p>
 <p>Changed teststeps from tabular table to auto-numbered paragraphs.
 <code>\teststep</code> now takes 1 arg (action only). Images, code
 blocks, and callouts can be placed freely between steps.</p>
-<p><strong>2.0.0</strong>  <em>2026-09-12</em></p>
+<p><strong>2.0.0</strong>  <em>2026-09-13</em></p>
 <p>Redesigned testcase layout: full-width mini header bars for each
 field, testprocedure environment with 2-column step table, field order
 updated (Test Result before Remarks).</p>
-<p><strong>1.1.0</strong>  <em>2026-09-12</em></p>
+<p><strong>1.1.0</strong>  <em>2026-09-13</em></p>
 <p>Added comprehensive feature demonstrations: <code>warning</code>,
 <code>tip</code>, <code>infobox</code> callouts; <code>code</code>
 blocks; <code>badge</code>; <code>weblink</code>; <code>note</code>;
@@ -1032,7 +977,7 @@ blocks; <code>badge</code>; <code>weblink</code>; <code>note</code>;
 <code>inlinecode</code> references.</p>
 <p>Added Security and Access Control test cases (TC-007, TC-008).</p>
 <p>Added Environment Setup and Tooling test cases (TC-009, TC-010).</p>
-<p><strong>1.0.0</strong>  <em>2026-09-12</em></p>
+<p><strong>1.0.0</strong>  <em>2026-09-13</em></p>
 <p>Initial version.</p>
 <p>Added Platform Architecture test cases (TC-001 to TC-003).</p>
 <p>Added Data Engineering test cases (TC-004 to TC-006).</p>

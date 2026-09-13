@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.2.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.3.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -274,6 +274,7 @@
     left=8pt, right=8pt, top=6pt, bottom=6pt,
     before skip=10pt, after skip=10pt,
   ]
+  \setlength{\parindent}{0pt}%
 }{%
   \end{tcolorbox}%
 }
@@ -308,6 +309,32 @@
   \if@showanswers
     \lg@testfield{\lg@remarks}{#1}
   \fi
+}
+
+% =====================================================================
+%  TEST LIST — styled enumerate with red bold numbers
+% =====================================================================
+% Use inside testcase fields (prerequisites, expected result, remarks)
+% for consistent numbered lists with red bold numbers matching teststep.
+% Usage:
+%   \testprerequisites{
+%     \begin{testlist}
+%       \item Terraform apply completed.
+%       \item MRS cluster ID is available.
+%     \end{testlist}
+%   }
+
+\newenvironment{testlist}{%
+  \begin{enumerate}[
+    label=\textcolor{huaweired}{\bfseries\arabic*.},
+    leftmargin=2.5em,
+    labelsep=0.5em,
+    itemsep=0.3em,
+    parsep=0pt,
+    topsep=0pt,
+  ]
+}{%
+  \end{enumerate}
 }
 
 % =====================================================================
@@ -363,10 +390,11 @@
 }
 
 % Auto-numbered step paragraph.  Red bold number, then action text.
+% Indented to align with testlist items (leftmargin ~2.5em).
 \newcommand{\teststep}[1]{%
   \refstepcounter{lg@teststep}%
   \par\smallskip
-  \noindent\textcolor{huaweired}{\bfseries\arabic{lg@teststep}.}\hspace{0.6em}#1\par
+  \noindent\hspace{1em}\textcolor{huaweired}{\bfseries\arabic{lg@teststep}.}\hspace{0.6em}#1\par
 }
 
 % =====================================================================

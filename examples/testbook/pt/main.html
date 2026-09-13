@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="date" content="2026-09-12" />
+  <meta name="date" content="2026-09-13" />
   <title>Casos de Teste POC — Validação da Plataforma de Dados</title>
   <style>
 
@@ -314,7 +314,7 @@ width: auto;
 <body>
   <h1 class="title">Casos de Teste POC — Validação da Plataforma de
 Dados</h1>
-  <p class="date">2026-09-12</p>
+  <p class="date">2026-09-13</p>
 <p class="version">v2.1.0</p>
 <div class="callout infobox" role="note" aria-label="Info">
 <p><strong>Informação</strong> </p>
@@ -529,11 +529,9 @@ apresentam status saudável.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>Aplicação da infraestrutura Terraform concluída com sucesso.</li>
-<li>ID do cluster MRS disponível na saída do Terraform.</li>
-<li>Usuário IAM possui função MRS_Viewer ou superior.</li>
-</ol>
+testlist Aplicação da infraestrutura Terraform concluída com sucesso. ID
+do cluster MRS disponível na saída do Terraform. Usuário IAM possui
+função MRS_Viewer ou superior. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -548,12 +546,9 @@ apresentam status saudável.
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>Status do cluster é Executando.</li>
-<li>Todos os quatro componentes (HDFS, YARN, Spark, Hive) estão listados
-com status Normal.</li>
-<li>Todos os nós apresentam status Executando sem alarmes.</li>
-</ol>
+testlist Status do cluster é Executando. Todos os quatro componentes
+(HDFS, YARN, Spark, Hive) estão listados com status Normal. Todos os nós
+apresentam status Executando sem alarmes. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -576,11 +571,9 @@ data lake da POC está criado, possui a classe de armazenamento correta e
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>Nome do bucket OBS definido na configuração Terraform.</li>
-<li>Política IAM concedendo acesso de leitura/escrita ao bucket está
-anexada ao usuário de teste.</li>
-</ol>
+testlist Nome do bucket OBS definido na configuração Terraform. Política
+IAM concedendo acesso de leitura/escrita ao bucket está anexada ao
+usuário de teste. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -596,12 +589,10 @@ anexada ao usuário de teste.</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>O bucket existe com classe de armazenamento Standard.</li>
-<li>O carregamento do arquivo conclui sem erro.</li>
-<li>O conteúdo do arquivo baixado corresponde ao original.</li>
-<li>A exclusão do arquivo é realizada com sucesso.</li>
-</ol>
+testlist O bucket existe com classe de armazenamento Standard. O
+carregamento do arquivo conclui sem erro. O conteúdo do arquivo baixado
+corresponde ao original. A exclusão do arquivo é realizada com sucesso.
+testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -624,11 +615,9 @@ CIDR e regras de entrada/saída corretos.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>IDs da VPC e da sub-rede disponíveis na saída do Terraform.</li>
-<li>Nomes dos grupos de segurança documentados na arquitetura da
-solução.</li>
-</ol>
+testlist IDs da VPC e da sub-rede disponíveis na saída do Terraform.
+Nomes dos grupos de segurança documentados na arquitetura da solução.
+testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -646,13 +635,9 @@ sub-rede bastion, TCP 443 do proxy corporativo</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>CIDR da VPC é 10.0.0.0/16.</li>
-<li>CIDR da sub-rede é 10.0.1.0/24.</li>
-<li>Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443 das
-origens especificadas.</li>
-<li>Saída permite todo o tráfego.</li>
-</ol>
+testlist CIDR da VPC é 10.0.0.0/16. CIDR da sub-rede é 10.0.1.0/24.
+Regras de entrada correspondem à arquitetura: TCP 22 e TCP 443 das
+origens especificadas. Saída permite todo o tráfego. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -676,11 +661,9 @@ com a função Dayu_User.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>Instância do DataArts Studio provisionada e com status
-Executando.</li>
-<li>Usuário IAM de teste possui a função Dayu_User atribuída.</li>
-</ol>
+testlist Instância do DataArts Studio provisionada e com status
+Executando. Usuário IAM de teste possui a função Dayu_User atribuída.
+testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -697,12 +680,10 @@ Dados</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>O workspace está listado e acessível.</li>
-<li>O console do DataArts Studio abre sem erros.</li>
-<li>Todos os três módulos (Integração de Dados, Desenvolvimento de
-Dados, Arquitetura de Dados) estão visíveis na navegação.</li>
-</ol>
+testlist O workspace está listado e acessível. O console do DataArts
+Studio abre sem erros. Todos os três módulos (Integração de Dados,
+Desenvolvimento de Dados, Arquitetura de Dados) estão visíveis na
+navegação. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -725,13 +706,10 @@ no caminho OBS de destino.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>TC-004 concluído (workspace do DataArts Studio acessível).</li>
-<li>Arquivo CSV de origem (customers.csv) existe no bucket OBS raw.</li>
-<li>Caminho OBS de destino (poc-datalake-curated/customers/) está
-configurado.</li>
-<li>Pipeline pl-ingest-customers está publicado no DataArts Studio.</li>
-</ol>
+testlist TC-004 concluído (workspace do DataArts Studio acessível).
+Arquivo CSV de origem (customers.csv) existe no bucket OBS raw. Caminho
+OBS de destino (poc-datalake-curated/customers/) está configurado.
+Pipeline pl-ingest-customers está publicado no DataArts Studio. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -746,12 +724,9 @@ configurado.</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>A execução do pipeline conclui com status Sucesso.</li>
-<li>O arquivo de saída é criado no caminho OBS de destino.</li>
-<li>A contagem de linhas do arquivo de saída corresponde ao arquivo de
-origem.</li>
-</ol>
+testlist A execução do pipeline conclui com status Sucesso. O arquivo de
+saída é criado no caminho OBS de destino. A contagem de linhas do
+arquivo de saída corresponde ao arquivo de origem. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -774,12 +749,9 @@ validando a integração entre o MRS e o data lake.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>TC-001 concluído (cluster MRS saudável).</li>
-<li>Tabela Hive poc_db.customers existe e contém dados carregados pelo
-pipeline de ingestão.</li>
-<li>Acesso SSH ao nó master do MRS configurado.</li>
-</ol>
+testlist TC-001 concluído (cluster MRS saudável). Tabela Hive
+poc_db.customers existe e contém dados carregados pelo pipeline de
+ingestão. Acesso SSH ao nó master do MRS configurado. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -798,11 +770,8 @@ poc_db.customers LIMIT 5;”</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>COUNT(*) retorna 10.000.</li>
-<li>A consulta de amostra retorna 5 linhas com valores válidos de
-customer_id e name.</li>
-</ol>
+testlist COUNT(*) retorna 10.000. A consulta de amostra retorna 5 linhas
+com valores válidos de customer_id e name. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -828,13 +797,10 @@ menor privilégio.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>Bucket OBS poc-datalake-raw existe com a política IAM
-designada.</li>
-<li>Dois usuários IAM de teste: um com função OBS_ReadWrite, outro sem
-permissões OBS.</li>
-<li>CLI obsutil configurada para ambos os usuários.</li>
-</ol>
+testlist Bucket OBS poc-datalake-raw existe com a política IAM
+designada. Dois usuários IAM de teste: um com função OBS_ReadWrite,
+outro sem permissões OBS. CLI obsutil configurada para ambos os
+usuários. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -854,13 +820,10 @@ pretendidas</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>Usuário autorizado consegue carregar e baixar com sucesso.</li>
-<li>Usuário não autorizado recebe HTTP 403 nas operações de carregamento
-e listagem.</li>
-<li>Política do bucket concede apenas as permissões de leitura/escrita
-pretendidas às funções designadas.</li>
-</ol>
+testlist Usuário autorizado consegue carregar e baixar com sucesso.
+Usuário não autorizado recebe HTTP 403 nas operações de carregamento e
+listagem. Política do bucket concede apenas as permissões de
+leitura/escrita pretendidas às funções designadas. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -884,12 +847,10 @@ consultadas por usuários não administradores.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>TC-004 concluído (workspace do DataArts Studio acessível).</li>
-<li>Regra de mascaramento configurada para a coluna customers.ssn
-(Número de Seguro Social).</li>
-<li>Usuário de teste possui função Dayu_User (não administrador).</li>
-</ol>
+testlist TC-004 concluído (workspace do DataArts Studio acessível).
+Regra de mascaramento configurada para a coluna customers.ssn (Número de
+Seguro Social). Usuário de teste possui função Dayu_User (não
+administrador). testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -908,12 +869,9 @@ os valores reais são retornados</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>Regra de mascaramento ativa para customers.ssn.</li>
-<li>Usuário não administrador visualiza valores mascarados na coluna
-ssn.</li>
-<li>Usuário administrador visualiza valores reais na coluna ssn.</li>
-</ol>
+testlist Regra de mascaramento ativa para customers.ssn. Usuário não
+administrador visualiza valores mascarados na coluna ssn. Usuário
+administrador visualiza valores reais na coluna ssn. testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -938,12 +896,9 @@ que o arquivo de estado reflete os recursos esperados.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>CLI terraform instalada (versão $$ 1.0).</li>
-<li>Credenciais AK/SK configuradas via variáveis de ambiente ou
-provider.tf.</li>
-<li>Arquivos de configuração Terraform no diretório do projeto.</li>
-</ol>
+testlist CLI terraform instalada (versão $$ 1.0). Credenciais AK/SK
+configuradas via variáveis de ambiente ou provider.tf. Arquivos de
+configuração Terraform no diretório do projeto. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -962,13 +917,10 @@ corresponde à arquitetura</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>terraform apply conclui sem erros.</li>
-<li>Todos os valores de saída estão preenchidos (ID do cluster, nome do
-bucket, ID da VPC).</li>
-<li>Contagem de recursos no estado corresponde à especificação da
-arquitetura.</li>
-</ol>
+testlist terraform apply conclui sem erros. Todos os valores de saída
+estão preenchidos (ID do cluster, nome do bucket, ID da VPC). Contagem
+de recursos no estado corresponde à especificação da arquitetura.
+testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -991,12 +943,9 @@ pipeline do DataArts Studio.
 </dd>
 <dt>Pré-requisitos</dt>
 <dd>
-<ol type="1">
-<li>TC-002 concluído (bucket OBS acessível).</li>
-<li>Arquivos de dados de teste preparados no diretório local
-./test-data/.</li>
-<li>CLI obsutil configurada com as credenciais do usuário de teste.</li>
-</ol>
+testlist TC-002 concluído (bucket OBS acessível). Arquivos de dados de
+teste preparados no diretório local ./test-data/. CLI obsutil
+configurada com as credenciais do usuário de teste. testlist
 </dd>
 <dt>Procedimento</dt>
 <dd>
@@ -1014,14 +963,11 @@ consegue ler os arquivos carregados</li>
 </dd>
 <dt>Resultado Esperado</dt>
 <dd>
-<ol type="1">
-<li>Todos os arquivos de dados de teste são carregados sem erros.</li>
-<li>A listagem do bucket mostra todos os arquivos carregados com
-tamanhos corretos.</li>
-<li>O checksum do arquivo baixado corresponde ao original local.</li>
-<li>A conexão de fonte de dados do DataArts Studio consegue ler os
-arquivos.</li>
-</ol>
+testlist Todos os arquivos de dados de teste são carregados sem erros. A
+listagem do bucket mostra todos os arquivos carregados com tamanhos
+corretos. O checksum do arquivo baixado corresponde ao original local. A
+conexão de fonte de dados do DataArts Studio consegue ler os arquivos.
+testlist
 </dd>
 <dt>Resultado do Teste</dt>
 <dd>
@@ -1037,17 +983,17 @@ upload multipart do OBS para maior confiabilidade.
 testes mostrando os resultados de todos os casos de teste]</em></p>
 <h1 data-number="6"><span class="header-section-number">6</span>
 Histórico de versões</h1>
-<p><strong>2.1.0</strong>  <em>2026-09-12</em></p>
+<p><strong>2.1.0</strong>  <em>2026-09-13</em></p>
 <p>Alteração de teststeps de tabela tabular para parágrafos
 auto-numerados. <code>\teststep</code> agora aceita 1 argumento (ação
 apenas). Imagens, blocos de código e callouts podem ser inseridos
 livremente entre os passos.</p>
-<p><strong>2.0.0</strong>  <em>2026-09-12</em></p>
+<p><strong>2.0.0</strong>  <em>2026-09-13</em></p>
 <p>Layout de casos de teste redesenhado: barras de cabeçalho mini de
 largura total para cada campo, ambiente testprocedure com tabela de
 passos de 2 colunas, ordem dos campos atualizada (Resultado do Teste
 antes de Observações).</p>
-<p><strong>1.1.0</strong>  <em>2026-09-12</em></p>
+<p><strong>1.1.0</strong>  <em>2026-09-13</em></p>
 <p>Adicionadas demonstrações abrangentes de recursos: caixas de destaque
 <code>warning</code>, <code>tip</code>, <code>infobox</code>; blocos
 <code>code</code>; <code>badge</code>; <code>weblink</code>;
@@ -1058,7 +1004,7 @@ antes de Observações).</p>
 TC-008).</p>
 <p>Adicionados casos de teste de Configuração do Ambiente e Ferramentas
 (TC-009, TC-010).</p>
-<p><strong>1.0.0</strong>  <em>2026-09-12</em></p>
+<p><strong>1.0.0</strong>  <em>2026-09-13</em></p>
 <p>Versão inicial.</p>
 <p>Adicionados casos de teste de Arquitetura da Plataforma (TC-001 a
 TC-003).</p>
