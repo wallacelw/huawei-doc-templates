@@ -25,7 +25,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.6.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v4.7.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -102,7 +102,7 @@
   \newcommand{\lg@teststatus}{Status}
 \else
   \newcommand{\lg@testcases}{Test Cases}
-  \newcommand{\lg@testcase}{Test Case}
+  \newcommand{\lg@testcase}{Testcase}
   \newcommand{\lg@objective}{Objective}
   \newcommand{\lg@prerequisites}{Prerequisites}
   \newcommand{\lg@procedure}{Procedure}
@@ -259,7 +259,8 @@
 
 \newenvironment{testcase}[1]{%
   \refstepcounter{testcase}%
-  \subsubsection{\lg@testcase~\thetestcase: #1}%
+  \par\medskip
+  \noindent\textbf{\lg@testcase~\thetestcase:}~#1\par\nobreak\medskip
   \begin{tcolorbox}[
     enhanced jigsaw,
     breakable,

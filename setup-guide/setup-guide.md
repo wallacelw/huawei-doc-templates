@@ -1077,6 +1077,12 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.7.0**  *2026-09-13*
+
+Testcase headings now formatted as captions (like figures/tables): bold
+"Testcase N:" followed by description. Changed label from "Test Case" to
+"Testcase".
+
 **4.6.0**  *2026-09-13*
 
 Section restructure: Introduction, Test Cases (with category

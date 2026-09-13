@@ -457,8 +457,8 @@ bloqueantes ou problemas de ambiente.</td>
 </table>
 <h1 data-number="2" id="casos-de-teste"><span class="header-section-number">2</span> Casos de Teste</h1>
 <h2 data-number="2.1" id="arquitetura-da-plataforma"><span class="header-section-number">2.1</span> Arquitetura da Plataforma</h2>
-<h3 data-number="2.1.1"><span class="header-section-number">2.1.1</span>
-Caso de Teste 1: Verificar implantação e saúde do cluster MRS</h3>
+<p><strong>Caso de Teste 1:</strong> Verificar implantação e saúde do
+cluster MRS</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -497,8 +497,8 @@ Se algum componente apresentar status <strong>Anormal</strong>,
 verificar a página de alarmes do MRS antes de registrar o resultado.
 </dd>
 </dl>
-<h3 data-number="2.1.2"><span class="header-section-number">2.1.2</span>
-Caso de Teste 2: Verificar criação e acessibilidade do bucket OBS</h3>
+<p><strong>Caso de Teste 2:</strong> Verificar criação e acessibilidade
+do bucket OBS</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -538,8 +538,8 @@ A consistência eventual do OBS pode causar um breve atraso antes que um
 objeto recém-carregado apareça nas listagens.
 </dd>
 </dl>
-<h3 data-number="2.1.3"><span class="header-section-number">2.1.3</span>
-Caso de Teste 3: Verificar configuração de VPC e grupo de segurança</h3>
+<p><strong>Caso de Teste 3:</strong> Verificar configuração de VPC e
+grupo de segurança</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -582,8 +582,8 @@ da arquitetura, documentá-las no campo de Observações.
 </dd>
 </dl>
 <h2 data-number="2.2" id="engenharia-de-dados"><span class="header-section-number">2.2</span> Engenharia de Dados</h2>
-<h3 data-number="2.2.1"><span class="header-section-number">2.2.1</span>
-Caso de Teste 4: Verificar criação do workspace do DataArts Studio</h3>
+<p><strong>Caso de Teste 4:</strong> Verificar criação do workspace do
+DataArts Studio</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -626,9 +626,8 @@ Se o workspace falhar ao carregar, verificar o status da instância Dayu
 e a atribuição da função IAM.
 </dd>
 </dl>
-<h3 data-number="2.2.2"><span class="header-section-number">2.2.2</span>
-Caso de Teste 5: Verificar execução do pipeline de ingestão de
-dados</h3>
+<p><strong>Caso de Teste 5:</strong> Verificar execução do pipeline de
+ingestão de dados</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -669,8 +668,8 @@ O tempo de execução do pipeline varia conforme o volume de dados. Para a
 POC, o arquivo de origem contém aproximadamente 10.000 linhas.
 </dd>
 </dl>
-<h3 data-number="2.2.3"><span class="header-section-number">2.2.3</span>
-Caso de Teste 6: Verificar consulta Spark SQL no cluster MRS</h3>
+<p><strong>Caso de Teste 6:</strong> Verificar consulta Spark SQL no
+cluster MRS</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -711,9 +710,8 @@ do componente Spark2x do MRS para submeter a consulta.
 </dl>
 <h2 data-number="2.3" id="segurança-e-controle-de-acesso"><span class="header-section-number">2.3</span> Segurança e Controle de
 Acesso</h2>
-<h3 data-number="2.3.1"><span class="header-section-number">2.3.1</span>
-Caso de Teste 7: Verificar aplicação de política IAM nos buckets
-OBS</h3>
+<p><strong>Caso de Teste 7:</strong> Verificar aplicação de política IAM
+nos buckets OBS</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -760,9 +758,8 @@ retornada conforme esperado — pode haver herança de política do projeto
 ou domínio.
 </dd>
 </dl>
-<h3 data-number="2.3.2"><span class="header-section-number">2.3.2</span>
-Caso de Teste 8: Verificar regra de mascaramento de dados do DataArts
-Studio</h3>
+<p><strong>Caso de Teste 8:</strong> Verificar regra de mascaramento de
+dados do DataArts Studio</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -809,9 +806,8 @@ os dados subjacentes no OBS/HDFS não são modificados.
 </dl>
 <h2 data-number="2.4" id="configuração-de-ambiente-e-ferramentas"><span class="header-section-number">2.4</span> Configuração de Ambiente e
 Ferramentas</h2>
-<h3 data-number="2.4.1"><span class="header-section-number">2.4.1</span>
-Caso de Teste 9: Verificar implantação de infraestrutura via
-Terraform</h3>
+<p><strong>Caso de Teste 9:</strong> Verificar implantação de
+infraestrutura via Terraform</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>
@@ -853,8 +849,8 @@ Se <code>terraform apply</code> falhar, verificar as credenciais AK/SK e
 os limites de cota da região <code>sa-brazil-1</code>.
 </dd>
 </dl>
-<h3 data-number="2.4.2"><span class="header-section-number">2.4.2</span>
-Caso de Teste 10: Verificar carregamento de dados de teste no OBS</h3>
+<p><strong>Caso de Teste 10:</strong> Verificar carregamento de dados de
+teste no OBS</p>
 <dl>
 <dt>Objetivo</dt>
 <dd>

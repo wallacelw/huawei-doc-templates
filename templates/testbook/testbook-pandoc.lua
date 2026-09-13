@@ -42,7 +42,7 @@ local config = {
       expectedresult = "Expected Result",
       remarks = "Remarks",
       testresult = "Test Result",
-      testcase = "Test Case",
+      testcase = "Testcase",
       testcaseid = "ID",
       testcasetitle = "Title",
       teststatus = "Status",
@@ -103,10 +103,14 @@ local config = {
       if not body then return nil end
 
       local blocks = pandoc.Blocks({})
-      -- Add subsubsection heading with auto-numbering (like figures/tables)
+      -- Add caption-style heading with auto-numbering (like figures/tables)
       testcase_counter = testcase_counter + 1
-      blocks:insert(pandoc.Header(3, pandoc.Inlines({
-        pandoc.Str(L("testcase") .. " " .. testcase_counter .. ": " .. title)
+      blocks:insert(pandoc.Para(pandoc.Inlines({
+        pandoc.Strong(pandoc.Inlines({
+          pandoc.Str(L("testcase") .. " " .. testcase_counter .. ":")
+        })),
+        pandoc.Space(),
+        pandoc.Str(title)
       })))
 
       -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.

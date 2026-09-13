@@ -87,7 +87,7 @@ kubectl version --client
 
 ## Platform Architecture
 
-### Test Case 1: Verify MRS cluster deployment and health
+**Testcase 1:** Verify MRS cluster deployment and health
 
 Objective
 :   Confirm that the MapReduce Service (MRS) cluster is deployed with
@@ -117,7 +117,7 @@ Remarks
 :   If any component shows **Abnormal**, check the MRS alarm page before
     marking the result.
 
-### Test Case 2: Verify OBS bucket creation and accessibility
+**Testcase 2:** Verify OBS bucket creation and accessibility
 
 Objective
 :   Confirm that the Object Storage Service (OBS) bucket used for the
@@ -148,7 +148,7 @@ Remarks
 :   OBS eventual consistency may cause a brief delay before a newly
     uploaded object appears in listings.
 
-### Test Case 3: Verify VPC and security group configuration
+**Testcase 3:** Verify VPC and security group configuration
 
 Objective
 :   Confirm that the VPC, subnet, and security groups are configured
@@ -182,7 +182,7 @@ Remarks
 
 ## Data Engineering
 
-### Test Case 4: Verify DataArts Studio workspace creation
+**Testcase 4:** Verify DataArts Studio workspace creation
 
 Objective
 :   Confirm that the DataArts Studio (Dayu) instance is provisioned, the
@@ -213,7 +213,7 @@ Remarks
 :   If the workspace fails to load, check the Dayu instance status and
     the IAM role assignment.
 
-### Test Case 5: Verify data ingestion pipeline execution
+**Testcase 5:** Verify data ingestion pipeline execution
 
 Objective
 :   Confirm that a DataArts Studio batch pipeline can successfully
@@ -245,7 +245,7 @@ Remarks
 :   Pipeline execution time varies with data volume. For the POC, the
     source file contains approximately 10,000 rows.
 
-### Test Case 6: Verify Spark SQL query on MRS cluster
+**Testcase 6:** Verify Spark SQL query on MRS cluster
 
 Objective
 :   Confirm that a Spark SQL query can be executed on the MRS cluster to
@@ -278,7 +278,7 @@ Remarks
 
 ## Security and Access Control
 
-### Test Case 7: Verify IAM policy enforcement on OBS buckets
+**Testcase 7:** Verify IAM policy enforcement on OBS buckets
 
 Objective
 :   Confirm that IAM policies correctly restrict OBS bucket access ---
@@ -314,7 +314,7 @@ Remarks
     expected --- there may be a policy inheritance from the project or
     domain level.
 
-### Test Case 8: Verify DataArts Studio data masking rule
+**Testcase 8:** Verify DataArts Studio data masking rule
 
 Objective
 :   Confirm that sensitive data columns (e.g. PII fields) are masked
@@ -349,7 +349,7 @@ Remarks
 
 ## Environment Setup and Tooling
 
-### Test Case 9: Verify Terraform infrastructure deployment
+**Testcase 9:** Verify Terraform infrastructure deployment
 
 Objective
 :   Confirm that the Terraform configuration deploys all required
@@ -383,7 +383,7 @@ Remarks
 :   If `terraform apply` fails, check the AK/SK credentials and the
     `sa-brazil-1` region quota limits.
 
-### Test Case 10: Verify test data upload to OBS
+**Testcase 10:** Verify test data upload to OBS
 
 Objective
 :   Confirm that all required test data files (CSV, JSON) can be

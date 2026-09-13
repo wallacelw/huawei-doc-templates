@@ -9,7 +9,7 @@
 \setguidetitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{4.6.0}
+\setdocversion{4.7.0}
 
 \begin{document}
 
@@ -1209,6 +1209,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{4.7.0}{\today}{\item Testcase headings now formatted as captions (like figures/tables): bold ``Testcase N:'' followed by description. Changed label from ``Test Case'' to ``Testcase''.}
   \changelogentry{4.6.0}{\today}{\item Section restructure: Introduction, Test Cases (with category subsections), Conclusion. Testcases auto-numbered like figures/tables. Changed testcase from subsection to subsubsection.}
   \changelogentry{4.5.0}{\today}{\item Unified field APIs: \inlinecode{testprerequisites} and \inlinecode{testexpected} changed from commands to environments, matching \inlinecode{testprocedure}. All three now use \inlinecode{\textbackslash teststep} for auto-numbered items with red bold numbers. Uniform code, same visual style.}
   \changelogentry{4.4.0}{\today}{\item Code review fixes: removed dead labels, badge now uses Huawei brand colors (tipbg/tipfg, huaweired, warningbg/warningfg), Lua filter preserves formatting in DOCX/MD/HTML via parse\_latex\_blocks, testprocedure handler preserves non-step content (images, code, callouts).}

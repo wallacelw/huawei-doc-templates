@@ -63,10 +63,12 @@ The document follows a 3-section structure:
    case results.
 
 Each test case uses the `testcase` environment, which produces an
-auto-numbered subsubsection heading ("Test Case 1: *title*",
-"Test Case 2: *title*", …) and a breakable tcolorbox with a red left-rule
-and stacked fields, each preceded by a full-width red mini header bar
-(Huawei-red background, white bold text) with content below.
+auto-numbered caption-style heading (**Testcase 1:** *title*,
+**Testcase 2:** *title*, …) — the prefix is bold and the description follows
+in regular text, matching the style of figure/table captions — and a breakable
+tcolorbox with a red left-rule and stacked fields, each preceded by a
+full-width red mini header bar (Huawei-red background, white bold text) with
+content below.
 
 See [SKILL.md](SKILL.md) for the complete skeleton and all available commands
 and environments.

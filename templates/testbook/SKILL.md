@@ -181,7 +181,7 @@ up in the class file and this SKILL.md.
 \begin{testcase}{<another test case title>}
   \testobjective{Verify that <other functionality> behaves correctly.}
   \begin{testprerequisites}
-    \teststep{Test Case 1 completed.}
+    \teststep{Testcase 1 completed.}
   \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Select the resource}
@@ -344,7 +344,8 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 ### Test case environment
 
 The `testcase` environment is the core building block. Each test case is
-rendered as a subsection heading followed by a **breakable tcolorbox** with a
+rendered as a caption-style heading (bold **Testcase N:** + description,
+like figure/table captions) followed by a **breakable tcolorbox** with a
 3pt Huawei-red left-rule. Fields are **stacked blocks**: each field shows a
 full-width red mini header bar (Huawei-red background, white bold text)
 followed by the content below it. This design allows images, code blocks,
@@ -353,7 +354,9 @@ across pages.
 
 **Auto-numbering:** The `testcase` environment automatically numbers each test
 case using a global counter (1, 2, 3, …). The rendered heading is
-"Test Case *N*: *title*" (English) or "Caso de Teste *N*: *title*" (Portuguese).
+**Testcase *N*:** *title* (English) or **Caso de Teste *N*:** *title* (Portuguese),
+formatted as a caption — the "Testcase N:" prefix is bold and the description
+follows in regular text, matching the style of figure/table captions.
 Do **not** include manual prefixes like "TC-001:" in the title argument — the
 environment adds the number for you.
 
@@ -381,8 +384,8 @@ Remarks fields.
 \end{testcase}
 ```
 
-This renders as **"Test Case 1: Verify MRS cluster deployment"** (the number
-is automatic — the next `testcase` will be "Test Case 2: ...").
+This renders as **Testcase 1:** Verify MRS cluster deployment (the number
+is automatic — the next `testcase` will be "Testcase 2: ...").
 
 | Field command | English label | Portuguese label | Required |
 |---|---|---|---|

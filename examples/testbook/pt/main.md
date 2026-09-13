@@ -91,7 +91,7 @@ kubectl version --client
 
 ## Arquitetura da Plataforma
 
-### Caso de Teste 1: Verificar implantação e saúde do cluster MRS
+**Caso de Teste 1:** Verificar implantação e saúde do cluster MRS
 
 Objetivo
 :   Confirmar que o cluster MapReduce Service (MRS) está implantado com
@@ -122,7 +122,7 @@ Observações
 :   Se algum componente apresentar status **Anormal**, verificar a
     página de alarmes do MRS antes de registrar o resultado.
 
-### Caso de Teste 2: Verificar criação e acessibilidade do bucket OBS
+**Caso de Teste 2:** Verificar criação e acessibilidade do bucket OBS
 
 Objetivo
 :   Confirmar que o bucket do Object Storage Service (OBS) utilizado
@@ -154,7 +154,7 @@ Observações
 :   A consistência eventual do OBS pode causar um breve atraso antes que
     um objeto recém-carregado apareça nas listagens.
 
-### Caso de Teste 3: Verificar configuração de VPC e grupo de segurança
+**Caso de Teste 3:** Verificar configuração de VPC e grupo de segurança
 
 Objetivo
 :   Confirmar que a VPC, a sub-rede e os grupos de segurança estão
@@ -191,7 +191,7 @@ Observações
 
 ## Engenharia de Dados
 
-### Caso de Teste 4: Verificar criação do workspace do DataArts Studio
+**Caso de Teste 4:** Verificar criação do workspace do DataArts Studio
 
 Objetivo
 :   Confirmar que a instância do DataArts Studio (Dayu) está
@@ -225,7 +225,7 @@ Observações
 :   Se o workspace falhar ao carregar, verificar o status da instância
     Dayu e a atribuição da função IAM.
 
-### Caso de Teste 5: Verificar execução do pipeline de ingestão de dados
+**Caso de Teste 5:** Verificar execução do pipeline de ingestão de dados
 
 Objetivo
 :   Confirmar que um pipeline em lote do DataArts Studio consegue
@@ -259,7 +259,7 @@ Observações
     Para a POC, o arquivo de origem contém aproximadamente 10.000
     linhas.
 
-### Caso de Teste 6: Verificar consulta Spark SQL no cluster MRS
+**Caso de Teste 6:** Verificar consulta Spark SQL no cluster MRS
 
 Objetivo
 :   Confirmar que uma consulta Spark SQL pode ser executada no cluster
@@ -294,7 +294,7 @@ Observações
 
 ## Segurança e Controle de Acesso
 
-### Caso de Teste 7: Verificar aplicação de política IAM nos buckets OBS
+**Caso de Teste 7:** Verificar aplicação de política IAM nos buckets OBS
 
 Objetivo
 :   Confirmar que as políticas IAM restringem corretamente o acesso ao
@@ -333,7 +333,8 @@ Observações
     retornada conforme esperado --- pode haver herança de política do
     projeto ou domínio.
 
-### Caso de Teste 8: Verificar regra de mascaramento de dados do DataArts Studio
+**Caso de Teste 8:**
+Verificar regra de mascaramento de dados do DataArts Studio
 
 Objetivo
 :   Confirmar que colunas de dados sensíveis (ex.: campos PII) são
@@ -370,7 +371,8 @@ Observações
 
 ## Configuração de Ambiente e Ferramentas
 
-### Caso de Teste 9: Verificar implantação de infraestrutura via Terraform
+**Caso de Teste 9:**
+Verificar implantação de infraestrutura via Terraform
 
 Objetivo
 :   Confirmar que a configuração Terraform implanta todos os recursos de
@@ -405,7 +407,7 @@ Observações
 :   Se `terraform apply` falhar, verificar as credenciais AK/SK e os
     limites de cota da região `sa-brazil-1`.
 
-### Caso de Teste 10: Verificar carregamento de dados de teste no OBS
+**Caso de Teste 10:** Verificar carregamento de dados de teste no OBS
 
 Objetivo
 :   Confirmar que todos os arquivos de dados de teste necessários (CSV,

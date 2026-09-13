@@ -3,6 +3,23 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.7.0 (2026-09-14)
+
+### Features
+
+- **Caption-style testcase headings**: Testcase titles now render as captions
+  (like figures/tables) instead of `\subsubsection` headings. Format:
+  **Testcase N:** description (bold label + number, regular text title).
+- **Label change**: "Test Case" (two words) → "Testcase" (one word).
+  Portuguese unchanged ("Caso de Teste").
+
+### Changed
+
+- `testbook.cls`: testcase environment uses `\textbf` caption format instead
+  of `\subsubsection`.
+- `testbook-pandoc.lua`: testcase handler produces `Para` with `Strong` prefix
+  instead of `Header(3)`.
+
 ## v4.6.0 (2026-09-13)
 
 ### Features
