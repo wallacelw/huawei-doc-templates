@@ -42,9 +42,9 @@ emblemas de resultado e histórico de versões.
 \end{infobox}
 
 % =====================================================================
-%  Seção 1 — Descrição dos Casos de Teste
+%  Seção 1 — Introdução
 % =====================================================================
-\section{Descrição dos Casos de Teste}
+\section{Introdução}
 
 \begin{objectives}
   \generalobjective{Validar a implantação da Plataforma de Dados do Huawei Cloud para o
@@ -116,27 +116,14 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \caption{Critérios de aceitação.}
 \end{table}
 
-\subsection{Resumo dos Casos de Teste}
-
-\begin{testsummary}
-  \testsummaryrow{TC-001}{Verificar implantação e saúde do cluster MRS}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-002}{Verificar criação e acessibilidade do bucket OBS}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-003}{Verificar configuração de VPC e grupo de segurança}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-004}{Verificar criação do workspace do DataArts Studio}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-005}{Verificar execução do pipeline de ingestão de dados}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-006}{Verificar consulta Spark SQL no cluster MRS}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-007}{Verificar aplicação de política IAM nos buckets OBS}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-008}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-009}{Verificar implantação de infraestrutura via Terraform}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-010}{Verificar carregamento de dados de teste no OBS}{\testresultbadge{Pass}}
-\end{testsummary}
-
 % =====================================================================
-%  Seção 2 — Arquitetura da Plataforma
+%  Seção 2 — Casos de Teste
 % =====================================================================
-\section{Arquitetura da Plataforma}
+\section{Casos de Teste}
 
-\begin{testcase}{TC-001: Verificar implantação e saúde do cluster MRS}
+\subsection{Arquitetura da Plataforma}
+
+\begin{testcase}{Verificar implantação e saúde do cluster MRS}
   \testobjective{Confirmar que o cluster MapReduce Service (MRS) está implantado
     com os componentes necessários (HDFS, YARN, Spark, Hive) e que todos os nós
     apresentam status saudável.}
@@ -165,7 +152,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testremarks{Se algum componente apresentar status \textbf{Anormal}, verificar a página de alarmes do MRS antes de registrar o resultado.}
 \end{testcase}
 
-\begin{testcase}{TC-002: Verificar criação e acessibilidade do bucket OBS}
+\begin{testcase}{Verificar criação e acessibilidade do bucket OBS}
   \testobjective{Confirmar que o bucket do Object Storage Service (OBS) utilizado
     para o data lake da POC está criado, possui a classe de armazenamento correta
     e é acessível com a política IAM designada.}
@@ -192,7 +179,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testremarks{A consistência eventual do OBS pode causar um breve atraso antes que um objeto recém-carregado apareça nas listagens.}
 \end{testcase}
 
-\begin{testcase}{TC-003: Verificar configuração de VPC e grupo de segurança}
+\begin{testcase}{Verificar configuração de VPC e grupo de segurança}
   \testobjective{Confirmar que a VPC, a sub-rede e os grupos de segurança estão
     configurados conforme o diagrama de arquitetura de rede, com os blocos CIDR
     e regras de entrada/saída corretos.}
@@ -218,12 +205,9 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testremarks{Se o grupo de segurança possuir regras adicionais além da especificação da arquitetura, documentá-las no campo de Observações.}
 \end{testcase}
 
-% =====================================================================
-%  Seção 3 — Engenharia de Dados
-% =====================================================================
-\section{Engenharia de Dados}
+\subsection{Engenharia de Dados}
 
-\begin{testcase}{TC-004: Verificar criação do workspace do DataArts Studio} \badge{Obrigatório}
+\begin{testcase}{Verificar criação do workspace do DataArts Studio} \badge{Obrigatório}
   \testobjective{Confirmar que a instância do DataArts Studio (Dayu) está
     provisionada, o workspace está acessível e os usuários IAM designados
     conseguem acessar com a função \textbf{Dayu\_User}.}
@@ -247,12 +231,12 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testremarks{Se o workspace falhar ao carregar, verificar o status da instância Dayu e a atribuição da função IAM.}
 \end{testcase}
 
-\begin{testcase}{TC-005: Verificar execução do pipeline de ingestão de dados}
+\begin{testcase}{Verificar execução do pipeline de ingestão de dados}
   \testobjective{Confirmar que um pipeline em lote do DataArts Studio consegue
     ingerir dados CSV do OBS, aplicar uma transformação básica
     e gravar o resultado no caminho OBS de destino.}
   \begin{testprerequisites}
-    \teststep{TC-004 concluído (workspace do DataArts Studio acessível).}
+    \teststep{Caso de Teste 4 concluído (workspace do DataArts Studio acessível).}
     \teststep{Arquivo CSV de origem (\inlinecode{customers.csv}) existe no bucket OBS raw.}
     \teststep{Caminho OBS de destino (\inlinecode{poc-datalake-curated/customers/}) está configurado.}
     \teststep{Pipeline \inlinecode{pl-ingest-customers} está publicado no DataArts Studio.}
@@ -281,12 +265,12 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
   \testremarks{O tempo de execução do pipeline varia conforme o volume de dados. Para a POC, o arquivo de origem contém aproximadamente 10.000 linhas.}
 \end{testcase}
 
-\begin{testcase}{TC-006: Verificar consulta Spark SQL no cluster MRS}
+\begin{testcase}{Verificar consulta Spark SQL no cluster MRS}
   \testobjective{Confirmar que uma consulta Spark SQL pode ser executada no
     cluster MRS para ler dados de uma tabela Hive e retornar resultados
     corretos, validando a integração entre o MRS e o data lake.}
   \begin{testprerequisites}
-    \teststep{TC-001 concluído (cluster MRS saudável).}
+    \teststep{Caso de Teste 1 concluído (cluster MRS saudável).}
     \teststep{Tabela Hive \inlinecode{poc\_db.customers} existe e contém dados carregados pelo pipeline de ingestão.}
     \teststep{Acesso SSH ao nó master do MRS configurado.}
   \end{testprerequisites}
@@ -316,12 +300,9 @@ spark-sql --master yarn \
   \testremarks{Se a CLI do Spark SQL não estiver disponível, utilizar a interface web do componente Spark2x do MRS para submeter a consulta.}
 \end{testcase}
 
-% =====================================================================
-%  Seção 4 — Segurança e Controle de Acesso
-% =====================================================================
-\section{Segurança e Controle de Acesso}
+\subsection{Segurança e Controle de Acesso}
 
-\begin{testcase}{TC-007: Verificar aplicação de política IAM nos buckets OBS} \badge{Novo}
+\begin{testcase}{Verificar aplicação de política IAM nos buckets OBS} \badge{Novo}
   \testobjective{Confirmar que as políticas IAM restringem corretamente o acesso
     ao bucket OBS — usuários autorizados podem ler/escrever enquanto usuários
     não autorizados são negados, e a política do bucket segue o princípio
@@ -360,12 +341,12 @@ obsutil ls obs://poc-datalake-raw/
   \note{Alterações em políticas IAM podem levar até 5 minutos para propagar. Aguardar antes de retestar após modificar uma política.}
 \end{testcase}
 
-\begin{testcase}{TC-008: Verificar regra de mascaramento de dados do DataArts Studio}
+\begin{testcase}{Verificar regra de mascaramento de dados do DataArts Studio}
   \testobjective{Confirmar que colunas de dados sensíveis (ex.: campos PII) são
     mascaradas conforme a regra de mascaramento do DataArts Studio quando
     consultadas por usuários não administradores.}
   \begin{testprerequisites}
-    \teststep{TC-004 concluído (workspace do DataArts Studio acessível).}
+    \teststep{Caso de Teste 4 concluído (workspace do DataArts Studio acessível).}
     \teststep{Regra de mascaramento configurada para a coluna \inlinecode{customers.ssn} (Número de Seguro Social).}
     \teststep{Usuário de teste possui função \textbf{Dayu\_User} (não administrador).}
   \end{testprerequisites}
@@ -385,12 +366,9 @@ obsutil ls obs://poc-datalake-raw/
   \testremarks{Regras de mascaramento de dados são aplicadas no momento da consulta — os dados subjacentes no OBS/HDFS não são modificados.}
 \end{testcase}
 
-% =====================================================================
-%  Seção 5 — Configuração do Ambiente e Ferramentas
-% =====================================================================
-\section{Configuração do Ambiente e Ferramentas}
+\subsection{Configuração de Ambiente e Ferramentas}
 
-\begin{testcase}{TC-009: Verificar implantação de infraestrutura via Terraform}
+\begin{testcase}{Verificar implantação de infraestrutura via Terraform}
   \testobjective{Confirmar que a configuração Terraform implanta todos os
     recursos de infraestrutura necessários (VPC, MRS, OBS, DataArts Studio)
     sem erros e que o arquivo de estado reflete os recursos esperados.}
@@ -435,12 +413,12 @@ terraform state list | wc -l
   \end{warning}
 \end{testcase}
 
-\begin{testcase}{TC-010: Verificar carregamento de dados de teste no OBS}
+\begin{testcase}{Verificar carregamento de dados de teste no OBS}
   \testobjective{Confirmar que todos os arquivos de dados de teste necessários
     (CSV, JSON) podem ser carregados no bucket OBS designado e são acessíveis
     pelo pipeline do DataArts Studio.}
   \begin{testprerequisites}
-    \teststep{TC-002 concluído (bucket OBS acessível).}
+    \teststep{Caso de Teste 2 concluído (bucket OBS acessível).}
     \teststep{Arquivos de dados de teste preparados no diretório local \param{./test-data/}.}
     \teststep{CLI \inlinecode{obsutil} configurada com as credenciais do usuário de teste.}
   \end{testprerequisites}
@@ -476,10 +454,31 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
 \imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do painel de execução de testes mostrando os resultados de todos os casos de teste}
 
 % =====================================================================
+%  Seção 3 — Conclusão
+% =====================================================================
+\section{Conclusão}
+
+\begin{testsummary}
+  \testsummaryrow{1}{Verificar implantação e saúde do cluster MRS}{\testresultbadge{Pass}}
+  \testsummaryrow{2}{Verificar criação e acessibilidade do bucket OBS}{\testresultbadge{Pass}}
+  \testsummaryrow{3}{Verificar configuração de VPC e grupo de segurança}{\testresultbadge{Pass}}
+  \testsummaryrow{4}{Verificar criação do workspace do DataArts Studio}{\testresultbadge{Pass}}
+  \testsummaryrow{5}{Verificar execução do pipeline de ingestão de dados}{\testresultbadge{Pass}}
+  \testsummaryrow{6}{Verificar consulta Spark SQL no cluster MRS}{\testresultbadge{Pass}}
+  \testsummaryrow{7}{Verificar aplicação de política IAM nos buckets OBS}{\testresultbadge{Pass}}
+  \testsummaryrow{8}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Pass}}
+  \testsummaryrow{9}{Verificar implantação de infraestrutura via Terraform}{\testresultbadge{Pass}}
+  \testsummaryrow{10}{Verificar carregamento de dados de teste no OBS}{\testresultbadge{Pass}}
+\end{testsummary}
+
+% =====================================================================
 %  Histórico de versões
 % =====================================================================
 \begin{changelog}
   \changelogentry{2.1.0}{\today}{
+    \item Reestruturação do documento para layout de 3 seções: Introdução, Casos de Teste (com subseções por domínio) e Conclusão (com tabela de resumo dos testes).
+    \item Remoção dos prefixos manuais TC-XXX dos títulos dos casos de teste — o ambiente os numera automaticamente como "Caso de Teste 1:", "Caso de Teste 2:", etc.
+    \item Atualização dos IDs do testsummary de TC-XXX para numeração automática 1--10.
     \item Alteração de teststeps de tabela tabular para parágrafos auto-numerados. \inlinecode{\textbackslash teststep} agora aceita 1 argumento (ação apenas). Imagens, blocos de código e callouts podem ser inseridos livremente entre os passos.
   }
   \changelogentry{2.0.0}{\today}{
@@ -487,13 +486,13 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
   }
   \changelogentry{1.1.0}{\today}{
     \item Adicionadas demonstrações abrangentes de recursos: caixas de destaque \inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox}; blocos \inlinecode{code}; \inlinecode{badge}; \inlinecode{weblink}; \inlinecode{note}; \inlinecode{param}; \inlinecode{image}, \inlinecode{imagecap} e \inlinecode{imageplaceholder}; caminhos \inlinecode{menu}; e referências \inlinecode{inlinecode}.
-    \item Adicionados casos de teste de Segurança e Controle de Acesso (TC-007, TC-008).
-    \item Adicionados casos de teste de Configuração do Ambiente e Ferramentas (TC-009, TC-010).
+    \item Adicionados casos de teste de Segurança e Controle de Acesso.
+    \item Adicionados casos de teste de Configuração do Ambiente e Ferramentas.
   }
   \changelogentry{1.0.0}{\today}{
     \item Versão inicial.
-    \item Adicionados casos de teste de Arquitetura da Plataforma (TC-001 a TC-003).
-    \item Adicionados casos de teste de Engenharia de Dados (TC-004 a TC-006).
+    \item Adicionados casos de teste de Arquitetura da Plataforma.
+    \item Adicionados casos de teste de Engenharia de Dados.
   }
 \end{changelog}
 

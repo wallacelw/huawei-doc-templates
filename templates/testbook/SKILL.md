@@ -12,13 +12,15 @@ compiled from LaTeX; DOCX, Markdown, and HTML are generated via Pandoc.
 ## When to use
 
 Use this skill when the task is to **write, extend, or fix a Huawei Cloud
-POC or acceptance test case document**. Test books organize test cases by
-domain using `\section` headings, with each test case rendered as a
-breakable tcolorbox with stacked fields, each preceded by a full-width
-red mini header bar. Field order: Objective → Prerequisites → Procedure
-→ Expected Result → Test Result → Remarks. Content defaults to English;
-pass the `portuguese` class option for Portuguese labels. Do **not** use
-this for general LaTeX documents — the formatting is hard-coded to the
+POC or acceptance test case document**. Test books follow a 3-section
+structure: **Introduction** (objectives, scope, preconditions, acceptance
+method), **Test Cases** (subsections per domain, each containing auto-numbered
+`testcase` environments), and **Conclusion** (test summary table). Each test
+case is rendered as a breakable tcolorbox with stacked fields, each preceded
+by a full-width red mini header bar. Field order: Objective → Prerequisites →
+Procedure → Expected Result → Test Result → Remarks. Content defaults to
+English; pass the `portuguese` class option for Portuguese labels. Do **not**
+use this for general LaTeX documents — the formatting is hard-coded to the
 Huawei house style (AGENTS.md L9).
 
 ## Context loading (do this first)
@@ -131,9 +133,33 @@ up in the class file and this SKILL.md.
 \maketoc
 \startbody
 
-\section{<Test Domain 1>}
+% --- Section 1: Introduction ---
+\section{Introduction}
 
-\begin{testcase}{TC-001: <test case title>}
+\begin{objectives}
+  \generalobjective{Verify that <system> meets the acceptance criteria.}
+  \prerequisites
+  \begin{itemize}
+    \item <precondition 1>
+    \item <precondition 2>
+  \end{itemize}
+\end{objectives}
+
+\subsection{Test Scope}
+% ... scope table ...
+
+\subsection{Preconditions and Preparations}
+% ... preconditions list ...
+
+\subsection{Acceptance Method}
+% ... acceptance criteria table ...
+
+% --- Section 2: Test Cases ---
+\section{Test Cases}
+
+\subsection{<Test Domain 1>}
+
+\begin{testcase}{<test case title>}
   \testobjective{Verify that <functionality> works as expected.}
   \begin{testprerequisites}
     \teststep{System is running.}
@@ -152,10 +178,10 @@ up in the class file and this SKILL.md.
   \testremarks{Optional notes about this test case.}
 \end{testcase}
 
-\begin{testcase}{TC-002: <another test case title>}
+\begin{testcase}{<another test case title>}
   \testobjective{Verify that <other functionality> behaves correctly.}
   \begin{testprerequisites}
-    \teststep{Resource from TC-001 exists.}
+    \teststep{Test Case 1 completed.}
   \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Select the resource}
@@ -169,9 +195,9 @@ up in the class file and this SKILL.md.
   \testremarks{}
 \end{testcase}
 
-\section{<Test Domain 2>}
+\subsection{<Test Domain 2>}
 
-\begin{testcase}{TC-003: <test case in domain 2>}
+\begin{testcase}{<test case in domain 2>}
   \testobjective{...}
   \begin{testprerequisites}
     \teststep{...}
@@ -185,6 +211,15 @@ up in the class file and this SKILL.md.
   \testresult{...}
   \testremarks{...}
 \end{testcase}
+
+% --- Section 3: Conclusion ---
+\section{Conclusion}
+
+\begin{testsummary}
+  \testsummaryrow{1}{<test case title>}{\testresultbadge{Pass}}
+  \testsummaryrow{2}{<another test case title>}{\testresultbadge{Pass}}
+  \testsummaryrow{3}{<test case in domain 2>}{\testresultbadge{Fail}}
+\end{testsummary}
 
 % --- Changelog (after all sections, before \end{document}) ---
 \begin{changelog}
@@ -200,7 +235,8 @@ up in the class file and this SKILL.md.
 
 Same skeleton but with `\documentclass[portuguese]{testbook}`. Labels switch
 automatically: *Casos de Teste*, *Objetivo*, *Pré-requisitos*, *Procedimento*,
-*Resultado Esperado*, *Resultado do Teste*, *Observações*.
+*Resultado Esperado*, *Resultado do Teste*, *Observações*. Section headings
+should be translated: *Introdução*, *Casos de Teste*, *Conclusão*.
 
 Body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections →
 `changelog` → `\end{document}`.
@@ -315,13 +351,19 @@ followed by the content below it. This design allows images, code blocks,
 callout boxes, and nested content to render correctly and break
 across pages.
 
+**Auto-numbering:** The `testcase` environment automatically numbers each test
+case using a global counter (1, 2, 3, …). The rendered heading is
+"Test Case *N*: *title*" (English) or "Caso de Teste *N*: *title*" (Portuguese).
+Do **not** include manual prefixes like "TC-001:" in the title argument — the
+environment adds the number for you.
+
 **Field order:** Objective → Prerequisites → Procedure → Expected Result →
 Test Result → Remarks. Test Result and Remarks are filled after execution,
 hence they appear last. The `noanswers` class option hides Test Result and
 Remarks fields.
 
 ```latex
-\begin{testcase}{TC-001: Verify MRS cluster deployment}
+\begin{testcase}{Verify MRS cluster deployment}
   \testobjective{Confirm that the MRS cluster is deployed.}
   \begin{testprerequisites}
     \teststep{Terraform apply completed.}
@@ -338,6 +380,9 @@ Remarks fields.
   \testremarks{If any component shows Abnormal, check alarms.}
 \end{testcase}
 ```
+
+This renders as **"Test Case 1: Verify MRS cluster deployment"** (the number
+is automatic — the next `testcase` will be "Test Case 2: ...").
 
 | Field command | English label | Portuguese label | Required |
 |---|---|---|---|
@@ -364,13 +409,14 @@ Remarks fields.
 
 The `testsummary` environment renders a 3-column overview table (ID, Title,
 Status) with a Huawei-red header. Use it to provide an at-a-glance summary
-of all test cases and their results.
+of all test cases and their results. The ID column should use the auto-number
+from the `testcase` environment (1, 2, 3, …) — not manual TC-XXX prefixes.
 
 ```latex
 \begin{testsummary}
-  \testsummaryrow{TC-001}{Verify MRS cluster deployment}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-002}{Verify OBS bucket creation}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-003}{Verify VPC configuration}{\testresultbadge{Fail}}
+  \testsummaryrow{1}{Verify MRS cluster deployment}{\testresultbadge{Pass}}
+  \testsummaryrow{2}{Verify OBS bucket creation}{\testresultbadge{Pass}}
+  \testsummaryrow{3}{Verify VPC configuration}{\testresultbadge{Fail}}
 \end{testsummary}
 ```
 
@@ -776,7 +822,10 @@ See [templates/testbook/README.md](README.md) for customization options
    changes the user explicitly requested.
 3. Keep body order: `\makecover` → `\maketoc` → `\startbody` → sections →
    `changelog` → `\end{document}`.
-4. Organize test cases under `\section` headings (one section per test domain).
+4. Follow the 3-section structure: Section 1 Introduction (objectives, scope,
+   preconditions, acceptance method), Section 2 Test Cases (subsections per
+   domain with auto-numbered `testcase` environments), Section 3 Conclusion
+   (test summary table).
 5. Use the `testcase` environment for each test case — do not manually create
    subsections and tables.
 6. Inside `code`, write literal code. In prose, use `\inlinecode{...}` with normal

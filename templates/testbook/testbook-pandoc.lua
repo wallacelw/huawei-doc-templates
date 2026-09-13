@@ -42,6 +42,7 @@ local config = {
       expectedresult = "Expected Result",
       remarks = "Remarks",
       testresult = "Test Result",
+      testcase = "Test Case",
       testcaseid = "ID",
       testcasetitle = "Title",
       teststatus = "Status",
@@ -59,6 +60,7 @@ local config = {
       expectedresult = "Resultado Esperado",
       remarks = "Observações",
       testresult = "Resultado do Teste",
+      testcase = "Caso de Teste",
       testcaseid = "ID",
       testcasetitle = "Título",
       teststatus = "Status",
@@ -89,6 +91,7 @@ local config = {
     -- subsection + a 2-column table (label | content). We replicate
     -- that as a subsection heading followed by a 2-column Pandoc
     -- Table with Huawei-red header styling.
+    local testcase_counter = 0
     local function handle_testcase_env(text)
       -- Extract the mandatory argument (test case title)
       local title = text:match("\\begin%s*{testcase}%s*(%b{})")
@@ -100,8 +103,11 @@ local config = {
       if not body then return nil end
 
       local blocks = pandoc.Blocks({})
-      -- Add subsection heading for the test case title
-      blocks:insert(pandoc.Header(2, pandoc.Inlines({pandoc.Str(title)})))
+      -- Add subsubsection heading with auto-numbering (like figures/tables)
+      testcase_counter = testcase_counter + 1
+      blocks:insert(pandoc.Header(3, pandoc.Inlines({
+        pandoc.Str(L("testcase") .. " " .. testcase_counter .. ": " .. title)
+      })))
 
       -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
       local function cell_to_md(cell_text)

@@ -7,7 +7,7 @@
 > `infobox`), tables, badge, menu paths, weblinks, notes, param
 > references, test summary table, result badges, and changelog.
 
-# Test Cases Description
+# Introduction
 
 > **General Objective:** Validate the Huawei Cloud Data Platform
 > deployment for the POC environment, ensuring that all core services
@@ -83,24 +83,11 @@ kubectl version --client
 | Not satisfied | The test case fails --- observed behavior does not match the expected result. A defect report must be filed. |
 | Untested | The test case could not be executed due to blocking dependencies or environment issues. |
 
-## Test Case Summary
+# Test Cases
 
-  ID       Title                                          Status
-  -------- ---------------------------------------------- ----------
-  TC-001   Verify MRS cluster deployment and health       **Pass**
-  TC-002   Verify OBS bucket creation and accessibility   **Pass**
-  TC-003   Verify VPC and security group configuration    **Pass**
-  TC-004   Verify DataArts Studio workspace creation      **Pass**
-  TC-005   Verify data ingestion pipeline execution       **Pass**
-  TC-006   Verify Spark SQL query on MRS cluster          **Pass**
-  TC-007   Verify IAM policy enforcement on OBS buckets   **Pass**
-  TC-008   Verify DataArts Studio data masking rule       **Pass**
-  TC-009   Verify Terraform infrastructure deployment     **Pass**
-  TC-010   Verify test data upload to OBS                 **Pass**
+## Platform Architecture
 
-# Platform Architecture
-
-## TC-001: Verify MRS cluster deployment and health
+### Test Case 1: Verify MRS cluster deployment and health
 
 Objective
 :   Confirm that the MapReduce Service (MRS) cluster is deployed with
@@ -130,7 +117,7 @@ Remarks
 :   If any component shows **Abnormal**, check the MRS alarm page before
     marking the result.
 
-## TC-002: Verify OBS bucket creation and accessibility
+### Test Case 2: Verify OBS bucket creation and accessibility
 
 Objective
 :   Confirm that the Object Storage Service (OBS) bucket used for the
@@ -161,7 +148,7 @@ Remarks
 :   OBS eventual consistency may cause a brief delay before a newly
     uploaded object appears in listings.
 
-## TC-003: Verify VPC and security group configuration
+### Test Case 3: Verify VPC and security group configuration
 
 Objective
 :   Confirm that the VPC, subnet, and security groups are configured
@@ -193,9 +180,9 @@ Remarks
 :   If the security group has additional rules beyond the architecture
     spec, document them in the Remarks field.
 
-# Data Engineering
+## Data Engineering
 
-## TC-004: Verify DataArts Studio workspace creation
+### Test Case 4: Verify DataArts Studio workspace creation
 
 Objective
 :   Confirm that the DataArts Studio (Dayu) instance is provisioned, the
@@ -226,7 +213,7 @@ Remarks
 :   If the workspace fails to load, check the Dayu instance status and
     the IAM role assignment.
 
-## TC-005: Verify data ingestion pipeline execution
+### Test Case 5: Verify data ingestion pipeline execution
 
 Objective
 :   Confirm that a DataArts Studio batch pipeline can successfully
@@ -234,7 +221,7 @@ Objective
     the result to the target OBS path.
 
 Prerequisites
-:   1\. TC-004 completed (DataArts Studio workspace accessible). 2.
+:   1\. Test Case 4 completed (DataArts Studio workspace accessible). 2.
     Source CSV file (`customers.csv`) exists in the OBS raw bucket. 3.
     Target OBS path (`poc-datalake-curated/customers/`) is
     configured. 4. Pipeline `pl-ingest-customers` is published in
@@ -258,7 +245,7 @@ Remarks
 :   Pipeline execution time varies with data volume. For the POC, the
     source file contains approximately 10,000 rows.
 
-## TC-006: Verify Spark SQL query on MRS cluster
+### Test Case 6: Verify Spark SQL query on MRS cluster
 
 Objective
 :   Confirm that a Spark SQL query can be executed on the MRS cluster to
@@ -266,7 +253,7 @@ Objective
     the integration between MRS and the data lake.
 
 Prerequisites
-:   1\. TC-001 completed (MRS cluster healthy). 2. Hive table
+:   1\. Test Case 1 completed (MRS cluster healthy). 2. Hive table
     `poc_db.customers` exists and contains data loaded by the ingestion
     pipeline. 3. SSH access to the MRS master node is configured.
 
@@ -289,9 +276,9 @@ Remarks
 :   If the Spark SQL CLI is not available, use the MRS Spark2x
     component's web UI to submit the query instead.
 
-# Security and Access Control
+## Security and Access Control
 
-## TC-007: Verify IAM policy enforcement on OBS buckets
+### Test Case 7: Verify IAM policy enforcement on OBS buckets
 
 Objective
 :   Confirm that IAM policies correctly restrict OBS bucket access ---
@@ -327,7 +314,7 @@ Remarks
     expected --- there may be a policy inheritance from the project or
     domain level.
 
-## TC-008: Verify DataArts Studio data masking rule
+### Test Case 8: Verify DataArts Studio data masking rule
 
 Objective
 :   Confirm that sensitive data columns (e.g. PII fields) are masked
@@ -335,9 +322,9 @@ Objective
     non-admin users.
 
 Prerequisites
-:   1\. TC-004 completed (DataArts Studio workspace accessible). 2. Data
-    masking rule configured for column `customers.ssn` (Social Security
-    Number). 3. Test user has **Dayu_User** role (not admin).
+:   1\. Test Case 4 completed (DataArts Studio workspace accessible). 2.
+    Data masking rule configured for column `customers.ssn` (Social
+    Security Number). 3. Test user has **Dayu_User** role (not admin).
 
 Procedure
 :   1\. In the DataArts Studio console, navigate to **Data
@@ -360,9 +347,9 @@ Remarks
 :   Data masking rules apply at query time --- the underlying data in
     OBS/HDFS is not modified.
 
-# Environment Setup and Tooling
+## Environment Setup and Tooling
 
-## TC-009: Verify Terraform infrastructure deployment
+### Test Case 9: Verify Terraform infrastructure deployment
 
 Objective
 :   Confirm that the Terraform configuration deploys all required
@@ -396,7 +383,7 @@ Remarks
 :   If `terraform apply` fails, check the AK/SK credentials and the
     `sa-brazil-1` region quota limits.
 
-## TC-010: Verify test data upload to OBS
+### Test Case 10: Verify test data upload to OBS
 
 Objective
 :   Confirm that all required test data files (CSV, JSON) can be
@@ -404,9 +391,9 @@ Objective
     DataArts Studio pipeline.
 
 Prerequisites
-:   1\. TC-002 completed (OBS bucket accessible). 2. Test data files
-    prepared in the local directory *./test-data/*. 3. `obsutil` CLI
-    configured with the test user credentials.
+:   1\. Test Case 2 completed (OBS bucket accessible). 2. Test data
+    files prepared in the local directory *./test-data/*. 3. `obsutil`
+    CLI configured with the test user credentials.
 
 Procedure
 :   1\. List the local test data files and verify their integrity (row
@@ -431,9 +418,32 @@ Remarks
 
 *\[Image placeholder: Screenshot of the test execution dashboard showing all test case results\]*
 
+# Conclusion
+
+  ID   Title                                          Status
+  ---- ---------------------------------------------- ----------
+  1    Verify MRS cluster deployment and health       **Pass**
+  2    Verify OBS bucket creation and accessibility   **Pass**
+  3    Verify VPC and security group configuration    **Pass**
+  4    Verify DataArts Studio workspace creation      **Pass**
+  5    Verify data ingestion pipeline execution       **Pass**
+  6    Verify Spark SQL query on MRS cluster          **Pass**
+  7    Verify IAM policy enforcement on OBS buckets   **Pass**
+  8    Verify DataArts Studio data masking rule       **Pass**
+  9    Verify Terraform infrastructure deployment     **Pass**
+  10   Verify test data upload to OBS                 **Pass**
+
 # Changelog
 
 **2.1.0**  *2026-09-13*
+
+Restructured document to 3-section layout: Introduction, Test Cases
+(with subsections per domain), and Conclusion (with test summary table).
+
+Removed manual TC-XXX prefixes from testcase titles --- the environment
+auto-numbers them as \"Test Case 1:\", \"Test Case 2:\", etc.
+
+Updated testsummary IDs from TC-XXX to auto-numbered 1--10.
 
 Changed teststeps from tabular table to auto-numbered paragraphs.
 `\teststep` now takes 1 arg (action only). Images, code blocks, and
@@ -452,14 +462,14 @@ callouts; `code` blocks; `badge`; `weblink`; `note`; `param`; `image`,
 `imagecap`, and `imageplaceholder`; `menu` paths; and `inlinecode`
 references.
 
-Added Security and Access Control test cases (TC-007, TC-008).
+Added Security and Access Control test cases.
 
-Added Environment Setup and Tooling test cases (TC-009, TC-010).
+Added Environment Setup and Tooling test cases.
 
 **1.0.0**  *2026-09-13*
 
 Initial version.
 
-Added Platform Architecture test cases (TC-001 to TC-003).
+Added Platform Architecture test cases.
 
-Added Data Engineering test cases (TC-004 to TC-006).
+Added Data Engineering test cases.

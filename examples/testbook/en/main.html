@@ -327,7 +327,7 @@ objectives block, code blocks, images, callouts (<code>warning</code>,
 weblinks, notes, param references, test summary table, result badges,
 and changelog.</p>
 </div>
-<h1 data-number="1" id="test-cases-description"><span class="header-section-number">1</span> Test Cases Description</h1>
+<h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction</h1>
 <div class="objectives">
 <p><strong>General Objective:</strong> Validate the Huawei Cloud Data
 Platform deployment for the POC environment, ensuring that all core
@@ -450,71 +450,10 @@ environment issues.</td>
 </tr>
 </tbody>
 </table>
-<h2 data-number="1.4" id="test-case-summary"><span class="header-section-number">1.4</span> Test Case Summary</h2>
-<table>
-<thead>
-<tr class="header">
-<th>ID</th>
-<th>Title</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>TC-001</td>
-<td>Verify MRS cluster deployment and health</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="even">
-<td>TC-002</td>
-<td>Verify OBS bucket creation and accessibility</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="odd">
-<td>TC-003</td>
-<td>Verify VPC and security group configuration</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="even">
-<td>TC-004</td>
-<td>Verify DataArts Studio workspace creation</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="odd">
-<td>TC-005</td>
-<td>Verify data ingestion pipeline execution</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="even">
-<td>TC-006</td>
-<td>Verify Spark SQL query on MRS cluster</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="odd">
-<td>TC-007</td>
-<td>Verify IAM policy enforcement on OBS buckets</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="even">
-<td>TC-008</td>
-<td>Verify DataArts Studio data masking rule</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="odd">
-<td>TC-009</td>
-<td>Verify Terraform infrastructure deployment</td>
-<td><strong>Pass</strong></td>
-</tr>
-<tr class="even">
-<td>TC-010</td>
-<td>Verify test data upload to OBS</td>
-<td><strong>Pass</strong></td>
-</tr>
-</tbody>
-</table>
-<h1 data-number="2" id="platform-architecture"><span class="header-section-number">2</span> Platform Architecture</h1>
-<h2 data-number="2.1"><span class="header-section-number">2.1</span>
-TC-001: Verify MRS cluster deployment and health</h2>
+<h1 data-number="2" id="test-cases"><span class="header-section-number">2</span> Test Cases</h1>
+<h2 data-number="2.1" id="platform-architecture"><span class="header-section-number">2.1</span> Platform Architecture</h2>
+<h3 data-number="2.1.1"><span class="header-section-number">2.1.1</span>
+Test Case 1: Verify MRS cluster deployment and health</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -553,8 +492,8 @@ If any component shows <strong>Abnormal</strong>, check the MRS alarm
 page before marking the result.
 </dd>
 </dl>
-<h2 data-number="2.2"><span class="header-section-number">2.2</span>
-TC-002: Verify OBS bucket creation and accessibility</h2>
+<h3 data-number="2.1.2"><span class="header-section-number">2.1.2</span>
+Test Case 2: Verify OBS bucket creation and accessibility</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -593,8 +532,8 @@ OBS eventual consistency may cause a brief delay before a newly uploaded
 object appears in listings.
 </dd>
 </dl>
-<h2 data-number="2.3"><span class="header-section-number">2.3</span>
-TC-003: Verify VPC and security group configuration</h2>
+<h3 data-number="2.1.3"><span class="header-section-number">2.1.3</span>
+Test Case 3: Verify VPC and security group configuration</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -636,9 +575,9 @@ If the security group has additional rules beyond the architecture spec,
 document them in the Remarks field.
 </dd>
 </dl>
-<h1 data-number="3" id="data-engineering"><span class="header-section-number">3</span> Data Engineering</h1>
-<h2 data-number="3.1"><span class="header-section-number">3.1</span>
-TC-004: Verify DataArts Studio workspace creation</h2>
+<h2 data-number="2.2" id="data-engineering"><span class="header-section-number">2.2</span> Data Engineering</h2>
+<h3 data-number="2.2.1"><span class="header-section-number">2.2.1</span>
+Test Case 4: Verify DataArts Studio workspace creation</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -679,8 +618,8 @@ If the workspace fails to load, check the Dayu instance status and the
 IAM role assignment.
 </dd>
 </dl>
-<h2 data-number="3.2"><span class="header-section-number">3.2</span>
-TC-005: Verify data ingestion pipeline execution</h2>
+<h3 data-number="2.2.2"><span class="header-section-number">2.2.2</span>
+Test Case 5: Verify data ingestion pipeline execution</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -690,11 +629,12 @@ the target OBS path.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-1. TC-004 completed (DataArts Studio workspace accessible). 2. Source
-CSV file (<code>customers.csv</code>) exists in the OBS raw bucket. 3.
-Target OBS path (<code>poc-datalake-curated/customers/</code>) is
-configured. 4. Pipeline <code>pl-ingest-customers</code> is published in
-DataArts Studio.
+1. Test Case 4 completed (DataArts Studio workspace accessible). 2.
+Source CSV file (<code>customers.csv</code>) exists in the OBS raw
+bucket. 3. Target OBS path
+(<code>poc-datalake-curated/customers/</code>) is configured. 4.
+Pipeline <code>pl-ingest-customers</code> is published in DataArts
+Studio.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -719,8 +659,8 @@ Pipeline execution time varies with data volume. For the POC, the source
 file contains approximately 10,000 rows.
 </dd>
 </dl>
-<h2 data-number="3.3"><span class="header-section-number">3.3</span>
-TC-006: Verify Spark SQL query on MRS cluster</h2>
+<h3 data-number="2.2.3"><span class="header-section-number">2.2.3</span>
+Test Case 6: Verify Spark SQL query on MRS cluster</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -730,7 +670,7 @@ integration between MRS and the data lake.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-1. TC-001 completed (MRS cluster healthy). 2. Hive table
+1. Test Case 1 completed (MRS cluster healthy). 2. Hive table
 <code>poc_db.customers</code> exists and contains data loaded by the
 ingestion pipeline. 3. SSH access to the MRS master node is configured.
 </dd>
@@ -758,9 +698,10 @@ If the Spark SQL CLI is not available, use the MRS Spark2x component’s
 web UI to submit the query instead.
 </dd>
 </dl>
-<h1 data-number="4" id="security-and-access-control"><span class="header-section-number">4</span> Security and Access Control</h1>
-<h2 data-number="4.1"><span class="header-section-number">4.1</span>
-TC-007: Verify IAM policy enforcement on OBS buckets</h2>
+<h2 data-number="2.3" id="security-and-access-control"><span class="header-section-number">2.3</span> Security and Access
+Control</h2>
+<h3 data-number="2.3.1"><span class="header-section-number">2.3.1</span>
+Test Case 7: Verify IAM policy enforcement on OBS buckets</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -804,8 +745,8 @@ Check the Cloud Trail logs if access denial is not returned as expected
 — there may be a policy inheritance from the project or domain level.
 </dd>
 </dl>
-<h2 data-number="4.2"><span class="header-section-number">4.2</span>
-TC-008: Verify DataArts Studio data masking rule</h2>
+<h3 data-number="2.3.2"><span class="header-section-number">2.3.2</span>
+Test Case 8: Verify DataArts Studio data masking rule</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -815,7 +756,7 @@ non-admin users.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-1. TC-004 completed (DataArts Studio workspace accessible). 2. Data
+1. Test Case 4 completed (DataArts Studio workspace accessible). 2. Data
 masking rule configured for column <code>customers.ssn</code> (Social
 Security Number). 3. Test user has <strong>Dayu_User</strong> role (not
 admin).
@@ -848,10 +789,10 @@ Data masking rules apply at query time — the underlying data in OBS/HDFS
 is not modified.
 </dd>
 </dl>
-<h1 data-number="5" id="environment-setup-and-tooling"><span class="header-section-number">5</span> Environment Setup and
-Tooling</h1>
-<h2 data-number="5.1"><span class="header-section-number">5.1</span>
-TC-009: Verify Terraform infrastructure deployment</h2>
+<h2 data-number="2.4" id="environment-setup-and-tooling"><span class="header-section-number">2.4</span> Environment Setup and
+Tooling</h2>
+<h3 data-number="2.4.1"><span class="header-section-number">2.4.1</span>
+Test Case 9: Verify Terraform infrastructure deployment</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -892,8 +833,8 @@ If <code>terraform apply</code> fails, check the AK/SK credentials and
 the <code>sa-brazil-1</code> region quota limits.
 </dd>
 </dl>
-<h2 data-number="5.2"><span class="header-section-number">5.2</span>
-TC-010: Verify test data upload to OBS</h2>
+<h3 data-number="2.4.2"><span class="header-section-number">2.4.2</span>
+Test Case 10: Verify test data upload to OBS</h3>
 <dl>
 <dt>Objective</dt>
 <dd>
@@ -903,9 +844,9 @@ pipeline.
 </dd>
 <dt>Prerequisites</dt>
 <dd>
-1. TC-002 completed (OBS bucket accessible). 2. Test data files prepared
-in the local directory <em>./test-data/</em>. 3. <code>obsutil</code>
-CLI configured with the test user credentials.
+1. Test Case 2 completed (OBS bucket accessible). 2. Test data files
+prepared in the local directory <em>./test-data/</em>. 3.
+<code>obsutil</code> CLI configured with the test user credentials.
 </dd>
 <dt>Procedure</dt>
 <dd>
@@ -936,9 +877,77 @@ reliability.
 </dl>
 <p><em>[Image placeholder: Screenshot of the test execution dashboard
 showing all test case results]</em></p>
-<h1 data-number="6"><span class="header-section-number">6</span>
+<h1 data-number="3" id="conclusion"><span class="header-section-number">3</span> Conclusion</h1>
+<table>
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Title</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Verify MRS cluster deployment and health</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Verify OBS bucket creation and accessibility</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Verify VPC and security group configuration</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Verify DataArts Studio workspace creation</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Verify data ingestion pipeline execution</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Verify Spark SQL query on MRS cluster</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Verify IAM policy enforcement on OBS buckets</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Verify DataArts Studio data masking rule</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Verify Terraform infrastructure deployment</td>
+<td><strong>Pass</strong></td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Verify test data upload to OBS</td>
+<td><strong>Pass</strong></td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="4"><span class="header-section-number">4</span>
 Changelog</h1>
 <p><strong>2.1.0</strong>  <em>2026-09-13</em></p>
+<p>Restructured document to 3-section layout: Introduction, Test Cases
+(with subsections per domain), and Conclusion (with test summary
+table).</p>
+<p>Removed manual TC-XXX prefixes from testcase titles — the environment
+auto-numbers them as &quot;Test Case 1:&quot;, &quot;Test Case 2:&quot;, etc.</p>
+<p>Updated testsummary IDs from TC-XXX to auto-numbered 1–10.</p>
 <p>Changed teststeps from tabular table to auto-numbered paragraphs.
 <code>\teststep</code> now takes 1 arg (action only). Images, code
 blocks, and callouts can be placed freely between steps.</p>
@@ -953,11 +962,11 @@ blocks; <code>badge</code>; <code>weblink</code>; <code>note</code>;
 <code>param</code>; <code>image</code>, <code>imagecap</code>, and
 <code>imageplaceholder</code>; <code>menu</code> paths; and
 <code>inlinecode</code> references.</p>
-<p>Added Security and Access Control test cases (TC-007, TC-008).</p>
-<p>Added Environment Setup and Tooling test cases (TC-009, TC-010).</p>
+<p>Added Security and Access Control test cases.</p>
+<p>Added Environment Setup and Tooling test cases.</p>
 <p><strong>1.0.0</strong>  <em>2026-09-13</em></p>
 <p>Initial version.</p>
-<p>Added Platform Architecture test cases (TC-001 to TC-003).</p>
-<p>Added Data Engineering test cases (TC-004 to TC-006).</p>
+<p>Added Platform Architecture test cases.</p>
+<p>Added Data Engineering test cases.</p>
 </body>
 </html>

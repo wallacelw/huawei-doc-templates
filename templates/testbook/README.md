@@ -52,11 +52,21 @@ and load `babel` with `brazilian` instead.
 The body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections
 → `changelog` → `\end{document}`.
 
-Sections (`\section`) represent test domains. Each test case uses the
-`testcase` environment, which produces a subsection heading and a breakable
-tcolorbox with a red left-rule and stacked fields, each preceded by a
-full-width red mini header bar (Huawei-red background, white bold text)
-with content below.
+The document follows a 3-section structure:
+
+1. **Introduction** (`\section{Introduction}`) — project overview, objectives,
+   test scope, preconditions, and acceptance method.
+2. **Test Cases** (`\section{Test Cases}`) — subsections per test domain
+   (`\subsection{Platform Architecture}`, `\subsection{Data Engineering}`, etc.),
+   each containing auto-numbered `testcase` environments.
+3. **Conclusion** (`\section{Conclusion}`) — test summary table with all test
+   case results.
+
+Each test case uses the `testcase` environment, which produces an
+auto-numbered subsubsection heading ("Test Case 1: *title*",
+"Test Case 2: *title*", …) and a breakable tcolorbox with a red left-rule
+and stacked fields, each preceded by a full-width red mini header bar
+(Huawei-red background, white bold text) with content below.
 
 See [SKILL.md](SKILL.md) for the complete skeleton and all available commands
 and environments.
@@ -118,9 +128,22 @@ from either folder.
 \begin{document}
 \makecover \maketoc \startbody
 
-\section{ECS Instance Management}
+\section{Introduction}
 
-\begin{testcase}{TC-001: Create ECS instance}
+\begin{objectives}
+  \generalobjective{Verify ECS instance provisioning.}
+  \prerequisites
+  \begin{itemize}
+    \item Huawei Cloud account with IAM admin privileges.
+    \item VPC and subnet already created.
+  \end{itemize}
+\end{objectives}
+
+\section{Test Cases}
+
+\subsection{ECS Instance Management}
+
+\begin{testcase}{Create ECS instance}
   \testobjective{Verify that an ECS instance can be created.}
   \begin{testprerequisites}
     \teststep{Account is active.}
@@ -138,6 +161,12 @@ from either folder.
   \testresult{\testresultbadge{Pass}}
   \testremarks{Test with basic and general-purpose specs.}
 \end{testcase}
+
+\section{Conclusion}
+
+\begin{testsummary}
+  \testsummaryrow{1}{Create ECS instance}{\testresultbadge{Pass}}
+\end{testsummary}
 
 \begin{changelog}
   \changelogentry{1.0.0}{\today}{\item Initial version.}

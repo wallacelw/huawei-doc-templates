@@ -1077,6 +1077,12 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**4.6.0**  *2026-09-13*
+
+Section restructure: Introduction, Test Cases (with category
+subsections), Conclusion. Testcases auto-numbered like figures/tables.
+Changed testcase from subsection to subsubsection.
+
 **4.5.0**  *2026-09-13*
 
 Unified field APIs: `testprerequisites` and `testexpected` changed from

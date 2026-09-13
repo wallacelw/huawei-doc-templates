@@ -3,6 +3,27 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v4.6.0 (2026-09-13)
+
+### Features
+
+- **Auto-numbered testcases**: Testcases now auto-number like figures/tables
+  ("Test Case 1: Title", "Test Case 2: Title", ...). Uses `\newcounter{testcase}`
+  with `\refstepcounter` for `\label`/`\ref` support.
+- **Section restructure**: New 3-section layout:
+  1. Introduction (project overview, scope, preconditions, acceptance)
+  2. Test Cases (one main section with category subsections)
+  3. Conclusion (test case summary table)
+- **Testcase heading level**: Changed from `\subsection` to `\subsubsection`
+  so categories can be `\subsection` under the main "Test Cases" section.
+
+### Migration
+
+- Remove manual "TC-001:" prefixes from testcase titles (auto-numbered now)
+- Wrap category sections in `\section{Test Cases}` with `\subsection` categories
+- Move test summary to a new `\section{Conclusion}`
+- Update testsummary IDs from "TC-001" to "1"
+
 ## v4.5.0 (2026-09-13)
 
 ### Breaking changes (API)

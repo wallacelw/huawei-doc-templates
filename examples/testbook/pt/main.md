@@ -8,7 +8,7 @@
 > menu, weblinks, notas, referências param, tabela de resumo dos testes,
 > emblemas de resultado e histórico de versões.
 
-# Descrição dos Casos de Teste
+# Introdução
 
 > **Objetivo Geral:** Validar a implantação da Plataforma de Dados do
 > Huawei Cloud para o ambiente de POC, garantindo que todos os serviços
@@ -87,54 +87,11 @@ kubectl version --client
 | Não satisfeito | O caso de teste falha --- o comportamento observado não corresponde ao resultado esperado. Um relatório de defeito deve ser registrado. |
 | Não testado | O caso de teste não pôde ser executado devido a dependências bloqueantes ou problemas de ambiente. |
 
-## Resumo dos Casos de Teste
+# Casos de Teste
 
-  -----------------------------------------------------------------------
-  ID                      Título                  Status
-  ----------------------- ----------------------- -----------------------
-  TC-001                  Verificar implantação e **Pass**
-                          saúde do cluster MRS    
+## Arquitetura da Plataforma
 
-  TC-002                  Verificar criação e     **Pass**
-                          acessibilidade do       
-                          bucket OBS              
-
-  TC-003                  Verificar configuração  **Pass**
-                          de VPC e grupo de       
-                          segurança               
-
-  TC-004                  Verificar criação do    **Pass**
-                          workspace do DataArts   
-                          Studio                  
-
-  TC-005                  Verificar execução do   **Pass**
-                          pipeline de ingestão de 
-                          dados                   
-
-  TC-006                  Verificar consulta      **Pass**
-                          Spark SQL no cluster    
-                          MRS                     
-
-  TC-007                  Verificar aplicação de  **Pass**
-                          política IAM nos        
-                          buckets OBS             
-
-  TC-008                  Verificar regra de      **Pass**
-                          mascaramento de dados   
-                          do DataArts Studio      
-
-  TC-009                  Verificar implantação   **Pass**
-                          de infraestrutura via   
-                          Terraform               
-
-  TC-010                  Verificar carregamento  **Pass**
-                          de dados de teste no    
-                          OBS                     
-  -----------------------------------------------------------------------
-
-# Arquitetura da Plataforma
-
-## TC-001: Verificar implantação e saúde do cluster MRS
+### Caso de Teste 1: Verificar implantação e saúde do cluster MRS
 
 Objetivo
 :   Confirmar que o cluster MapReduce Service (MRS) está implantado com
@@ -165,7 +122,7 @@ Observações
 :   Se algum componente apresentar status **Anormal**, verificar a
     página de alarmes do MRS antes de registrar o resultado.
 
-## TC-002: Verificar criação e acessibilidade do bucket OBS
+### Caso de Teste 2: Verificar criação e acessibilidade do bucket OBS
 
 Objetivo
 :   Confirmar que o bucket do Object Storage Service (OBS) utilizado
@@ -197,7 +154,7 @@ Observações
 :   A consistência eventual do OBS pode causar um breve atraso antes que
     um objeto recém-carregado apareça nas listagens.
 
-## TC-003: Verificar configuração de VPC e grupo de segurança
+### Caso de Teste 3: Verificar configuração de VPC e grupo de segurança
 
 Objetivo
 :   Confirmar que a VPC, a sub-rede e os grupos de segurança estão
@@ -232,9 +189,9 @@ Observações
 :   Se o grupo de segurança possuir regras adicionais além da
     especificação da arquitetura, documentá-las no campo de Observações.
 
-# Engenharia de Dados
+## Engenharia de Dados
 
-## TC-004: Verificar criação do workspace do DataArts Studio
+### Caso de Teste 4: Verificar criação do workspace do DataArts Studio
 
 Objetivo
 :   Confirmar que a instância do DataArts Studio (Dayu) está
@@ -268,7 +225,7 @@ Observações
 :   Se o workspace falhar ao carregar, verificar o status da instância
     Dayu e a atribuição da função IAM.
 
-## TC-005: Verificar execução do pipeline de ingestão de dados
+### Caso de Teste 5: Verificar execução do pipeline de ingestão de dados
 
 Objetivo
 :   Confirmar que um pipeline em lote do DataArts Studio consegue
@@ -276,11 +233,11 @@ Objetivo
     o resultado no caminho OBS de destino.
 
 Pré-requisitos
-:   1\. TC-004 concluído (workspace do DataArts Studio acessível). 2.
-    Arquivo CSV de origem (`customers.csv`) existe no bucket OBS raw. 3.
-    Caminho OBS de destino (`poc-datalake-curated/customers/`) está
-    configurado. 4. Pipeline `pl-ingest-customers` está publicado no
-    DataArts Studio.
+:   1\. Caso de Teste 4 concluído (workspace do DataArts Studio
+    acessível). 2. Arquivo CSV de origem (`customers.csv`) existe no
+    bucket OBS raw. 3. Caminho OBS de destino
+    (`poc-datalake-curated/customers/`) está configurado. 4. Pipeline
+    `pl-ingest-customers` está publicado no DataArts Studio.
 
 Procedimento
 :   1\. Navegar até Desenvolvimento de Dados no DataArts Studio 2.
@@ -302,7 +259,7 @@ Observações
     Para a POC, o arquivo de origem contém aproximadamente 10.000
     linhas.
 
-## TC-006: Verificar consulta Spark SQL no cluster MRS
+### Caso de Teste 6: Verificar consulta Spark SQL no cluster MRS
 
 Objetivo
 :   Confirmar que uma consulta Spark SQL pode ser executada no cluster
@@ -310,7 +267,7 @@ Objetivo
     corretos, validando a integração entre o MRS e o data lake.
 
 Pré-requisitos
-:   1\. TC-001 concluído (cluster MRS saudável). 2. Tabela Hive
+:   1\. Caso de Teste 1 concluído (cluster MRS saudável). 2. Tabela Hive
     `poc_db.customers` existe e contém dados carregados pelo pipeline de
     ingestão. 3. Acesso SSH ao nó master do MRS configurado.
 
@@ -335,9 +292,9 @@ Observações
 :   Se a CLI do Spark SQL não estiver disponível, utilizar a interface
     web do componente Spark2x do MRS para submeter a consulta.
 
-# Segurança e Controle de Acesso
+## Segurança e Controle de Acesso
 
-## TC-007: Verificar aplicação de política IAM nos buckets OBS
+### Caso de Teste 7: Verificar aplicação de política IAM nos buckets OBS
 
 Objetivo
 :   Confirmar que as políticas IAM restringem corretamente o acesso ao
@@ -376,7 +333,7 @@ Observações
     retornada conforme esperado --- pode haver herança de política do
     projeto ou domínio.
 
-## TC-008: Verificar regra de mascaramento de dados do DataArts Studio
+### Caso de Teste 8: Verificar regra de mascaramento de dados do DataArts Studio
 
 Objetivo
 :   Confirmar que colunas de dados sensíveis (ex.: campos PII) são
@@ -384,10 +341,10 @@ Objetivo
     quando consultadas por usuários não administradores.
 
 Pré-requisitos
-:   1\. TC-004 concluído (workspace do DataArts Studio acessível). 2.
-    Regra de mascaramento configurada para a coluna `customers.ssn`
-    (Número de Seguro Social). 3. Usuário de teste possui função
-    **Dayu_User** (não administrador).
+:   1\. Caso de Teste 4 concluído (workspace do DataArts Studio
+    acessível). 2. Regra de mascaramento configurada para a coluna
+    `customers.ssn` (Número de Seguro Social). 3. Usuário de teste
+    possui função **Dayu_User** (não administrador).
 
 Procedimento
 :   1\. No console do DataArts Studio, navegar até **Arquitetura de
@@ -411,9 +368,9 @@ Observações
 :   Regras de mascaramento de dados são aplicadas no momento da consulta
     --- os dados subjacentes no OBS/HDFS não são modificados.
 
-# Configuração do Ambiente e Ferramentas
+## Configuração de Ambiente e Ferramentas
 
-## TC-009: Verificar implantação de infraestrutura via Terraform
+### Caso de Teste 9: Verificar implantação de infraestrutura via Terraform
 
 Objetivo
 :   Confirmar que a configuração Terraform implanta todos os recursos de
@@ -448,7 +405,7 @@ Observações
 :   Se `terraform apply` falhar, verificar as credenciais AK/SK e os
     limites de cota da região `sa-brazil-1`.
 
-## TC-010: Verificar carregamento de dados de teste no OBS
+### Caso de Teste 10: Verificar carregamento de dados de teste no OBS
 
 Objetivo
 :   Confirmar que todos os arquivos de dados de teste necessários (CSV,
@@ -456,9 +413,9 @@ Objetivo
     pelo pipeline do DataArts Studio.
 
 Pré-requisitos
-:   1\. TC-002 concluído (bucket OBS acessível). 2. Arquivos de dados de
-    teste preparados no diretório local *./test-data/*. 3. CLI `obsutil`
-    configurada com as credenciais do usuário de teste.
+:   1\. Caso de Teste 2 concluído (bucket OBS acessível). 2. Arquivos de
+    dados de teste preparados no diretório local *./test-data/*. 3. CLI
+    `obsutil` configurada com as credenciais do usuário de teste.
 
 Procedimento
 :   1\. Listar os arquivos de dados de teste locais e verificar sua
@@ -486,9 +443,35 @@ Observações
 
 *\[Image placeholder: Captura de tela do painel de execução de testes mostrando os resultados de todos os casos de teste\]*
 
+# Conclusão
+
+  ID   Título                                                        Status
+  ---- ------------------------------------------------------------- ----------
+  1    Verificar implantação e saúde do cluster MRS                  **Pass**
+  2    Verificar criação e acessibilidade do bucket OBS              **Pass**
+  3    Verificar configuração de VPC e grupo de segurança            **Pass**
+  4    Verificar criação do workspace do DataArts Studio             **Pass**
+  5    Verificar execução do pipeline de ingestão de dados           **Pass**
+  6    Verificar consulta Spark SQL no cluster MRS                   **Pass**
+  7    Verificar aplicação de política IAM nos buckets OBS           **Pass**
+  8    Verificar regra de mascaramento de dados do DataArts Studio   **Pass**
+  9    Verificar implantação de infraestrutura via Terraform         **Pass**
+  10   Verificar carregamento de dados de teste no OBS               **Pass**
+
 # Histórico de versões
 
 **2.1.0**  *2026-09-13*
+
+Reestruturação do documento para layout de 3 seções: Introdução, Casos
+de Teste (com subseções por domínio) e Conclusão (com tabela de resumo
+dos testes).
+
+Remoção dos prefixos manuais TC-XXX dos títulos dos casos de teste --- o
+ambiente os numera automaticamente como \"Caso de Teste 1:\", \"Caso de
+Teste 2:\", etc.
+
+Atualização dos IDs do testsummary de TC-XXX para numeração automática
+1--10.
 
 Alteração de teststeps de tabela tabular para parágrafos auto-numerados.
 `\teststep` agora aceita 1 argumento (ação apenas). Imagens, blocos de
@@ -508,17 +491,14 @@ Adicionadas demonstrações abrangentes de recursos: caixas de destaque
 `param`; `image`, `imagecap` e `imageplaceholder`; caminhos `menu`; e
 referências `inlinecode`.
 
-Adicionados casos de teste de Segurança e Controle de Acesso (TC-007,
-TC-008).
+Adicionados casos de teste de Segurança e Controle de Acesso.
 
-Adicionados casos de teste de Configuração do Ambiente e Ferramentas
-(TC-009, TC-010).
+Adicionados casos de teste de Configuração do Ambiente e Ferramentas.
 
 **1.0.0**  *2026-09-13*
 
 Versão inicial.
 
-Adicionados casos de teste de Arquitetura da Plataforma (TC-001 a
-TC-003).
+Adicionados casos de teste de Arquitetura da Plataforma.
 
-Adicionados casos de teste de Engenharia de Dados (TC-004 a TC-006).
+Adicionados casos de teste de Engenharia de Dados.

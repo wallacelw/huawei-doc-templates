@@ -42,9 +42,9 @@ result badges, and changelog.
 \end{infobox}
 
 % =====================================================================
-%  Section 1 — Test Cases Description
+%  Section 1 — Introduction
 % =====================================================================
-\section{Test Cases Description}
+\section{Introduction}
 
 \begin{objectives}
   \generalobjective{Validate the Huawei Cloud Data Platform deployment for the
@@ -116,27 +116,14 @@ infrastructure changes and avoid unintended resource modifications.
   \caption{Acceptance criteria.}
 \end{table}
 
-\subsection{Test Case Summary}
-
-\begin{testsummary}
-  \testsummaryrow{TC-001}{Verify MRS cluster deployment and health}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-002}{Verify OBS bucket creation and accessibility}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-003}{Verify VPC and security group configuration}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-004}{Verify DataArts Studio workspace creation}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-005}{Verify data ingestion pipeline execution}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-006}{Verify Spark SQL query on MRS cluster}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-007}{Verify IAM policy enforcement on OBS buckets}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-008}{Verify DataArts Studio data masking rule}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-009}{Verify Terraform infrastructure deployment}{\testresultbadge{Pass}}
-  \testsummaryrow{TC-010}{Verify test data upload to OBS}{\testresultbadge{Pass}}
-\end{testsummary}
-
 % =====================================================================
-%  Section 2 — Platform Architecture
+%  Section 2 — Test Cases
 % =====================================================================
-\section{Platform Architecture}
+\section{Test Cases}
 
-\begin{testcase}{TC-001: Verify MRS cluster deployment and health}
+\subsection{Platform Architecture}
+
+\begin{testcase}{Verify MRS cluster deployment and health}
   \testobjective{Confirm that the MapReduce Service (MRS) cluster is deployed
     with the required components (HDFS, YARN, Spark, Hive) and all nodes
     report a healthy status.}
@@ -165,7 +152,7 @@ infrastructure changes and avoid unintended resource modifications.
   \testremarks{If any component shows \textbf{Abnormal}, check the MRS alarm page before marking the result.}
 \end{testcase}
 
-\begin{testcase}{TC-002: Verify OBS bucket creation and accessibility}
+\begin{testcase}{Verify OBS bucket creation and accessibility}
   \testobjective{Confirm that the Object Storage Service (OBS) bucket used
     for the POC data lake is created, has the correct storage class, and
     is accessible with the designated IAM policy.}
@@ -192,7 +179,7 @@ infrastructure changes and avoid unintended resource modifications.
   \testremarks{OBS eventual consistency may cause a brief delay before a newly uploaded object appears in listings.}
 \end{testcase}
 
-\begin{testcase}{TC-003: Verify VPC and security group configuration}
+\begin{testcase}{Verify VPC and security group configuration}
   \testobjective{Confirm that the VPC, subnet, and security groups are
     configured according to the network architecture diagram, with the
     correct CIDR blocks and inbound/outbound rules.}
@@ -218,12 +205,9 @@ infrastructure changes and avoid unintended resource modifications.
   \testremarks{If the security group has additional rules beyond the architecture spec, document them in the Remarks field.}
 \end{testcase}
 
-% =====================================================================
-%  Section 3 — Data Engineering
-% =====================================================================
-\section{Data Engineering}
+\subsection{Data Engineering}
 
-\begin{testcase}{TC-004: Verify DataArts Studio workspace creation} \badge{Required}
+\begin{testcase}{Verify DataArts Studio workspace creation} \badge{Required}
   \testobjective{Confirm that the DataArts Studio (Dayu) instance is
     provisioned, the workspace is accessible, and the designated IAM
     users can log in with the \textbf{Dayu\_User} role.}
@@ -247,12 +231,12 @@ infrastructure changes and avoid unintended resource modifications.
   \testremarks{If the workspace fails to load, check the Dayu instance status and the IAM role assignment.}
 \end{testcase}
 
-\begin{testcase}{TC-005: Verify data ingestion pipeline execution}
+\begin{testcase}{Verify data ingestion pipeline execution}
   \testobjective{Confirm that a DataArts Studio batch pipeline can
     successfully ingest CSV data from OBS, apply a basic transformation,
     and write the result to the target OBS path.}
   \begin{testprerequisites}
-    \teststep{TC-004 completed (DataArts Studio workspace accessible).}
+    \teststep{Test Case 4 completed (DataArts Studio workspace accessible).}
     \teststep{Source CSV file (\inlinecode{customers.csv}) exists in the OBS raw bucket.}
     \teststep{Target OBS path (\inlinecode{poc-datalake-curated/customers/}) is configured.}
     \teststep{Pipeline \inlinecode{pl-ingest-customers} is published in DataArts Studio.}
@@ -281,12 +265,12 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
   \testremarks{Pipeline execution time varies with data volume. For the POC, the source file contains approximately 10,000 rows.}
 \end{testcase}
 
-\begin{testcase}{TC-006: Verify Spark SQL query on MRS cluster}
+\begin{testcase}{Verify Spark SQL query on MRS cluster}
   \testobjective{Confirm that a Spark SQL query can be executed on the
     MRS cluster to read data from a Hive table and return correct
     results, validating the integration between MRS and the data lake.}
   \begin{testprerequisites}
-    \teststep{TC-001 completed (MRS cluster healthy).}
+    \teststep{Test Case 1 completed (MRS cluster healthy).}
     \teststep{Hive table \inlinecode{poc\_db.customers} exists and contains data loaded by the ingestion pipeline.}
     \teststep{SSH access to the MRS master node is configured.}
   \end{testprerequisites}
@@ -316,12 +300,9 @@ spark-sql --master yarn \
   \testremarks{If the Spark SQL CLI is not available, use the MRS Spark2x component's web UI to submit the query instead.}
 \end{testcase}
 
-% =====================================================================
-%  Section 4 — Security and Access Control
-% =====================================================================
-\section{Security and Access Control}
+\subsection{Security and Access Control}
 
-\begin{testcase}{TC-007: Verify IAM policy enforcement on OBS buckets} \badge{New}
+\begin{testcase}{Verify IAM policy enforcement on OBS buckets} \badge{New}
   \testobjective{Confirm that IAM policies correctly restrict OBS bucket
     access — authorized users can read/write while unauthorized users are
     denied, and the bucket policy matches the principle of least privilege.}
@@ -360,12 +341,12 @@ obsutil ls obs://poc-datalake-raw/
     re-testing after modifying a policy.}
 \end{testcase}
 
-\begin{testcase}{TC-008: Verify DataArts Studio data masking rule}
+\begin{testcase}{Verify DataArts Studio data masking rule}
   \testobjective{Confirm that sensitive data columns (e.g. PII fields) are
     masked according to the DataArts Studio data masking rule when queried
     by non-admin users.}
   \begin{testprerequisites}
-    \teststep{TC-004 completed (DataArts Studio workspace accessible).}
+    \teststep{Test Case 4 completed (DataArts Studio workspace accessible).}
     \teststep{Data masking rule configured for column \inlinecode{customers.ssn} (Social Security Number).}
     \teststep{Test user has \textbf{Dayu\_User} role (not admin).}
   \end{testprerequisites}
@@ -385,12 +366,9 @@ obsutil ls obs://poc-datalake-raw/
   \testremarks{Data masking rules apply at query time — the underlying data in OBS/HDFS is not modified.}
 \end{testcase}
 
-% =====================================================================
-%  Section 5 — Environment Setup and Tooling
-% =====================================================================
-\section{Environment Setup and Tooling}
+\subsection{Environment Setup and Tooling}
 
-\begin{testcase}{TC-009: Verify Terraform infrastructure deployment}
+\begin{testcase}{Verify Terraform infrastructure deployment}
   \testobjective{Confirm that the Terraform configuration deploys all
     required infrastructure resources (VPC, MRS, OBS, DataArts Studio)
     without errors and the state file reflects the expected resources.}
@@ -435,12 +413,12 @@ terraform state list | wc -l
   \end{warning}
 \end{testcase}
 
-\begin{testcase}{TC-010: Verify test data upload to OBS}
+\begin{testcase}{Verify test data upload to OBS}
   \testobjective{Confirm that all required test data files (CSV, JSON) can
     be uploaded to the designated OBS bucket and are accessible by the
     DataArts Studio pipeline.}
   \begin{testprerequisites}
-    \teststep{TC-002 completed (OBS bucket accessible).}
+    \teststep{Test Case 2 completed (OBS bucket accessible).}
     \teststep{Test data files prepared in the local directory \param{./test-data/}.}
     \teststep{\inlinecode{obsutil} CLI configured with the test user credentials.}
   \end{testprerequisites}
@@ -476,10 +454,31 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
 \imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the test execution dashboard showing all test case results}
 
 % =====================================================================
+%  Section 3 — Conclusion
+% =====================================================================
+\section{Conclusion}
+
+\begin{testsummary}
+  \testsummaryrow{1}{Verify MRS cluster deployment and health}{\testresultbadge{Pass}}
+  \testsummaryrow{2}{Verify OBS bucket creation and accessibility}{\testresultbadge{Pass}}
+  \testsummaryrow{3}{Verify VPC and security group configuration}{\testresultbadge{Pass}}
+  \testsummaryrow{4}{Verify DataArts Studio workspace creation}{\testresultbadge{Pass}}
+  \testsummaryrow{5}{Verify data ingestion pipeline execution}{\testresultbadge{Pass}}
+  \testsummaryrow{6}{Verify Spark SQL query on MRS cluster}{\testresultbadge{Pass}}
+  \testsummaryrow{7}{Verify IAM policy enforcement on OBS buckets}{\testresultbadge{Pass}}
+  \testsummaryrow{8}{Verify DataArts Studio data masking rule}{\testresultbadge{Pass}}
+  \testsummaryrow{9}{Verify Terraform infrastructure deployment}{\testresultbadge{Pass}}
+  \testsummaryrow{10}{Verify test data upload to OBS}{\testresultbadge{Pass}}
+\end{testsummary}
+
+% =====================================================================
 %  Changelog
 % =====================================================================
 \begin{changelog}
   \changelogentry{2.1.0}{\today}{
+    \item Restructured document to 3-section layout: Introduction, Test Cases (with subsections per domain), and Conclusion (with test summary table).
+    \item Removed manual TC-XXX prefixes from testcase titles — the environment auto-numbers them as "Test Case 1:", "Test Case 2:", etc.
+    \item Updated testsummary IDs from TC-XXX to auto-numbered 1--10.
     \item Changed teststeps from tabular table to auto-numbered paragraphs. \inlinecode{\textbackslash teststep} now takes 1 arg (action only). Images, code blocks, and callouts can be placed freely between steps.
   }
   \changelogentry{2.0.0}{\today}{
@@ -487,13 +486,13 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
   }
   \changelogentry{1.1.0}{\today}{
     \item Added comprehensive feature demonstrations: \inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox} callouts; \inlinecode{code} blocks; \inlinecode{badge}; \inlinecode{weblink}; \inlinecode{note}; \inlinecode{param}; \inlinecode{image}, \inlinecode{imagecap}, and \inlinecode{imageplaceholder}; \inlinecode{menu} paths; and \inlinecode{inlinecode} references.
-    \item Added Security and Access Control test cases (TC-007, TC-008).
-    \item Added Environment Setup and Tooling test cases (TC-009, TC-010).
+    \item Added Security and Access Control test cases.
+    \item Added Environment Setup and Tooling test cases.
   }
   \changelogentry{1.0.0}{\today}{
     \item Initial version.
-    \item Added Platform Architecture test cases (TC-001 to TC-003).
-    \item Added Data Engineering test cases (TC-004 to TC-006).
+    \item Added Platform Architecture test cases.
+    \item Added Data Engineering test cases.
   }
 \end{changelog}
 
