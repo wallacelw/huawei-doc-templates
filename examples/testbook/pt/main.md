@@ -273,12 +273,12 @@ Pré-requisitos
 
 Procedimento
 :   1\. Acessar o nó master do MRS via SSH 2. Executar a CLI do Spark
-    SQL:
-    `spark-sql –master yarn --conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc_db.customers;"` 3.
-    Verificar se a contagem retornada corresponde ao esperado
-    (10.000) 4. Executar uma consulta de amostra para verificar a
-    integridade dos dados:
-    `spark-sql –master yarn -e "SELECT customer_id, name FROM poc_db.customers LIMIT 5;"` 5.
+    SQL: spark-sql --master yarn   --conf
+    spark.sql.hive.convertMetastoreOrc=true   -e "SELECT COUNT(\*) FROM
+    poc_db.customers;" 3. Verificar se a contagem retornada corresponde
+    ao esperado (10.000) 4. Executar uma consulta de amostra para
+    verificar a integridade dos dados: spark-sql --master yarn   -e
+    "SELECT customer_id, name FROM poc_db.customers LIMIT 5;" 5.
     Confirmar que a consulta retorna 5 linhas com valores não nulos
 
 Resultado Esperado
@@ -462,7 +462,7 @@ Observações
 
 # Histórico de versões
 
-**2.1.0**  *2026-09-13*
+**2.1.0**  *2026-09-14*
 
 Reestruturação do documento para layout de 3 seções: Introdução, Casos
 de Teste (com subseções por domínio) e Conclusão (com tabela de resumo
@@ -479,14 +479,14 @@ Alteração de teststeps de tabela tabular para parágrafos auto-numerados.
 `\teststep` agora aceita 1 argumento (ação apenas). Imagens, blocos de
 código e callouts podem ser inseridos livremente entre os passos.
 
-**2.0.0**  *2026-09-13*
+**2.0.0**  *2026-09-14*
 
 Layout de casos de teste redesenhado: barras de cabeçalho mini de
 largura total para cada campo, ambiente testprocedure com tabela de
 passos de 2 colunas, ordem dos campos atualizada (Resultado do Teste
 antes de Observações).
 
-**1.1.0**  *2026-09-13*
+**1.1.0**  *2026-09-14*
 
 Adicionadas demonstrações abrangentes de recursos: caixas de destaque
 `warning`, `tip`, `infobox`; blocos `code`; `badge`; `weblink`; `note`;
@@ -497,7 +497,7 @@ Adicionados casos de teste de Segurança e Controle de Acesso.
 
 Adicionados casos de teste de Configuração do Ambiente e Ferramentas.
 
-**1.0.0**  *2026-09-13*
+**1.0.0**  *2026-09-14*
 
 Versão inicial.
 

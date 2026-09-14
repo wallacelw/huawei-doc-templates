@@ -9,7 +9,7 @@
 \setdoctitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{5.0.1}
+\setdocversion{5.0.2}
 
 \begin{document}
 
@@ -1209,6 +1209,7 @@ full command reference, see the template's README.md or run
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{5.0.2}{\today}{\item Long commands in test steps now render as code blocks instead of inline code.}
   \changelogentry{5.0.1}{\today}{\item Testcase caption centered above the block.}
   \changelogentry{5.0.0}{\today}{\item Major refactoring: extracted shared modules (huawei-titles, huawei-toc, huawei-cover), renamed \inlinecode{\textbackslash lg@guidetitle} to \inlinecode{\textbackslash lg@doctitle}, unified title API with \inlinecode{\textbackslash setdoctitle}, decomposed \inlinecode{docx\_fix.py} (680$\to$84 lines), added testbook unit tests, fixed build system error handling.}
   \changelogentry{4.7.0}{\today}{\item Testcase headings now formatted as captions (like figures/tables): bold ``Testcase N:'' followed by description. Changed label from ``Test Case'' to ``Testcase''.}

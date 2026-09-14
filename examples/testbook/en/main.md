@@ -258,12 +258,13 @@ Prerequisites
     pipeline. 3. SSH access to the MRS master node is configured.
 
 Procedure
-:   1\. SSH into the MRS master node 2. Run the Spark SQL CLI:
-    `spark-sql –master yarn --conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc_db.customers;"` 3.
-    Verify the returned count matches the expected row count (10,000) 4.
-    Run a sample query to verify data integrity:
-    `spark-sql –master yarn -e "SELECT customer_id, name FROM poc_db.customers LIMIT 5;"` 5.
-    Confirm the query returns 5 rows with non-null values
+:   1\. SSH into the MRS master node 2. Run the Spark SQL CLI: spark-sql
+    --master yarn   --conf spark.sql.hive.convertMetastoreOrc=true   -e
+    "SELECT COUNT(\*) FROM poc_db.customers;" 3. Verify the returned
+    count matches the expected row count (10,000) 4. Run a sample query
+    to verify data integrity: spark-sql --master yarn   -e "SELECT
+    customer_id, name FROM poc_db.customers LIMIT 5;" 5. Confirm the
+    query returns 5 rows with non-null values
 
 Expected Result
 :   1\. `COUNT(*)` returns 10,000. 2. The sample query returns 5 rows
@@ -435,7 +436,7 @@ Remarks
 
 # Changelog
 
-**2.1.0**  *2026-09-13*
+**2.1.0**  *2026-09-14*
 
 Restructured document to 3-section layout: Introduction, Test Cases
 (with subsections per domain), and Conclusion (with test summary table).
@@ -449,13 +450,13 @@ Changed teststeps from tabular table to auto-numbered paragraphs.
 `\teststep` now takes 1 arg (action only). Images, code blocks, and
 callouts can be placed freely between steps.
 
-**2.0.0**  *2026-09-13*
+**2.0.0**  *2026-09-14*
 
 Redesigned testcase layout: full-width mini header bars for each field,
 testprocedure environment with 2-column step table, field order updated
 (Test Result before Remarks).
 
-**1.1.0**  *2026-09-13*
+**1.1.0**  *2026-09-14*
 
 Added comprehensive feature demonstrations: `warning`, `tip`, `infobox`
 callouts; `code` blocks; `badge`; `weblink`; `note`; `param`; `image`,
@@ -466,7 +467,7 @@ Added Security and Access Control test cases.
 
 Added Environment Setup and Tooling test cases.
 
-**1.0.0**  *2026-09-13*
+**1.0.0**  *2026-09-14*
 
 Initial version.
 

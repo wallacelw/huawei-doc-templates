@@ -276,21 +276,20 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
   \end{testprerequisites}
   \begin{testprocedure}
     \teststep{Acessar o nó master do MRS via SSH}
-    \teststep{Executar a CLI do Spark SQL: \inlinecode{spark-sql --master yarn -{}-conf spark.sql.hive.convertMetastoreOrc=true -e "SELECT COUNT(*) FROM poc\_db.customers;"}}
-    \teststep{Verificar se a contagem retornada corresponde ao esperado (10.000)}
-    \teststep{Executar uma consulta de amostra para verificar a integridade dos dados: \inlinecode{spark-sql --master yarn -e "SELECT customer\_id, name FROM poc\_db.customers LIMIT 5;"}}
-    \teststep{Confirmar que a consulta retorna 5 linhas com valores não nulos}
-  \end{testprocedure}
-
-  \begin{code}[bash]
-# Acessar o nó master do MRS via SSH
-ssh root@mrs-master-poc
-
-# Executar consulta de contagem Spark SQL
+    \teststep{Executar a CLI do Spark SQL:}
+\begin{code}[bash]
 spark-sql --master yarn \
   --conf spark.sql.hive.convertMetastoreOrc=true \
   -e "SELECT COUNT(*) FROM poc_db.customers;"
-  \end{code}
+\end{code}
+    \teststep{Verificar se a contagem retornada corresponde ao esperado (10.000)}
+    \teststep{Executar uma consulta de amostra para verificar a integridade dos dados:}
+\begin{code}[bash]
+spark-sql --master yarn \
+  -e "SELECT customer_id, name FROM poc_db.customers LIMIT 5;"
+\end{code}
+    \teststep{Confirmar que a consulta retorna 5 linhas com valores não nulos}
+  \end{testprocedure}
 
   \begin{testexpected}
     \teststep{\inlinecode{COUNT(*)} retorna 10.000.}

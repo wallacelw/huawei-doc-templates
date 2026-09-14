@@ -1077,11 +1077,16 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
-**5.0.1**  *2026-09-13*
+**5.0.2**  *2026-09-14*
+
+Long commands in test steps now render as code blocks instead of inline
+code.
+
+**5.0.1**  *2026-09-14*
 
 Testcase caption centered above the block.
 
-**5.0.0**  *2026-09-13*
+**5.0.0**  *2026-09-14*
 
 Major refactoring: extracted shared modules (huawei-titles, huawei-toc,
 huawei-cover), renamed `\lg@guidetitle` to `\lg@doctitle`, unified title
@@ -1089,26 +1094,26 @@ API with `\setdoctitle`, decomposed `docx_fix.py`
 (680$\to$`<!-- -->`{=html}84 lines), added testbook unit tests, fixed
 build system error handling.
 
-**4.7.0**  *2026-09-13*
+**4.7.0**  *2026-09-14*
 
 Testcase headings now formatted as captions (like figures/tables): bold
 "Testcase N:" followed by description. Changed label from "Test Case" to
 "Testcase".
 
-**4.6.0**  *2026-09-13*
+**4.6.0**  *2026-09-14*
 
 Section restructure: Introduction, Test Cases (with category
 subsections), Conclusion. Testcases auto-numbered like figures/tables.
 Changed testcase from subsection to subsubsection.
 
-**4.5.0**  *2026-09-13*
+**4.5.0**  *2026-09-14*
 
 Unified field APIs: `testprerequisites` and `testexpected` changed from
 commands to environments, matching `testprocedure`. All three now use
 `\teststep` for auto-numbered items with red bold numbers. Uniform code,
 same visual style.
 
-**4.4.0**  *2026-09-13*
+**4.4.0**  *2026-09-14*
 
 Code review fixes: removed dead labels, badge now uses Huawei brand
 colors (tipbg/tipfg, huaweired, warningbg/warningfg), Lua filter
@@ -1116,27 +1121,27 @@ preserves formatting in DOCX/MD/HTML via parse_latex_blocks,
 testprocedure handler preserves non-step content (images, code,
 callouts).
 
-**4.3.0**  *2026-09-13*
+**4.3.0**  *2026-09-14*
 
 Added `testlist` environment for numbered lists with red bold numbers in
 testcase fields. Fixed alignment: zeroed `\parindent` inside testcase,
 indented procedure step numbering to align with `testlist` items.
 
-**4.2.0**  *2026-09-13*
+**4.2.0**  *2026-09-14*
 
 Changed teststeps from tabular table to auto-numbered paragraphs.
 `\teststep` now takes 1 arg (action only, numbering automatic). Removed
 `teststeps` environment. Images, code blocks, and callouts can be placed
 freely between steps inside `testprocedure`.
 
-**4.1.0**  *2026-09-13*
+**4.1.0**  *2026-09-14*
 
 Testcase field redesign: full-width red mini header bars for each field.
 Changed `testprocedure` from command to environment wrapping 2-column
 teststeps (Step \| Action). Reordered fields: Test Result before
 Remarks. Updated Lua filter and round-trip test for grid table counting.
 
-**4.0.0**  *2026-09-13*
+**4.0.0**  *2026-09-14*
 
 Redesigned testbook `testcase` environment: replaced 2-column tabular
 with breakable tcolorbox (red left-rule, stacked paragraph fields).
@@ -1145,13 +1150,13 @@ and break across pages. Added `longhutable` environment for
 page-breaking tables. Updated Lua filter to produce definition lists for
 DOCX/MD/HTML.
 
-**3.9.0**  *2026-09-13*
+**3.9.0**  *2026-09-14*
 
 Added testsummary environment, teststeps environment, and
 `\testresultbadge` command to testbook template. Fixed testcase layout
 (full-width tabular with proper text alignment).
 
-**3.8.1**  *2026-09-13*
+**3.8.1**  *2026-09-14*
 
 End-to-end quality review: fixed testbook PDF metadata title, removed
 stray user DOCX from template dir, fixed round-trip.sh variable typo,
@@ -1159,31 +1164,31 @@ updated stale references in AGENTS.md and README.md, committed testbook
 sample PDFs, set TZ for pandoc cover time consistency, widened pandoc
 version range.
 
-**3.8.0**  *2026-09-13*
+**3.8.0**  *2026-09-14*
 
 Removed Tips and Tricks chapter (tmux configuration) --- required VS
 Code-specific keybindings that don't generalize across terminal setups.
 
-**3.7.0**  *2026-09-13*
+**3.7.0**  *2026-09-14*
 
 Added `testbook` template for POC/acceptance test case documents with
 `testcase` environment and `[noanswers]` option.
 
-**3.6.0**  *2026-09-13*
+**3.6.0**  *2026-09-14*
 
 Added `\setdocauthors` command and `[noauthors]` class option to both
 templates. Authors are displayed on the cover page (optional --- hidden
 if not set or if `[noauthors]` is passed). Demonstrated in all 4
 samples.
 
-**3.5.0**  *2026-09-13*
+**3.5.0**  *2026-09-14*
 
 Reorganized project structure: moved `build.sh`, `install.sh`, and
 `uninstall.sh` from repo root to `scripts/` directory. Updated all
 references in Makefile, README, AGENTS.md, SKILL.md, and setup guide.
 One-liner URLs now use `main/scripts/install.sh`.
 
-**3.4.0**  *2026-09-13*
+**3.4.0**  *2026-09-14*
 
 `install.sh`: opencode skills and VS Code LaTeX Workshop are now
 optional prompts (default yes). Removed LTeX extension (was failing to
@@ -1198,7 +1203,7 @@ Updated Chapter 6 with optional component prompts and update detection.
 Updated Chapter 7 with one-liner update/uninstall and full menu
 documentation.
 
-**3.3.0**  *2026-09-13*
+**3.3.0**  *2026-09-14*
 
 Moved pre-compiled setup guide to `setup-guide/` folder in repo root
 with all four formats (PDF, MD, DOCX, HTML). Users can read these before
@@ -1212,14 +1217,14 @@ comparison table.
 
 Updated .gitignore to track all four formats in `setup-guide/`.
 
-**3.2.1**  *2026-09-13*
+**3.2.1**  *2026-09-14*
 
 Renamed Chapter 7 from "Clean Up" to "Operations and Maintenance". Added
 subsections for updating and uninstalling both the MaaS Gateway and the
 document templates. Added cloud resource cleanup as an optional
 subsection.
 
-**3.2.0**  *2026-09-13*
+**3.2.0**  *2026-09-14*
 
 Added `uninstall.sh` script with interactive menu, `–all`, `–yes`, and
 `–dry-run` flags. Removes opencode skills, .sty modules, HarmonyOS Sans
@@ -1232,13 +1237,13 @@ success/failure reporting.
 
 Updated Chapter 7 with uninstall instructions.
 
-**3.1.2**  *2026-09-13*
+**3.1.2**  *2026-09-14*
 
 Added output format guide to README.md: comparison table of PDF,
 Markdown, DOCX, and HTML with purpose, copy-paste quality, and
 limitations. Recommends Markdown for copy-paste.
 
-**3.1.1**  *2026-09-13*
+**3.1.1**  *2026-09-14*
 
 Updated MaaS Gateway chapter to v1.10.9: non-interactive mode (`-y`) now
 suppresses all prompts (prerequisites, tool selection, skill install).
@@ -1249,7 +1254,7 @@ working directory.
 Added project standards to AGENTS.md: workflow, end-to-end validation,
 code style, git conventions, when unsure.
 
-**3.1.0**  *2026-09-13*
+**3.1.0**  *2026-09-14*
 
 Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider,
 flavor `x1.4u.16g`) --- more cost-efficient and robust. Updated creation
@@ -1273,20 +1278,20 @@ Added mandatory reboot warning in Chapter 2 (SSH port change). Added
 troubleshooting subsection in Chapter 4 with common SSH connection
 issues and ncat debugging commands.
 
-**3.0.1**  *2026-09-13*
+**3.0.1**  *2026-09-14*
 
 Minor fixes: test-filter.sh auto-discovery, build.sh help text, Makefile
 aggregate descriptions, 5-section comment correction, CHANGELOG version
 gap note, callout-in-code fix, CI font auto-discovery, dofile path
 comment, test-sync.sh header.
 
-**3.0.0**  *2026-09-13*
+**3.0.0**  *2026-09-14*
 
 Modular pipeline refactoring: shared Lua filter factory, shared DOCX fix
 logic, build system auto-discovery, unified format pipeline, GitHub
 Actions CI.
 
-**2.16.0**  *2026-09-13*
+**2.16.0**  *2026-09-14*
 
 Updated to match template v2.16.0 --- Lua filter fixes, build system
 updates, and technical template parity improvements.

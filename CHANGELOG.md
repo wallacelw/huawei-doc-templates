@@ -3,6 +3,15 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v5.0.2 (2026-09-14)
+
+### Fix
+
+- **Code blocks in test steps**: Long commands in `\teststep` now render as
+  code blocks (`\begin{code}[bash]...\end{code}`) instead of inline code
+  (`\inlinecode{...}`). The Lua filter converts `code` environments to
+  `verbatim` so Pandoc recognizes them in DOCX/MD/HTML output.
+
 ## v5.0.1 (2026-09-14)
 
 ### Fix

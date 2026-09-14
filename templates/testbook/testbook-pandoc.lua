@@ -83,6 +83,10 @@ local config = {
   extra_env_handlers = function(L, parse_latex_blocks, preamble)
     -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
     local function cell_to_md(cell_text)
+      -- Convert \begin{code}[lang]...\end{code} to \begin{verbatim}...\end{verbatim}
+      -- so pandoc.read recognizes it as a code block
+      cell_text = cell_text:gsub("\\begin%s*{code}%s*%[[^%]]*%]%s*(.-)%s*\\end%s*{code}", "\\begin{verbatim}%1\\end{verbatim}")
+      cell_text = cell_text:gsub("\\begin%s*{code}%s*(.-)%s*\\end%s*{code}", "\\begin{verbatim}%1\\end{verbatim}")
       cell_text = cell_text:gsub("\\\\", "\n")
       -- Preprocess testbook-specific commands to standard LaTeX
       cell_text = cell_text:gsub("\\testresultbadge%s*(%b{})", function(arg)
