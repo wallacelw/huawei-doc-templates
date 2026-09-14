@@ -217,10 +217,16 @@ approval. Changing them breaks existing documents and reproducibility.
 - `scripts/install.sh` installs both brand fonts; the fallbacks are safety nets.
 
 ### L9. Colors are hardcoded to Huawei brand
-- `huaweired` (`#C7000B`), `codebg` (`#F6F8FA`), `codetext` (`#1F2328`),
-  `linkblue` (`#0000FF`), `ruleblack` (`#000000`).
-- Callout colors: `warningbg/fg` (amber), `tipbg/fg` (green), `infobg/fg` (blue).
+- Corporate: `huaweired` (`#C7000B`, PMS 185C), `ruleblack` (`#000000`).
+- Callout colors (aligned to brand auxiliary palette, see L20):
+  `warningbg/fg` (orange `#FFF3E0`/`#ED6D00`), `tipbg/fg` (green
+  `#E8F5E9`/`#62B230`), `infobg/fg` (blue `#E0F7FA`/`#30B5C5`).
+- Code block: `codebg` (`#F6F8FA`), `codetext` (`#1F2328`),
+  `codeborder` (`#E1E4E8`).
+- Hyperlinks: `linkblue` (`#0000FF`).
 - Do not change these values. They match the Huawei house style.
+- Source: `brand-guidelines/BRAND-GUIDELINES.md` (HUAWEI CLOUD BRAND
+  GUIDELINES V1.0, Section 2.11–2.13).
 
 ### L11. Auto-version on every AI-assisted change
 - Every AI-assisted edit to a document must bump `\setdocversion` and add a
@@ -314,6 +320,20 @@ approval. Changing them breaks existing documents and reproducibility.
 - In `technical.cls`, authors appear as a row in the cover version table.
 - In `testbook.cls`, authors appear below the cover text, above version/date/time.
 - The command is defined in `templates/_base/huawei-changelog.sty` (shared).
+
+### L20. Auxiliary brand color palette (Brand Guidelines Section 2.12)
+- Six auxiliary colors are defined in `templates/_base/huawei-colors.sty`:
+  `rosered` (`#C40054`, PMS 7636), `darkred` (`#7F0001`, PMS 483C),
+  `huaweiorange` (`#ED6D00`, PMS 165C), `huaweiyellow` (`#FCC800`, PMS 7406C),
+  `huaweigreen` (`#62B230`, PMS 3501C), `huaweiblue` (`#30B5C5`, PMS 2227C).
+- Monochrome palette: `huaweiblack` (`#000000`), `huaweigray90` (`#E5E5E5`),
+  `huaweigray80` (`#CCCCCC`), `huaweigray50` (`#808080`),
+  `huaweigray30` (`#4D4D4D`), `huaweiwhite` (`#FFFFFF`).
+- CBG-only red (`#CE0E2D`, PMS 186C) is intentionally excluded — reserved
+  for Consumer BG, not for Cloud Computing BU documents.
+- Auxiliary colors must be used together with their main colors (per brand
+  guidelines). Use for charts, diagrams, and classification attributes.
+- Do not change these values. Source: `brand-guidelines/BRAND-GUIDELINES.md`.
 
 ---
 

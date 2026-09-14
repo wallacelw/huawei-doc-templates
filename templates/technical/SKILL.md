@@ -385,6 +385,47 @@ Closes with a 1.5pt horizontal rule. Inherited from `huawei-shared.sty`.
 
 ---
 
+## Colors (defined in `templates/_base/huawei-colors.sty`, reusable via `\textcolor{name}{...}`)
+
+| Name | Hex | Use |
+|---|---|---|
+| `codebg` | `#F6F8FA` | Code block background |
+| `codetext` | `#1F2328` | Code text |
+| `codeborder` | `#E1E4E8` | Code block border |
+| `linkblue` | `#0000FF` | Links |
+| `huaweired` | `#C7000B` | Brand red (H1 chapter rules, accents, badge) |
+| `ruleblack` | `#000000` | Horizontal rules (TOC, objectives) |
+| `warningbg` | `#FFF3E0` | Warning box background |
+| `warningfg` | `#ED6D00` | Warning box border |
+| `tipbg` | `#E8F5E9` | Tip box background |
+| `tipfg` | `#62B230` | Tip box border |
+| `infobg` | `#E0F7FA` | Info box background |
+| `infofg` | `#30B5C5` | Info box border |
+
+### Auxiliary brand colors (Section 2.12)
+
+| Color name | HEX | Pantone | Usage |
+|------------|-----|---------|-------|
+| `rosered` | #C40054 | 7636 | Charts, diagrams |
+| `darkred` | #7F0001 | 483C | Deep accent |
+| `huaweiorange` | #ED6D00 | 165C | Warning callout border |
+| `huaweiyellow` | #FCC800 | 7406C | Caution, attention |
+| `huaweigreen` | #62B230 | 3501C | Tip callout border |
+| `huaweiblue` | #30B5C5 | 2227C | Info callout border |
+
+### Monochrome palette (Section 2.13)
+
+| Color name | HEX | Brightness |
+|------------|-----|------------|
+| `huaweiblack` | #000000 | 0% |
+| `huaweigray90` | #E5E5E5 | 90% |
+| `huaweigray80` | #CCCCCC | 80% |
+| `huaweigray50` | #808080 | 50% |
+| `huaweigray30` | #4D4D4D | 30% |
+| `huaweiwhite` | #FFFFFF | 100% |
+
+---
+
 ## Multi-format output
 
 LaTeX → PDF is the primary output. DOCX, Markdown, and HTML are generated

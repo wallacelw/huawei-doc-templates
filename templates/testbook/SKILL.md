@@ -766,6 +766,28 @@ rendered, but the content remains in the `.tex` file for future reference.
 | `infobg` | `#E3F2FD` | Info box background |
 | `infofg` | `#1565C0` | Info box border |
 
+### Auxiliary brand colors (Section 2.12)
+
+| Color name | HEX | Pantone | Usage |
+|------------|-----|---------|-------|
+| `rosered` | #C40054 | 7636 | Charts, diagrams |
+| `darkred` | #7F0001 | 483C | Deep accent |
+| `huaweiorange` | #ED6D00 | 165C | Warning callout border |
+| `huaweiyellow` | #FCC800 | 7406C | Caution, attention |
+| `huaweigreen` | #62B230 | 3501C | Tip callout border |
+| `huaweiblue` | #30B5C5 | 2227C | Info callout border |
+
+### Monochrome palette (Section 2.13)
+
+| Color name | HEX | Brightness |
+|------------|-----|------------|
+| `huaweiblack` | #000000 | 0% |
+| `huaweigray90` | #E5E5E5 | 90% |
+| `huaweigray80` | #CCCCCC | 80% |
+| `huaweigray50` | #808080 | 50% |
+| `huaweigray30` | #4D4D4D | 30% |
+| `huaweiwhite` | #FFFFFF | 100% |
+
 ---
 
 ## Format reference

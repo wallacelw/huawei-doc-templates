@@ -14,14 +14,14 @@
 \newcommand{\lg@deflangkey}[1]{\define@key{FV}{#1}[unused]{}}
 \forcsvlist{\lg@deflangkey}{bash,sh,shell,python,Python,json,yaml,xml,html,javascript,js,sql,text,ini,conf}
 
-% Code block: #F6F8FA background, no border, left indented
+% Code block: #F6F8FA background, subtle border, left indented
 % Uses fancyvrb (not listings) for clean copy-paste in PDF.
 % listings processes character by character -> xdvipdfmx writes each
 % one as a separate text operation -> PDF readers insert spaces.
 % fancyvrb typesets line by line -> contiguous text in PDF -> clean copy.
 
 % Shared fancyvrb options for code blocks (used by code environment and \codefile).
-\newcommand{\lg@codeopts}{fontsize=\fontsize{10}{13}\selectfont, formatcom=\codefont\color{codetext}, frame=none, backgroundcolor=codebg, xleftmargin=0.7cm, xrightmargin=0.5cm, breaklines=true, breakanywhere=true, breaksymbolleft={}, breaksymbolright={}, breakanywheresymbolpre={}, breakanywheresymbolpost={}}
+\newcommand{\lg@codeopts}{fontsize=\fontsize{10}{13}\selectfont, formatcom=\codefont\color{codetext}, frame=single, framerule=0.4pt, rulecolor=\color{codeborder}, backgroundcolor=codebg, xleftmargin=0.7cm, xrightmargin=0.5cm, breaklines=true, breakanywhere=true, breaksymbolleft={}, breaksymbolright={}, breakanywheresymbolpre={}, breakanywheresymbolpost={}}
 
 % Expand \lg@codeopts before passing to fancyvrb (key-value scanner
 % requires pre-expanded options; macros are not expanded during scanning).

@@ -3,6 +3,29 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v5.1.0 (2026-09-14)
+
+### Features
+
+- **Auxiliary brand color palette**: Added 6 auxiliary colors from Huawei Cloud
+  Brand Guidelines Section 2.12: `rosered` (#C40054), `darkred` (#7F0001),
+  `huaweiorange` (#ED6D00), `huaweiyellow` (#FCC800), `huaweigreen` (#62B230),
+  `huaweiblue` (#30B5C5).
+- **Monochrome palette**: Added 6 grayscale colors from Section 2.13:
+  `huaweiblack`, `huaweigray90`, `huaweigray80`, `huaweigray50`,
+  `huaweigray30`, `huaweiwhite`.
+- **Code block border**: Added subtle `codeborder` (#E1E4E8) border to code
+  blocks.
+
+### Changed
+
+- **Callout colors aligned to brand**: Warning border #F57C00 → #ED6D00
+  (Orange PMS 165C), Tip border #2E7D32 → #62B230 (Green PMS 3501C),
+  Info border #1565C0 → #30B5C5 (Blue PMS 2227C). Background tints
+  updated accordingly.
+- **Brand guidelines reference**: Added `brand-guidelines/BRAND-GUIDELINES.md`
+  with extracted key information from the official brand guidelines PDF.
+
 ## v5.0.3 (2026-09-14)
 
 ### Fix

@@ -1,25 +1,60 @@
 %% huawei-colors.sty
 %% =====================================================================
-%%  Huawei brand colors and table rule color.
+%%  Huawei brand colors, auxiliary palette, monochrome scale, and
+%%  table rule color.
+%%  Aligned to HUAWEI CLOUD BRAND GUIDELINES V1.0 (Section 2.11–2.13).
 %%  Extracted from guide.cls v2.0.0 decomposition.
 %% =====================================================================
-\ProvidesPackage{huawei-colors}[2026/08/19 Huawei brand colors]
+\ProvidesPackage{huawei-colors}[2026/09/14 Huawei brand colors]
 %% Depends on: (none — base color definitions)
 
 % =====================================================================
-%  COLORS
+%  CORPORATE COLORS  (Brand Guidelines Section 2.11)
 % =====================================================================
-\definecolor{codebg}{HTML}{F6F8FA}   % code block background
-\definecolor{codetext}{HTML}{1F2328} % code text color
-\definecolor{linkblue}{HTML}{0000FF} % hyperlinks (no underline)
-\definecolor{huaweired}{HTML}{C7000B}% brand red (accents)
-\definecolor{ruleblack}{HTML}{000000} % horizontal rule color (black)
-\definecolor{warningbg}{HTML}{FFF8E1} % warning box background (light amber)
-\definecolor{warningfg}{HTML}{F57C00} % warning box border (amber)
-\definecolor{tipbg}{HTML}{E8F5E9}     % tip box background (light green)
-\definecolor{tipfg}{HTML}{2E7D32}     % tip box border (green)
-\definecolor{infobg}{HTML}{E3F2FD}    % info box background (light blue)
-\definecolor{infofg}{HTML}{1565C0}    % info box border (blue)
+\definecolor{huaweired}{HTML}{C7000B}  % Huawei Red (PMS 185C) — primary brand color
+\definecolor{ruleblack}{HTML}{000000}   % horizontal rule color (black)
+
+% =====================================================================
+%  AUXILIARY BRAND COLORS  (Brand Guidelines Section 2.12)
+% =====================================================================
+\definecolor{rosered}{HTML}{C40054}      % Rose Red (PMS 7636)
+\definecolor{darkred}{HTML}{7F0001}      % Dark Red (PMS 483C)
+\definecolor{huaweiorange}{HTML}{ED6D00} % Orange (PMS 165C)
+\definecolor{huaweiyellow}{HTML}{FCC800} % Yellow (PMS 7406C)
+\definecolor{huaweigreen}{HTML}{62B230}  % Green (PMS 3501C)
+\definecolor{huaweiblue}{HTML}{30B5C5}   % Blue (PMS 2227C)
+
+% =====================================================================
+%  MONOCHROME PALETTE  (Brand Guidelines Section 2.13 gray scale)
+% =====================================================================
+\definecolor{huaweiblack}{HTML}{000000}  % 0% brightness (PMS 426C)
+\definecolor{huaweigray90}{HTML}{E5E5E5} % 90% brightness
+\definecolor{huaweigray80}{HTML}{CCCCCC} % 80% brightness
+\definecolor{huaweigray50}{HTML}{808080} % 50% brightness (mid gray)
+\definecolor{huaweigray30}{HTML}{4D4D4D} % 30% brightness
+\definecolor{huaweiwhite}{HTML}{FFFFFF}  % 100% brightness
+
+% =====================================================================
+%  CODE BLOCK COLORS  (aligned to monochrome palette)
+% =====================================================================
+\definecolor{codebg}{HTML}{F6F8FA}      % ~95% gray — code block background
+\definecolor{codetext}{HTML}{1F2328}    % ~12% gray — code text color
+\definecolor{codeborder}{HTML}{E1E4E8}  % ~88% gray — subtle code block border
+
+% =====================================================================
+%  HYPERLINK COLOR
+% =====================================================================
+\definecolor{linkblue}{HTML}{0000FF}    % hyperlinks (no underline)
+
+% =====================================================================
+%  CALLOUT BOX COLORS  (aligned to auxiliary brand colors)
+% =====================================================================
+\definecolor{warningbg}{HTML}{FFF3E0}   % warning box background (light orange tint)
+\definecolor{warningfg}{HTML}{ED6D00}   % warning box border (Orange, PMS 165C)
+\definecolor{tipbg}{HTML}{E8F5E9}       % tip box background (light green tint)
+\definecolor{tipfg}{HTML}{62B230}       % tip box border (Green, PMS 3501C)
+\definecolor{infobg}{HTML}{E0F7FA}      % info box background (light blue tint)
+\definecolor{infofg}{HTML}{30B5C5}      % info box border (Blue, PMS 2227C)
 
 % Table rules in Huawei red
 \arrayrulecolor{huaweired}
