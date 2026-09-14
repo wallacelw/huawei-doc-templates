@@ -61,7 +61,7 @@ def log_warn(msg):
     print(f"WARNING: {msg}", file=sys.stderr)
 
 
-def add_or_get_paragraph_style(doc, name, base_style=None):
+def add_or_get_paragraph_style(doc, name):
     """Get an existing paragraph style or create a new one."""
     try:
         return doc.styles[name]
@@ -69,7 +69,7 @@ def add_or_get_paragraph_style(doc, name, base_style=None):
         return doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
 
 
-def add_or_get_character_style(doc, name, base_style=None):
+def add_or_get_character_style(doc, name):
     """Get an existing character style or create a new one."""
     try:
         return doc.styles[name]
@@ -90,50 +90,13 @@ def set_cell_shading(style, color_hex):
     pPr.append(shd)
 
 
-def set_left_border(style, color_hex, size_pt=3):
-    """Add a left paragraph border via OXML (pPr/pBdr/left)."""
-    color_hex = color_hex.replace("#", "")
-    size_eighth_pt = int(size_pt * 8)  # Word uses eighth-points
-    pPr = style.element.get_or_add_pPr()
-    # Remove existing pBdr
-    for existing in pPr.findall(qn("w:pBdr")):
-        pPr.remove(existing)
-    pBdr = parse_xml(
-        f'<w:pBdr {nsdecls("w")}>'
-        f'  <w:left w:val="single" w:sz="{size_eighth_pt}" '
-        f'w:space="4" w:color="{color_hex}"/>'
-        f'</w:pBdr>'
-    )
-    pPr.append(pBdr)
-
-
-def set_bottom_border(style, color_hex, size_pt=1.5):
-    """Add a bottom paragraph border via OXML (pPr/pBdr/bottom)."""
-    color_hex = color_hex.replace("#", "")
-    size_eighth_pt = int(size_pt * 8)
-    pPr = style.element.get_or_add_pPr()
-    for existing in pPr.findall(qn("w:pBdr")):
-        pPr.remove(existing)
-    pBdr = parse_xml(
-        f'<w:pBdr {nsdecls("w")}>'
-        f'  <w:bottom w:val="single" w:sz="{size_eighth_pt}" '
-        f'w:space="1" w:color="{color_hex}"/>'
-        f'</w:pBdr>'
-    )
-    # Insert before spacing (OOXML order: pBdr before spacing)
-    spacing = pPr.find(qn("w:spacing"))
-    if spacing is not None:
-        spacing.addprevious(pBdr)
-    else:
-        pPr.append(pBdr)
-
-
-def set_paragraph_border(style, side, size_str, color_hex):
+def set_paragraph_border(style, side, size_str, color_hex, space="1"):
     """Add a paragraph border via OXML (pPr/pBdr/<side>).
 
     side: 'bottom', 'top', 'left', 'right'
     size_str: e.g. '1.5pt' — parsed to eighth-points for w:sz
     color_hex: e.g. '000000'
+    space: border space value (default "1" for most borders; "4" for callout left borders)
     """
     color_hex = color_hex.replace("#", "")
     size_pt = float(size_str.replace("pt", ""))
@@ -144,10 +107,19 @@ def set_paragraph_border(style, side, size_str, color_hex):
     pBdr = parse_xml(
         f'<w:pBdr {nsdecls("w")}>'
         f'  <w:{side} w:val="single" w:sz="{size_eighth_pt}" '
-        f'w:space="1" w:color="{color_hex}"/>'
+        f'w:space="{space}" w:color="{color_hex}"/>'
         f'</w:pBdr>'
     )
     pPr.append(pBdr)
+
+
+def set_left_border(style, color_hex, size_pt=3):
+    """Add a left paragraph border via OXML (pPr/pBdr/left).
+
+    Delegates to set_paragraph_border with space="4" for callout-style
+    left borders (wider offset from paragraph edge).
+    """
+    set_paragraph_border(style, "left", f"{size_pt}pt", color_hex, space="4")
 
 
 def set_left_indent(style, cm_value):
@@ -230,39 +202,10 @@ def set_theme_fonts(doc, body_font):
                         rfonts.set(qn(f"w:{attr}"), body_font)
 
 
-def fix_generated_docx(docx_path):
-    """Post-process a pandoc-generated DOCX to fix heading styles.
+# ── Helper functions for fix_generated_docx ────────────────────────────────
 
-    Pandoc overrides the reference doc's Heading styles with its own defaults
-    (blue accent1 color, no border). This fixes them to match the PDF:
-    near-black text, red bottom border on H1.
-
-    Bypasses python-docx entirely — modifies styles.xml in the zip directly,
-    because python-docx's save() overwrites any part blob modifications.
-
-    Raises RuntimeError if expected XML elements are missing (pandoc output
-    structure has changed) or if pandoc version is outside supported range.
-    """
-    check_pandoc_version()
-    import zipfile, shutil
-    W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-
-    with zipfile.ZipFile(docx_path, 'r') as z:
-        styles_xml = z.read('word/styles.xml')
-
-    root = etree.fromstring(styles_xml)
-
-    # Remove duplicate styleIds (keep first occurrence, remove subsequent)
-    # python-docx's BabelFish lookup can create duplicates; this ensures a clean styles.xml
-    seen_ids = set()
-    for s in root.findall(f"{{{W_NS}}}style"):
-        sid = s.get(f"{{{W_NS}}}styleId")
-        if sid:
-            if sid in seen_ids:
-                root.remove(s)
-            else:
-                seen_ids.add(sid)
-
+def _fix_heading_styles(root, W_NS):
+    """Fix Heading1-4 styles: color, font, size, spacing, borders, keep rules."""
     for heading_id in ['Heading1', 'Heading2', 'Heading3', 'Heading4']:
         style = None
         for s in root.findall(f"{{{W_NS}}}style"):
@@ -411,7 +354,9 @@ def fix_generated_docx(docx_path):
                         rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
                 break
 
-    # Fix Title style (cover page): 36pt, near-black, HarmonyOS Sans
+
+def _fix_title_style(root, W_NS):
+    """Fix Title style (cover page): 36pt, near-black, HarmonyOS Sans."""
     title_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "Title":
@@ -459,7 +404,9 @@ def fix_generated_docx(docx_path):
             "pandoc output structure may have changed"
         )
 
-    # Fix VerbatimChar style: Consolas → Cascadia Code, 11pt → 10pt (matches PDF)
+
+def _fix_verbatim_style(root, W_NS):
+    """Fix VerbatimChar style: Consolas → Cascadia Code, 11pt → 10pt (matches PDF)."""
     verbatim_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "VerbatimChar":
@@ -492,7 +439,9 @@ def fix_generated_docx(docx_path):
             "pandoc output structure may have changed"
         )
 
-    # Fix SourceCode style: add left/right indentation + szCs (matches PDF code block)
+
+def _fix_source_code_style(root, W_NS):
+    """Fix SourceCode style: add left/right indentation + szCs (matches PDF code block)."""
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "SourceCode":
             pPr = s.find(f"{{{W_NS}}}pPr")
@@ -521,6 +470,9 @@ def fix_generated_docx(docx_path):
             szCs.set(f"{{{W_NS}}}val", "20")
             break
 
+
+def _fix_callout_spacing(root, W_NS):
+    """Fix callout/code spacing, justification, and BodyText/FirstParagraph spacing."""
     # Fix callout and code style spacing: 6pt before, 6pt after (matches PDF)
     for sid in ['warning', 'tip', 'infobox', 'SourceCode']:
         for s in root.findall(f"{{{W_NS}}}style"):
@@ -570,11 +522,13 @@ def fix_generated_docx(docx_path):
                 spacing.set(f"{{{W_NS}}}before", "0")
                 break
 
-    # Fix all styles: add explicit font names alongside theme references
-    # Prevents Word from falling back to Cambria when HarmonyOS Sans
-    # is not installed (theme refs alone don't provide a fallback name)
-    # NOTE: rPr and rFonts are genuinely optional here — some styles have
-    # only pPr (no run properties). Skip with warning if missing.
+
+def _fix_font_fallbacks(root, W_NS):
+    """Add explicit font names alongside theme references for all styles.
+
+    Prevents Word from falling back to Cambria when HarmonyOS Sans
+    is not installed (theme refs alone don't provide a fallback name).
+    """
     for style in root.findall(f"{{{W_NS}}}style"):
         style_id = style.get(f"{{{W_NS}}}styleId", "<unnamed>")
         rPr = style.find(f"{{{W_NS}}}rPr")
@@ -590,7 +544,9 @@ def fix_generated_docx(docx_path):
         if rFonts.get(f"{{{W_NS}}}hAnsiTheme") and not rFonts.get(f"{{{W_NS}}}hAnsi"):
             rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
 
-    # Fix Normal style: 10.5pt (sz=21) to match PDF body text (10.5pt/14pt leading)
+
+def _fix_normal_style(root, W_NS):
+    """Fix Normal style: 10.5pt (sz=21) to match PDF body text (10.5pt/14pt leading)."""
     normal_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "Normal":
@@ -621,7 +577,9 @@ def fix_generated_docx(docx_path):
             "pandoc output structure may have changed"
         )
 
-    # Fix docDefaults: 10.5pt (sz=21), spacing after=80 (4pt parskip)
+
+def _fix_doc_defaults(root, W_NS):
+    """Fix docDefaults: 10.5pt (sz=21), spacing after=80 (4pt parskip)."""
     docDefaults = root.find(f"{{{W_NS}}}docDefaults")
     if docDefaults is None:
         raise RuntimeError(
@@ -669,8 +627,12 @@ def fix_generated_docx(docx_path):
     spacing.set(f"{{{W_NS}}}line", "280")
     spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
 
-    # ── Add/fix Caption style for figure/table captions ─────────────────
-    # PDF: \small (9pt), bold label, centered — ensure properties even if style exists
+
+def _add_caption_style(root, W_NS):
+    """Add/fix Caption style for figure/table captions.
+
+    PDF: \\small (9pt), bold label, centered — ensure properties even if style exists.
+    """
     caption_style = None
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "Caption":
@@ -715,8 +677,12 @@ def fix_generated_docx(docx_path):
             elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
         elem.set(f"{{{W_NS}}}val", "18")  # 9pt (matches PDF \small)
 
-    # ── Add/fix badge character style (red pill, white bold text) ───────
-    # PDF: bg=huaweired, white bold footnotesize (8pt)
+
+def _add_badge_style(root, W_NS):
+    """Add/fix badge character style (red pill, white bold text).
+
+    PDF: bg=huaweired, white bold footnotesize (8pt).
+    """
     badge_style = None
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "badge":
@@ -755,7 +721,9 @@ def fix_generated_docx(docx_path):
             elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
         elem.set(f"{{{W_NS}}}val", "16")  # 8pt
 
-    # ── Add TOC1/TOC2/TOC3 styles (Word built-in TOC entry styles) ───────
+
+def _fix_toc_styles(root, W_NS):
+    """Fix TOC1/TOC2/TOC3 + TOCHeading styles (Word built-in TOC entry styles)."""
     toc_configs = [
         ("TOC1", "0",   "9"),
         ("TOC2", "420", "9"),
@@ -782,7 +750,7 @@ def fix_generated_docx(docx_path):
             sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
             sp.set(f"{{{W_NS}}}after", "40")  # 2pt
 
-    # ── Style TOC heading: 22pt bold + bottom rule (matches PDF) ──────────
+    # Style TOC heading: 22pt bold + bottom rule (matches PDF)
     toc_heading = None
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "TOCHeading":
@@ -839,14 +807,13 @@ def fix_generated_docx(docx_path):
     bottom.set(f"{{{W_NS}}}space", "1")
     bottom.set(f"{{{W_NS}}}color", "000000")
 
-    modified_xml = etree.tostring(
-        root, xml_declaration=True, encoding="UTF-8", standalone=True
-    )
 
-    # Replace styles.xml + numbering.xml in the DOCX zip
-    # (settings.xml left untouched — updateFields triggers a Word security prompt)
+def _fix_list_indentation(docx_path, W_NS):
+    """Fix list indentation in numbering.xml (match PDF 1.6em/1.8em).
 
-    # ── Fix list indentation in numbering.xml (match PDF 1.6em/1.8em) ────
+    Returns modified numbering.xml bytes, or None if numbering.xml is absent.
+    """
+    import zipfile
     modified_numbering = None
     with zipfile.ZipFile(docx_path, 'r') as z:
         if 'word/numbering.xml' in z.namelist():
@@ -881,8 +848,64 @@ def fix_generated_docx(docx_path):
                 "word/numbering.xml not found in DOCX — "
                 "list indentation fix skipped (document may have no lists)"
             )
+    return modified_numbering
 
-    # ── Footer with page number (pandoc doesn't carry over reference footer) ─
+
+# ── Main fix function ─────────────────────────────────────────────────────
+
+def fix_generated_docx(docx_path):
+    """Post-process a pandoc-generated DOCX to fix heading styles.
+
+    Pandoc overrides the reference doc's Heading styles with its own defaults
+    (blue accent1 color, no border). This fixes them to match the PDF:
+    near-black text, red bottom border on H1.
+
+    Bypasses python-docx entirely — modifies styles.xml in the zip directly,
+    because python-docx's save() overwrites any part blob modifications.
+
+    Raises RuntimeError if expected XML elements are missing (pandoc output
+    structure has changed) or if pandoc version is outside supported range.
+    """
+    check_pandoc_version()
+    import zipfile, shutil
+    W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+    with zipfile.ZipFile(docx_path, 'r') as z:
+        styles_xml = z.read('word/styles.xml')
+
+    root = etree.fromstring(styles_xml)
+
+    # Remove duplicate styleIds (keep first occurrence, remove subsequent)
+    # python-docx's BabelFish lookup can create duplicates; this ensures a clean styles.xml
+    seen_ids = set()
+    for s in root.findall(f"{{{W_NS}}}style"):
+        sid = s.get(f"{{{W_NS}}}styleId")
+        if sid:
+            if sid in seen_ids:
+                root.remove(s)
+            else:
+                seen_ids.add(sid)
+
+    _fix_heading_styles(root, W_NS)
+    _fix_title_style(root, W_NS)
+    _fix_verbatim_style(root, W_NS)
+    _fix_source_code_style(root, W_NS)
+    _fix_callout_spacing(root, W_NS)
+    _fix_font_fallbacks(root, W_NS)
+    _fix_normal_style(root, W_NS)
+    _fix_doc_defaults(root, W_NS)
+    _add_caption_style(root, W_NS)
+    _add_badge_style(root, W_NS)
+    _fix_toc_styles(root, W_NS)
+
+    modified_xml = etree.tostring(
+        root, xml_declaration=True, encoding="UTF-8", standalone=True
+    )
+
+    # Fix list indentation in numbering.xml
+    modified_numbering = _fix_list_indentation(docx_path, W_NS)
+
+    # Footer with page number (pandoc doesn't carry over reference footer)
     footer_xml = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
         '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'

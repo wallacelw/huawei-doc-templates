@@ -84,7 +84,7 @@ local config = {
   cover_logo = "huawei-logo-cover.png",          -- hardcoded for technical
   warn_setheaderlogo = false,
   -- Section env handlers created via function to get correct closures
-  extra_env_handlers = function(L, parse_latex_blocks)
+  extra_env_handlers = function(L, parse_latex_blocks, preamble)
     -- Factory: returns a handler for a technical section environment.
     -- level 1 = \section (problem, rootcauseanalysis, etc.)
     -- level 2 = \subsection (impact, backupdata, etc.)

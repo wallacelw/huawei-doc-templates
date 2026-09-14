@@ -1,0 +1,12 @@
+```{=latex}
+\testresultbadge{Pass}
+```
+```{=latex}
+\testresultbadge{Fail}
+```
+```{=latex}
+\testresultbadge{Blocked}
+```
+```{=latex}
+\testresultbadge{Untested}
+```

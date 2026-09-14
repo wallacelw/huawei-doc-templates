@@ -1077,6 +1077,14 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**5.0.0**  *2026-09-13*
+
+Major refactoring: extracted shared modules (huawei-titles, huawei-toc,
+huawei-cover), renamed `\lg@guidetitle` to `\lg@doctitle`, unified title
+API with `\setdoctitle`, decomposed `docx_fix.py`
+(680$\to$`<!-- -->`{=html}84 lines), added testbook unit tests, fixed
+build system error handling.
+
 **4.7.0**  *2026-09-13*
 
 Testcase headings now formatted as captions (like figures/tables): bold

@@ -19,27 +19,19 @@
 % listings processes character by character -> xdvipdfmx writes each
 % one as a separate text operation -> PDF readers insert spaces.
 % fancyvrb typesets line by line -> contiguous text in PDF -> clean copy.
-\DefineVerbatimEnvironment{code}{Verbatim}
-{fontsize=\fontsize{10}{13}\selectfont, formatcom=\codefont\color{codetext},
- frame=none,
- backgroundcolor=codebg,
- xleftmargin=0.7cm, xrightmargin=0.5cm,
- breaklines=true, breakanywhere=true,
- breaksymbolleft={}, breaksymbolright={},
- breakanywheresymbolpre={}, breakanywheresymbolpost={},
-}
+
+% Shared fancyvrb options for code blocks (used by code environment and \codefile).
+\newcommand{\lg@codeopts}{fontsize=\fontsize{10}{13}\selectfont, formatcom=\codefont\color{codetext}, frame=none, backgroundcolor=codebg, xleftmargin=0.7cm, xrightmargin=0.5cm, breaklines=true, breakanywhere=true, breaksymbolleft={}, breaksymbolright={}, breakanywheresymbolpre={}, breakanywheresymbolpost={}}
+
+% Expand \lg@codeopts before passing to fancyvrb (key-value scanner
+% requires pre-expanded options; macros are not expanded during scanning).
+\def\lg@code@def{\DefineVerbatimEnvironment{code}{Verbatim}}
+\expandafter\lg@code@def\expandafter{\lg@codeopts}
 
 % Code block from external file
 \newcommand{\codefile}[2][]{%
   \IfFileExists{#2}{%
-    \VerbatimInput[fontsize=\fontsize{10}{13}\selectfont,
-     formatcom=\codefont\color{codetext},
-     frame=none,
-     backgroundcolor=codebg,
-     xleftmargin=0.7cm, xrightmargin=0.5cm,
-     breaklines=true, breakanywhere=true,
-     breaksymbolleft={}, breaksymbolright={},
-     breakanywheresymbolpre={}, breakanywheresymbolpost={}]{#2}%
+    \expandafter\VerbatimInput\expandafter[\lg@codeopts]{#2}%
   }{\PackageWarning{huawei-code}{Code file "#2" not found.
     Check the path (relative to TEXINPUTS) and that the file exists.}}%
 }

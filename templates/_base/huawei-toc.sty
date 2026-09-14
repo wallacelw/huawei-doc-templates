@@ -1,0 +1,34 @@
+%% huawei-toc.sty — Shared TOC configuration for Huawei templates.
+%% Provides \maketoc command with Huawei-styled TOC.
+%% Depends on: tocloft (loaded by class file), \if@portuguese (defined by class file).
+\ProvidesPackage{huawei-toc}[2026/09/14 Huawei TOC configuration]
+
+% =====================================================================
+%  TABLE OF CONTENTS — right-aligned title + rule; dotted leaders
+% =====================================================================
+\renewcommand{\contentsname}{\lg@toc}
+\renewcommand{\cfttoctitlefont}{\hfill\normalfont\bfseries\fontsize{22}{26}\selectfont}
+\renewcommand{\cftaftertoctitle}{\par\vspace{2pt}%
+  {\color{ruleblack}\hrule height 0.5pt}\vspace{6pt}}
+% Level 1: bold 12pt
+\renewcommand{\cftsecfont}{\bfseries\fontsize{12}{15}\selectfont}
+\renewcommand{\cftsecpagefont}{\bfseries\fontsize{12}{15}\selectfont}
+\renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}}
+% Levels 2 and 3: normal 10pt
+\renewcommand{\cftsubsecfont}{\fontsize{10}{13}\selectfont}
+\renewcommand{\cftsubsecpagefont}{\fontsize{10}{13}\selectfont}
+\renewcommand{\cftsubsubsecfont}{\fontsize{10}{13}\selectfont}
+\renewcommand{\cftsubsubsecpagefont}{\fontsize{10}{13}\selectfont}
+% TOC indents starting at the margin (ind left=0)
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsubsecindent}{1.2em}
+\setlength{\cftsubsubsecindent}{2.4em}
+\setlength{\cftbeforesecskip}{4pt}
+\renewcommand{\cftdotsep}{1.2}
+% show dotted leaders also at level 1
+\setcounter{tocdepth}{3}
+
+% Convenience command for TOC (resets leftskip)
+\newcommand{\maketoc}{{\leftskip=0pt\relax\pagestyle{plain}\thispagestyle{plain}\tableofcontents}\clearpage}
+
+\endinput

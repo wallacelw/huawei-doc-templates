@@ -350,7 +350,7 @@ generate_pandoc_format() {
     fi
     echo "  Generating ${label}..."
     local err
-    err=$(cd "$PROJECT_DIR" && export TZ="America/Sao_Paulo" && pandoc -f latex+raw_tex \
+    err=$(cd "$PROJECT_DIR" && export TZ="${TZ:-America/Sao_Paulo}" && pandoc -f latex+raw_tex \
         --lua-filter="$LUA_FILTER" \
         --resource-path=".:${REPO_ROOT}/templates/${TEMPLATE}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
         --number-sections \
@@ -381,6 +381,7 @@ generate_docx() {
     if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.docx" ]; then
         if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/${BASENAME}.docx" 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2
+            RESULTS_FAIL+=("DOCX:post-processing failed for $TEMPLATE")
         fi
     fi
 }

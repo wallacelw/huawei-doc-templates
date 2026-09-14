@@ -1,5 +1,5 @@
 --- pandoc-common.lua
---- Shared factory for Huawei Pandoc Lua filters (guide + technical).
+--- Shared factory for Huawei Pandoc Lua filters (guide + technical + testbook).
 --- Translates custom commands and environments to DOCX, Markdown, and HTML5.
 ---
 --- This module exports a make_filter(config) factory function.
@@ -12,14 +12,18 @@
 
 local function make_filter(config)
   -- config fields:
-  --   class_name         : string  — "guide" or "technical" (for \documentclass match)
+  --   class_name         : string  — "guide", "technical", or "testbook" (for \documentclass match)
   --   labels             : table   — { en = {...}, pt = {...} } label strings
   --   strip_commands     : table   — command names to strip (set as keys = true)
   --   command_map        : table   — { title = "...", version = "...", date = "..." }
   --   cover_text         : string|nil — if nil, read from preamble.commands.setcovertext
   --   cover_logo         : string|nil — if nil, read from preamble.commands.setcoverlogo
-  --   warn_setheaderlogo : boolean — guide warns, technical doesn't
+  --   warn_setheaderlogo : boolean — guide and testbook warn, technical doesn't
   --   extra_env_handlers : table   — env_name → handler function (technical's section envs)
+
+  -- Constants
+  local DOCX_CONTENT_WIDTH = 9638  -- A4 with 2cm L/R margins (twips)
+  local DOCX_PAGE_BREAK = pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>')
 
   -- Language labels
   local labels = config.labels
@@ -39,6 +43,10 @@ local function make_filter(config)
 
   local function trim(s)
     return (s:gsub("^%s+", ""):gsub("%s+$", ""))
+  end
+
+  local function esc_xml(s)
+    return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">","&gt;")
   end
 
   local function read_file(path)
@@ -277,24 +285,25 @@ local function make_filter(config)
     infobox = { role = "note",   ["aria-label"] = "Info" },
   }
 
+  --- Callout colors: border, background, label color
+  local callout_colors = {
+    warning = {border = "F57C00", bg = "FFF8E1", label_color = "C7000B"},
+    tip     = {border = "2E7D32", bg = "E8F5E9", label_color = "2E7D32"},
+    infobox = {border = "1565C0", bg = "E3F2FD", label_color = "1565C0"},
+  }
+
   --- Create a format-appropriate callout box.
   local function make_callout(cls, label, content)
     local label_para = pandoc.Para({pandoc.Strong({pandoc.Str(label)}), pandoc.Str(" ")})
 
     if FORMAT:match("docx") then
-      -- Callout colors: border, background, label color
-      local callout_colors = {
-        warning = {border = "F57C00", bg = "FFF8E1", label_color = "C7000B"},
-        tip     = {border = "2E7D32", bg = "E8F5E9", label_color = "2E7D32"},
-        infobox = {border = "1565C0", bg = "E3F2FD", label_color = "1565C0"},
-      }
       local c = callout_colors[cls] or callout_colors.infobox
-      local esc_label = label:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+      local esc_label = esc_xml(label)
 
       -- Single-cell table: thick left border only (matches PDF leftrule=3pt, boxrule=0pt)
       -- Cell padding: L/R=8pt (160tw), T/B=6pt (120tw) — matches PDF inner padding
       local open_xml = string.format(
-        '<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>' ..
+        '<w:tbl><w:tblPr><w:tblW w:w="' .. DOCX_CONTENT_WIDTH .. '" w:type="dxa"/>' ..
         '<w:tblLayout w:type="fixed"/>' ..
         '<w:tblBorders>' ..
         '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' ..
@@ -304,7 +313,7 @@ local function make_filter(config)
         '</w:tblBorders>' ..
         '<w:tblCellMar><w:top w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/>' ..
         '<w:bottom w:w="120" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tblCellMar>' ..
-        '</w:tblPr><w:tr><w:tc><w:tcPr><w:tcW w:w="9638" w:type="dxa"/>' ..
+        '</w:tblPr><w:tr><w:tc><w:tcPr><w:tcW w:w="' .. DOCX_CONTENT_WIDTH .. '" w:type="dxa"/>' ..
         '<w:shd w:val="clear" w:color="auto" w:fill="%s"/></w:tcPr>' ..
         '<w:p><w:r><w:rPr><w:rFonts w:ascii="HarmonyOS Sans" w:hAnsi="HarmonyOS Sans"/>' ..
         '<w:b/><w:color w:val="%s"/><w:sz w:val="21"/><w:szCs w:val="21"/></w:rPr>' ..
@@ -555,11 +564,8 @@ local function make_filter(config)
       if FORMAT:match("markdown") then return pandoc.RawBlock("markdown", md_table) end
 
       if FORMAT:match("docx") then
-        local function esc(t)
-          return t:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-        end
         local parts = {}
-        parts[#parts+1] = '<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>' ..
+        parts[#parts+1] = '<w:tbl><w:tblPr><w:tblW w:w="' .. DOCX_CONTENT_WIDTH .. '" w:type="dxa"/>' ..
           '<w:tblLayout w:type="fixed"/><w:tblBorders>' ..
           '<w:top w:val="single" w:sz="4" w:space="0" w:color="C7000B"/>' ..
           '<w:left w:val="single" w:sz="4" w:space="0" w:color="C7000B"/>' ..
@@ -576,7 +582,7 @@ local function make_filter(config)
             '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>' ..
             '<w:r><w:rPr><w:rFonts w:ascii="HarmonyOS Sans" w:hAnsi="HarmonyOS Sans"/>' ..
             '<w:b/><w:color w:val="FFFFFF"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>' ..
-            '<w:t>' .. esc(cell_to_md(ct)) .. '</w:t></w:r></w:p></w:tc>'
+            '<w:t>' .. esc_xml(cell_to_md(ct)) .. '</w:t></w:r></w:p></w:tc>'
         end
         parts[#parts+1] = '</w:tr>'
         for i, row in ipairs(rows) do
@@ -587,7 +593,7 @@ local function make_filter(config)
               '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>' ..
               '<w:r><w:rPr><w:rFonts w:ascii="HarmonyOS Sans" w:hAnsi="HarmonyOS Sans"/>' ..
               '<w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>' ..
-              '<w:t>' .. esc(cell_to_md(ct)) .. '</w:t></w:r></w:p></w:tc>'
+              '<w:t>' .. esc_xml(cell_to_md(ct)) .. '</w:t></w:r></w:p></w:tc>'
           end
           parts[#parts+1] = '</w:tr>'
         end
@@ -617,14 +623,14 @@ local function make_filter(config)
     if FORMAT:match("docx") then
       sec_h1 = sec_h1 + 1; sec_h2 = 0; sec_h3 = 0; sec_h4 = 0
       local section = tostring(sec_h1)
-      local heading_text = L("changelog"):gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+      local heading_text = esc_xml(L("changelog"))
       local bid = bookmark_seq
       bookmark_seq = bookmark_seq + 1
-      blocks:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+      blocks:insert(DOCX_PAGE_BREAK)
       blocks:insert(pandoc.RawBlock("openxml", string.format(
         '<w:p><w:pPr><w:pStyle w:val="Heading1"/>' ..
         '<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="2" w:color="C7000B"/></w:pBdr>' ..
-        '<w:tabs><w:tab w:val="right" w:pos="9638"/></w:tabs></w:pPr>' ..
+        '<w:tabs><w:tab w:val="right" w:pos="' .. DOCX_CONTENT_WIDTH .. '"/></w:tabs></w:pPr>' ..
         '<w:bookmarkStart w:id="%d" w:name="sec-changelog"/>' ..
         '<w:r><w:rPr><w:sz w:val="112"/><w:szCs w:val="112"/></w:rPr>' ..
         '<w:t xml:space="preserve">%s</w:t></w:r>' ..
@@ -664,10 +670,10 @@ local function make_filter(config)
         '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="000000"/></w:pBdr>' ..
         '<w:spacing w:after="120"/></w:pPr></w:p>'))
       for _, entry in ipairs(entries) do
-        local esc_ver = entry.version:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-        local esc_date = entry.date:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+        local esc_ver = esc_xml(entry.version)
+        local esc_date = esc_xml(entry.date)
         blocks:insert(pandoc.RawBlock("openxml",
-          '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="9638"/></w:tabs></w:pPr>' ..
+          '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="' .. DOCX_CONTENT_WIDTH .. '"/></w:tabs></w:pPr>' ..
           '<w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">' .. esc_ver .. '</w:t></w:r>' ..
           '<w:r><w:tab/></w:r>' ..
           '<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">' .. esc_date .. '</w:t></w:r>' ..
@@ -768,7 +774,7 @@ local function make_filter(config)
             {pandoc.Para({pandoc.Str(mt)})},
             pandoc.Attr("", {}, {["custom-style"] = "CoverMeta"})))
       end
-      cb:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+      cb:insert(DOCX_PAGE_BREAK)
       for i = #cb, 1, -1 do doc.blocks:insert(1, cb[i]) end
       -- Word TOC field (right-aligned 22pt heading + TOC + page break)
       local toc_title = L("toc")
@@ -788,7 +794,7 @@ local function make_filter(config)
         '<w:fldChar w:fldCharType="end"/>' ..
         '</w:r></w:p>' ..
         '</w:sdtContent></w:sdt>'))
-      toc_blocks:insert(pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+      toc_blocks:insert(DOCX_PAGE_BREAK)
       for i = #toc_blocks, 1, -1 do doc.blocks:insert(#cb + 1, toc_blocks[i]) end
       doc.meta.date = nil
     end
@@ -918,10 +924,10 @@ local function make_filter(config)
       elseif il.t == "Code" then title = title .. il.text
       end
     end
-    title = title:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-    section = section:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+    title = esc_xml(title)
+    section = esc_xml(section)
 
-    local content_width = 9638
+    local content_width = DOCX_CONTENT_WIDTH
     local bname = el.identifier or ""
     local bid = bookmark_seq
     bookmark_seq = bookmark_seq + 1
@@ -954,7 +960,7 @@ local function make_filter(config)
 
       if sec_h1 > 1 then
         return pandoc.Blocks({
-          pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'),
+          DOCX_PAGE_BREAK,
           pandoc.RawBlock("openxml", xml)
         })
       end
@@ -1206,12 +1212,6 @@ local function make_filter(config)
     RawInline = RawInline_fn,
     Header = Header_fn,
     CodeBlock = CodeBlock_fn,
-    -- Export helpers that wrappers might need
-    parse_latex_blocks = parse_latex_blocks,
-    parse_latex_inlines = parse_latex_inlines,
-    L = L,
-    preamble = preamble,
-    labels = labels,
   }
 end
 

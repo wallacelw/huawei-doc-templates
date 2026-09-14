@@ -3,19 +3,19 @@
 %%  LaTeX class for Huawei Cloud technical reports
 %%  Requires XeLaTeX or LuaLaTeX (due to fontspec).
 %%
-%%  v2.15.0 — Rebuilt as LaTeX-based template (replaces python-docx approach).
+%%  Rebuilt as LaTeX-based template (replaces python-docx approach).
 %%    Loads all shared modules from templates/_base/:
 %%    huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
 %%    huawei-code, huawei-callouts, huawei-images, huawei-changelog,
-%%    huawei-shared.
+%%    huawei-titles, huawei-toc, huawei-shared.
 %%
 %%  Provides a 5-section structure for formal incident/analysis reports:
 %%    1. Problem Description and Impact
 %%    2. Root Cause Analysis
 %%    3. Root Cause
 %%    4. Trigger Condition
-%%  5. Workaround and Impact (with 6 subsections)
-%%    6. Changelog (optional)
+%%    5. Workaround and Impact (with 6 subsections)
+%%    Plus an optional Changelog.
 %%
 %%  Class options:
 %%    portuguese  -> uses Portuguese for predefined labels and babel.
@@ -30,7 +30,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/13 Huawei Technical Report template v4.7.0]
+\ProvidesClass{technical}[2026/09/13 Huawei Technical Report template v5.0.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -73,6 +73,7 @@
 \RequirePackage{hyperref}
 \RequirePackage{caption}
 \RequirePackage{float}
+\RequirePackage{longtable}
 
 % ---- Shared modules (templates/_base/) ------------------------------
 \RequirePackage{huawei-colors}
@@ -84,72 +85,23 @@
 \RequirePackage{huawei-callouts}
 \RequirePackage{huawei-images}
 \RequirePackage{huawei-changelog}
+\RequirePackage{huawei-titles}
+\RequirePackage{huawei-toc}
 \RequirePackage{huawei-shared}
 
-% =====================================================================
-%  TITLES (headings) — same style as guide.cls for consistency
-% =====================================================================
-\setcounter{secnumdepth}{4}
+% ---- Titles (shared) ----------------------------------------------
+% (loaded via huawei-titles)
 
-% --- H1: big number (56pt) left-aligned + 20pt bold right-aligned title + rule
-\titleformat{\section}[block]
-  {\normalfont\bfseries\fontsize{20}{25}\selectfont}
-  {\fontsize{56}{56}\selectfont\thesection}
-  {0pt}
-  {\hfill}
-  [\vspace{2pt}{\color{huaweired}\titlerule[1.5pt]}\vspace{14pt}]
-\titlespacing*{\section}{0pt}{0pt}{30pt}
-% Each \section starts on a new page
-\let\lg@origsection\section
-\renewcommand{\section}{\clearpage\lg@origsection}
-
-% --- H2/H3/H4: regular, decreasing sizes, left-aligned
-\titleformat{\subsection}
-  {\normalfont\fontsize{18}{22}\selectfont}{\thesubsection}{0.4em}{}
-\titlespacing*{\subsection}{0pt}{30pt}{6pt}
-
-\titleformat{\subsubsection}
-  {\normalfont\fontsize{16}{20}\selectfont}{\thesubsubsection}{0.4em}{}
-\titlespacing*{\subsubsection}{0pt}{10pt}{4pt}
-
-\titleformat{\paragraph}[hang]
-  {\normalfont\fontsize{14}{18}\selectfont}{\theparagraph}{0.4em}{}
-\titlespacing*{\paragraph}{0pt}{8pt}{4pt}
-
-% Numbering: 1  /  1.1  /  1.1.1  /  1.1.1.1
-\renewcommand{\thesection}{\arabic{section}}
-\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
-\renewcommand{\theparagraph}{\thesubsubsection.\arabic{paragraph}}
-
-% =====================================================================
-%  TABLE OF CONTENTS — same style as guide.cls
-% =====================================================================
-\renewcommand{\contentsname}{\lg@toc}
-\renewcommand{\cfttoctitlefont}{\hfill\normalfont\bfseries\fontsize{22}{26}\selectfont}
-\renewcommand{\cftaftertoctitle}{\par\vspace{2pt}%
-  {\color{ruleblack}\hrule height 0.5pt}\vspace{6pt}}
-\renewcommand{\cftsecfont}{\bfseries\fontsize{12}{15}\selectfont}
-\renewcommand{\cftsecpagefont}{\bfseries\fontsize{12}{15}\selectfont}
-\renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}}
-\renewcommand{\cftsubsecfont}{\fontsize{10}{13}\selectfont}
-\renewcommand{\cftsubsecpagefont}{\fontsize{10}{13}\selectfont}
-\renewcommand{\cftsubsubsecfont}{\fontsize{10}{13}\selectfont}
-\renewcommand{\cftsubsubsecpagefont}{\fontsize{10}{13}\selectfont}
-\setlength{\cftsecindent}{0pt}
-\setlength{\cftsubsecindent}{1.2em}
-\setlength{\cftsubsubsecindent}{2.4em}
-\setlength{\cftbeforesecskip}{4pt}
-\renewcommand{\cftdotsep}{1.2}
-\setcounter{tocdepth}{3}
-
-\newcommand{\maketoc}{{\leftskip=0pt\relax\pagestyle{plain}\thispagestyle{plain}\tableofcontents}\clearpage}
+% ---- TOC (shared) -------------------------------------------------
+% (loaded via huawei-toc)
 
 % =====================================================================
 %  TECHNICAL REPORT — metadata commands
 % =====================================================================
-\newcommand{\lg@reporttitle}{Technical Report}
-\newcommand{\setreporttitle}[1]{\renewcommand{\lg@reporttitle}{#1}}
+% \lg@reporttitle is an alias for \lg@doctitle (set by \setdoctitle / \setreporttitle)
+\newcommand{\lg@reporttitle}{\lg@doctitle}
+\newcommand{\setreporttitle}[1]{\setdoctitle{#1}}
+\newcommand{\setdoctitle}[1]{\renewcommand{\lg@doctitle}{#1}}
 \newcommand{\lg@reportversion}{}
 \newcommand{\setreportversion}[1]{\renewcommand{\lg@reportversion}{#1}}
 \newcommand{\lg@reportdate}{\today}
@@ -158,10 +110,6 @@
 \newcommand{\setreportscenario}[1]{\renewcommand{\lg@reportscenario}{#1}}
 \newcommand{\lg@reporttype}{Technical Report}
 \newcommand{\setreporttype}[1]{\renewcommand{\lg@reporttype}{#1}}
-
-% Fix: huawei-page.sty references \lg@guidetitle for PDF metadata.
-% Alias it to the report title so technical PDFs don't show "Guide" as pdftitle.
-\renewcommand{\lg@guidetitle}{\lg@reporttitle}
 
 % =====================================================================
 %  LANGUAGE-AWARE SECTION LABELS

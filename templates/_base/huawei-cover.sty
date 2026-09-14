@@ -1,0 +1,59 @@
+%% huawei-cover.sty — Shared cover page layout for Huawei templates.
+%% Provides \makecover with title, logo, cover text, authors, version/date/time.
+%% Used by guide and testbook. Technical has its own cover.
+%% Depends on: \lg@doctitle, \lg@docversion, \lg@docdate (from huawei-changelog.sty),
+%%             \if@showtime, \if@changelog, \if@showauthors (from class file).
+\ProvidesPackage{huawei-cover}[2026/09/14 Huawei cover page]
+
+% =====================================================================
+%  COVER — shared by guide and testbook
+% =====================================================================
+\newcommand{\lg@covertext}{Huawei Technologies CO., LTD}
+\newcommand{\setcovertext}[1]{\renewcommand{\lg@covertext}{#1}}
+\newcommand{\lg@coverlogo}{common-assets/huawei-logo-cover.png}
+\newcommand{\setcoverlogo}[1]{\renewcommand{\lg@coverlogo}{#1}}
+% Compilation time from \time primitive (minutes since midnight, respects TZ)
+% \two@digits is provided by the LaTeX kernel
+\newcount\lg@hour
+\newcount\lg@min
+\newcount\lg@tmp
+\lg@hour=\time
+\divide\lg@hour by 60
+\lg@tmp=\lg@hour
+\multiply\lg@tmp by 60
+\lg@min=\time
+\advance\lg@min by -\lg@tmp
+\newcommand{\lg@covermeta}{%
+  \ifx\lg@docversion\@empty\else\textbf{v\lg@docversion}\fi
+  \ifx\lg@docversion\@empty\else\ifx\lg@docdate\@empty\else\ — \fi\fi
+  \ifx\lg@docdate\@empty\else\lg@docdate\fi
+  \if@showtime\ \two@digits{\lg@hour}:\two@digits{\lg@min}\fi%
+}
+
+\newcommand{\makecover}{%
+  \begingroup
+  \leftskip=0pt\relax
+  \thispagestyle{empty}%
+  \vspace*{2.2cm}%
+  {\centering
+   \fontsize{36}{42}\selectfont\bfseries \lg@doctitle\par}%
+  \vspace{4.5cm}%
+  {\centering
+   \includegraphics[width=3.6cm]{\lg@coverlogo}\par}%
+  \vspace{0.9cm}%
+   {\centering
+    \fontsize{16}{20}\selectfont \lg@covertext\par}%
+   \if@showauthors
+     \ifx\lg@docauthors\@empty\else
+       \vspace{0.3cm}%
+       {\centering
+        \fontsize{12}{14}\selectfont \lg@docauthors\par}%
+     \fi
+   \fi
+   \vspace{0.5cm}%
+   {\centering
+    \fontsize{12}{14}\selectfont \if@changelog\lg@covermeta\fi\par}%
+   \endgroup
+  \clearpage}
+
+\endinput

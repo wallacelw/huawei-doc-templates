@@ -1,0 +1,43 @@
+%% huawei-titles.sty — Shared heading formats for Huawei templates.
+%% Provides \titleformat/\titlespacing for section through paragraph,
+%% section numbering, and \clearpage before \section.
+%% Depends on: titlesec (loaded by class file).
+\ProvidesPackage{huawei-titles}[2026/09/14 Huawei title formatting]
+
+% =====================================================================
+%  TITLES (headings)
+% =====================================================================
+\setcounter{secnumdepth}{4}
+
+% --- H1: big number (56pt) left-aligned + 20pt bold right-aligned title + rule
+\titleformat{\section}[block]
+  {\normalfont\bfseries\fontsize{20}{25}\selectfont}
+  {\fontsize{56}{56}\selectfont\thesection}
+  {0pt}
+  {\hfill}
+  [\vspace{2pt}{\color{huaweired}\titlerule[1.5pt]}\vspace{14pt}]
+\titlespacing*{\section}{0pt}{0pt}{30pt} % before 0 / after 30pt
+% Each \section (chapter) starts on a new page
+\let\lg@origsection\section
+\renewcommand{\section}{\clearpage\lg@origsection}
+
+% --- H2/H3/H4: regular, decreasing sizes, left-aligned
+\titleformat{\subsection}
+  {\normalfont\fontsize{18}{22}\selectfont}{\thesubsection}{0.4em}{}
+\titlespacing*{\subsection}{0pt}{30pt}{6pt}
+
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{16}{20}\selectfont}{\thesubsubsection}{0.4em}{}
+\titlespacing*{\subsubsection}{0pt}{10pt}{4pt}
+
+\titleformat{\paragraph}[hang]
+  {\normalfont\fontsize{14}{18}\selectfont}{\theparagraph}{0.4em}{}
+\titlespacing*{\paragraph}{0pt}{8pt}{4pt}
+
+% Numbering: 1  /  1.1  /  1.1.1  /  1.1.1.1
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+\renewcommand{\theparagraph}{\thesubsubsection.\arabic{paragraph}}
+
+\endinput

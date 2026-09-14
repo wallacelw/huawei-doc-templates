@@ -40,6 +40,40 @@ if [ "$PANDOC_NUM" -lt "$MIN_NUM" ] || [ "$PANDOC_NUM" -ge "$MAX_NUM" ]; then
 fi
 echo "  pandoc version: $PANDOC_VERSION (in supported range 3.1.0–3.6.0)"
 
+# ── Helper: remove a style from a DOCX file's styles.xml ──────────────────
+# Usage: break_style_in_docx <docx_path> <style_id>
+# Removes the style with the given styleId from word/styles.xml inside the DOCX.
+break_style_in_docx() {
+  local docx_path="$1"
+  local style_id="$2"
+  python3 - "$docx_path" "$style_id" <<'PYEOF'
+import sys, zipfile, shutil
+from lxml import etree
+
+docx_path = sys.argv[1]
+style_id = sys.argv[2]
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+with zipfile.ZipFile(docx_path, 'r') as z:
+    styles_xml = z.read('word/styles.xml')
+root = etree.fromstring(styles_xml)
+for s in root.findall(f"{{{W}}}style"):
+    if s.get(f"{{{W}}}styleId") == style_id:
+        root.remove(s)
+        break
+modified_xml = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+tmp_path = docx_path + '.tmp'
+with zipfile.ZipFile(docx_path, 'r') as zin:
+    with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            if item.filename == 'word/styles.xml':
+                zout.writestr(item, modified_xml)
+            else:
+                zout.writestr(item, zin.read(item.filename))
+shutil.move(tmp_path, docx_path)
+PYEOF
+}
+
 # ── Template test function ────────────────────────────────────────────────
 # run_template_tests <template_name> <fix_script> <filter> <ref_docx> <sample_dir> <common_assets>
 run_template_tests() {
@@ -196,29 +230,7 @@ PYEOF
   # 8. Missing Heading1 style → RuntimeError
   BROKEN_DOCX="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_heading1.docx"
   cp "$DOCX_OUT" "$BROKEN_DOCX"
-  python3 - "$BROKEN_DOCX" << 'PYEOF'
-import sys, zipfile, shutil, tempfile, os
-from lxml import etree
-W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-docx_path = sys.argv[1]
-with zipfile.ZipFile(docx_path, 'r') as z:
-    styles_xml = z.read('word/styles.xml')
-root = etree.fromstring(styles_xml)
-for s in root.findall(f"{{{W}}}style"):
-    if s.get(f"{{{W}}}styleId") == "Heading1":
-        root.remove(s)
-        break
-modified_xml = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
-tmp_path = docx_path + '.tmp'
-with zipfile.ZipFile(docx_path, 'r') as zin:
-    with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == 'word/styles.xml':
-                zout.writestr(item, modified_xml)
-            else:
-                zout.writestr(item, zin.read(item.filename))
-shutil.move(tmp_path, docx_path)
-PYEOF
+  break_style_in_docx "$BROKEN_DOCX" "Heading1"
 
   if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX" 2>/dev/null; then
     fail "$TEMPLATE_NAME: Missing Heading1 style did not cause --fix to fail"
@@ -229,29 +241,7 @@ PYEOF
   # 9. Missing Title style → RuntimeError
   BROKEN_DOCX2="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_title.docx"
   cp "$DOCX_OUT" "$BROKEN_DOCX2"
-  python3 - "$BROKEN_DOCX2" << 'PYEOF'
-import sys, zipfile, shutil
-from lxml import etree
-W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-docx_path = sys.argv[1]
-with zipfile.ZipFile(docx_path, 'r') as z:
-    styles_xml = z.read('word/styles.xml')
-root = etree.fromstring(styles_xml)
-for s in root.findall(f"{{{W}}}style"):
-    if s.get(f"{{{W}}}styleId") == "Title":
-        root.remove(s)
-        break
-modified_xml = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
-tmp_path = docx_path + '.tmp'
-with zipfile.ZipFile(docx_path, 'r') as zin:
-    with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == 'word/styles.xml':
-                zout.writestr(item, modified_xml)
-            else:
-                zout.writestr(item, zin.read(item.filename))
-shutil.move(tmp_path, docx_path)
-PYEOF
+  break_style_in_docx "$BROKEN_DOCX2" "Title"
 
   if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX2" 2>/dev/null; then
     fail "$TEMPLATE_NAME: Missing Title style did not cause --fix to fail"
@@ -262,29 +252,7 @@ PYEOF
   # 10. Missing Normal style → RuntimeError
   BROKEN_DOCX3="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_normal.docx"
   cp "$DOCX_OUT" "$BROKEN_DOCX3"
-  python3 - "$BROKEN_DOCX3" << 'PYEOF'
-import sys, zipfile, shutil
-from lxml import etree
-W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-docx_path = sys.argv[1]
-with zipfile.ZipFile(docx_path, 'r') as z:
-    styles_xml = z.read('word/styles.xml')
-root = etree.fromstring(styles_xml)
-for s in root.findall(f"{{{W}}}style"):
-    if s.get(f"{{{W}}}styleId") == "Normal":
-        root.remove(s)
-        break
-modified_xml = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
-tmp_path = docx_path + '.tmp'
-with zipfile.ZipFile(docx_path, 'r') as zin:
-    with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == 'word/styles.xml':
-                zout.writestr(item, modified_xml)
-            else:
-                zout.writestr(item, zin.read(item.filename))
-shutil.move(tmp_path, docx_path)
-PYEOF
+  break_style_in_docx "$BROKEN_DOCX3" "Normal"
 
   if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX3" 2>/dev/null; then
     fail "$TEMPLATE_NAME: Missing Normal style did not cause --fix to fail"
@@ -295,29 +263,7 @@ PYEOF
   # 11. Missing VerbatimChar style → RuntimeError
   BROKEN_DOCX4="$TMPDIR_FIX/${TEMPLATE_NAME}-broken_verbatim.docx"
   cp "$DOCX_OUT" "$BROKEN_DOCX4"
-  python3 - "$BROKEN_DOCX4" << 'PYEOF'
-import sys, zipfile, shutil
-from lxml import etree
-W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-docx_path = sys.argv[1]
-with zipfile.ZipFile(docx_path, 'r') as z:
-    styles_xml = z.read('word/styles.xml')
-root = etree.fromstring(styles_xml)
-for s in root.findall(f"{{{W}}}style"):
-    if s.get(f"{{{W}}}styleId") == "VerbatimChar":
-        root.remove(s)
-        break
-modified_xml = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
-tmp_path = docx_path + '.tmp'
-with zipfile.ZipFile(docx_path, 'r') as zin:
-    with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == 'word/styles.xml':
-                zout.writestr(item, modified_xml)
-            else:
-                zout.writestr(item, zin.read(item.filename))
-shutil.move(tmp_path, docx_path)
-PYEOF
+  break_style_in_docx "$BROKEN_DOCX4" "VerbatimChar"
 
   if python3 "$FIX_SCRIPT" --fix "$BROKEN_DOCX4" 2>/dev/null; then
     fail "$TEMPLATE_NAME: Missing VerbatimChar style did not cause --fix to fail"

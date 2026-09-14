@@ -81,6 +81,26 @@ local config = {
   warn_setheaderlogo = true,
   -- Test case environment handler
   extra_env_handlers = function(L, parse_latex_blocks, preamble)
+    -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
+    local function cell_to_md(cell_text)
+      cell_text = cell_text:gsub("\\\\", "\n")
+      -- Preprocess testbook-specific commands to standard LaTeX
+      cell_text = cell_text:gsub("\\testresultbadge%s*(%b{})", function(arg)
+        return "\\textbf{" .. arg:sub(2, -2) .. "}"
+      end)
+      cell_text = cell_text:gsub("\\begin%s*{testlist}", "\\begin{itemize}")
+      cell_text = cell_text:gsub("\\end%s*{testlist}", "\\end{itemize}")
+      local blocks = parse_latex_blocks(cell_text)
+      if blocks and #blocks > 0 then
+        local doc = pandoc.Pandoc(blocks)
+        return pandoc.write(doc, "markdown"):gsub("\n", " "):gsub("%s+$", "")
+      end
+      -- Fallback: strip LaTeX commands naively
+      cell_text = cell_text:gsub("\\_", "_")
+      cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
+      return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
+    end
+
     -- Handler for the testcase environment.
     -- Converts \begin{testcase}{Title}...\end{testcase} into a
     -- subsection heading + a definition-list style table with
@@ -112,26 +132,6 @@ local config = {
         pandoc.Space(),
         pandoc.Str(title)
       })))
-
-      -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
-      local function cell_to_md(cell_text)
-        cell_text = cell_text:gsub("\\\\", "\n")
-        -- Preprocess testbook-specific commands to standard LaTeX
-        cell_text = cell_text:gsub("\\testresultbadge%s*(%b{})", function(arg)
-          return "\\textbf{" .. arg:sub(2, -2) .. "}"
-        end)
-        cell_text = cell_text:gsub("\\begin%s*{testlist}", "\\begin{itemize}")
-        cell_text = cell_text:gsub("\\end%s*{testlist}", "\\end{itemize}")
-        local blocks = parse_latex_blocks(cell_text)
-        if blocks and #blocks > 0 then
-          local doc = pandoc.Pandoc(blocks)
-          return pandoc.write(doc, "markdown"):gsub("\n", " "):gsub("%s+$", "")
-        end
-        -- Fallback: strip LaTeX commands naively
-        cell_text = cell_text:gsub("\\_", "_")
-        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
-        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
-      end
 
       -- Parse test field commands from the body.
       -- Each \testfield{content} becomes a row: label | content.
@@ -207,26 +207,6 @@ local config = {
     local function handle_testsummary_env(text)
       local body = text:match("\\begin%s*{testsummary}%s*(.-)%s*\\end%s*{testsummary}")
       if not body then return nil end
-
-      -- cell_to_md: convert LaTeX cell content to markdown, preserving formatting.
-      local function cell_to_md(cell_text)
-        cell_text = cell_text:gsub("\\\\", "\n")
-        -- Preprocess testbook-specific commands to standard LaTeX
-        cell_text = cell_text:gsub("\\testresultbadge%s*(%b{})", function(arg)
-          return "\\textbf{" .. arg:sub(2, -2) .. "}"
-        end)
-        cell_text = cell_text:gsub("\\begin%s*{testlist}", "\\begin{itemize}")
-        cell_text = cell_text:gsub("\\end%s*{testlist}", "\\end{itemize}")
-        local blocks = parse_latex_blocks(cell_text)
-        if blocks and #blocks > 0 then
-          local doc = pandoc.Pandoc(blocks)
-          return pandoc.write(doc, "markdown"):gsub("\n", " "):gsub("%s+$", "")
-        end
-        -- Fallback: strip LaTeX commands naively
-        cell_text = cell_text:gsub("\\_", "_")
-        cell_text = cell_text:gsub("\\[a-zA-Z]+", "")
-        return (cell_text:gsub("^%s+", ""):gsub("%s+$", ""))
-      end
 
       -- Parse \testsummaryrow{ID}{Title}{Status} commands
       local rows = {}

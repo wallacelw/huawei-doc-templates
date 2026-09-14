@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guide: Environment Setup for Huawei Cloud Development</title>
+  <title>setup-guide</title>
   <style>
 
 :root {
@@ -271,9 +271,7 @@ font-size: 8pt;
 </style>
 </head>
 <body>
-  <h1 class="title">Guide: Environment Setup for Huawei Cloud
-Development</h1>
-<p class="version">v4.7.0</p>
+<p class="version">v5.0.0</p>
 <h1 data-number="1" id="provision-a-flexus-x-instance-on-huawei-cloud"><span class="header-section-number">1</span> Provision a Flexus X Instance on
 Huawei Cloud</h1>
 <div class="objectives">
@@ -1545,6 +1543,12 @@ or run <code>/skill huawei-template-guide</code> in your coding
 agent.</em></p>
 <h1 data-number="8"><span class="header-section-number">8</span>
 Changelog</h1>
+<p><strong>5.0.0</strong>  <em>2026-09-13</em></p>
+<p>Major refactoring: extracted shared modules (huawei-titles,
+huawei-toc, huawei-cover), renamed <code>\lg@guidetitle</code> to
+<code>\lg@doctitle</code>, unified title API with
+<code>\setdoctitle</code>, decomposed <code>docx_fix.py</code> (680<span class="math inline">→</span>84 lines), added testbook unit tests, fixed
+build system error handling.</p>
 <p><strong>4.7.0</strong>  <em>2026-09-13</em></p>
 <p>Testcase headings now formatted as captions (like figures/tables):
 bold “Testcase N:” followed by description. Changed label from “Test

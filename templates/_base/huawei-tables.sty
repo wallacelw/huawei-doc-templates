@@ -6,6 +6,7 @@
 %% =====================================================================
 \ProvidesPackage{huawei-tables}[2026/08/20 Huawei table formatting]
 %% Depends on: huawei-colors (huaweired, codebg, white), xcolor/colortbl (\rowcolors)
+%% Requires: longtable (loaded by class file)
 
 % Table header cell: white bold text (for use with \rowcolor{huaweired})
 \newcommand{\thd}[1]{\textcolor{white}{\textbf{#1}}}
@@ -78,7 +79,6 @@
 %  - Add \endhead after the header row to repeat it on page breaks.
 %  - Without \endhead, the header appears only on the first page.
 %  - Cannot be used inside tcolorbox (longtable requires top-level).
-\RequirePackage{longtable}
 \newenvironment{longhutable}[1]{%
   \par\medskip
   \begingroup

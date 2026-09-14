@@ -43,7 +43,7 @@ examples: setup-guide ## Compile the setup-guide and copy all formats to setup-g
 
 setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
 	cd examples/setup-guide/src && latexmk setup-guide.tex
-	./scripts/build.sh --all examples/setup-guide >/dev/null 2>&1 || true
+	./scripts/build.sh --all examples/setup-guide
 	cp examples/setup-guide/setup-guide.pdf  setup-guide/setup-guide.pdf
 	cp examples/setup-guide/setup-guide.md   setup-guide/setup-guide.md
 	cp examples/setup-guide/setup-guide.docx setup-guide/setup-guide.docx

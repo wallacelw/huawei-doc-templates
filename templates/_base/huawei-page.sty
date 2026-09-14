@@ -31,11 +31,8 @@
   linktoc=all,
   bookmarksnumbered=true,
 }
-% Set PDF metadata after preamble (title is set by \setguidetitle)
-\AtBeginDocument{\hypersetup{pdftitle={\lg@guidetitle}, pdfauthor={Huawei Technologies}}}
-% TODO: PDF/UA tagging would require \usepackage{tagpdf} and
-% \tagpdfsetup{activate-all, interwordspace=true} in guide.cls.
-% This is a larger effort that may require XeLaTeX-specific configuration.
+% Set PDF metadata after preamble (title is set by \setdoctitle)
+\AtBeginDocument{\hypersetup{pdftitle={\lg@doctitle}, pdfauthor={Huawei Technologies}}}
 
 % =====================================================================
 %  HEADER AND FOOTER

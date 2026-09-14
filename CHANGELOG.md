@@ -3,6 +3,54 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v5.0.0 (2026-09-14)
+
+### Breaking changes
+
+- **New shared modules**: `huawei-titles.sty`, `huawei-toc.sty`, `huawei-cover.sty`
+  extracted from duplicated code in all 3 class files (~140 lines deduplicated).
+- **Macro rename**: `\lg@guidetitle` → `\lg@doctitle` in shared modules.
+  Template-specific setters (`\setguidetitle`, `\setreporttitle`, `\settestbooktitle`)
+  kept as backward-compatible aliases.
+- **Unified title API**: `\setdoctitle{...}` is now the canonical command.
+  Samples updated to use `\setdoctitle`.
+- **`\RequirePackage{longtable}`** moved from `huawei-tables.sty` to class files
+  (compliance with L15).
+
+### Features
+
+- **Testbook unit tests**: 4 new test cases (`testcase`, `testsummary`, `testlist`,
+  `testresultbadge`) with expected output. Test count: 80 → 84.
+
+### Refactoring
+
+- **`docx_fix.py` decomposed**: `fix_generated_docx` reduced from 680 to 84 lines
+  via 11 focused helper functions.
+- **`cell_to_md` deduplicated**: Extracted from 2 copies in `testbook-pandoc.lua`.
+- **`pandoc-common.lua` cleanup**: XML escaping helper (`esc_xml`), `DOCX_CONTENT_WIDTH`
+  and `DOCX_PAGE_BREAK` constants, `callout_colors` moved to module level, unused
+  exports removed, stale comments fixed.
+- **`test-docx-fix.sh`**: 128 lines of duplicated Python heredocs extracted into
+  `break_style_in_docx()` shell function.
+- **`huawei-code.sty`**: Code block options extracted into `\lg@codeopts` macro.
+- **`huawei-images.sty`**: Image not-found warning extracted into `\lg@checkimg` helper.
+- **Dead code removed**: `set_bottom_border`, unused `base_style` parameter.
+- **Border functions**: `set_left_border` now delegates to `set_paragraph_border`.
+
+### Bug fixes
+
+- **Makefile**: Removed `|| true` that silently swallowed multi-format generation failures.
+- **`build.sh`**: Respects project TZ (`${TZ:-America/Sao_Paulo}`) instead of hardcoding.
+- **`build.sh`**: DOCX post-processing failure now adds to `RESULTS_FAIL` (was just a warning).
+- **`technical-pandoc.lua`**: Fixed `extra_env_handlers` callback signature to accept `preamble`.
+
+### Documentation
+
+- Implicit dependencies documented in `huawei-lang.sty`, `huawei-fonts.sty`,
+  `huawei-changelog.sty`.
+- Stale version numbers and TODOs removed from class files and shared modules.
+- Stale usage example in `testbook.cls` updated to current environment API.
+
 ## v4.7.0 (2026-09-14)
 
 ### Features
