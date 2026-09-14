@@ -3,6 +3,14 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v5.0.1 (2026-09-14)
+
+### Fix
+
+- **Testcase caption centered**: The "Testcase N: description" caption is now
+  centered above the tcolorbox block, matching the visual style of table/figure
+  captions.
+
 ## v5.0.0 (2026-09-14)
 
 ### Breaking changes

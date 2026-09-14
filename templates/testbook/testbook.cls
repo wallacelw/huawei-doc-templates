@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v5.0.0]
+\ProvidesClass{testbook}[2026/09/13 Huawei Test Book template v5.0.1]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -171,7 +171,7 @@
 \newenvironment{testcase}[1]{%
   \refstepcounter{testcase}%
   \par\medskip
-  \noindent\textbf{\lg@testcase~\thetestcase:}~#1\par\nobreak\medskip
+  {\centering\textbf{\lg@testcase~\thetestcase:}~#1\par}\nobreak\medskip
   \begin{tcolorbox}[
     enhanced jigsaw,
     breakable,

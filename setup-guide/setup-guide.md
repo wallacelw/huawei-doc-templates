@@ -1077,6 +1077,10 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**5.0.1**  *2026-09-13*
+
+Testcase caption centered above the block.
+
 **5.0.0**  *2026-09-13*
 
 Major refactoring: extracted shared modules (huawei-titles, huawei-toc,
