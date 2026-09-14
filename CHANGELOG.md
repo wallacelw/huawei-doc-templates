@@ -3,6 +3,14 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v5.0.3 (2026-09-14)
+
+### Fix
+
+- **Removed non-standard `\badge` tags**: Two testcases had `\badge{Required}`
+  and `\badge{New}` (PT: `\badge{Obrigatório}` / `\badge{Novo}`) while the
+  other 8 had none. Removed for consistency.
+
 ## v5.0.2 (2026-09-14)
 
 ### Fix

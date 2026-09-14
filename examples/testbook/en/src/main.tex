@@ -207,7 +207,7 @@ infrastructure changes and avoid unintended resource modifications.
 
 \subsection{Data Engineering}
 
-\begin{testcase}{Verify DataArts Studio workspace creation} \badge{Required}
+\begin{testcase}{Verify DataArts Studio workspace creation}
   \testobjective{Confirm that the DataArts Studio (Dayu) instance is
     provisioned, the workspace is accessible, and the designated IAM
     users can log in with the \textbf{Dayu\_User} role.}
@@ -301,7 +301,7 @@ spark-sql --master yarn \
 
 \subsection{Security and Access Control}
 
-\begin{testcase}{Verify IAM policy enforcement on OBS buckets} \badge{New}
+\begin{testcase}{Verify IAM policy enforcement on OBS buckets}
   \testobjective{Confirm that IAM policies correctly restrict OBS bucket
     access — authorized users can read/write while unauthorized users are
     denied, and the bucket policy matches the principle of least privilege.}

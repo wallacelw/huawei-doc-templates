@@ -207,7 +207,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
 
 \subsection{Engenharia de Dados}
 
-\begin{testcase}{Verificar criação do workspace do DataArts Studio} \badge{Obrigatório}
+\begin{testcase}{Verificar criação do workspace do DataArts Studio}
   \testobjective{Confirmar que a instância do DataArts Studio (Dayu) está
     provisionada, o workspace está acessível e os usuários IAM designados
     conseguem acessar com a função \textbf{Dayu\_User}.}
@@ -301,7 +301,7 @@ spark-sql --master yarn \
 
 \subsection{Segurança e Controle de Acesso}
 
-\begin{testcase}{Verificar aplicação de política IAM nos buckets OBS} \badge{Novo}
+\begin{testcase}{Verificar aplicação de política IAM nos buckets OBS}
   \testobjective{Confirmar que as políticas IAM restringem corretamente o acesso
     ao bucket OBS — usuários autorizados podem ler/escrever enquanto usuários
     não autorizados são negados, e a política do bucket segue o princípio

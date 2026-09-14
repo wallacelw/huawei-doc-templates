@@ -1077,6 +1077,10 @@ full command reference, see the template's README.md or run
 
 # Changelog
 
+**5.0.3**  *2026-09-14*
+
+Removed non-standard `\badge` tags from testcases for consistency.
+
 **5.0.2**  *2026-09-14*
 
 Long commands in test steps now render as code blocks instead of inline
