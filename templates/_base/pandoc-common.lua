@@ -287,9 +287,9 @@ local function make_filter(config)
 
   --- Callout colors: border, background, label color
   local callout_colors = {
-    warning = {border = "F57C00", bg = "FFF8E1", label_color = "C7000B"},
-    tip     = {border = "2E7D32", bg = "E8F5E9", label_color = "2E7D32"},
-    infobox = {border = "1565C0", bg = "E3F2FD", label_color = "1565C0"},
+    warning = {border = "ED6D00", bg = "FFF3E0", label_color = "C7000B"},
+    tip     = {border = "62B230", bg = "E8F5E9", label_color = "62B230"},
+    infobox = {border = "30B5C5", bg = "E0F7FA", label_color = "30B5C5"},
   }
 
   --- Create a format-appropriate callout box.

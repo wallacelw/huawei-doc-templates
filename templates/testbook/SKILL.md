@@ -759,12 +759,12 @@ rendered, but the content remains in the `.tex` file for future reference.
 | `linkblue` | `#0000FF` | Links |
 | `huaweired` | `#C7000B` | Brand red (H1 chapter rules, test case left-rule and labels, accents, badge) |
 | `ruleblack` | `#000000` | Horizontal rules (TOC, objectives) |
-| `warningbg` | `#FFF8E1` | Warning box background |
-| `warningfg` | `#F57C00` | Warning box border |
+| `warningbg` | `#FFF3E0` | Warning box background |
+| `warningfg` | `#ED6D00` | Warning box border |
 | `tipbg` | `#E8F5E9` | Tip box background |
-| `tipfg` | `#2E7D32` | Tip box border |
-| `infobg` | `#E3F2FD` | Info box background |
-| `infofg` | `#1565C0` | Info box border |
+| `tipfg` | `#62B230` | Tip box border |
+| `infobg` | `#E0F7FA` | Info box background |
+| `infofg` | `#30B5C5` | Info box border |
 
 ### Auxiliary brand colors (Section 2.12)
 

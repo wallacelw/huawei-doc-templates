@@ -9,7 +9,7 @@
 \setdoctitle{Guide: Environment Setup for Huawei Cloud Development}
 \setheadertitle{Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup}
 \setcovertext{Huawei Technologies CO., LTD}
-\setdocversion{5.1.0}
+\setdocversion{5.1.1}
 
 \begin{document}
 
@@ -1206,9 +1206,43 @@ full command reference, see the template's README.md or run
 \inlinecode{/skill huawei-template-guide} in your coding agent.}
 
 % =====================================================================
+%  Brand Color Palette
+% =====================================================================
+\section{Brand Color Palette}
+
+The template defines auxiliary brand colors aligned to the Huawei Cloud
+Brand Guidelines (Section 2.12):
+
+\begin{hutable}{|l|l|l|l|}
+\rowcolor{huaweired} \thd{Color} & \thd{HEX} & \thd{Pantone} & \thd{Sample} \\
+\tbody
+\textcolor{rosered}{Rose Red} & \texttt{\#C40054} & 7636 & \textcolor{rosered}{\rule{2cm}{4pt}} \\
+\textcolor{darkred}{Dark Red} & \texttt{\#7F0001} & 483C & \textcolor{darkred}{\rule{2cm}{4pt}} \\
+\textcolor{huaweiorange}{Orange} & \texttt{\#ED6D00} & 165C & \textcolor{huaweiorange}{\rule{2cm}{4pt}} \\
+\textcolor{huaweiyellow}{Yellow} & \texttt{\#FCC800} & 7406C & \textcolor{huaweiyellow}{\rule{2cm}{4pt}} \\
+\textcolor{huaweigreen}{Green} & \texttt{\#62B230} & 3501C & \textcolor{huaweigreen}{\rule{2cm}{4pt}} \\
+\textcolor{huaweiblue}{Blue} & \texttt{\#30B5C5} & 2227C & \textcolor{huaweiblue}{\rule{2cm}{4pt}} \\
+\end{hutable}
+
+The monochrome palette provides a grayscale scale for code blocks and
+secondary text:
+
+\begin{hutable}{|l|l|l|}
+\rowcolor{huaweired} \thd{Color} & \thd{HEX} & \thd{Brightness} \\
+\tbody
+\textcolor{huaweiblack}{Black} & \texttt{\#000000} & 0\% \\
+\textcolor{huaweigray90}{Gray 90\%} & \texttt{\#E5E5E5} & 90\% \\
+\textcolor{huaweigray80}{Gray 80\%} & \texttt{\#CCCCCC} & 80\% \\
+\textcolor{huaweigray50}{Gray 50\%} & \texttt{\#808080} & 50\% \\
+\textcolor{huaweigray30}{Gray 30\%} & \texttt{\#4D4D4D} & 30\% \\
+\textcolor{huaweiwhite}{White} & \texttt{\#FFFFFF} & 100\% \\
+\end{hutable}
+
+% =====================================================================
 %  Changelog
 % =====================================================================
 \begin{changelog}
+  \changelogentry{5.1.1}{\today}{\item Synced callout colors in DOCX/HTML/MD output to match brand palette. Added color palette demo.}
   \changelogentry{5.1.0}{\today}{\item Adopted brand guidelines auxiliary color palette and monochrome scale. Aligned callout colors to brand specifications.}
   \changelogentry{5.0.3}{\today}{\item Removed non-standard \inlinecode{\textbackslash badge} tags from testcases for consistency.}
   \changelogentry{5.0.2}{\today}{\item Long commands in test steps now render as code blocks instead of inline code.}

@@ -101,7 +101,7 @@ count_docx() {
 import xml.etree.ElementTree as ET, sys
 doc_xml = sys.argv[1]
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-callout_colors = {"C7000B", "F57C00", "2E7D32", "1565C0"}
+callout_colors = {"C7000B", "ED6D00", "62B230", "30B5C5"}
 
 tree = ET.parse(doc_xml)
 root = tree.getroot()

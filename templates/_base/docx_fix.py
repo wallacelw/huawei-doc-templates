@@ -948,20 +948,20 @@ def regenerate_reference(docx_path):
 
     # ── Warning callout ──────────────────────────────────────────────
     style = add_or_get_paragraph_style(doc, "warning")
-    set_left_border(style, "F57C00", size_pt=3)
-    set_cell_shading(style, "FFF8E1")
+    set_left_border(style, "ED6D00", size_pt=3)
+    set_cell_shading(style, "FFF3E0")
     set_left_indent(style, 0.5)
 
     # ── Tip callout ──────────────────────────────────────────────────
     style = add_or_get_paragraph_style(doc, "tip")
-    set_left_border(style, "2E7D32", size_pt=3)
+    set_left_border(style, "62B230", size_pt=3)
     set_cell_shading(style, "E8F5E9")
     set_left_indent(style, 0.5)
 
     # ── Info callout ─────────────────────────────────────────────────
     style = add_or_get_paragraph_style(doc, "infobox")
-    set_left_border(style, "1565C0", size_pt=3)
-    set_cell_shading(style, "E3F2FD")
+    set_left_border(style, "30B5C5", size_pt=3)
+    set_cell_shading(style, "E0F7FA")
     set_left_indent(style, 0.5)
 
     # ── Objectives block ─────────────────────────────────────────────

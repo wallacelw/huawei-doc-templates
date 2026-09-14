@@ -3,6 +3,19 @@
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.tex` file.
 
+## v5.1.1 (2026-09-14)
+
+### Fix
+
+- **Synced callout colors across all formats**: Updated `pandoc-common.lua`,
+  `docx_fix.py`, and 3 HTML templates with brand-aligned callout colors
+  (warning #ED6D00, tip #62B230, info #30B5C5). Previously only the LaTeX
+  source was updated — DOCX/HTML/MD output still showed old colors.
+- **Updated stale documentation**: Fixed callout color values in 2 SKILL.md
+  files and 2 README.md files.
+- **Fixed round-trip test**: Updated color assertion to validate new values.
+- **Added color palette demo to setup-guide**.
+
 ## v5.1.0 (2026-09-14)
 
 ### Features
