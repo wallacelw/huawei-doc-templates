@@ -128,10 +128,11 @@ echo -e "${C_BOLD}${C_CYAN}║  ${_banner_text}  ║${C_RESET}"
 echo -e "${C_BOLD}${C_CYAN}╚${_banner_border}╝${C_RESET}"
 echo ""
 
-echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX templates for Huawei Cloud guides (XeLaTeX + latexmk)"
+echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX templates for Huawei Cloud guides (XeLaTeX + latexmk, AsciiDoc + asciidoctor)"
 echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
 log_dim "• XeLaTeX + latexmk + LaTeX packages"
+log_dim "• AsciiDoc + asciidoctor (source format + converter)"
 log_dim "• HarmonyOS Sans (body font, free commercial use)"
 log_dim "• Cascadia Code (code font, open source)"
 log_dim "• opencode skills (/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook)"
@@ -204,9 +205,26 @@ $SUDO apt-get install -y \
     poppler-utils \
     pandoc \
     python3-docx \
+    ruby-full \
     2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd\|already the newest\|automatically installed\|autoremove\|not upgraded\|newly installed\|upgraded" || true
 
 log_done "TeX Live packages installed"
+
+# ── Install asciidoctor (AsciiDoc processor) ──
+log_step "Installing asciidoctor"
+
+if command -v asciidoctor &>/dev/null; then
+    log_ok "asciidoctor: already installed ($(asciidoctor --version 2>/dev/null | head -1))"
+else
+    log_desc "Installing asciidoctor Ruby gem..."
+    gem install asciidoctor 2>&1 | grep -v "^$\|Fetching\|Successfully installed\|Parsing\|Installing\|Building" || true
+    if command -v asciidoctor &>/dev/null; then
+        log_done "asciidoctor: installed ($(asciidoctor --version 2>/dev/null | head -1))"
+    else
+        log_warn "Failed to install asciidoctor — AsciiDoc pipeline unavailable"
+        log_dim "Install manually: gem install asciidoctor"
+    fi
+fi
 
 # ── Update fvextra for backgroundcolor support ──
 # fvextra >= 1.5 introduced the backgroundcolor option (TeX Live 2024+).
@@ -309,6 +327,13 @@ verify() {
 
 verify xelatex
 verify latexmk
+
+log_step "Verifying asciidoctor"
+if command -v asciidoctor &>/dev/null; then
+    log_done "asciidoctor $(asciidoctor --version 2>/dev/null | head -1)"
+else
+    log_warn "asciidoctor not found — AsciiDoc pipeline unavailable (LaTeX still works)"
+fi
 
 log_step "Verifying pandoc"
 if command -v pandoc &>/dev/null; then
@@ -523,6 +548,7 @@ echo -e "${C_BOLD}${C_GREEN}  ✓ Setup complete${C_RESET}"
 echo ""
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Engine:"             "XeLaTeX (TeX Live)"
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Build tool:"         "latexmk (.latexmkrc → xelatex)"
+printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Source format:"      "AsciiDoc (.adoc → LaTeX via asciidoctor)"
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Body font:"          "HarmonyOS Sans → Liberation Sans"
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Code font:"          "Cascadia Code → DejaVu Sans Mono"
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook"

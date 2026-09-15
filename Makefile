@@ -1,7 +1,7 @@
 # Makefile — build convenience for Huawei Document Templates
 # ============================================================================
 # Self-documenting: run `make` (no arguments) to list all available targets.
-# Engine: XeLaTeX (via latexmk, $pdf_mode=5). pdflatex will NOT work.
+# Source: AsciiDoc (.adoc) → LaTeX (.tex) via huawei-latex converter → PDF via XeLaTeX
 # Templates are auto-discovered from templates/*/ directories.
 # ============================================================================
 
@@ -42,6 +42,7 @@ samples: $(TEMPLATE_SAMPLES) ## Compile all samples (all templates, PT + EN)
 examples: setup-guide ## Compile the setup-guide and copy all formats to setup-guide/
 
 setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
+	./scripts/build-adoc.sh examples/setup-guide/src/setup-guide.adoc
 	cd examples/setup-guide/src && latexmk setup-guide.tex
 	./scripts/build.sh --all examples/setup-guide
 	cp examples/setup-guide/setup-guide.pdf  setup-guide/setup-guide.pdf
@@ -67,8 +68,8 @@ $(1)-docx: $(1)-docx-pt $(1)-docx-en ; @true
 $(1)-html: $(1)-html-pt $(1)-html-en ; @true
 $(1)-formats: $(1)-md $(1)-docx $(1)-html ; @true
 
-$(1)-pt: ; cd examples/$(1)/pt/src && latexmk main.tex
-$(1)-en: ; cd examples/$(1)/en/src && latexmk main.tex
+$(1)-pt: ; ./scripts/build-adoc.sh examples/$(1)/pt/src/main.adoc && cd examples/$(1)/pt/src && latexmk main.tex
+$(1)-en: ; ./scripts/build-adoc.sh examples/$(1)/en/src/main.adoc && cd examples/$(1)/en/src && latexmk main.tex
 $(1)-samples: $(1)-pt $(1)-en ; @true
 endef
 
@@ -78,8 +79,8 @@ $(foreach tmpl,$(TEMPLATES),$(eval $(call TEMPLATE_RULES,$(tmpl))))
 # Each template gets: clean-<t>-pt, clean-<t>-en, clean-<t>-samples
 
 define TEMPLATE_CLEAN_RULES
-clean-$(1)-pt: ; cd examples/$(1)/pt/src && latexmk -C main.tex; rm -f examples/$(1)/pt/main.pdf
-clean-$(1)-en: ; cd examples/$(1)/en/src && latexmk -C main.tex; rm -f examples/$(1)/en/main.pdf
+clean-$(1)-pt: ; cd examples/$(1)/pt/src && latexmk -C main.tex; rm -f examples/$(1)/pt/src/main.tex examples/$(1)/pt/main.pdf
+clean-$(1)-en: ; cd examples/$(1)/en/src && latexmk -C main.tex; rm -f examples/$(1)/en/src/main.tex examples/$(1)/en/main.pdf
 clean-$(1)-samples: clean-$(1)-pt clean-$(1)-en ; @true
 endef
 
@@ -122,19 +123,22 @@ html: html-pt html-en html-sg ## HTML for guide samples + setup-guide (use all-f
 
 technical: ## Compile a specific technical report (make technical DIR=<path-with-src>)
 	@if [ -z "$(DIR)" ]; then echo "Usage: make technical DIR=<path-with-src>"; exit 1; fi
+	@./scripts/build-adoc.sh $(DIR)/src/main.adoc
 	@cd $(DIR)/src && latexmk main.tex
 
-project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.tex])
-	@if [ -z "$(DIR)" ]; then echo "Usage: make project DIR=<path> [FILE=<name>.tex]"; exit 1; fi
+project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.adoc])
+	@if [ -z "$(DIR)" ]; then echo "Usage: make project DIR=<path> [FILE=<name>.adoc]"; exit 1; fi
 	@if [ -z "$(FILE)" ]; then \
-		TEX=$$(ls $(DIR)/src/*.tex 2>/dev/null | head -1); \
-		if [ -z "$$TEX" ]; then TEX=$$(ls $(DIR)/*.tex 2>/dev/null | head -1); fi; \
-		if [ -z "$$TEX" ]; then echo "No .tex file found in $(DIR)/src/ or $(DIR)/"; exit 1; fi; \
-		echo "Compiling $$TEX"; \
-		cd $$(dirname $$TEX) && latexmk $$(basename $$TEX); \
+		ADOC=$$(ls $(DIR)/src/*.adoc 2>/dev/null | head -1); \
+		if [ -z "$$ADOC" ]; then ADOC=$$(ls $(DIR)/*.adoc 2>/dev/null | head -1); fi; \
+		if [ -z "$$ADOC" ]; then echo "No .adoc file found in $(DIR)/src/ or $(DIR)/"; exit 1; fi; \
+		echo "Compiling $$ADOC"; \
+		./scripts/build-adoc.sh "$$ADOC"; \
+		cd $$(dirname "$$ADOC") && latexmk $$(basename "$${ADOC%.adoc}.tex"); \
 	else \
 		echo "Compiling $(DIR)/$(FILE)"; \
-		cd $(DIR)/src && latexmk $(FILE); \
+		./scripts/build-adoc.sh $(DIR)/src/$(FILE); \
+		cd $(DIR)/src && latexmk $$(basename $${FILE%.adoc}.tex); \
 	fi
 
 menu: ## Interactive format menu (delegates to build.sh)
@@ -162,7 +166,7 @@ clean-examples: clean-setup-guide ## Clean the setup-guide
 
 clean-setup-guide: ## Clean the setup-guide and the root format copies
 	cd examples/setup-guide/src && latexmk -C setup-guide.tex
-	rm -f examples/setup-guide/setup-guide.pdf
+	rm -f examples/setup-guide/src/setup-guide.tex examples/setup-guide/setup-guide.pdf
 	rm -f setup-guide/setup-guide.pdf setup-guide/setup-guide.md setup-guide/setup-guide.docx setup-guide/setup-guide.html
 
 clean-formats: ## Remove generated multi-format files (DOCX/MD/HTML)
@@ -181,15 +185,19 @@ clean-pt: clean-guide-pt ; @true
 clean-en: clean-guide-en ; @true
 clean-samples: clean-guide-samples ; @true
 
-clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=<name>.tex])
-	@if [ -z "$(DIR)" ]; then echo "Usage: make clean-project DIR=<path> [FILE=<name>.tex]"; exit 1; fi
+clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=<name>.adoc])
+	@if [ -z "$(DIR)" ]; then echo "Usage: make clean-project DIR=<path> [FILE=<name>.adoc]"; exit 1; fi
 	@if [ -z "$(FILE)" ]; then \
-		TEX=$$(ls $(DIR)/src/*.tex 2>/dev/null | head -1); \
-		if [ -z "$$TEX" ]; then TEX=$$(ls $(DIR)/*.tex 2>/dev/null | head -1); fi; \
-		if [ -z "$$TEX" ]; then echo "No .tex file found in $(DIR)/src/ or $(DIR)/"; exit 1; fi; \
-		cd $$(dirname $$TEX) && latexmk -C $$(basename $$TEX); \
+		ADOC=$$(ls $(DIR)/src/*.adoc 2>/dev/null | head -1); \
+		if [ -z "$$ADOC" ]; then ADOC=$$(ls $(DIR)/*.adoc 2>/dev/null | head -1); fi; \
+		if [ -z "$$ADOC" ]; then echo "No .adoc file found in $(DIR)/src/ or $(DIR)/"; exit 1; fi; \
+		TEXFILE="$${ADOC%.adoc}.tex"; \
+		cd $$(dirname "$$ADOC") && latexmk -C $$(basename "$$TEXFILE"); \
+		rm -f "$$TEXFILE"; \
 	else \
-		cd $(DIR)/src && latexmk -C $(FILE); \
+		TEXFILE="$$(basename ${FILE%.adoc}.tex)"; \
+		cd $(DIR)/src && latexmk -C "$$TEXFILE"; \
+		rm -f "$$TEXFILE"; \
 	fi
 
 # ============================================================================

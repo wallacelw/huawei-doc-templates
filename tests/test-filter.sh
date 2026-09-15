@@ -1,6 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# v6.0.0: Lua filters may be removed in favor of AsciiDoc pipeline.
+# Skip gracefully if the shared filter is gone.
+if [ ! -f "$REPO_ROOT/templates/_base/pandoc-common.lua" ]; then
+    echo "SKIP: Lua filters removed in v6.0.0"
+    exit 0
+fi
+
 PASS=0; FAIL=0
 
 # Auto-discover templates

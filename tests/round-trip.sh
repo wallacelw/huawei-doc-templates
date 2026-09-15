@@ -242,6 +242,7 @@ PYEOF
 }
 
 # ── Sample list (auto-discovered) ────────────────────────────────────────────
+# v6.0.0: prefer .adoc source if present; fall back to .tex for backward compat.
 SAMPLES=()
 for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     tmpl_name=$(basename "$tmpl_dir")
@@ -251,24 +252,41 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     for lang_dir in "$REPO_ROOT/examples/$tmpl_name"/*/; do
         [ ! -d "$lang_dir" ] && continue
         lang_name=$(basename "$lang_dir")
-        # Check if there's a .tex file in src/
-        if [ -f "$lang_dir/src/main.tex" ]; then
-            SAMPLES+=("examples/$tmpl_name/$lang_name main")
+        # Check for .adoc first, then fall back to .tex
+        if [ -f "$lang_dir/src/main.adoc" ]; then
+            SAMPLES+=("examples/$tmpl_name/$lang_name main adoc")
+        elif [ -f "$lang_dir/src/main.tex" ]; then
+            SAMPLES+=("examples/$tmpl_name/$lang_name main tex")
         fi
     done
 done
 # Setup guide (special case — uses guide template, different filename)
-if [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.tex" ]; then
-    SAMPLES+=("examples/setup-guide setup-guide")
+if [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.adoc" ]; then
+    SAMPLES+=("examples/setup-guide setup-guide adoc")
+elif [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.tex" ]; then
+    SAMPLES+=("examples/setup-guide setup-guide tex")
 fi
 
 # ── Main loop ──────────────────────────────────────────────────────────────
 for entry in "${SAMPLES[@]}"; do
-  read -r sample basename <<< "$entry"
+  read -r sample basename src_fmt <<< "$entry"
   name=$(basename "$(dirname "$sample")")/$(basename "$sample")
   echo "=== $name ==="
 
-  tex_file="$REPO_ROOT/$sample/src/${basename}.tex"
+  # Resolve source file based on format (adoc or tex)
+  if [ "$src_fmt" = "adoc" ]; then
+    src_file="$REPO_ROOT/$sample/src/${basename}.adoc"
+    # For .adoc sources, convert to .tex first via asciidoctor, then use pandoc
+    tex_file="$RT_TMPDIR/${basename}-from-adoc.tex"
+    if ! asciidoctor -b latex -o "$tex_file" "$src_file" 2>/dev/null; then
+      echo "  SKIP: asciidoctor conversion failed for $src_file"
+      continue
+    fi
+  else
+    src_file="$REPO_ROOT/$sample/src/${basename}.tex"
+    tex_file="$src_file"
+  fi
+
   if [ ! -f "$tex_file" ]; then
     echo "  SKIP: $tex_file not found"
     continue

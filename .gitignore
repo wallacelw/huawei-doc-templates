@@ -48,9 +48,16 @@ examples/guide/*/main.html
 examples/technical/*/main.md
 examples/technical/*/main.docx
 examples/technical/*/main.html
+examples/testbook/*/main.md
+examples/testbook/*/main.docx
+examples/testbook/*/main.html
 examples/setup-guide/setup-guide.md
 examples/setup-guide/setup-guide.docx
 examples/setup-guide/setup-guide.html
+# Generated LaTeX from AsciiDoc (build artifacts, not source)
+examples/*/src/main.tex
+examples/*/src/setup-guide.tex
+documents/*/src/main.tex
 # User documents — ignore everything in documents/ except README.md
 documents/*
 !documents/README.md

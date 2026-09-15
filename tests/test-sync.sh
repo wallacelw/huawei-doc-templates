@@ -11,6 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLS_FILE="$REPO_ROOT/templates/guide/guide.cls"
 TEX_FILE="$REPO_ROOT/examples/setup-guide/src/setup-guide.tex"
+ADOC_FILE="$REPO_ROOT/examples/setup-guide/src/setup-guide.adoc"
 MAKEFILE="$REPO_ROOT/Makefile"
 
 # --- Extract cls version from \ProvidesClass line ---
@@ -20,10 +21,20 @@ if [ -z "$cls_version" ]; then
   exit 1
 fi
 
-# --- Extract setup-guide version from \setdocversion{X.Y.Z} ---
-sg_version=$(grep -oP '\\setdocversion\{\K[0-9]+\.[0-9]+\.[0-9]+' "$TEX_FILE")
+# --- Extract setup-guide version ---
+# v6.0.0: prefer .adoc header attribute (:version: X.Y.Z), fall back to .tex
+if [ -f "$ADOC_FILE" ]; then
+  sg_version=$(grep '^:version:' "$ADOC_FILE" | head -1 | sed 's/:version: *//')
+  sg_source="$ADOC_FILE"
+elif [ -f "$TEX_FILE" ]; then
+  sg_version=$(grep -oP '\\setdocversion\{\K[0-9]+\.[0-9]+\.[0-9]+' "$TEX_FILE")
+  sg_source="$TEX_FILE"
+else
+  echo "FAIL: neither $ADOC_FILE nor $TEX_FILE found"
+  exit 1
+fi
 if [ -z "$sg_version" ]; then
-  echo "FAIL: could not extract version from $TEX_FILE"
+  echo "FAIL: could not extract version from $sg_source"
   exit 1
 fi
 
