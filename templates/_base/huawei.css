@@ -365,3 +365,48 @@ hr { border: none; border-top: 1px solid var(--ruleblack); margin: 1em 0; }
   margin-bottom: 0.5em;
   color: #62B230;
 }
+
+/* ===================================================================
+ *  Copy-to-clipboard for code blocks
+ * =================================================================== */
+
+/* Base styling for the copy button */
+pre {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.4em;
+  right: 0.4em;
+  padding: 0.3em 0.6em;
+  font-size: 0.8em;
+  font-family: 'HarmonyOS Sans', 'Liberation Sans', sans-serif;
+  color: #1F2328;
+  background: #F6F8FA;
+  border: 1px solid #E1E4E8;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+pre:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  background: #E1E4E8;
+  border-color: #1F2328;
+}
+
+.copy-btn.copied {
+  color: #62B230;
+  border-color: #62B230;
+  opacity: 1;
+}
+
+.copy-btn.copied::before {
+  content: "✓ ";
+}

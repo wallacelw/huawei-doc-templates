@@ -145,6 +145,66 @@ menu: ## Interactive format menu (delegates to build.sh)
 	./scripts/build.sh
 
 # ============================================================================
+##@ Live editing
+# ============================================================================
+
+# ── Preview (HTML in browser) ──
+preview: ## Preview document as HTML in browser (make preview DIR=examples/guide/en)
+	@dir="$(DIR)"; \
+	adoc=""; \
+	if [ -f "$$dir/src/main.adoc" ]; then adoc="$$dir/src/main.adoc"; \
+	elif [ -f "$$dir/src/setup-guide.adoc" ]; then adoc="$$dir/src/setup-guide.adoc"; \
+	elif [ -f "$$dir/main.adoc" ]; then adoc="$$dir/main.adoc"; fi; \
+	if [ -z "$$adoc" ]; then echo "Error: No .adoc file found in $$dir/src/"; exit 1; fi; \
+	out="/tmp/huawei-preview.html"; \
+	echo "Generating HTML preview from $$adoc..."; \
+	asciidoctor -b html5 \
+	  -a stylesheet=$(CURDIR)/templates/_base/huawei.css \
+	  -a docinfodir=$(CURDIR)/templates/_base \
+	  -a docinfo1 \
+	  -r asciidoctor-diagram \
+	  "$$adoc" -o "$$out" 2>&1; \
+	echo "Opening $$out..."; \
+	xdg-open "$$out" 2>/dev/null || open "$$out" 2>/dev/null || echo "Open manually: $$out"
+
+# ── Watch (recompile on save) ──
+watch: ## Watch .adoc and recompile PDF on save (make watch DIR=examples/guide/en)
+	@dir="$(DIR)"; \
+	srcdir="$$dir/src"; \
+	adoc=""; \
+	if [ -f "$$srcdir/main.adoc" ]; then adoc="main.adoc"; \
+	elif [ -f "$$srcdir/setup-guide.adoc" ]; then adoc="setup-guide.adoc"; fi; \
+	if [ -z "$$adoc" ]; then echo "Error: No .adoc file found in $$srcdir/"; exit 1; fi; \
+	echo "Watching $$srcdir/$$adoc for changes..."; \
+	echo "Press Ctrl+C to stop."; \
+	if command -v entr >/dev/null 2>&1; then \
+	  find "$$srcdir" -name "*.adoc" | entr -s \
+	    "echo 'Recompiling...'; \
+	     $(CURDIR)/scripts/build-adoc.sh $$srcdir/$$adoc $$srcdir/main.tex && \
+	     (cd $$srcdir && latexmk -xelatex main.tex 2>&1 | tail -3)"; \
+	elif command -v inotifywait >/dev/null 2>&1; then \
+	  while true; do \
+	    inotifywait -q -e modify "$$srcdir/$$adoc" >/dev/null 2>&1; \
+	    echo "Recompiling..."; \
+	    $(CURDIR)/scripts/build-adoc.sh "$$srcdir/$$adoc" "$$srcdir/main.tex" && \
+	    (cd "$$srcdir" && latexmk -xelatex main.tex 2>&1 | tail -3); \
+	  done; \
+	else \
+	  echo "Warning: Neither 'entr' nor 'inotifywait' found. Using polling fallback."; \
+	  last_mtime=0; \
+	  while true; do \
+	    current_mtime=$$(stat -c %Y "$$srcdir/$$adoc" 2>/dev/null || stat -f %m "$$srcdir/$$adoc"); \
+	    if [ "$$current_mtime" != "$$last_mtime" ]; then \
+	      last_mtime=$$current_mtime; \
+	      echo "Recompiling..."; \
+	      $(CURDIR)/scripts/build-adoc.sh "$$srcdir/$$adoc" "$$srcdir/main.tex" && \
+	      (cd "$$srcdir" && latexmk -xelatex main.tex 2>&1 | tail -3); \
+	    fi; \
+	    sleep 1; \
+	  done; \
+	fi
+
+# ============================================================================
 ##@ Testing
 # ============================================================================
 
@@ -216,7 +276,7 @@ TEMPLATE_PHONY := $(foreach tmpl,$(TEMPLATES), \
 TEMPLATE_CLEAN_PHONY := $(foreach tmpl,$(TEMPLATES), \
 	clean-$(tmpl)-pt clean-$(tmpl)-en clean-$(tmpl)-samples)
 
-.PHONY: help all samples examples setup-guide project menu
+.PHONY: help all samples examples setup-guide project menu preview watch
 .PHONY: $(TEMPLATE_PHONY)
 .PHONY: technical
 .PHONY: test

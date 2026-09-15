@@ -53,6 +53,6 @@ if [ -z "$OUTPUT" ]; then
 fi
 
 # Run asciidoctor with the huawei-latex backend
-asciidoctor -b huawei-latex -r "$CONVERTER" "$INPUT" -o "$OUTPUT"
+asciidoctor -b huawei-latex -r "$CONVERTER" -r asciidoctor-diagram "$INPUT" -o "$OUTPUT"
 
 echo "Generated: $OUTPUT"

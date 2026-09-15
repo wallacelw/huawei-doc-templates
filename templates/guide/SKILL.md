@@ -327,6 +327,50 @@ Placeholder for missing image:
 image::path[title="Placeholder: description of expected image"]
 ```
 
+### Diagrams
+
+The template supports inline diagrams using the `asciidoctor-diagram` extension.
+Diagrams are converted to PNG images during the build process.
+
+#### PlantUML (sequence, class, deployment diagrams)
+
+```adoc
+[plantuml,my-diagram,png]
+....
+@startuml
+actor User
+participant "API" as API
+User -> API : Request
+API --> User : Response
+@enduml
+....
+```
+
+#### Graphviz (flowcharts, network diagrams)
+
+```adoc
+[graphviz,my-flowchart,png]
+....
+digraph G {
+  A -> B -> C;
+}
+....
+```
+
+#### Mermaid (flowcharts, gantt charts)
+
+```adoc
+[mermaid,my-chart,png]
+....
+graph TD
+    A --> B --> C
+....
+```
+
+**Requirements:** The `asciidoctor-diagram` gem must be installed (`gem install asciidoctor-diagram`).
+PlantUML requires Java + PlantUML jar. Graphviz requires the `dot` command. Mermaid requires
+Node.js + mermaid-cli.
+
 ### Tables (hutable)
 ```asciidoc
 [.hutable]

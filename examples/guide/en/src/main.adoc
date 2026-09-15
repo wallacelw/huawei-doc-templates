@@ -215,6 +215,60 @@ TIP: Use `terraform validate` to check syntax before applying changes.
 NOTE: If you used Terraform, run `terraform destroy` instead to remove
 all resources declared in the configuration.
 
+== Architecture Diagrams
+
+This section demonstrates inline diagram support using AsciiDoc diagram blocks.
+Diagrams are converted to images during the build process.
+
+=== PlantUML Sequence Diagram
+
+[plantuml,sequence-diagram,png]
+....
+@startuml
+actor User
+participant "Web Console" as Console
+participant "API Gateway" as API
+database "Database" as DB
+
+User -> Console : Click "Create ECS"
+Console -> API : POST /ecs
+API -> DB : INSERT instance
+DB --> API : success
+API --> Console : 201 Created
+Console --> User : "ECS created"
+@enduml
+....
+
+=== Graphviz Flowchart
+
+[graphviz,flowchart,png]
+....
+digraph G {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor="#E0F7FA"];
+  
+  Start [label="Start", fillcolor="#62B230", fontcolor=white];
+  Auth [label="Authenticate"];
+  Deploy [label="Deploy ECS"];
+  Config [label="Configure Network"];
+  Ready [label="Ready", fillcolor="#62B230", fontcolor=white];
+  
+  Start -> Auth -> Deploy -> Config -> Ready;
+}
+....
+
+=== Mermaid Flowchart
+
+[mermaid,mermaid-flow,png]
+....
+graph TD
+    A[User Request] --> B{Auth Check}
+    B -->|Pass| C[Process Request]
+    B -->|Fail| D[Return 401]
+    C --> E[Return Response]
+    D --> F[Log Error]
+....
+
 == Brand Color Palette
 
 The template defines auxiliary brand colors aligned to the Huawei Cloud

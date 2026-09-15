@@ -4,6 +4,37 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.3 (2026-09-16)
+
+### Features
+
+- **Diagram support**: PlantUML, graphviz, and mermaid diagrams can now be
+  embedded directly in `.adoc` files using `[plantuml]`, `[graphviz]`, and
+  `[mermaid]` blocks. The `asciidoctor-diagram` gem is loaded automatically
+  by `build-adoc.sh`. Requires Java+PlantUML, graphviz, or mermaid-cli
+  depending on diagram type. Added diagram examples to guide/en sample.
+- **Copy-to-clipboard for HTML code blocks**: Code blocks in HTML output now
+  show a "Copy" button on hover. Uses `navigator.clipboard` API with
+  `execCommand` fallback. Styled with Huawei brand colors (green on success).
+  New files: `huawei.js`, `docinfo.html`.
+- **`make preview`**: Generates HTML preview from `.adoc` and opens in browser.
+  Usage: `make preview DIR=examples/guide/en`.
+- **`make watch`**: Watches `.adoc` files and recompiles PDF on save.
+  Uses `entr` if available, falls back to `inotifywait`, then polling.
+  Usage: `make watch DIR=examples/guide/en`.
+
+### Cleanup
+
+- **Removed old Lua filter files**: `pandoc-common.lua` (47KB),
+  `guide-pandoc.lua`, `technical-pandoc.lua`, `testbook-pandoc.lua`.
+  These were superseded by `huawei-latex-converter.rb` in v6.0.0.
+- **Removed legacy test data**: `tests/cases/` (36 .tex files),
+  `tests/expected/` (36 .md.expected files), `.luacheckrc`.
+  These tested the old Lua filter pipeline.
+- **Gemfile**: Added `ruby '>= 2.4'` version constraint (converter uses
+  `Float#clamp` from Ruby 2.4+).
+- **install.sh**: Added `graphviz` and `plantuml` packages for diagram support.
+
 ## v6.0.2 (2026-09-16)
 
 ### Fixes

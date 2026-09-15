@@ -129,6 +129,8 @@ make technical DIR=documents/my-report  # compile a technical report (latexmk in
 make setup-guide     # compile setup guide only
 make project DIR=examples/my-guide   # compile a specific project (auto-detects .adoc)
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
+make preview DIR=examples/guide/en  # generate HTML preview and open in browser
+make watch DIR=examples/guide/en    # watch .adoc files and recompile PDF on save (requires entr or inotifywait)
 make all-formats     # generate DOCX + MD + HTML for all samples + technical
 make clean           # remove all build artifacts
 make clean-formats   # remove generated multi-format files
@@ -244,6 +246,7 @@ Note: `.tex` files are generated from `.adoc` — edit the `.adoc` source instea
 | [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — 5-section structure (problem → root cause analysis → root cause → trigger condition → workaround), branded cover with version info table, TOC, callout boxes, tables, code blocks. Source: AsciiDoc → LaTeX → PDF. Portuguese and English. |
 | [`testbook`](templates/testbook/) | `/skill huawei-template-testbook` | Huawei Cloud test case document — POC/acceptance test cases with structured `testcase` environment (Objective, Prerequisites, Procedure, Expected Result, Remarks, Test Result), test scope and acceptance method tables, `:noanswers:` attribute for clean handouts. Source: AsciiDoc → LaTeX → PDF. Portuguese and English. |
 
+- **Diagram support**: PlantUML, graphviz, and mermaid diagrams can be embedded directly in `.adoc` files using `[plantuml]`, `[graphviz]`, and `[mermaid]` blocks. Requires `asciidoctor-diagram` gem and corresponding tools (Java+PlantUML, graphviz, mermaid-cli).
 - **Brand color palette**: Auxiliary colors (Orange, Green, Blue, etc.) and monochrome scale from Huawei Cloud Brand Guidelines. See `brand-guidelines/BRAND-GUIDELINES.md` for the full reference.
 
 See [`templates/guide/SKILL.md`](templates/guide/SKILL.md) for the full AsciiDoc

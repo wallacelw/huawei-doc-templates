@@ -204,6 +204,8 @@ $SUDO apt-get install -y \
     fonts-cascadia-code \
     poppler-utils \
     pandoc \
+    graphviz \
+    plantuml \
     python3-docx \
     ruby-full \
     2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd\|already the newest\|automatically installed\|autoremove\|not upgraded\|newly installed\|upgraded" || true
@@ -567,6 +569,7 @@ printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Code font:"          "Cascadia Code →
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook"
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "VS Code:"            "LaTeX Workshop (local + remote, -cd -xelatex)"
 printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Timezone:"           "America/Sao_Paulo (GMT-3, overridable)"
+printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Diagrams:"           "PlantUML + graphviz (optional: mermaid-cli for mermaid)"
 echo ""
 echo -e "  ${C_BOLD}Next steps:${C_RESET}"
 log_dim "1. Open this project in opencode"

@@ -1,3 +1,0 @@
-# Trigger Condition
-
-The issue triggers when concurrent requests exceed 1000.

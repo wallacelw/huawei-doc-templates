@@ -478,7 +478,11 @@ generate_html() {
     echo "  Generating HTML..."
     if [[ -n "$ADOC_FILE" ]]; then
         # AsciiDoc pipeline: asciidoctor directly
-        asciidoctor -b html5 -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" "$ADOC_FILE" -o "${PROJECT_DIR}/$out" 2>&1 || {
+        asciidoctor -b html5 \
+            -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
+            -a docinfodir="$REPO_ROOT/templates/_base" \
+            -a docinfo1 \
+            "$ADOC_FILE" -o "${PROJECT_DIR}/$out" 2>&1 || {
             RESULTS_FAIL+=("HTML:asciidoctor failed")
             return
         }
