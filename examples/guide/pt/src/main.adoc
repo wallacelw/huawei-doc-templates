@@ -1,0 +1,246 @@
+= Guia: Acessar o Console da Huawei Cloud
+:template: guide
+:lang: pt
+:header-title: Huawei Cloud -- Guia de acesso ao Console
+:cover-text: Huawei Technologies CO., LTD
+:version: 3.6.0
+:header-logo: common-assets/huawei-logo-header.png
+:cover-logo: common-assets/huawei-logo-cover.png
+
+NOTE: Este documento exemplifica o uso do template `guide` (`guide.cls`) para guias
+da Huawei Cloud. Ele demonstra todos os comandos e ambientes disponíveis:
+capa, sumário, objetivos, blocos de código, imagens, callouts, badge,
+changelog e o comando de caminho de menu.
+
+Verificação de acentuação (PT-BR): á à â ã ç é ê í ó ô õ ú,
+Á À Â Ã Ç É Ê Í Ó Ô Õ Ú. Exemplos: São Paulo, análise, distribuída,
+avô, avó, Histórico, Órgão, Índice, Útil.
+
+== Acessar o Console da Huawei Cloud
+
+[.objectives]
+====
+[.general-objective]#Este laboratório apresenta o acesso ao Console da Huawei Cloud,
+desde o login no portal até a navegação básica pelo painel de serviços.
+Ao concluir, você será capaz de autenticar-se na plataforma, selecionar a
+região desejada e localizar os principais serviços do catálogo.#
+
+*Pré-requisitos:*
+
+- Conta IAM ativa na Huawei Cloud (com usuário e senha válidos).
+- Navegador web atualizado (Google Chrome, Mozilla Firefox ou Microsoft Edge).
+- Acesso à internet e permissão para acessar o endpoint
+  `console.huaweicloud.com`.
+====
+
+NOTE: Este guia cobre o fluxo básico de acesso ao Console. Para operações
+avançadas, consulte a documentação oficial da Huawei Cloud.
+
+=== Acessar e navegar no Console
+
+*Objetivo:* Realizar o login no portal da Huawei Cloud e percorrer os
+elementos principais do Console: catálogo de serviços, seletor de região
+e área de notificações.
+
+*Passo a passo:*
+
+. Acesse a https://www.huaweicloud.com/intl/en-us/[Huawei Cloud]
+  e, no canto superior direito, clique em *Console*.
++
+.Tela de login do Console
+image::assets/exemplo-login.png[width=50%]
++
+. Informe o nome de usuário e a senha da sua conta IAM e clique em
+  *Log In*. Se a conta tiver autenticação em dois fatores habilitada,
+  informe o código enviado ao seu dispositivo.
++
+. Após o login, o painel principal do Console é exibido. No canto
+  superior esquerdo, abra o catálogo de serviços clicando no ícone de
+  menu e navegue até menu:Console[Elastic Cloud Server].
++
+image::assets/exemplo-menu.png[width=80%]
++
+. No canto superior direito, selecione a região em que seus recursos
+  serão criados (por exemplo, `sa-brazil-1`).
++
+NOTE: A região selecionada no Console define onde os novos recursos são
+provisionados. Recursos já existentes em outras regiões continuam visíveis
+apenas quando você alterna para a região correspondente.
++
+WARNING: A região não pode ser alterada para recursos já provisionados.
+Planeje a região antes de criar seus recursos.
+
+=== Explorar o Console
+
+==== Visão geral do painel
+
+O painel do Console é organizado em três áreas principais: o catálogo de
+serviços (à esquerda), a área de trabalho central e a barra superior, onde
+ficam o seletor de região, o seletor de projeto e as notificações da conta.
+Use o catálogo para abrir qualquer serviço, como *Elastic Cloud Server
+(ECS)* ou *Object Storage Service (OBS)*.
+
+===== Regiões e projetos
+
+Cada região pode conter múltiplos projetos IAM. O seletor de projeto, ao lado
+do seletor de região, permite isolar recursos por equipe ou finalidade. O
+parâmetro *region* do provedor Terraform deve corresponder exatamente ao
+identificador da região escolhida aqui, por exemplo `sa-brazil-1`.
+
+==== Regiões disponíveis
+
+A tabela abaixo lista as regiões suportadas para o Brasil e América Latina:
+
+.Regiões disponíveis na Huawei Cloud
+[.hutable]
+|===
+| Região | Localidade | Código
+
+| São Paulo | Brasil | `sa-brazil-1`
+| Santiago  | Chile | `la-south-2`
+|===
+
+image::assets/console-regions.png[alt="Captura de tela do seletor de região no Console"]
+
+== Configurar credenciais para a CLI
+
+[.objectives]
+====
+[.general-objective]#Este capítulo mostra como obter um par de chaves de acesso
+(AK/SK) no Console e declarar o provedor da Huawei Cloud em um arquivo
+de configuração, preparando o ambiente para uso com a CLI e com
+ferramentas de Infrastructure as Code.#
+
+*Pré-requisitos:*
+
+- Acesso ao Console da Huawei Cloud concluído no Capítulo 1.
+- Permissão IAM para criar credenciais de acesso.
+- `terraform` instalado localmente (versão 1.0 ou superior).
+====
+
+=== Criar uma AK/SK
+
+*Objetivo:* Gerar um par de Access Key ID / Secret Access Key para autenticar
+ferramentas externas na Huawei Cloud.
+
+No Console, clique no nome do usuário, no canto superior direito, e abra
+*My Credentials*. Na seção *Access Keys*, clique em
+*Create Access Key* e baixe o arquivo gerado. Guarde o arquivo em local
+seguro: a Secret Access Key é exibida apenas uma vez.
+
+=== Declarar o provider
+
+*Passo a passo:*
+
+. Crie um arquivo chamado *provider.tf* no diretório do seu
+  projeto com o seguinte conteúdo:
++
+----
+terraform {
+  required_providers {
+    huaweicloud = {
+      source  = "huaweicloud/huaweicloud"
+      version = ">= 1.60.0"
+    }
+  }
+}
+
+provider "huaweicloud" {
+  region     = "sa-brazil-1"
+  access_key = "SUA_ACCESS_KEY_AQUI"
+  secret_key = "SUA_SECRET_KEY_AQUI"
+}
+----
++
+  Substitua os valores de *access_key* e *secret_key* pelas
+  credenciais obtidas na seção anterior. Alternativamente, você pode incluir
+  o código a partir de um arquivo externo:
++
+  pass:[\codefile[bash]{assets/example-script.sh}]
++
+. No terminal, na pasta do projeto, inicialize o diretório de trabalho
+  do `terraform`:
++
+[source,bash]
+----
+terraform init
+terraform plan
+----
++
+NOTE: Nunca versione o arquivo *provider.tf* com credenciais reais.
+Use variáveis de ambiente ou um arquivo de estado ignorado pelo controle
+de versão.
+
+=== Próximos passos
+
+Com o provider declarado, você pode começar a definir recursos no
+`terraform`. Para conhecer todos os recursos disponíveis, consulte a
+documentação oficial em
+https://registry.terraform.io/providers/huaweicloud/huaweicloud/latest/docs[Huawei Cloud Provider].
+
+TIP: Use `terraform validate` para verificar a sintaxe antes de aplicar
+as alterações.
+
+[.badge]#Exemplo#
+
+NOTE: Este guia é um exemplo de uso do template `guide.cls`;
+ajuste os textos, imagens e blocos de código conforme o fluxo real do
+seu guia.
+
+== Limpeza
+
+[.objectives]
+====
+[.general-objective]#Remover os recursos criados neste laboratório para evitar cobranças contínuas.#
+====
+
+*Passo a passo:*
+
+. No Console, navegue até *Elastic Cloud Server*.
+. Selecione a instância `web-server-01`, clique em *More* e
+  escolha *Delete*.
+. Confirme a exclusão. Opcionalmente, libere o EIP se ele foi dedicado.
+
+NOTE: Se você usou o Terraform, execute `terraform destroy` em vez disso
+para remover todos os recursos declarados na configuração.
+
+== Paleta de Cores da Marca
+
+O template define cores auxiliares da marca alinhadas às
+Diretrizes de Marca da Huawei Cloud:
+
+[.hutable]
+|===
+| Color | HEX | Pantone | Sample
+
+| Rose Red | `#C40054` | 7636 | pass:[\textcolor{rosered}{\rule{2cm}{4pt}}]
+| Dark Red | `#7F0001` | 483C | pass:[\textcolor{darkred}{\rule{2cm}{4pt}}]
+| Orange | `#ED6D00` | 165C | pass:[\textcolor{huaweiorange}{\rule{2cm}{4pt}}]
+| Yellow | `#FCC800` | 7406C | pass:[\textcolor{huaweiyellow}{\rule{2cm}{4pt}}]
+| Green | `#62B230` | 3501C | pass:[\textcolor{huaweigreen}{\rule{2cm}{4pt}}]
+| Blue | `#30B5C5` | 2227C | pass:[\textcolor{huaweiblue}{\rule{2cm}{4pt}}]
+|===
+
+++++
+\begin{changelog}
+\changelogentry{3.6.0}{\today}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}
+\changelogentry{1.10.0}{\today}{\item Atualização para modelo base v3.0.1 — correções menores (auto-descoberta de testes, textos de ajuda, comentários, CI).}
+\changelogentry{1.9.0}{\today}{\item Atualização para modelo base v3.0.0 — refatoração modular do pipeline (fábrica Lua compartilhada, lógica DOCX compartilhada, auto-descoberta do sistema de build).}
+\changelogentry{1.8.0}{\today}{\item Atualização do modelo base v2.16.0 — correções do filtro Lua e melhorias no sistema de build.}
+\changelogentry{1.7.0}{2026-08-17}{\item Adicionar capítulo de Limpeza para paridade com a amostra em inglês.}
+\changelogentry{1.6.0}{2026-08-12}{\item O ambiente \texttt{changelog} agora emite seu próprio cabeçalho de seção; \texttt{[nochangelog]} suprime cabeçalho e entradas em um único comando.}
+\changelogentry{1.5.2}{2026-08-12}{\item Adicionada linha de verificação de acentuação PT-BR no infobox do exemplo (exercita todos os acentos do português).}
+\changelogentry{1.5.1}{2026-08-12}{\item Correção de centralização e preenchimento de cor das linhas do \texttt{hutable}: uso de \texttt{\textbackslash hline} para que o \texttt{colortbl} preencha as cores até as bordas.}
+\changelogentry{1.5.0}{2026-08-12}{\item Novo ambiente \texttt{hutable}: tabelas com grade completa, cabeçalho vermelho Huawei e linhas alternadas. \item Floats agora usam \texttt{[H]} como posicionamento padrão, então tabelas e figuras aparecem na ordem do código-fonte.}
+\changelogentry{1.4.1}{2026-08-10}{\item Título da seção H1 reduzido de 27pt para 20pt.}
+\changelogentry{1.4.0}{2026-08-10}{\item Tamanho padrão de imagem aumentado: largura 65\% $\to$ 90\% da largura do texto, altura 40\% $\to$ 50\% da altura do texto.}
+\changelogentry{1.3.0}{2026-08-10}{\item Aumentado o título da seção H1 (18pt $\to$ 27pt, 50\% maior). \item A opção \texttt{nochangelog} agora oculta versão, data e hora na capa. \item A data do documento passa a usar \inlinecode{\textbackslash today} (data de compilação).}
+\changelogentry{1.2.1}{2026-08-09}{\item Revertidos marcadores \texttt{/ActualText} — quebraram renderização de blocos de código.}
+\changelogentry{1.2.0}{2026-08-09}{\item Adicionadas opções de tamanho (key-value) para \inlinecode{\textbackslash image} e \inlinecode{\textbackslash imagecap} — \inlinecode{width} e \inlinecode{height} podem ser definidos independentemente.}
+\changelogentry{1.1.3}{2026-08-09}{\item Corrigida cópia de URLs em blocos de código — desabilitadas ligaturas de programação (\texttt{calt}) do Cascadia Code que convertiam \texttt{//} em \texttt{))} ao copiar.}
+\changelogentry{1.1.2}{2026-08-09}{\item Corrigida renderização de itálico — HarmonyOS Sans e Cascadia Code não têm itálico; habilitado slant sintético (\texttt{AutoFakeSlant}).}
+\changelogentry{1.1.1}{2026-08-08}{\item Alteradas as legendas de tabelas e figuras para preto (era vermelho Huawei).}
+\changelogentry{1.1.0}{2026-08-08}{\item Adicionada formatação de tabelas estilo Huawei: cabeçalho vermelho, cores alternadas e bordas.}
+\changelogentry{1.0.0}{2026-08-05}{\item Versão inicial. \item Adicionados callout boxes e badge.}
+\end{changelog}
+++++

@@ -1,0 +1,161 @@
+= [Analysis Report] The Enterprise Project List Is Not Displayed on the ECS Creation Page in 8.5.1 at the Brazil Site
+:template: technical
+:lang: en
+:version: 3.6.0
+:header-title: Huawei Cloud --- Technical Report
+:report-version: HCS 8.5.1
+:report-date: 2025-08-13
+:report-scenario: Standard Scenario
+
+++++
+\setreportversion{HCS 8.5.1}
+\setreportdate{2025-08-13}
+\setreportscenario{Standard Scenario}
+++++
+
+NOTE: This document is a sample of the *Huawei Technical Report template* (`technical.cls`).
+It demonstrates the 5-section structure (problem, root cause analysis, root cause, trigger condition, workaround)
+along with shared formatting commands: callout boxes, code blocks, tables, images, and inline commands.
+
+[.problem]
+====
+At the Brazil site of HCS 8.5.1, the default enterprise project
+is not displayed on the ECS creation page. This prevents users from
+selecting the correct enterprise project when provisioning new ECS
+instances.
+====
+
+[.rootcauseanalysis]
+====
+. Analyzed the permissions of the user who cannot view the
+  default enterprise project
+. Verified the `auth_action` field behavior in version 8.5.1
+. Confirmed the Server Administrator role lacks fine-grained
+  action permissions
+====
+
+[.rootcause]
+====
+In version 8.5.1, the fine-grained permission scenario was optimized.
+When an ECS is provisioned, only enterprise projects with the appropriate
+permissions are listed. The Server Administrator role does not include
+ECS FullAccess.
+====
+
+[.triggercondition]
+====
+Occurs when a user with only the Server Administrator role attempts
+to create an ECS instance in HCS 8.5.1.
+====
+
+[.workaround]
+====
+[.impact]
+--
+To grant ECS FullAccess to a user, you need to modify the user group
+permission. This permission is the ECS administrator permission
+and is included in the Server Administrator permission.
+--
+
+[.backupdata]
+--
+N/A --- no data modification required.
+--
+
+[.workaroundsteps]
+--
+. Log in to the tenant plane and find the user group associated
+  with the affected user
+. Add the ECS FullAccess permission to the user group
+. Verify the permission is applied correctly
+--
+
+[.verification]
+--
+Log in to the tenant page again, go to the ECS page, create an
+ECS, and verify the enterprise project list is now displayed.
+--
+
+[.rollback]
+--
+Remove the ECS FullAccess permission from the user group.
+--
+
+[.cleanup]
+--
+No cleanup required.
+--
+====
+
+== Additional formatting examples
+
+This section demonstrates shared formatting commands available in the technical template.
+
+=== Callout boxes
+
+WARNING: This is a warning callout box. Use it to highlight important cautions or potential issues.
+
+TIP: This is a tip callout box. Use it to suggest best practices or helpful advice.
+
+NOTE: This is an info callout box. Use it for general information or notes.
+
+=== Code blocks
+
+[source,bash]
+----
+# Example script for verification
+kubectl get pods -n production
+kubectl logs -f deployment/api-gateway -n production
+----
+
+`kubectl describe pod` for detailed pod inspection.
+
+=== Tables
+
+[.hutable]
+|===
+| Component | Version | Status
+
+| API Gateway | 2.4.1 | OK
+| Database | 8.5.1 | OK
+| Cache | 7.0 | Degraded
+|===
+
+=== Inline commands
+
+[.note]#Always verify the backup before starting the workaround.#
+
+Reference: https://docs.huaweicloud.com[Huawei Cloud Documentation]
+
+Navigation: menu:Console[ECS[Instances]]
+
+Status: [.badge]#Verified#
+
+Parameter: *timeout* should be set to 300 seconds.
+
+== Brand Color Palette
+
+The template defines auxiliary brand colors aligned to the Huawei Cloud
+Brand Guidelines:
+
+[.hutable]
+|===
+| Color | HEX | Pantone | Sample
+
+| Rose Red | `#C40054` | 7636 | pass:[\textcolor{rosered}{\rule{2cm}{4pt}}]
+| Dark Red | `#7F0001` | 483C | pass:[\textcolor{darkred}{\rule{2cm}{4pt}}]
+| Orange | `#ED6D00` | 165C | pass:[\textcolor{huaweiorange}{\rule{2cm}{4pt}}]
+| Yellow | `#FCC800` | 7406C | pass:[\textcolor{huaweiyellow}{\rule{2cm}{4pt}}]
+| Green | `#62B230` | 3501C | pass:[\textcolor{huaweigreen}{\rule{2cm}{4pt}}]
+| Blue | `#30B5C5` | 2227C | pass:[\textcolor{huaweiblue}{\rule{2cm}{4pt}}]
+|===
+
+++++
+\begin{changelog}
+\changelogentry{3.6.0}{\today}{\item Added \inlinecode{\textbackslash setdocauthors} to demonstrate the authors feature on the cover page.}
+\changelogentry{1.3.0}{\today}{\item Updated to base template v3.0.1 — minor fixes (test auto-discovery, help text, comments, CI).}
+\changelogentry{1.2.0}{\today}{\item Updated to base template v3.0.0 — modular pipeline refactoring (shared Lua filter factory, shared DOCX fix logic, build system auto-discovery).}
+\changelogentry{1.1.0}{\today}{\item Added infobox explanation and demonstrations of shared formatting commands (callouts, code, tables, inline commands).}
+\changelogentry{1.0.0}{\today}{\item Initial version.}
+\end{changelog}
+++++
