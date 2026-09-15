@@ -19,7 +19,7 @@ curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main
 ```
 
 If an existing installation is detected, the one-liner prompts to update
-(`Update v5.1.1 → v6.0.0? [Y/n]`) and pulls the latest version.
+(`Update v6.0.0 → v6.0.1? [Y/n]`) and pulls the latest version.
 
 **Or step by step:**
 
@@ -232,7 +232,8 @@ Each format serves a different purpose. Choose based on your workflow:
 
 The repo ships `.vscode/settings.json` pre-configured for **latexmk (XeLaTeX)**.
 Install the [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
-extension, open the repo root, and save any `.tex` file to auto-compile.
+extension, open the repo root, and edit `.adoc` source files to auto-compile
+(LaTeX Workshop triggers on the generated `.tex`).
 Note: `.tex` files are generated from `.adoc` — edit the `.adoc` source instead.
 
 ## Templates
@@ -266,7 +267,7 @@ for the technical report template syntax reference.
 ├── opencode.json            # skill discovery: scans templates/ for SKILL.md
 ├── README.md                # this file
 ├── LICENSE                  # MIT
-├── .luacheckrc             # Lua static analysis config
+├── .luacheckrc             # Lua static analysis config (legacy, used by old Lua filter pipeline)
 ├── .vscode/
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
@@ -310,8 +311,8 @@ for the technical report template syntax reference.
 │       │   └── .latexmkrc   # TEXINPUTS → ../../templates/_base/ + ../../templates/guide/; $out_dir='..'
 │       └── assets/           # project-specific images
 ├── tests/
-│   ├── cases/           # Lua filter test cases
-│   ├── expected/        # expected filter output (.md.expected)
+│   ├── cases/           # Lua filter test cases (legacy, used by old Lua filter pipeline)
+│   ├── expected/        # expected filter output (.md.expected) (legacy, used by old Lua filter pipeline)
 │   ├── test-filter.sh   # Lua filter unit tests
 │   ├── round-trip.sh    # cross-format validation (MD + DOCX + HTML)
 │   ├── test-docx-fix.sh # DOCX --fix post-processing smoke test

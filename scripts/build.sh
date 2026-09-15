@@ -47,7 +47,6 @@ else
 fi
 
 # Placeholder paths — will be finalized after template is resolved
-LUA_FILTER=""
 REF_DOCX=""
 HTML_TMPL=""
 
@@ -134,39 +133,44 @@ if [ ! -d "$SRC_DIR" ]; then
     SRC_DIR="$PROJECT_DIR"  # fallback for non-restructured projects
 fi
 
-# ── Auto-detect .tex file ────────────────────────────────────────────────
+# ── Auto-detect source file (.adoc preferred, .tex fallback) ────────────
+ADOC_FILE=""
 TEX_FILE=""
-TEX_COUNT=0
-for f in "$SRC_DIR"/*.tex; do
-    [ -f "$f" ] || continue
-    TEX_COUNT=$((TEX_COUNT + 1))
-done
 
-if [ "$TEX_COUNT" -eq 0 ]; then
-    echo "Error: No .tex file found in $SRC_DIR" >&2
-    exit 1
-elif [ "$TEX_COUNT" -eq 1 ]; then
-    TEX_FILE="$(basename "$SRC_DIR"/*.tex)"
-else
-    # Multiple .tex files — prefer main.tex, then setup-guide.tex
-    if [ -f "$SRC_DIR/main.tex" ]; then
-        TEX_FILE="main.tex"
-    elif [ -f "$SRC_DIR/setup-guide.tex" ]; then
-        TEX_FILE="setup-guide.tex"
-    else
-        echo "Error: Multiple .tex files found in $SRC_DIR and no main.tex or setup-guide.tex" >&2
-        echo "Please specify the file manually." >&2
-        exit 1
-    fi
+# Derive document name from project directory basename (for non-main.adoc files)
+DOC_NAME="$(basename "$PROJECT_DIR")"
+
+# Detect .adoc source
+if [[ -f "$SRC_DIR/main.adoc" ]]; then
+    ADOC_FILE="$SRC_DIR/main.adoc"
+elif [[ -f "$SRC_DIR/${DOC_NAME}.adoc" ]]; then
+    ADOC_FILE="$SRC_DIR/${DOC_NAME}.adoc"
 fi
 
-BASENAME="${TEX_FILE%.tex}"
+# Detect .tex source (fallback for legacy projects)
+if [[ -f "$SRC_DIR/main.tex" ]]; then
+    TEX_FILE="$SRC_DIR/main.tex"
+elif [[ -f "$SRC_DIR/${DOC_NAME}.tex" ]]; then
+    TEX_FILE="$SRC_DIR/${DOC_NAME}.tex"
+fi
+
+if [[ -z "$ADOC_FILE" && -z "$TEX_FILE" ]]; then
+    echo "Error: No .adoc or .tex file found in $SRC_DIR" >&2
+    exit 1
+fi
+
+# Determine basename from whichever source is available
+if [[ -n "$ADOC_FILE" ]]; then
+    BASENAME="$(basename "${ADOC_FILE%.adoc}")"
+else
+    BASENAME="$(basename "${TEX_FILE%.tex}")"
+fi
 
 # Relative path from project dir to .tex file (for pandoc resource resolution)
 if [ "$SRC_DIR" = "$PROJECT_DIR" ]; then
-    TEX_REL="$TEX_FILE"
+    TEX_REL="${BASENAME}.tex"
 else
-    TEX_REL="src/$TEX_FILE"
+    TEX_REL="src/${BASENAME}.tex"
 fi
 
 # ── Auto-detect template from .latexmkrc if not specified ────────────────
@@ -197,7 +201,6 @@ if [ ! -f "${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}.cls" ]; then
 fi
 
 # Finalize template paths
-LUA_FILTER="${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}-pandoc.lua"
 REF_DOCX="${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}-reference.docx"
 HTML_TMPL="${REPO_ROOT}/templates/${TEMPLATE}/${TEMPLATE}-template.html"
 
@@ -236,7 +239,7 @@ interactive_menu() {
     echo "Huawei Cloud Document Builder"
     echo "========================================"
     echo "Project: ${REL_DIR}"
-    echo "Source:  ${TEX_FILE}"
+    echo "Source:  ${ADOC_FILE:-$TEX_FILE}"
     echo ""
     echo "Select output formats (enter numbers separated by spaces, or 'all'):"
     echo ""
@@ -315,8 +318,17 @@ generate_pdf() {
         return
     fi
     echo "  Generating PDF..."
+    # Convert .adoc -> .tex if AsciiDoc source exists
+    if [[ -n "$ADOC_FILE" ]]; then
+        echo "  Converting ${ADOC_FILE} -> ${SRC_DIR}/${BASENAME}.tex"
+        "$REPO_ROOT/scripts/build-adoc.sh" "$ADOC_FILE" -o "$SRC_DIR/${BASENAME}.tex" || {
+            RESULTS_FAIL+=("PDF:build-adoc.sh failed")
+            return
+        }
+        TEX_FILE="$SRC_DIR/${BASENAME}.tex"
+    fi
     local rc=0
-    (cd "$SRC_DIR" && latexmk "$TEX_FILE") 2>&1 || rc=$?
+    (cd "$SRC_DIR" && latexmk "${BASENAME}.tex") 2>&1 || rc=$?
     if [ "$rc" -eq 0 ]; then
         RESULTS_OK+=("PDF:$out")
         # Check for font fallback warnings
@@ -340,6 +352,7 @@ generate_pdf() {
 }
 
 generate_pandoc_format() {
+    # Legacy .tex-only pipeline (backward compatibility)
     local label=$1 fmt=$2 ext=$3; shift 3
     local extra_args=("$@")
     local out="${BASENAME}.${ext}"
@@ -348,10 +361,9 @@ generate_pandoc_format() {
         RESULTS_OK+=("${label}:$out (dry-run)")
         return
     fi
-    echo "  Generating ${label}..."
+    echo "  Generating ${label} (from .tex)..."
     local err
     err=$(cd "$PROJECT_DIR" && export TZ="${TZ:-America/Sao_Paulo}" && pandoc -f latex+raw_tex \
-        --lua-filter="$LUA_FILTER" \
         --resource-path=".:${REPO_ROOT}/templates/${TEMPLATE}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
         --number-sections \
         "${extra_args[@]}" \
@@ -376,25 +388,114 @@ generate_pandoc_format() {
 }
 
 generate_docx() {
-    generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
+    local out="${BASENAME}.docx"
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "  Would generate DOCX: ${REL_DIR}/$out"
+        RESULTS_OK+=("DOCX:$out (dry-run)")
+        return
+    fi
+    echo "  Generating DOCX..."
+    if [[ -n "$ADOC_FILE" ]]; then
+        # AsciiDoc pipeline: asciidoctor-reducer -> pandoc
+        local tmp_adoc
+        tmp_adoc=$(mktemp --suffix=.adoc)
+        asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
+        pandoc -f asciidoc --reference-doc="$REF_DOCX" "$tmp_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
+            RESULTS_FAIL+=("DOCX:pandoc failed")
+            rm -f "$tmp_adoc"
+            return
+        }
+        rm -f "$tmp_adoc"
+    else
+        # Legacy .tex pipeline
+        generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
+    fi
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
-    if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.docx" ]; then
-        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/${BASENAME}.docx" 2>&1; then
+    if [ -f "${PROJECT_DIR}/$out" ]; then
+        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2
             RESULTS_FAIL+=("DOCX:post-processing failed for $TEMPLATE")
         fi
     fi
-}
-generate_md() {
-    generate_pandoc_format "Markdown" markdown md
-    # Post-process: embed images as base64 data URIs (self-contained MD)
-    if [ "$DRY_RUN" -eq 0 ] && [ -f "${PROJECT_DIR}/${BASENAME}.md" ]; then
-        python3 "${REPO_ROOT}/templates/_base/embed-images.py" \
-            "${PROJECT_DIR}/${BASENAME}.md" \
-            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" 2>&1 | sed 's/^/  /'
+    local size=""
+    if [ -f "${PROJECT_DIR}/$out" ]; then
+        size="$(du -k "${PROJECT_DIR}/$out" 2>/dev/null | cut -f1)"
+    fi
+    if [ -n "$size" ]; then
+        RESULTS_OK+=("DOCX:${REL_DIR}/$out (${size} KB)")
+    else
+        RESULTS_OK+=("DOCX:${REL_DIR}/$out")
     fi
 }
-generate_html() { generate_pandoc_format "HTML" html5 html --template="$HTML_TMPL" -s --embed-resources; }
+
+generate_md() {
+    local out="${BASENAME}.md"
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "  Would generate Markdown: ${REL_DIR}/$out"
+        RESULTS_OK+=("Markdown:$out (dry-run)")
+        return
+    fi
+    echo "  Generating Markdown..."
+    if [[ -n "$ADOC_FILE" ]]; then
+        # AsciiDoc pipeline: asciidoctor-reducer -> pandoc
+        local tmp_adoc
+        tmp_adoc=$(mktemp --suffix=.adoc)
+        asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
+        pandoc -f asciidoc -t gfm "$tmp_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
+            RESULTS_FAIL+=("Markdown:pandoc failed")
+            rm -f "$tmp_adoc"
+            return
+        }
+        rm -f "$tmp_adoc"
+    else
+        # Legacy .tex pipeline
+        generate_pandoc_format "Markdown" markdown md
+    fi
+    # Post-process: embed images as base64 data URIs (self-contained MD)
+    if [ -f "${PROJECT_DIR}/$out" ]; then
+        python3 "${REPO_ROOT}/templates/_base/embed-images.py" \
+            "${PROJECT_DIR}/$out" \
+            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" 2>&1 | sed 's/^/  /'
+    fi
+    local size=""
+    if [ -f "${PROJECT_DIR}/$out" ]; then
+        size="$(du -k "${PROJECT_DIR}/$out" 2>/dev/null | cut -f1)"
+    fi
+    if [ -n "$size" ]; then
+        RESULTS_OK+=("Markdown:${REL_DIR}/$out (${size} KB)")
+    else
+        RESULTS_OK+=("Markdown:${REL_DIR}/$out")
+    fi
+}
+
+generate_html() {
+    local out="${BASENAME}.html"
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "  Would generate HTML: ${REL_DIR}/$out"
+        RESULTS_OK+=("HTML:$out (dry-run)")
+        return
+    fi
+    echo "  Generating HTML..."
+    if [[ -n "$ADOC_FILE" ]]; then
+        # AsciiDoc pipeline: asciidoctor directly
+        asciidoctor -b html5 -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" "$ADOC_FILE" -o "${PROJECT_DIR}/$out" 2>&1 || {
+            RESULTS_FAIL+=("HTML:asciidoctor failed")
+            return
+        }
+    else
+        # Legacy .tex pipeline
+        generate_pandoc_format "HTML" html5 html --template="$HTML_TMPL" -s --embed-resources
+    fi
+    local size=""
+    if [ -f "${PROJECT_DIR}/$out" ]; then
+        size="$(du -k "${PROJECT_DIR}/$out" 2>/dev/null | cut -f1)"
+    fi
+    if [ -n "$size" ]; then
+        RESULTS_OK+=("HTML:${REL_DIR}/$out (${size} KB)")
+    else
+        RESULTS_OK+=("HTML:${REL_DIR}/$out")
+    fi
+}
 
 # ── Summary ──────────────────────────────────────────────────────────────
 show_summary() {

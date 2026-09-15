@@ -117,7 +117,7 @@ The table below lists recommended ECS flavors for development workloads:
 | ac8.2xlarge.2 | 8 vCPU / 16 GB | Heavy workloads + multiple agents
 |===
 
-image::assets/ecs-flavors.png[alt="Screenshot of the ECS flavor selection page in the Console"]
+pass:[\imageplaceholder{assets/ecs-flavors.png}{Screenshot of the ECS flavor selection page in the Console}]
 
 NOTE: This is an English sample that exercises every command and
 environment provided by the `guide` class. Use it as a reference

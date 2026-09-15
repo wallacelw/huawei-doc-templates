@@ -3,7 +3,7 @@ set -euo pipefail
 
 # test-sync.sh — verify version synchronization across the project
 # Checks:
-#   1. guide.cls version == setup-guide \setdocversion
+#   1. guide.cls version == setup-guide :version: header attribute
 #   2. guide.cls version == latest git tag (if tags exist)
 #   3. All template .cls versions match guide.cls version
 #   4. Makefile has format targets for each template

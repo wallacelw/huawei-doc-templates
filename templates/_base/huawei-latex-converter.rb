@@ -64,15 +64,6 @@ def pixel_width_to_linewidth(px)
 end
 
 # ─────────────────────────────────────────────────────────────────────
-#  Helper: convert AsciiDoc table column specs to LaTeX column specs
-#  AsciiDoc cols like "1,3,1" → LaTeX "|l|l|l|"
-# ─────────────────────────────────────────────────────────────────────
-def latex_col_spec(_node)
-  # Default to left-aligned columns; number of columns determines the spec
-  '|l'
-end
-
-# ─────────────────────────────────────────────────────────────────────
 #  Helper: admonition type → LaTeX environment
 # ─────────────────────────────────────────────────────────────────────
 ADMONITION_MAP = {
@@ -81,16 +72,6 @@ ADMONITION_MAP = {
   'warning'   => 'warning',
   'caution'   => 'warning',
   'important' => 'warning',
-}.freeze
-
-# ─────────────────────────────────────────────────────────────────────
-#  Helper: badge role → LaTeX command
-# ─────────────────────────────────────────────────────────────────────
-BADGE_ROLE_MAP = {
-  'badge-pass'    => 'testresultbadge',
-  'badge-fail'    => 'testresultbadge',
-  'badge-blocked' => 'testresultbadge',
-  'badge-untested'=> 'testresultbadge',
 }.freeze
 
 # ─────────────────────────────────────────────────────────────────────
@@ -183,6 +164,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     class_options << 'notime'      if notime
     class_options << 'nochangelog' if nochangelog
     class_options << 'noauthors'   if noauthors
+    class_options << 'noanswers'   if node.attr?('noanswers')
+    class_options << 'indentbody'  if node.attr?('indentbody')
 
     class_opt_str = class_options.empty? ? '' : "[#{class_options.join(',')}]"
 
@@ -190,7 +173,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     doctitle   = node.doctitle
     authors    = node.attr('author') || node.attr('authors')
     version    = node.attr('version')
-    revdate    = node.attr('revdate')
+    revdate    = node.attr('date') || node.attr('revdate')
     header_title = node.attr('header-title')
     cover_text   = node.attr('cover-text')
 
@@ -206,6 +189,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
     lines << "\\setheadertitle{#{latex_escape(header_title)}}" if header_title
     lines << "\\setcovertext{#{latex_escape(cover_text)}}" if cover_text
+    header_logo = node.attr('header-logo')
+    if header_logo
+      lines << "\\setheaderlogo{#{header_logo}}"
+    end
+    cover_logo = node.attr('cover-logo')
+    if cover_logo
+      lines << "\\setcoverlogo{#{cover_logo}}"
+    end
     lines << ''
     lines << '\\begin{document}'
     lines << '\\makecover'
@@ -260,7 +251,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     content = node.content
     return '' if content.nil? || content.empty?
     # Unescape HTML entities that asciidoctor adds
-    content = content.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&amp;', '&').gsub('&quot;', '"')
+    content = content.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&quot;', '"').gsub('&amp;', '&')
     # Escape LaTeX special chars not preceded by a backslash.
     # Don't escape { } — they appear in generated LaTeX commands from inline handlers.
     content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
@@ -301,10 +292,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Check for include:: directive inside source block → \codefile
     source = node.source || ''
     if source.include?('include::')
-      # Extract include target
-      source.scan(/include::([^\[]+)/).each do |match|
-        return "\\codefile{#{match.first}}"
-      end
+      includes = source.scan(/include::([^\[]+)/).map(&:first)
+      return includes.map { |f| "\\codefile{#{f}}" }.join("\n")
     end
 
     language = node.attr('language')
@@ -334,11 +323,6 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     num_cols = node.columns ? node.columns.size : 1
     col_spec = "|#{'l|' * num_cols}"
 
-    # Test summary table
-    if role == 'testsummary'
-      return convert_testsummary(node)
-    end
-
     # Determine table environment
     if role == 'hutable'
       env_name = 'hutable'
@@ -357,10 +341,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     rows_body = node.rows.body
     rows_foot = node.rows.foot
 
-    # Header row
+    # Header rows
     unless rows_head.empty?
-      header_cells = rows_head.first.map { |cell| "\\thd{#{latex_escape(cell.text)}}" }
-      lines << "\\rowcolor{huaweired} #{header_cells.join(' & ')} \\\\"
+      rows_head.each do |header_row|
+        header_cells = header_row.map { |cell| "\\thd{#{cell.content}}" }
+        lines << "#{header_cells.join(' & ')} \\\\"
+      end
       if env_name == 'longhutable'
         lines << '\\endhead'
       end
@@ -394,25 +380,6 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       return wrapped.join("\n")
     end
 
-    lines.join("\n")
-  end
-
-  # ===================================================================
-  #  TEST SUMMARY — [.testsummary] table → \begin{testsummary}...
-  # ===================================================================
-  def convert_testsummary(node)
-    rows_body = node.rows.body
-    lines = []
-    lines << '\\begin{testsummary}'
-    rows_body.each do |row|
-      # First col = ID, second = title, third = status
-      id    = row[0] ? latex_escape(row[0].text) : ''
-      title = row[1] ? latex_escape(row[1].text) : ''
-      # Status may contain badge markup — extract text
-      status = row[2] ? latex_escape(row[2].text) : ''
-      lines << "\\testsummaryrow{#{id}}{#{title}}{#{status}}"
-    end
-    lines << '\\end{testsummary}'
     lines.join("\n")
   end
 
@@ -477,7 +444,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Default: render as description list
     items = node.items.map do |terms, desc|
       term_text = terms.map(&:text).join(', ')
-      desc_text = desc ? desc.text : ''
+      desc_text = desc ? desc.content : ''
       "\\item[#{latex_escape(term_text)}] #{desc_text}"
     end
     "\\begin{description}\n#{items.join("\n")}\n\\end{description}"
@@ -503,6 +470,56 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     else
       content
     end
+  end
+
+  # ===================================================================
+  #  Technical template 5-section role handlers
+  #  [.problem], [.rootcauseanalysis], [.rootcause],
+  #  [.triggercondition], [.workaround] → LaTeX environments
+  # ===================================================================
+  def convert_role_problem(node)
+    "\\begin{problem}\n#{node.content}\n\\end{problem}"
+  end
+
+  def convert_role_rootcauseanalysis(node)
+    "\\begin{rootcauseanalysis}\n#{node.content}\n\\end{rootcauseanalysis}"
+  end
+
+  def convert_role_rootcause(node)
+    "\\begin{rootcause}\n#{node.content}\n\\end{rootcause}"
+  end
+
+  def convert_role_triggercondition(node)
+    "\\begin{triggercondition}\n#{node.content}\n\\end{triggercondition}"
+  end
+
+  def convert_role_workaround(node)
+    "\\begin{workaround}\n#{node.content}\n\\end{workaround}"
+  end
+
+  # Technical template sub-role handlers
+  def convert_role_impact(node)
+    "\\begin{impact}\n#{node.content}\n\\end{impact}"
+  end
+
+  def convert_role_backupdata(node)
+    "\\begin{backupdata}\n#{node.content}\n\\end{backupdata}"
+  end
+
+  def convert_role_workaroundsteps(node)
+    "\\begin{workaroundsteps}\n#{node.content}\n\\end{workaroundsteps}"
+  end
+
+  def convert_role_verification(node)
+    "\\begin{verification}\n#{node.content}\n\\end{verification}"
+  end
+
+  def convert_role_rollback(node)
+    "\\begin{rollback}\n#{node.content}\n\\end{rollback}"
+  end
+
+  def convert_role_cleanup(node)
+    "\\begin{cleanup}\n#{node.content}\n\\end{cleanup}"
   end
 
   # ===================================================================
@@ -629,7 +646,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   #  INLINE BREAK — line break
   # ===================================================================
   def convert_inline_break(node)
-    "#{node.text}\\\\"
+    "#{latex_escape_text(node.text)}\\\\"
   end
 
   # ===================================================================
@@ -693,137 +710,6 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # ===================================================================
 
   # ───────────────────────────────────────────────────────────────────
-  #  [.changelog] open block → \begin{changelog}...\end{changelog}
-  #
-  #  Expected structure: a definition list where each term is the
-  #  version number, the first line of the description is the date,
-  #  and subsequent lines are the change items.
-  # ───────────────────────────────────────────────────────────────────
-  def convert_role_changelog(node)
-    lines = []
-    lines << '\\begin{changelog}'
-
-    node.blocks.each do |block|
-      if block.role == 'entry'
-        # [.entry version="..." date="..."] block
-        version = block.attr('version') || ''
-        date = block.attr('date') || ''
-        # Convert content (bullet items) to LaTeX \item entries
-        items_latex = convert(block)
-        lines << "\\changelogentry{#{version}}{#{date}}{#{items_latex}}"
-      elsif block.node_name == 'dlist'
-        block.items.each do |terms, desc|
-          version = terms.map(&:text).join.strip
-          desc_text = desc ? desc.text : ''
-          date = ''
-          items_text = ''
-          if desc_text && !desc_text.empty?
-            parts = desc_text.split("\n", 2)
-            date = parts[0].strip
-            items_text = parts[1] || ''
-          end
-          if items_text && !items_text.empty?
-            item_lines = items_text.strip.split("\n").map do |line|
-              cleaned = line.gsub(/^\*\s+/, '')
-              "\\item #{cleaned}" unless cleaned.strip.empty?
-            end.compact
-            items_latex = item_lines.join(' ')
-          else
-            items_latex = "\\item #{desc_text}"
-          end
-          lines << "\\changelogentry{#{version}}{#{date}}{#{items_latex}}"
-        end
-      elsif block.node_name == 'paragraph'
-        lines << block.content
-      end
-    end
-
-    lines << '\\end{changelog}'
-    lines.join("\n")
-  end
-
-  # ───────────────────────────────────────────────────────────────────
-  #  [.testcase] open block → \begin{testcase}{title}...\end{testcase}
-  # ───────────────────────────────────────────────────────────────────
-  def convert_role_testcase(node)
-    tc_title = node.attr('title') || node.title || ''
-    lines = []
-    lines << "\\begin{testcase}{#{latex_escape(tc_title)}}"
-
-    # Process child blocks — look for [.testfield] sub-blocks
-    node.blocks.each do |block|
-      if block.role == 'testfield'
-        label = block.attr('label') || ''
-        field_type = TESTFIELD_MAP[label]
-
-        case field_type
-        when :objective
-          lines << "\\testobjective{#{block.content}}"
-
-        when :prerequisites
-          lines << '\\begin{testprerequisites}'
-          lines << convert_teststeps(block)
-          lines << '\\end{testprerequisites}'
-
-        when :procedure
-          lines << '\\begin{testprocedure}'
-          lines << convert_teststeps(block)
-          lines << '\\end{testprocedure}'
-
-        when :expected
-          lines << '\\begin{testexpected}'
-          lines << convert_teststeps(block)
-          lines << '\\end{testexpected}'
-
-        when :result
-          lines << "\\testresult{#{block.content}}"
-
-        when :remarks
-          lines << "\\testremarks{#{block.content}}"
-
-        else
-          # Unknown field — emit as plain content
-          lines << block.content
-        end
-      else
-        # Non-testfield content inside testcase (images, code, etc.)
-        lines << block.content
-      end
-    end
-
-    lines << '\\end{testcase}'
-    lines.join("\n")
-  end
-
-  # ───────────────────────────────────────────────────────────────────
-  #  Helper: convert numbered/bullet list items in a testfield to
-  #  \teststep{...} entries
-  # ───────────────────────────────────────────────────────────────────
-  def convert_teststeps(block)
-    steps = []
-    # Walk child blocks for list items
-    if block.blocks
-      block.blocks.each do |child|
-        case child.node_name
-        when 'olist', 'ulist'
-          child.items.each do |item|
-            steps << "\\teststep{#{item.text}}"
-          end
-        when 'paragraph'
-          steps << "\\teststep{#{child.content}}"
-        else
-          steps << child.content
-        end
-      end
-    end
-    # If no child blocks, treat the text content as a single step
-    if steps.empty? && block.content && !block.content.strip.empty?
-      steps << "\\teststep{#{block.content.strip}}"
-    end
-    steps.join("\n")
-  end
-
-  # ───────────────────────────────────────────────────────────────────
   #  [.objectives] open block → \begin{objectives}...\end{objectives}
   # ───────────────────────────────────────────────────────────────────
   def convert_role_objectives(node)
@@ -863,13 +749,6 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines.join("\n")
   end
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.testsummary] on a table — already handled in convert_table
-  # ───────────────────────────────────────────────────────────────────
-  def convert_role_testsummary(node)
-    convert_testsummary(node)
-  end
-
   # ===================================================================
   #  ROLE-BASED INLINE (SPAN) CONVERTERS
   # ===================================================================
@@ -878,7 +757,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   #  [.badge]#text# → \badge{text}
   # ───────────────────────────────────────────────────────────────────
   def convert_role_badge(node)
-    "\\badge{#{node.text}}"
+    "\\badge{#{latex_escape_text(node.text)}}"
   end
 
   # ───────────────────────────────────────────────────────────────────
@@ -895,14 +774,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   #  [.note]#text# → \note{text}
   # ───────────────────────────────────────────────────────────────────
   def convert_role_note(node)
-    "\\note{#{node.text}}"
+    "\\note{#{latex_escape_text(node.text)}}"
   end
 
   # ───────────────────────────────────────────────────────────────────
   #  [.param]#text# → \param{text}
   # ───────────────────────────────────────────────────────────────────
   def convert_role_param(node)
-    "\\param{#{node.text}}"
+    "\\param{#{latex_escape_text(node.text)}}"
   end
 
   # ───────────────────────────────────────────────────────────────────

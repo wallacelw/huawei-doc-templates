@@ -128,7 +128,7 @@ echo -e "${C_BOLD}${C_CYAN}║  ${_banner_text}  ║${C_RESET}"
 echo -e "${C_BOLD}${C_CYAN}╚${_banner_border}╝${C_RESET}"
 echo ""
 
-echo -e "  ${C_BOLD}What:${C_RESET}  LaTeX templates for Huawei Cloud guides (XeLaTeX + latexmk, AsciiDoc + asciidoctor)"
+echo -e "  ${C_BOLD}What:${C_RESET}  AsciiDoc document templates for Huawei Cloud guides (XeLaTeX + latexmk, AsciiDoc + asciidoctor)"
 echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
 log_dim "• XeLaTeX + latexmk + LaTeX packages"
@@ -506,23 +506,36 @@ fi
 log_step "Test compilation"
 
 compile_sample() {
-    local dir="$1" label="$2" file="${3:-main.tex}"
+    local dir="$1" label="$2" file="${3:-}"
     local src_dir="$dir/src"
-    if [[ -f "$src_dir/$file" ]]; then
-        cd "$src_dir"
-        latexmk -C "$file" >/dev/null 2>&1
-        if latexmk "$file" >/dev/null 2>&1; then
-            local pdf="${file%.tex}.pdf"
-            # .latexmkrc sets $out_dir='..' — PDF goes to parent dir
-            [[ ! -f "$pdf" ]] && pdf="../$pdf"
-            local pages=$(pdfinfo "$pdf" 2>/dev/null | grep "^Pages:" | awk '{print $2}')
-            log_ok "$label: ${pages:-?} pages"
-            latexmk -c "$file" >/dev/null 2>&1
-        else
-            log_warn "$label compile failed — check $src_dir/${file%.tex}.log"
-        fi
+
+    # Detect source file (.adoc preferred, .tex fallback)
+    if [[ -f "$src_dir/main.adoc" ]]; then
+        local adoc_file="$src_dir/main.adoc"
+        local tex_file="$src_dir/main.tex"
+        echo "  Converting $adoc_file -> $tex_file"
+        "$SCRIPT_DIR/scripts/build-adoc.sh" "$adoc_file" -o "$tex_file" || { log_warn "$label: build-adoc.sh failed"; return 1; }
+        file="main.tex"
+    elif [[ -f "$src_dir/main.tex" ]]; then
+        file="main.tex"
+    elif [[ -n "$file" && -f "$src_dir/$file" ]]; then
+        : # use provided file
     else
         log_warn "$label not found at $src_dir — skipping"
+        return 1
+    fi
+
+    cd "$src_dir"
+    latexmk -C "$file" >/dev/null 2>&1
+    if latexmk "$file" >/dev/null 2>&1; then
+        local pdf="${file%.tex}.pdf"
+        # .latexmkrc sets $out_dir='..' — PDF goes to parent dir
+        [[ ! -f "$pdf" ]] && pdf="../$pdf"
+        local pages=$(pdfinfo "$pdf" 2>/dev/null | grep "^Pages:" | awk '{print $2}')
+        log_ok "$label: ${pages:-?} pages"
+        latexmk -c "$file" >/dev/null 2>&1
+    else
+        log_warn "$label compile failed — check $src_dir/${file%.tex}.log"
     fi
 }
 
@@ -559,8 +572,8 @@ echo -e "  ${C_BOLD}Next steps:${C_RESET}"
 log_dim "1. Open this project in opencode"
 log_dim "2. Run /skill huawei-template-guide to create a new guide"
 log_dim "   New documents go in documents/<name>/ (auto-created by the skill)"
-log_dim "3. Or open in VS Code — save a .tex file to auto-compile"
+log_dim "3. Or open in VS Code — edit .adoc source files to auto-compile"
 log_dim "4. Or compile manually:"
-log_dim "   cd documents/my-guide && latexmk main.tex"
+log_dim "   make project DIR=documents/my-guide"
 echo ""
 echo ""

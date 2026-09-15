@@ -1,40 +1,63 @@
-# Huawei Cloud Technical Report Template
+# Huawei Cloud Technical Report — AsciiDoc Document Template
 
-LaTeX class (`technical.cls`) for generating Huawei-branded technical
-reports with a fixed 5-section structure (problem → root cause analysis →
-root cause → trigger condition → workaround). Output is PDF via XeLaTeX; DOCX, Markdown, and HTML via
-Pandoc.
+Produces a Huawei Cloud technical report PDF from AsciiDoc source. The
+pipeline is AsciiDoc → LaTeX (via `huawei-latex-converter.rb`) → PDF
+(XeLaTeX). HTML, DOCX, and Markdown are generated from the same `.adoc`
+source.
 
-## Setup
+Reports follow a fixed 5-section structure: problem → root cause analysis
+→ root cause → trigger condition → workaround. Each section uses an
+AsciiDoc role: `[.problem]`, `[.rootcauseanalysis]`, `[.rootcause]`,
+`[.triggercondition]`, `[.workaround]`.
 
-See the [root README](../../README.md) for environment setup and
-`scripts/install.sh` for one-command installation.
+> **Setup:** see the [root README](../../README.md) for installation,
+> environment setup, and compilation instructions.
+> See [SKILL.md](SKILL.md) for the full AsciiDoc syntax reference.
 
-## Usage
+## Quick start
 
-See [SKILL.md](SKILL.md) for the full command reference, document
-skeleton, and workflow checklist.
+Create a file `src/main.adoc`:
 
-Quick example:
+```adoc
+:template: technical
+:lang: en
+:version: 1.0.0
 
-```latex
-\documentclass{technical}
-\setreporttitle{[Analysis Report] Issue title}
-\setreportversion{HCS 8.5.1}
-\setreportdate{2025-08-13}
-\setreportscenario{Standard Scenario}
-\setheadertitle{Huawei Cloud -- Technical Report}
+= [Analysis Report] Issue title
 
-\begin{document}
-\makecover \maketoc \startbody
-
-\begin{problem}
+[.problem]
 Describe the problem here.
-\end{problem}
 
-% ... other sections ...
-
-\end{document}
+[.rootcauseanalysis]
+Analysis details here.
 ```
 
-Compile with `latexmk main.tex` (XeLaTeX).
+Compile from the repo root:
+
+```bash
+make technical-en
+```
+
+Or manually:
+
+```bash
+scripts/build-adoc.sh src/main.adoc src/main.tex && latexmk src/main.tex
+```
+
+## Header attributes
+
+| Attribute | Effect |
+|---|---|
+| `:lang: pt` | Switches all predefined labels to Portuguese. Default is English. |
+| `:notime:` | Hides the compilation time on the cover page. |
+| `:nochangelog:` | Suppresses the changelog section and hides version, date, and time on the cover page. |
+| `:noauthors:` | Hides the authors on the cover page. |
+
+## Samples
+
+Two samples demonstrate all roles and passthrough blocks:
+
+- [`examples/technical/pt/src/main.adoc`](../../examples/technical/pt/src/main.adoc) — Portuguese
+- [`examples/technical/en/src/main.adoc`](../../examples/technical/en/src/main.adoc) — English
+
+Compile with `make technical-pt` / `make technical-en` from the repo root.

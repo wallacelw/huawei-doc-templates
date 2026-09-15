@@ -4,6 +4,43 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.1 (2026-09-16)
+
+### Fixes
+
+- **Converter: Added technical template role handlers** (`problem`,
+  `rootcauseanalysis`, `rootcause`, `triggercondition`, `workaround` + 6 sub-roles)
+  that emit proper LaTeX environments. Previously these roles were silently ignored.
+- **Converter: Fixed `:date:` attribute** — now reads `:date:` first (as documented),
+  falls back to `:revdate:`.
+- **Converter: Added `:noanswers:` and `:indentbody:` class options** — previously
+  silently dropped.
+- **Converter: Added `:header-logo:` and `:cover-logo:` attribute handling** —
+  now emits `\setheaderlogo` and `\setcoverlogo` commands.
+- **Converter: Fixed multiple `include::` in source blocks** — previously only the
+  first include was processed, rest silently dropped.
+- **Converter: Fixed HTML entity unescape order** — `&amp;` is now unescaped last
+  to prevent double-unescape.
+- **Converter: Fixed LaTeX escaping** in `convert_inline_break`, `convert_role_badge`,
+  `convert_role_note`, `convert_role_param`, and `convert_dlist` description text.
+- **Converter: Fixed table header cells** — now uses `cell.content` for inline
+  formatting support and processes all header rows (not just first).
+- **Converter: Removed ~140 lines of dead code** (`latex_col_spec`, `BADGE_ROLE_MAP`,
+  `convert_role_changelog`, `convert_role_testcase`, `convert_testsummary`).
+- **build.sh: Updated multi-format pipeline** — DOCX/MD/HTML now uses
+  `asciidoctor-reducer → pandoc -f asciidoc` when `.adoc` source exists.
+  Legacy `.tex`-only pipeline preserved for backward compatibility.
+- **install.sh: Fixed `compile_sample()`** — now detects `.adoc` and runs
+  `build-adoc.sh` before `latexmk`.
+- **build-adoc.sh: Added asciidoctor availability check** with actionable error message.
+- **CSS: Added styling for technical template roles** (problem, rootcause, workaround,
+  etc.) with brand-colored borders and section headings.
+- **Docs: Fixed stale references** in 3× template README.md (rewritten for AsciiDoc),
+  3× SKILL.md (attribute name fixes), 3× HTML templates (Lua filter comments),
+  README.md, CHANGELOG.md, BRAND-GUIDELINES.md, test-sync.sh.
+- **Samples: Fixed guide/en placeholder image** — uses `\imageplaceholder` passthrough
+  for missing `ecs-flavors.png`.
+
 ## v6.0.0 (2026-09-16)
 
 ### Breaking changes
@@ -32,6 +69,10 @@ Per-document changelogs are maintained via `\changelogentry` in each `.adoc` fil
 - **Test scripts**: Adapted for .adoc source detection.
 - **.gitignore**: Generated .tex files and testbook outputs now ignored.
 - **Net code reduction**: ~6,200 lines removed (old .tex sources + testbook outputs).
+- **Lua filters now legacy**: `pandoc-common.lua` and `*-pandoc.lua` files are
+  superseded by `huawei-latex-converter.rb` for PDF and `asciidoctor-reducer → pandoc`
+  for other formats. The files still exist for backward compatibility but are no
+  longer the primary pipeline.
 
 ## v5.1.1 (2026-09-14)
 

@@ -109,7 +109,7 @@ Read all five files before proceeding to the Quick start below.
 :reportversion: HCS <version>
 :reportdate: <date>
 :reportscenario: <scenario>
-:headertitle: Huawei Cloud -- <short title>
+:header-title: Huawei Cloud -- <short title>
 
 [.problem]
 --
@@ -240,11 +240,13 @@ goes in `technical.cls`. Do not inline formatting overrides in the document.
 | `:reportversion: HCS 8.5.1` | Version info (shown in cover page version table). | `:reportversion: HCS 8.5.1` |
 | `:reportdate: 2026-09-16` | Report date (shown in cover page version table). | `:reportdate: 2026-09-16` |
 | `:reportscenario: Standard Scenario` | Installation scenario (shown in cover page version table). | `:reportscenario: Standard Scenario` |
-| `:headertitle: ...` | Centered header text on body pages. | `:headertitle: Huawei Cloud -- ECS` |
+| `:header-title: ...` | Centered header text on body pages. | `:header-title: Huawei Cloud -- ECS` |
 | `:nochangelog:` | Suppress changelog section and cover version/date/time. | `:nochangelog:` |
 | `:noauthors:` | Hide authors on the cover page. | `:noauthors:` |
 | `:notime:` | Hide compilation time on cover page. | `:notime:` |
 | `:indentbody:` | Indent all running text. | `:indentbody:` |
+
+Note: `:reportversion:`, `:reportdate:`, and `:reportscenario:` are also set via passthrough blocks in the document body for the cover page version table.
 
 ### 5-section environments (the core structure)
 

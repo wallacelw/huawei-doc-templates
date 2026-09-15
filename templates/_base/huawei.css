@@ -240,3 +240,128 @@ hr { border: none; border-top: 1px solid var(--ruleblack); margin: 1em 0; }
   pre { margin-left: 0; margin-right: 0; }
   #toc { position: static; }
 }
+
+/* ── Technical template section roles ─────────────────────────── */
+.problem, .rootcauseanalysis, .rootcause, .triggercondition,
+.workaround, .impact, .backupdata, .workaroundsteps,
+.verification, .rollback, .cleanup {
+  margin: 1.5em 0;
+  padding: 1em 1.5em;
+  border-left: 4px solid #C7000B;
+  background: #F6F8FA;
+  border-radius: 0 4px 4px 0;
+}
+
+.problem {
+  border-left-color: #C7000B;
+}
+
+.rootcauseanalysis, .rootcause {
+  border-left-color: #7F0001;
+}
+
+.triggercondition {
+  border-left-color: #ED6D00;
+}
+
+.workaround, .workaroundsteps, .verification, .rollback, .cleanup {
+  border-left-color: #62B230;
+}
+
+.impact, .backupdata {
+  border-left-color: #30B5C5;
+}
+
+/* Add headings for each role */
+.problem::before {
+  content: "Problem Description and Impact";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 0.5em;
+  color: #C7000B;
+}
+
+.rootcauseanalysis::before {
+  content: "Root Cause Analysis";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 0.5em;
+  color: #7F0001;
+}
+
+.rootcause::before {
+  content: "Root Cause";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 0.5em;
+  color: #7F0001;
+}
+
+.triggercondition::before {
+  content: "Trigger Condition";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 0.5em;
+  color: #ED6D00;
+}
+
+.workaround::before {
+  content: "Workaround";
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 0.5em;
+  color: #62B230;
+}
+
+.impact::before {
+  content: "Impact";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #30B5C5;
+}
+
+.backupdata::before {
+  content: "Backup Data";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #30B5C5;
+}
+
+.workaroundsteps::before {
+  content: "Workaround Steps";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #62B230;
+}
+
+.verification::before {
+  content: "Verification";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #62B230;
+}
+
+.rollback::before {
+  content: "Rollback";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #62B230;
+}
+
+.cleanup::before {
+  content: "Cleanup";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #62B230;
+}

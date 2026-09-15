@@ -1,77 +1,111 @@
-# Huawei Cloud Test Book — LaTeX Template
+# Huawei Cloud Test Book — AsciiDoc Document Template
 
-A LaTeX template that produces a Huawei Cloud POC/acceptance test case PDF:
-cover page, header, table of contents, test cases organized by domain with
-stacked fields in a breakable tcolorbox (red left-rule), each field preceded
-by a full-width red mini header bar, code blocks, callout boxes, and
-changelog.
+Produces a Huawei Cloud POC/acceptance test case PDF from AsciiDoc source.
+The pipeline is AsciiDoc → LaTeX (via `huawei-latex-converter.rb`) → PDF
+(XeLaTeX). HTML, DOCX, and Markdown are generated from the same `.adoc`
+source.
+
+Test cases use passthrough blocks (`++++\n\begin{testcase}...\end{testcase}\n++++`)
+because they have complex internal structure not representable in plain
+AsciiDoc. The `testsummary` environment also uses a passthrough block.
 
 > **Setup:** see the [root README](../../README.md) for installation,
-> environment setup, VS Code configuration, and compilation instructions.
-> See [SKILL.md](SKILL.md) for the full command and environment reference.
+> environment setup, and compilation instructions.
+> See [SKILL.md](SKILL.md) for the full AsciiDoc syntax reference.
 
-## Language
+## Quick start
 
-By default the test book renders in **English** — built-in labels such as
-*Objective*, *Prerequisites*, *Procedure*, *Expected Result*, *Test Result*
-and *Remarks* are in English. Pass the **`portuguese`** class option
-(`\documentclass[portuguese]{testbook}`) to switch all labels to Portuguese
-and load `babel` with `brazilian` instead.
+Create a file `src/main.adoc`:
 
-## Class options
+```adoc
+:template: testbook
+:lang: en
+:version: 1.0.0
 
-```latex
-\documentclass[portuguese,indentbody,notime,nochangelog,noauthors,noanswers]{testbook}
+= POC Test Cases: ECS Provisioning
+
+== Introduction
+
+[.objectives]
+--
+General Objective: Verify ECS instance provisioning.
+
+Prerequisites:
+
+* Huawei Cloud account with IAM admin privileges.
+* VPC and subnet already created.
+--
+
+== Test Cases
+
+=== ECS Instance Management
+
+++++
+\begin{testcase}{Create ECS instance}
+  \testobjective{Verify that an ECS instance can be created.}
+  \begin{testprerequisites}
+    \teststep{Account is active.}
+    \teststep{VPC exists.}
+  \end{testprerequisites}
+  \begin{testprocedure}
+    \teststep{Navigate to ECS}
+    \teststep{Click Create}
+    \teststep{Fill parameters and click OK}
+  \end{testprocedure}
+  \begin{testexpected}
+    \teststep{Instance is created.}
+    \teststep{Status is Running.}
+  \end{testexpected}
+  \testresult{\testresultbadge{Pass}}
+  \testremarks{Test with basic and general-purpose specs.}
+\end{testcase}
+++++
+
+== Conclusion
+
+++++
+\begin{testsummary}
+  \testsummaryrow{1}{Create ECS instance}{\testresultbadge{Pass}}
+\end{testsummary}
+++++
 ```
 
-| Option | Effect |
+Compile from the repo root:
+
+```bash
+make testbook-en
+```
+
+Or manually:
+
+```bash
+scripts/build-adoc.sh src/main.adoc src/main.tex && latexmk src/main.tex
+```
+
+## Header attributes
+
+| Attribute | Effect |
 |---|---|
-| `portuguese` | Switches all predefined labels to Portuguese; loads `babel` with `brazilian`. Default off (English). |
-| `indentbody` | Indents all running text by `\contentindent` (0.6 cm). Default off (text flush to the left margin). |
-| `notime` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
-| `nochangelog` | Suppresses the changelog section entirely (no-ops) and hides version, date, and time on the cover page. Use when it grows too large. Default off (changelog is shown). |
-| `noauthors` | Hides the authors on the cover page. Default off (authors shown if set via `\setdocauthors`). |
-| `noanswers` | Hides the **Test Result** and **Remarks** fields in all test cases. Use to produce a blank test book for testers to fill in by hand. Default off (all fields shown). |
+| `:lang: pt` | Switches all predefined labels to Portuguese; loads `babel` with `brazilian`. Default is English. |
+| `:indentbody:` | Indents all running text by 0.6 cm. Default off (text flush to the left margin). |
+| `:notime:` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
+| `:nochangelog:` | Suppresses the changelog section and hides version, date, and time on the cover page. Default off (changelog is shown). |
+| `:noauthors:` | Hides the authors on the cover page. Default off (authors shown if set). |
+| `:noanswers:` | Hides the **Test Result** and **Remarks** fields in all test cases. Use to produce a blank test book for testers to fill in by hand. Default off (all fields shown). |
 
 ### Label translations
 
-| Token | English (default) | Portuguese (`[portuguese]`) |
+| Token | English (default) | Portuguese (`:lang: pt`) |
 |---|---|---|
 | TOC title | Contents | Sumário |
 | Cover title default | Test Book | Test Book |
-| `\testobjective` label | Objective | Objetivo |
-| `\testprerequisites` label | Prerequisites | Pré-requisitos |
-| `\testprocedure` label | Procedure | Procedimento |
-| `\testexpected` label | Expected Result | Resultado Esperado |
-| `\testremarks` label | Remarks | Observações |
-| `\testresult` label | Test Result | Resultado do Teste |
+| Test objective label | Objective | Objetivo |
+| Test prerequisites label | Prerequisites | Pré-requisitos |
+| Test procedure label | Procedure | Procedimento |
+| Expected result label | Expected Result | Resultado Esperado |
+| Remarks label | Remarks | Observações |
+| Test result label | Test Result | Resultado do Teste |
 | Footer page label | Page | Página |
-
-## Document structure
-
-The body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections
-→ `changelog` → `\end{document}`.
-
-The document follows a 3-section structure:
-
-1. **Introduction** (`\section{Introduction}`) — project overview, objectives,
-   test scope, preconditions, and acceptance method.
-2. **Test Cases** (`\section{Test Cases}`) — subsections per test domain
-   (`\subsection{Platform Architecture}`, `\subsection{Data Engineering}`, etc.),
-   each containing auto-numbered `testcase` environments.
-3. **Conclusion** (`\section{Conclusion}`) — test summary table with all test
-   case results.
-
-Each test case uses the `testcase` environment, which produces an
-auto-numbered caption-style heading (**Testcase 1:** *title*,
-**Testcase 2:** *title*, …) — the prefix is bold and the description follows
-in regular text, matching the style of figure/table captions — and a breakable
-tcolorbox with a red left-rule and stacked fields, each preceded by a
-full-width red mini header bar (Huawei-red background, white bold text) with
-content below.
-
-See [SKILL.md](SKILL.md) for the complete skeleton and all available commands
-and environments.
 
 ## Format reference
 
@@ -95,86 +129,13 @@ and environments.
 | Info box | `#E0F7FA` bg / `#30B5C5` border |
 
 Colors are defined in `templates/_base/huawei-colors.sty` and fonts in
-`templates/_base/huawei-fonts.sty`. Both are reusable via `\textcolor{name}{...}`
-and `\codefont` respectively.
-
-## Customization
-
-- **Logos:** replace files in `common-assets/` keeping the names, or use
-  `\setheaderlogo{path}` / `\setcoverlogo{path}` in the preamble.
-- **Colors:** edit the `\definecolor` block in `templates/_base/huawei-colors.sty`.
-- **Fonts:** edit font setup in `templates/_base/huawei-fonts.sty`.
-- **Sizes/spacing:** each concern is in a commented section of `testbook.cls`
-  (`TITLES`, `CODE`, `HEADER AND FOOTER`, etc.) — find the section and edit there.
+`templates/_base/huawei-fonts.sty`.
 
 ## Samples
 
-Two samples demonstrate all commands and environments:
+Two samples demonstrate all roles and passthrough blocks:
 
-- [`examples/testbook/pt/main.tex`](../../examples/testbook/pt/src/main.tex) — Portuguese
-- [`examples/testbook/en/main.tex`](../../examples/testbook/en/src/main.tex) — English
+- [`examples/testbook/pt/src/main.adoc`](../../examples/testbook/pt/src/main.adoc) — Portuguese
+- [`examples/testbook/en/src/main.adoc`](../../examples/testbook/en/src/main.adoc) — English
 
-Compile with `make pt` / `make en` from the repo root, or `latexmk main.tex`
-from either folder.
-
-## Quick example
-
-```latex
-\documentclass{testbook}
-
-\settestbooktitle{POC Test Cases: ECS Provisioning}
-\setheadertitle{Huawei Cloud -- ECS POC Tests}
-\setdocversion{1.0.0}
-\setdocdate{\today}
-
-\begin{document}
-\makecover \maketoc \startbody
-
-\section{Introduction}
-
-\begin{objectives}
-  \generalobjective{Verify ECS instance provisioning.}
-  \prerequisites
-  \begin{itemize}
-    \item Huawei Cloud account with IAM admin privileges.
-    \item VPC and subnet already created.
-  \end{itemize}
-\end{objectives}
-
-\section{Test Cases}
-
-\subsection{ECS Instance Management}
-
-\begin{testcase}{Create ECS instance}
-  \testobjective{Verify that an ECS instance can be created.}
-  \begin{testprerequisites}
-    \teststep{Account is active.}
-    \teststep{VPC exists.}
-  \end{testprerequisites}
-  \begin{testprocedure}
-    \teststep{Navigate to ECS}
-    \teststep{Click Create}
-    \teststep{Fill parameters and click OK}
-  \end{testprocedure}
-  \begin{testexpected}
-    \teststep{Instance is created.}
-    \teststep{Status is Running.}
-  \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
-  \testremarks{Test with basic and general-purpose specs.}
-\end{testcase}
-
-\section{Conclusion}
-
-\begin{testsummary}
-  \testsummaryrow{1}{Create ECS instance}{\testresultbadge{Pass}}
-\end{testsummary}
-
-\begin{changelog}
-  \changelogentry{1.0.0}{\today}{\item Initial version.}
-\end{changelog}
-
-\end{document}
-```
-
-Compile with `latexmk main.tex` (XeLaTeX).
+Compile with `make testbook-pt` / `make testbook-en` from the repo root.

@@ -1,7 +1,7 @@
 # Huawei Cloud Brand Guidelines — Reference & Adoption Plan
 
 Source: *HUAWEI CLOUD BRAND GUIDELINES* V1.0 (49 pages, Adobe PDF).
-This file extracts the key specifications relevant to this LaTeX template
+This file extracts the key specifications relevant to this AsciiDoc document template
 project and compares them against the current implementation.
 
 ---

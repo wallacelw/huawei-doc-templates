@@ -1,54 +1,62 @@
-# Huawei Cloud Guide — LaTeX Template
+# Huawei Cloud Guide — AsciiDoc Document Template
 
-A LaTeX template that produces a Huawei Cloud guide PDF: cover page, header,
-table of contents, giant chapter numbers, objectives box, code blocks, tables,
-callout boxes, badges, colors, spacing, and fonts.
+Produces a Huawei Cloud guide PDF from AsciiDoc source. The pipeline is
+AsciiDoc → LaTeX (via `huawei-latex-converter.rb`) → PDF (XeLaTeX).
+HTML, DOCX, and Markdown are generated from the same `.adoc` source.
 
 > **Setup:** see the [root README](../../README.md) for installation,
-> environment setup, VS Code configuration, and compilation instructions.
-> See [SKILL.md](SKILL.md) for the full command and environment reference.
+> environment setup, and compilation instructions.
+> See [SKILL.md](SKILL.md) for the full AsciiDoc syntax reference.
 
-## Language
+## Quick start
 
-By default the guide renders in **English** — built-in labels such as
-*Contents*, *General Objective:*, *Objective:*, *Prerequisites:* and
-*Step by step:* are in English. Pass the **`portuguese`** class option
-(`\documentclass[portuguese]{guide}`) to switch all labels to Portuguese and
-load `babel` with `brazilian` instead.
+Create a file `src/main.adoc`:
 
-## Class options
+```adoc
+:template: guide
+:lang: en
+:version: 1.0.0
 
-```latex
-\documentclass[portuguese,indentbody,notime,nochangelog,noauthors]{guide}
+= My Guide Title
+
+.Body content goes here.
 ```
 
-| Option | Effect |
+Compile from the repo root:
+
+```bash
+make guide-en
+```
+
+Or manually:
+
+```bash
+scripts/build-adoc.sh src/main.adoc src/main.tex && latexmk src/main.tex
+```
+
+## Header attributes
+
+AsciiDoc header attributes replace LaTeX class options:
+
+| Attribute | Effect |
 |---|---|
-| `portuguese` | Switches all predefined labels to Portuguese; loads `babel` with `brazilian`. Default off (English). |
-| `indentbody` | Indents all running text by `\contentindent` (0.6 cm). Default off (text flush to the left margin). |
-| `notime` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
-| `nochangelog` | Suppresses the changelog section entirely (no-ops) and hides version, date, and time on the cover page. Use when it grows too large. Default off (changelog is shown). |
-| `noauthors` | Hides the authors on the cover page. Default off (authors shown if set via `\setdocauthors`). |
+| `:lang: pt` | Switches all predefined labels to Portuguese; loads `babel` with `brazilian`. Default is English. |
+| `:indentbody:` | Indents all running text by 0.6 cm. Default off (text flush to the left margin). |
+| `:notime:` | Hides the compilation time (HH:MM) on the cover page. Default off (time is shown). |
+| `:nochangelog:` | Suppresses the changelog section and hides version, date, and time on the cover page. Default off (changelog is shown). |
+| `:noauthors:` | Hides the authors on the cover page. Default off (authors shown if set). |
 
 ### Label translations
 
-| Token | English (default) | Portuguese (`[portuguese]`) |
+| Token | English (default) | Portuguese (`:lang: pt`) |
 |---|---|---|
 | TOC title | Contents | Sumário |
 | Cover title default | Guide | Guia |
-| `\generalobjective` label | General Objective: | Objetivo Geral: |
-| `\objective` label | Objective: | Objetivo: |
-| `\prerequisites` label | Prerequisites: | Pré-requisitos: |
-| `\stepbystep` label | Step by step: | Passo a passo: |
+| General objective label | General Objective: | Objetivo Geral: |
+| Objective label | Objective: | Objetivo: |
+| Prerequisites label | Prerequisites: | Pré-requisitos: |
+| Step-by-step label | Step by step: | Passo a passo: |
 | Footer page label | Page | Página |
-
-## Document structure
-
-The body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections
-→ `changelog` → `\end{document}`.
-
-See [SKILL.md](SKILL.md) for the complete skeleton and all available commands
-and environments.
 
 ## Format reference
 
@@ -71,24 +79,13 @@ and environments.
 | Info box | `#E0F7FA` bg / `#30B5C5` border |
 
 Colors are defined in `templates/_base/huawei-colors.sty` and fonts in
-`templates/_base/huawei-fonts.sty`. Both are reusable via `\textcolor{name}{...}`
-and `\codefont` respectively.
-
-## Customization
-
-- **Logos:** replace files in `common-assets/` keeping the names, or use
-  `\setheaderlogo{path}` / `\setcoverlogo{path}` in the preamble.
-- **Colors:** edit the `\definecolor` block in `templates/_base/huawei-colors.sty`.
-- **Fonts:** edit font setup in `templates/_base/huawei-fonts.sty`.
-- **Sizes/spacing:** each concern is in a commented section of `guide.cls`
-  (`TITLES`, `CODE`, `HEADER AND FOOTER`, etc.) — find the section and edit there.
+`templates/_base/huawei-fonts.sty`.
 
 ## Samples
 
-Two samples demonstrate all commands and environments:
+Two samples demonstrate all roles and passthrough blocks:
 
-- [`examples/guide/pt/main.tex`](../../examples/guide/pt/main.tex) — Portuguese
-- [`examples/guide/en/main.tex`](../../examples/guide/en/main.tex) — English
+- [`examples/guide/pt/src/main.adoc`](../../examples/guide/pt/src/main.adoc) — Portuguese
+- [`examples/guide/en/src/main.adoc`](../../examples/guide/en/src/main.adoc) — English
 
-Compile with `make pt` / `make en` from the repo root, or `latexmk main.tex`
-from either folder.
+Compile with `make guide-pt` / `make guide-en` from the repo root.

@@ -18,6 +18,11 @@ if [ ! -f "$CONVERTER" ]; then
   exit 1
 fi
 
+command -v asciidoctor >/dev/null 2>&1 || {
+  echo "Error: asciidoctor not installed. Run: gem install asciidoctor" >&2
+  exit 1
+}
+
 INPUT=""
 OUTPUT=""
 
