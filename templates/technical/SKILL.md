@@ -1,23 +1,23 @@
 ---
 name: huawei-template-technical
-description: Create or edit Huawei Cloud technical reports using the LaTeX technical report template. Use when the user wants to write, extend, or fix a technical report, analysis report, or incident report for Huawei Cloud. Triggers on keywords like huawei-template-technical, huawei report, technical report, analysis report, relatório técnico, incident report.
+description: Create or edit Huawei Cloud technical reports using the AsciiDoc technical report template. Use when the user wants to write, extend, or fix a technical report, analysis report, or incident report for Huawei Cloud. Triggers on keywords like huawei-template-technical, huawei report, technical report, analysis report, relatório técnico, incident report, asciidoc report.
 ---
 
 # Huawei Cloud Technical Report — Skill
 
 Create, edit, and compile Huawei Cloud technical reports using the
-`technical` LaTeX class in this directory. The output is a PDF compiled
-from LaTeX; DOCX, Markdown, and HTML are generated via Pandoc.
+`technical` template. Source format is AsciiDoc (`.adoc`); PDF is generated
+via `asciidoctor -b huawei-latex` → LaTeX → XeLaTeX.
 
 ## When to use
 
 Use this skill when the task is to **write, extend, or fix a Huawei Cloud
-technical report**. Technical reports follow a fixed 5-section structure
-(with 6 subsections in workaround) (problem → root cause analysis → root
-cause → trigger condition → workaround). The output is a PDF compiled from LaTeX. Content defaults to
-English; pass the `portuguese` class option for Portuguese labels. Do
-**not** use this for general LaTeX documents — the formatting is
-hard-coded to the Huawei house style (AGENTS.md L9).
+technical report**. Technical reports follow a fixed 5-section
+structure (with 6 subsections in workaround) (problem → root cause analysis → root
+cause → trigger condition → workaround). The output is a PDF compiled from
+AsciiDoc via LaTeX. Content defaults to English; set `:lang: pt` for
+Portuguese labels. Do **not** use this for general AsciiDoc documents — the
+formatting is hard-coded to the Huawei house style (AGENTS.md L9).
 
 ## Context loading (do this first)
 
@@ -27,13 +27,15 @@ project context:
 1. **`templates/technical/technical.cls`** — the class file. Shared formatting
    lives in `templates/_base/huawei-*.sty` modules. Technical-specific
    formatting (cover page, 5-section environments) lives in `technical.cls`.
-2. **`README.md`** (repo root) — project setup, compilation instructions,
+2. **`templates/_base/huawei-latex-converter.rb`** — the AsciiDoc-to-LaTeX
+   converter. Maps AsciiDoc roles to Huawei LaTeX commands.
+3. **`README.md`** (repo root) — project setup, compilation instructions,
    install steps, and project layout.
-3. **`AGENTS.md`** (repo root) — locked decisions, file editing rules,
+4. **`AGENTS.md`** (repo root) — locked decisions, file editing rules,
    versioning workflow, and project standards.
-4. **`templates/technical/README.md`** — human-readable template overview.
+5. **`templates/technical/README.md`** — human-readable template overview.
 
-Read all four files before proceeding to the Quick start below.
+Read all five files before proceeding to the Quick start below.
 
 ---
 
@@ -44,18 +46,17 @@ Read all four files before proceeding to the Quick start below.
    - **Language** — English (default) or Portuguese
    - **Project name** — used as the folder name (e.g. `ecs-issue-report`)
    - **Author(s)** — prompt the user: "Who is the author of this report?"
-     Add `\setdocauthors{Name}` to the preamble. If multiple authors, separate
-     with commas: `\setdocauthors{John Smith, Jane Doe}`. If the user declines,
-     omit the command entirely (nothing shown on the cover).
+      Add `:authors: Name` to the header. If multiple authors, separate
+      with commas: `:authors: John Smith, Jane Doe`. If the user declines,
+      omit the attribute entirely (nothing shown on the cover).
    - **Changelog** — prompt the user: "Keep the changelog section? [Y/n]"
-     If yes (default), include the `changelog` environment with an initial
-     `\changelogentry{1.0.0}{\today}{\item Initial version.}`. If no, add the
-     `[nochangelog]` class option to suppress it.
+      If yes (default), include the changelog passthrough block with an initial
+      entry. If no, add the `:nochangelog:` attribute to suppress it.
 
 2. **Create a self-contained project folder** at `documents/<project-name>/`:
    - Inside the folder, create:
      - `src/` subfolder containing:
-       - `main.tex` — the document, using the skeleton below.
+       - `main.adoc` — the document, using the skeleton below.
        - `.latexmkrc` — with `TEXINPUTS` pointing to the template directories.
          From `documents/<project-name>/src/`, the relative path to
          `templates/technical/` is `../../../templates/technical/`:
@@ -73,11 +74,6 @@ Read all four files before proceeding to the Quick start below.
    make project DIR=documents/<project-name>                    # PDF
    ./scripts/build.sh --all documents/<project-name>            # PDF + DOCX + MD + HTML
    ```
-   Or from inside the project folder:
-   ```bash
-   cd src/ && latexmk main.tex                                  # PDF
-   cd ../../.. && ./scripts/build.sh --all documents/<project-name>  # all 4 formats
-   ```
 
 4. **Report** the page count, output file locations (PDF, DOCX, MD, HTML),
    and any warnings to the user.
@@ -86,13 +82,16 @@ Read all four files before proceeding to the Quick start below.
 
 ## Hard requirements
 
-- **Engine: XeLaTeX or LuaLaTeX only.** The class loads `fontspec`, so
-  `pdflatex` will fail. Always compile with `xelatex` (or `lualatex`).
+- **Source format: AsciiDoc.** Documents are written in `.adoc` files.
+  LaTeX (`.tex`) is generated by `huawei-latex-converter.rb` — never hand-edit it.
+- **PDF engine: XeLaTeX or LuaLaTeX only.** The class loads `fontspec`, so
+  `pdflatex` will fail. The build pipeline converts `.adoc` → `.tex` → PDF.
 - **Compile twice** on the first run so the TOC and page numbers settle.
   `latexmk` handles this automatically (`.latexmkrc` is included).
 - **Fonts:** HarmonyOS Sans (body) + Cascadia Code (code). Falls back with
   a warning if missing (see AGENTS.md L8). `scripts/install.sh` installs both.
 - **Pandoc >= 3.0** — required for multi-format output (DOCX, Markdown, HTML).
+- **asciidoctor** — Ruby gem required for `.adoc` → `.tex` conversion.
 
 ---
 
@@ -100,81 +99,87 @@ Read all four files before proceeding to the Quick start below.
 
 ### English (default)
 
-```latex
-\documentclass{technical}
+```asciidoc
+= [Analysis Report] <title>
+:template: technical
+:lang: en
+:version: 1.0.0
+:date: 2026-09-16
+:authors: Author Name
+:reportversion: HCS <version>
+:reportdate: <date>
+:reportscenario: <scenario>
+:headertitle: Huawei Cloud -- <short title>
 
-\setreporttitle{[Analysis Report] <title>}
-\setreportversion{HCS <version>}
-\setreportdate{<date>}
-\setreportscenario{<scenario>}
-\setheadertitle{Huawei Cloud -- <short title>}
-\setdocauthors{Author Name}  % optional — omit to hide
-
-\begin{document}
-\makecover
-\maketoc
-\startbody
-
-\begin{problem}
+[.problem]
+--
 <problem description and impact>
-\end{problem}
+--
 
-\begin{rootcauseanalysis}
+[.rootcauseanalysis]
+--
 <step-by-step analysis>
-\end{rootcauseanalysis}
+--
 
-\begin{rootcause}
+[.rootcause]
+--
 <identified root cause>
-\end{rootcause}
+--
 
-\begin{triggercondition}
+[.triggercondition]
+--
 <when the issue occurs>
-\end{triggercondition}
+--
 
-\begin{workaround}
+[.workaround]
+--
 
-  \begin{impact}
-  <impact of the workaround>
-  \end{impact}
+[.impact]
+--
+<impact of the workaround>
+--
 
-  \begin{backupdata}
-  <backup steps or N/A>
-  \end{backupdata}
+[.backupdata]
+--
+<backup steps or N/A>
+--
 
-  \begin{workaroundsteps}
-  <step-by-step workaround>
-  \end{workaroundsteps}
+[.workaroundsteps]
+--
+<step-by-step workaround>
+--
 
-  \begin{verification}
-  <how to verify the fix>
-  \end{verification}
+[.verification]
+--
+<how to verify the fix>
+--
 
-  \begin{rollback}
-  <how to undo the workaround>
-  \end{rollback}
+[.rollback]
+--
+<how to undo the workaround>
+--
 
-  \begin{cleanup}
-  <post-fix cleanup steps>
-  \end{cleanup}
+[.cleanup]
+--
+<post-fix cleanup steps>
+--
 
-\end{workaround}
+--
 
+++++
 \begin{changelog}
-  \changelogentry{1.0.0}{\today}{
+  \changelogentry{1.0.0}{2026-09-16}{
     \item Initial version.
   }
 \end{changelog}
-
-\end{document}
+++++
 ```
 
 ### Portuguese
 
-Same skeleton but with `\documentclass[portuguese]{technical}`. Labels switch
-automatically: *Descrição do Problema e Impacto*, *Análise de Causa Raiz*,
-*Causa Raiz*, *Condição de Disparo*, *Solução Alternativa e Impacto*, etc.
-
-Body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections.
+Same skeleton but with `:lang: pt`. Labels switch automatically: *Descrição
+do Problema e Impacto*, *Análise de Causa Raiz*, *Causa Raiz*, *Condição de
+Disparo*, *Solução Alternativa e Impacto*, etc.
 
 ---
 
@@ -183,7 +188,6 @@ Body order is fixed: `\makecover` → `\maketoc` → `\startbody` → sections.
 ```
 templates/technical/
 ├── technical.cls                    # technical-specific formatting (cover, 5-section envs)
-├── technical-pandoc.lua             # Lua filter wrapper (calls _base/pandoc-common.lua factory)
 ├── technical-template.html          # HTML template for Pandoc
 ├── create-technical-reference-docx.py  # DOCX reference style generator (calls _base/docx_fix.py)
 ├── technical-reference.docx         # reference DOCX with Huawei styles
@@ -199,12 +203,12 @@ examples/technical/
 ├── pt/
 │   ├── src/
 │   │   ├── .latexmkrc
-│   │   └── main.tex                # Portuguese sample
+│   │   └── main.adoc               # Portuguese sample
 │   └── main.pdf                    # compiled output
 └── en/
     ├── src/
     │   ├── .latexmkrc
-    │   └── main.tex                # English sample
+    │   └── main.adoc               # English sample
     └── main.pdf
 
 # User-created documents go in documents/:
@@ -212,176 +216,147 @@ documents/
 └── my-report/
     ├── src/
     │   ├── .latexmkrc
-    │   └── main.tex
+    │   └── main.adoc
     └── assets/
 ```
 
-**Rule of thumb:** content/structure goes in `.tex` files; shared look-and-feel
+**Rule of thumb:** content/structure goes in `.adoc` files; shared look-and-feel
 goes in `templates/_base/huawei-*.sty` modules; technical-specific formatting
 goes in `technical.cls`. Do not inline formatting overrides in the document.
 
 ---
 
-## Commands reference
+## AsciiDoc syntax reference
 
-### Preamble configuration
-| Command | Purpose |
-|---|---|
-| `\setreporttitle{...}` | Report title (shown on cover page). |
-| `\setreportversion{HCS 8.5.1}` | Version info (shown in cover page version table). |
-| `\setreportdate{2025-08-13}` | Report date (shown in cover page version table). |
-| `\setreportscenario{Standard Scenario}` | Installation scenario (shown in cover page version table). |
-| `\setreporttype{...}` | Report type (optional, for custom classification). |
-| `\setheadertitle{...}` | Centered header text on body pages. |
-| `\setdocversion{1.0.0}` | Document version for changelog (if using changelog). |
-| `\setdocdate{\today}` | Document date for changelog. |
-| `\setdocauthors{John Smith, Jane Doe}` | One or more authors displayed on the cover page. Optional — if not set, nothing is shown. |
-
-### Document structure
-| Command | Purpose |
-|---|---|
-| `\makecover` | Render the cover page with version info table. Call right after `\begin{document}`. |
-| `\maketoc` | Render the TOC and page-break. |
-| `\startbody` | Mark body start; resets page numbering to 1 and restores header. |
+### Header attributes (document metadata)
+| Attribute | Purpose | Example |
+|---|---|---|
+| `:template: technical` | Selects the technical template class. | `:template: technical` |
+| `:lang: en` | Language: `en` (English, default) or `pt` (Portuguese). | `:lang: pt` |
+| `:version: 1.0.0` | Document version for changelog. | `:version: 1.0.0` |
+| `:date: 2026-09-16` | Document date for changelog. | `:date: 2026-09-16` |
+| `:authors: Name` | One or more authors on the cover page. Optional. | `:authors: John Smith, Jane Doe` |
+| `:reporttitle: ...` | Report title (shown on cover page). | `:reporttitle: [Analysis Report] ECS Issue` |
+| `:reportversion: HCS 8.5.1` | Version info (shown in cover page version table). | `:reportversion: HCS 8.5.1` |
+| `:reportdate: 2026-09-16` | Report date (shown in cover page version table). | `:reportdate: 2026-09-16` |
+| `:reportscenario: Standard Scenario` | Installation scenario (shown in cover page version table). | `:reportscenario: Standard Scenario` |
+| `:headertitle: ...` | Centered header text on body pages. | `:headertitle: Huawei Cloud -- ECS` |
+| `:nochangelog:` | Suppress changelog section and cover version/date/time. | `:nochangelog:` |
+| `:noauthors:` | Hide authors on the cover page. | `:noauthors:` |
+| `:notime:` | Hide compilation time on cover page. | `:notime:` |
+| `:indentbody:` | Indent all running text. | `:indentbody:` |
 
 ### 5-section environments (the core structure)
 
 All five sections are mandatory in a technical report (with 6 subsections
-in workaround). They produce
-language-aware section headings automatically.
+in workaround). They use AsciiDoc roles and produce language-aware section
+headings automatically.
 
-| Environment | Level | English label | Portuguese label |
+| Role | Level | English label | Portuguese label |
 |---|---|---|---|
-| `problem` | Section (H1) | Problem Description and Impact | Descrição do Problema e Impacto |
-| `rootcauseanalysis` | Section (H1) | Root Cause Analysis | Análise de Causa Raiz |
-| `rootcause` | Section (H1) | Root Cause | Causa Raiz |
-| `triggercondition` | Section (H1) | Trigger Condition | Condição de Disparo |
-| `workaround` | Section (H1) | Workaround and Impact | Solução Alternativa e Impacto |
+| `[.problem]` | Section (H1) | Problem Description and Impact | Descrição do Problema e Impacto |
+| `[.rootcauseanalysis]` | Section (H1) | Root Cause Analysis | Análise de Causa Raiz |
+| `[.rootcause]` | Section (H1) | Root Cause | Causa Raiz |
+| `[.triggercondition]` | Section (H1) | Trigger Condition | Condição de Disparo |
+| `[.workaround]` | Section (H1) | Workaround and Impact | Solução Alternativa e Impacto |
 
-The `workaround` environment contains six subsections:
+The `workaround` role contains six subsections:
 
-| Environment | Level | English label | Portuguese label |
+| Role | Level | English label | Portuguese label |
 |---|---|---|---|
-| `impact` | Subsection (H2) | Impact | Impacto |
-| `backupdata` | Subsection (H2) | Back up data before the workaround | Backup de dados antes da solução alternativa |
-| `workaroundsteps` | Subsection (H2) | Workaround | Solução Alternativa |
-| `verification` | Subsection (H2) | Verification after the workaround | Verificação após a solução alternativa |
-| `rollback` | Subsection (H2) | Rollback Operation | Operação de Rollback |
-| `cleanup` | Subsection (H2) | Cleanup Operation | Operação de Limpeza |
+| `[.impact]` | Subsection (H2) | Impact | Impacto |
+| `[.backupdata]` | Subsection (H2) | Back up data before the workaround | Backup de dados antes da solução alternativa |
+| `[.workaroundsteps]` | Subsection (H2) | Workaround | Solução Alternativa |
+| `[.verification]` | Subsection (H2) | Verification after the workaround | Verificação após a solução alternativa |
+| `[.rollback]` | Subsection (H2) | Rollback Operation | Operação de Rollback |
+| `[.cleanup]` | Subsection (H2) | Cleanup Operation | Operação de Limpeza |
 
-### Headings — use standard section commands inside environments
-| Command | Result |
+### Headings
+| AsciiDoc | Result |
 |---|---|
-| `\section{...}` | H1: 56pt chapter number + bold title + red rule. New page. |
-| `\subsection{...}` | H2: 18pt regular, left-aligned. |
-| `\subsubsection{...}` | H3: 16pt regular. |
-| `\paragraph{...}` | H4: 14pt regular. |
+| `== <title>` | H1: 56pt chapter number + bold title + red rule. New page. |
+| `=== <title>` | H2: 18pt regular, left-aligned. |
+| `==== <title>` | H3: 16pt regular. |
+| `===== <title>` | H4: 14pt regular. |
 
 ### Callout boxes (shared from _base)
-| Environment | English label | Portuguese label | Color |
+| AsciiDoc | English label | Portuguese label | Color |
 |---|---|---|---|
-| `warning` | Important | Importante | Amber |
-| `tip` | Tip | Dica | Green |
-| `infobox` | Info | Informação | Blue |
+| `WARNING: <text>` | Important | Importante | Amber |
+| `TIP: <text>` | Tip | Dica | Green |
+| `NOTE: <text>` | Info | Informação | Blue |
 
-### Tables
-Use the `hutable` environment (full-grid, Huawei-red header, alternating
-body rows). Do not use raw `tabular` with manual rules.
+### Tables (hutable)
+```asciidoc
+[.hutable]
+|===
+| Column A | Column B | Column C
 
-### `longhutable` — page-breaking table
-
-Same visual style as `hutable` (full-grid, Huawei-red header, alternating rows) but uses
-`longtable` for page breaking. Use for tables with many rows that don't fit on one page.
-
-Usage:
-```latex
-\begin{longhutable}{|l|l|l|}
-  \rowcolor{huaweired} \thd{Col A} & \thd{Col B} & \thd{Col C} \\
-  \endhead
-  \tbody
-  row 1 & value & value \\
-  row 2 & value & value \\
-\end{longhutable}
+| Row 1 | Value | Value
+| Row 2 | Value | Value
+|===
 ```
 
-Rules:
-- **Must NOT be wrapped in `\begin{table}`** — longtable is not a float.
-- Add `\endhead` after the header row to repeat it on page breaks.
-- Without `\endhead`, the header appears only on the first page.
-- **Cannot be used inside `testcase`** — longtable requires top-level.
-
 ### Code
-| Command | Result |
-|---|---|
-| `\begin{code} ... \end{code}` | Code block: `#F6F8FA` bg, Cascadia Code 10pt. Verbatim. |
-| `\codefile[language]{file}` | Code block from an external file. |
-| `\inlinecode{...}` | Inline monospace code. |
+```asciidoc
+[source,bash]
+----
+echo "Hello, World!"
+----
+```
+
+Inline code: `` `code` ``
 
 ### Images
-| Command | Result |
-|---|---|
-| `\image{path}` | Inline image (non-floating). |
-| `\imagecap{path}{caption}` | Image with caption. |
-| `\imageplaceholder{path}{description}` | Placeholder for missing image. |
+```asciidoc
+image::path[width=80%]
+```
+
+Image with caption:
+```asciidoc
+image::path[width=80%,title="Console login screen."]
+```
 
 ### Changelog
-```latex
+```asciidoc
+++++
 \begin{changelog}
-  \changelogentry{1.0.0}{\today}{
+  \changelogentry{1.0.0}{2026-09-16}{
     \item Initial version.
   }
 \end{changelog}
+++++
 ```
 The `changelog` environment emits its own section heading. Use the
-`nochangelog` class option to suppress it.
+`:nochangelog:` attribute to suppress it.
 
 ### Inherited commands (from shared modules)
 
-These commands and environments are defined in `templates/_base/huawei-*.sty`
-modules and are available in technical documents.
-
-#### Header logo
-| Command | Purpose |
-|---|---|
-| `\setheaderlogo{path}` | Header logo image path (default `common-assets/huawei-logo-header.png`). Inherited from `huawei-page.sty`. |
-
-#### Notes & links
-| Command | Result |
-|---|---|
-| `\note{...}` | Italic observation paragraph. Inherited from `huawei-shared.sty`. |
-| `\weblink{url}{text}` | Blue (`#0000FF`), no underline, clickable. Inherited from `huawei-shared.sty`. |
-| `\menu{A, B, C}` | Menu path: **A** → **B** → **C** (bold items joined by arrows). Inherited from `huawei-shared.sty`. |
+These are available via AsciiDoc roles and passthrough syntax.
 
 #### Badge
-| Command | Result |
-|---|---|
-| `\badge{...}` | Inline red label with white text (e.g. `\badge{New}`). Inherited from `huawei-shared.sty`. |
+```asciidoc
+[.badge]#New#
+```
 
-#### Code (additional)
-| Command | Result |
-|---|---|
-| `\param{...}` | Filename/parameter in italic (e.g. `\param{provider.tf}`). Inherited from `huawei-code.sty`. |
-| `\codefont` | Selects the monospace font (Cascadia Code with fallback). Used internally by `code` and `\inlinecode`; available for advanced customization. Inherited from `huawei-fonts.sty`. |
+#### Menu path
+```asciidoc
+menu:File[Save[As]]
+```
 
 #### Objectives / prerequisites block
-```latex
-\begin{objectives}
-  \generalobjective{<general objective>}
-  \objective{<objective>}
-  \prerequisites
-  \begin{itemize}
-    \item ...
-  \end{itemize}
-\end{objectives}
-```
-Closes with a 1.5pt horizontal rule. Inherited from `huawei-shared.sty`.
+```asciidoc
+[.objectives]
+====
+**General Objective:** <general objective>
 
-| Command | Produces |
-|---|---|
-| `\generalobjective{...}` | **"General Objective:"** / **"Objetivo Geral:"** (bold label) + text. |
-| `\objective{...}` | **"Objective:"** / **"Objetivo:"** + text. |
-| `\prerequisites` | **"Prerequisites:"** / **"Pré-requisitos:"** label (put a list after). |
-| `\stepbystep` | **"Step by step:"** / **"Passo a passo:"** label (put a numbered list after). |
+**Objective:** <objective>
+
+**Prerequisites:**
+* <prerequisite 1>
+* <prerequisite 2>
+====
+```
 
 ---
 
@@ -428,36 +403,20 @@ Closes with a 1.5pt horizontal rule. Inherited from `huawei-shared.sty`.
 
 ## Multi-format output
 
-LaTeX → PDF is the primary output. DOCX, Markdown, and HTML are generated
-via Pandoc + the Lua filter:
+AsciiDoc → LaTeX → PDF is the primary output. HTML is generated directly
+from AsciiDoc. DOCX and Markdown are generated via Pandoc from `.adoc`.
 
 ```bash
-# Markdown
-pandoc --lua-filter=templates/technical/technical-pandoc.lua \
-  -f latex+raw_tex -t markdown -o output.md input.tex
+# HTML (direct from asciidoctor)
+asciidoctor -b html5 -a stylesheet=huawei.css src/main.adoc -o output.html
 
-# HTML
-pandoc --lua-filter=templates/technical/technical-pandoc.lua \
-  --template=templates/technical/technical-template.html \
-  -f latex+raw_tex -t html5 --standalone -o output.html input.tex
+# Markdown (via asciidoctor-reducer → pandoc)
+asciidoctor-reducer src/main.adoc | pandoc -f asciidoc -t markdown -o output.md
 
-# DOCX
-pandoc --lua-filter=templates/technical/technical-pandoc.lua \
-  --reference-doc=templates/technical/technical-reference.docx \
-  -f latex+raw_tex -t docx -o output.docx input.tex
+# DOCX (via asciidoctor-reducer → pandoc)
+asciidoctor-reducer src/main.adoc | pandoc -f asciidoc \
+  --reference-doc=templates/technical/technical-reference.docx -t docx -o output.docx
 ```
-
----
-
-## Class options
-
-| Option | Effect |
-|---|---|
-| `portuguese` | Portuguese labels (Sumário, section names, etc.). |
-| `notime` | Hide compilation time on cover page. |
-| `nochangelog` | Suppress changelog section and cover page version/date/time. |
-| `noauthors` | Hide authors on the cover page (default: show if set via `\setdocauthors`). |
-| `indentbody` | Indent all running text by `\contentindent`. |
 
 ---
 
@@ -466,9 +425,11 @@ pandoc --lua-filter=templates/technical/technical-pandoc.lua \
 From the project folder:
 
 ```bash
-cd src/ && latexmk main.tex          # compile to PDF (XeLaTeX)
-cd src/ && latexmk -C main.tex       # clean all generated files
+make project DIR=documents/<project-name>   # from repo root (recommended)
 ```
+
+**Build pipeline:** `asciidoctor -b huawei-latex main.adoc -o main.tex` →
+`latexmk main.tex` → PDF.
 
 ### Versioning workflow (for AI-assisted edits)
 
@@ -482,9 +443,9 @@ changelog entry.** See the guide SKILL.md for the full workflow.
    - **Minor** (`1.0.0` → `1.1.0`): new sections, new content.
    - **Major** (`1.0.0` → `2.0.0`): structural changes, breaking reorganization.
 
-2. **Update `\setdocversion{...}`** in the preamble with the new version.
+2. **Update `:version:`** in the header attributes with the new version.
 
-3. **Add a `\changelogentry` at the top of the `changelog` block** (newest first).
+3. **Add a `\changelogentry` at the top of the `changelog` passthrough block** (newest first).
 
 4. **Recompile** with `make project DIR=documents/<project-name>`.
 
@@ -494,10 +455,10 @@ changelog entry.** See the guide SKILL.md for the full workflow.
 
 ## Agent workflow checklist
 
-1. Read `technical.cls` and this SKILL.md before writing any content.
+1. Read `technical.cls`, `huawei-latex-converter.rb`, and this SKILL.md before writing any content.
 2. Create a self-contained folder in `documents/<project-name>/`.
-3. Write `src/main.tex` using the skeleton above.
+3. Write `src/main.adoc` using the skeleton above.
 4. Write `src/.latexmkrc` with correct `TEXINPUTS` paths.
-5. Compile with `latexmk` and verify the PDF.
+5. Compile with `make project DIR=documents/<project-name>` and verify the PDF.
 6. Bump version and add a changelog entry (AGENTS.md L11).
-7. For multi-format output, run the Pandoc commands above.
+7. For multi-format output, run the build commands above.
