@@ -120,8 +120,7 @@ log_dim()   { echo -e "    ${C_DIM}$1${C_RESET}"; }
 # ── Banner ──
 _banner_text="Huawei Document Templates — install.sh"
 _banner_width=$(( ${#_banner_text} + 4 ))
-_banner_border=""
-for _i in $(seq 1 $_banner_width); do _banner_border+="═"; done
+_banner_border=$(printf '═%.0s' $(seq 1 $_banner_width))
 echo ""
 echo -e "${C_BOLD}${C_CYAN}╔${_banner_border}╗${C_RESET}"
 echo -e "${C_BOLD}${C_CYAN}║  ${_banner_text}  ║${C_RESET}"
@@ -131,17 +130,23 @@ echo ""
 echo -e "  ${C_BOLD}What:${C_RESET}  AsciiDoc document templates for Huawei Cloud guides (XeLaTeX + latexmk, AsciiDoc + asciidoctor)"
 echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
-log_dim "• XeLaTeX + latexmk + LaTeX packages"
-log_dim "• AsciiDoc + asciidoctor (source format + converter)"
-log_dim "• HarmonyOS Sans (body font, free commercial use)"
-log_dim "• Cascadia Code (code font, open source)"
-log_dim "• opencode skills (/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook)"
-log_dim "• VS Code LaTeX Workshop (local + remote config)"
+local -a installs=(
+    "• XeLaTeX + latexmk + LaTeX packages"
+    "• AsciiDoc + asciidoctor (source format + converter)"
+    "• HarmonyOS Sans (body font, free commercial use)"
+    "• Cascadia Code (code font, open source)"
+    "• opencode skills (/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook)"
+    "• VS Code LaTeX Workshop (local + remote config)"
+)
+for line in "${installs[@]}"; do log_dim "$line"; done
 echo ""
 echo -e "  ${C_BOLD}Prerequisites:${C_RESET}"
-log_dim "• Ubuntu 22.04+ (WSL or native)     (required)"
-log_dim "• apt-get, sudo                      (required)"
-log_dim "• VS Code CLI (code)                 (optional — for extension install)"
+local -a prereqs=(
+    "• Ubuntu 22.04+ (WSL or native)     (required)"
+    "• apt-get, sudo                      (required)"
+    "• VS Code CLI (code)                 (optional — for extension install)"
+)
+for line in "${prereqs[@]}"; do log_dim "$line"; done
 echo ""
 
 # ── Confirmation ──
@@ -511,14 +516,12 @@ compile_sample() {
     local dir="$1" label="$2" file="${3:-}"
     local src_dir="$dir/src"
 
-    # Detect source file (.adoc preferred, .tex fallback)
+    # Detect source file (.adoc only — all samples use AsciiDoc)
     if [[ -f "$src_dir/main.adoc" ]]; then
         local adoc_file="$src_dir/main.adoc"
         local tex_file="$src_dir/main.tex"
         echo "  Converting $adoc_file -> $tex_file"
         "$SCRIPT_DIR/scripts/build-adoc.sh" "$adoc_file" -o "$tex_file" || { log_warn "$label: build-adoc.sh failed"; return 1; }
-        file="main.tex"
-    elif [[ -f "$src_dir/main.tex" ]]; then
         file="main.tex"
     elif [[ -n "$file" && -f "$src_dir/$file" ]]; then
         : # use provided file
@@ -561,15 +564,20 @@ compile_sample "$SCRIPT_DIR/examples/setup-guide" "Setup guide" "setup-guide.tex
 echo ""
 echo -e "${C_BOLD}${C_GREEN}  ✓ Setup complete${C_RESET}"
 echo ""
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Engine:"             "XeLaTeX (TeX Live)"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Build tool:"         "latexmk (.latexmkrc → xelatex)"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Source format:"      "AsciiDoc (.adoc → LaTeX via asciidoctor)"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Body font:"          "HarmonyOS Sans → Liberation Sans"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Code font:"          "Cascadia Code → DejaVu Sans Mono"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "VS Code:"            "LaTeX Workshop (local + remote, -cd -xelatex)"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Timezone:"           "America/Sao_Paulo (GMT-3, overridable)"
-printf "  ${C_DIM}%-24s${C_RESET} %s\n" "Diagrams:"           "PlantUML + graphviz (optional: mermaid-cli for mermaid)"
+local -a summary_rows=(
+    "Engine:"             "XeLaTeX (TeX Live)"
+    "Build tool:"         "latexmk (.latexmkrc → xelatex)"
+    "Source format:"      "AsciiDoc (.adoc → LaTeX via asciidoctor)"
+    "Body font:"          "HarmonyOS Sans → Liberation Sans"
+    "Code font:"          "Cascadia Code → DejaVu Sans Mono"
+    "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook"
+    "VS Code:"            "LaTeX Workshop (local + remote, -cd -xelatex)"
+    "Timezone:"           "America/Sao_Paulo (GMT-3, overridable)"
+    "Diagrams:"           "PlantUML + graphviz (optional: mermaid-cli for mermaid)"
+)
+for (( i=0; i<${#summary_rows[@]}; i+=2 )); do
+    printf "  ${C_DIM}%-24s${C_RESET} %s\n" "${summary_rows[$i]}" "${summary_rows[$i+1]}"
+done
 echo ""
 echo -e "  ${C_BOLD}Next steps:${C_RESET}"
 log_dim "1. Open this project in opencode"

@@ -244,7 +244,7 @@ PYEOF
 }
 
 # ── Sample list (auto-discovered) ────────────────────────────────────────────
-# v6.0.0: prefer .adoc source if present; fall back to .tex for backward compat.
+# v6.0.0: all samples use .adoc source.
 SAMPLES=()
 for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     tmpl_name=$(basename "$tmpl_dir")
@@ -254,19 +254,14 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     for lang_dir in "$REPO_ROOT/examples/$tmpl_name"/*/; do
         [ ! -d "$lang_dir" ] && continue
         lang_name=$(basename "$lang_dir")
-        # Check for .adoc first, then fall back to .tex
         if [ -f "$lang_dir/src/main.adoc" ]; then
             SAMPLES+=("examples/$tmpl_name/$lang_name main adoc")
-        elif [ -f "$lang_dir/src/main.tex" ]; then
-            SAMPLES+=("examples/$tmpl_name/$lang_name main tex")
         fi
     done
 done
 # Setup guide (special case — uses guide template, different filename)
 if [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.adoc" ]; then
     SAMPLES+=("examples/setup-guide setup-guide adoc")
-elif [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.tex" ]; then
-    SAMPLES+=("examples/setup-guide setup-guide tex")
 fi
 
 # ── Main loop ──────────────────────────────────────────────────────────────
@@ -275,20 +270,13 @@ for entry in "${SAMPLES[@]}"; do
   name=$(basename "$(dirname "$sample")")/$(basename "$sample")
   echo "=== $name ==="
 
-  # Resolve source file based on format (adoc or tex)
-  if [ "$src_fmt" = "adoc" ]; then
-    src_file="$REPO_ROOT/$sample/src/${basename}.adoc"
-    USE_ADOC=true
-    # For .adoc sources, convert to .tex first via custom backend
-    tex_file="$RT_TMPDIR/${basename}-from-adoc.tex"
-    if ! asciidoctor -b huawei-latex -r "$REPO_ROOT/templates/_base/huawei-latex-converter.rb" "$src_file" -o "$tex_file" 2>/dev/null; then
-      echo "  SKIP: asciidoctor conversion failed for $src_file"
-      continue
-    fi
-  else
-    src_file="$REPO_ROOT/$sample/src/${basename}.tex"
-    tex_file="$src_file"
-    USE_ADOC=false
+  # Resolve source file (all samples are .adoc)
+  src_file="$REPO_ROOT/$sample/src/${basename}.adoc"
+  USE_ADOC=true
+  tex_file="$RT_TMPDIR/${basename}-from-adoc.tex"
+  if ! asciidoctor -b huawei-latex -r "$REPO_ROOT/templates/_base/huawei-latex-converter.rb" "$src_file" -o "$tex_file" 2>/dev/null; then
+    echo "  SKIP: asciidoctor conversion failed for $src_file"
+    continue
   fi
 
   if [ ! -f "$tex_file" ]; then
@@ -300,23 +288,13 @@ for entry in "${SAMPLES[@]}"; do
   get_template_paths "$sample"
 
   # ── Generate Markdown ──────────────────────────────────────────────────
-  if [[ "$USE_ADOC" == "true" ]]; then
-    tmp_adoc=$(mktemp --suffix=.adoc)
-    asciidoctor-reducer "$src_file" > "$tmp_adoc" 2>/dev/null || cp "$src_file" "$tmp_adoc"
-    pandoc -f asciidoc -t gfm "$tmp_adoc" -o "$RT_TMPDIR/rt.md" 2>/dev/null
-    rm -f "$tmp_adoc"
-  else
-    pandoc -f latex+raw_tex --lua-filter="$FILTER" -t markdown --wrap=none \
-      "$tex_file" -o "$RT_TMPDIR/rt.md" 2>/dev/null
-  fi
+  tmp_adoc=$(mktemp --suffix=.adoc)
+  asciidoctor-reducer "$src_file" > "$tmp_adoc" 2>/dev/null || cp "$src_file" "$tmp_adoc"
+  pandoc -f asciidoc -t gfm "$tmp_adoc" -o "$RT_TMPDIR/rt.md" 2>/dev/null
+  rm -f "$tmp_adoc"
 
   # ── Generate HTML ──────────────────────────────────────────────────────
-  if [[ "$USE_ADOC" == "true" ]]; then
-    asciidoctor -b html5 -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" "$src_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
-  else
-    pandoc -f latex+raw_tex --lua-filter="$FILTER" --template="$HTML_TMPL" -s -t html5 \
-      "$tex_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
-  fi
+  asciidoctor -b html5 -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" "$src_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
 
   # ── Generate DOCX ──────────────────────────────────────────────────────
   docx_outdir="$RT_TMPDIR/docx_out"
@@ -330,11 +308,6 @@ for entry in "${SAMPLES[@]}"; do
       --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
       "$tmp_adoc" -o "$docx_outdir/${basename}.docx" 2>/dev/null
     rm -f "$tmp_adoc"
-  else
-    pandoc -f latex+raw_tex --lua-filter="$FILTER" \
-      --reference-doc="$REF_DOCX" --number-sections \
-      --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
-      -t docx "$tex_file" -o "$docx_outdir/${basename}.docx" 2>/dev/null
   fi
   # Post-process with --fix (same pipeline as scripts/build.sh)
   if [ -f "$docx_outdir/${basename}.docx" ]; then
@@ -426,13 +399,13 @@ for entry in "${SAMPLES[@]}"; do
   echo ""
   echo "  Metric          | MD  | HTML | DOCX"
   echo "  ----------------|-----|------|-----"
-  printf "  H1              | %3d | %4d | %4d\n" "$md_h1" "$html_h1" "$docx_h1"
-  printf "  H2              | %3d | %4d | %4d\n" "$md_h2" "$html_h2" "$docx_h2"
-  printf "  Images          | %3d | %4d | %4d\n" "$md_img" "$html_img" "$docx_img"
-  printf "  Code blocks     | %3d | %4d | %4d\n" "$md_code" "$html_code" "$docx_code_blocks"
-  printf "  Tables          | %3d | %4d | %4d\n" "$md_tables" "$html_tables" "$docx_tables"
-  printf "  Callouts        | %3d | %4d | %4d\n" "$md_callouts" "$html_callouts" "$docx_callouts"
-  printf "  Tables+Callouts | %3d | %4d | %4d\n" "$md_tc" "$html_tc" "$docx_tc"
+  local -a metrics=("H1" "H2" "Images" "Code blocks" "Tables" "Callouts" "Tables+Callouts")
+  local -a md_vals=("$md_h1" "$md_h2" "$md_img" "$md_code" "$md_tables" "$md_callouts" "$md_tc")
+  local -a html_vals=("$html_h1" "$html_h2" "$html_img" "$html_code" "$html_tables" "$html_callouts" "$html_tc")
+  local -a docx_vals=("$docx_h1" "$docx_h2" "$docx_img" "$docx_code_blocks" "$docx_tables" "$docx_callouts" "$docx_tc")
+  for i in "${!metrics[@]}"; do
+    printf "  %-16s| %3d | %4d | %4d\n" "${metrics[$i]}" "${md_vals[$i]}" "${html_vals[$i]}" "${docx_vals[$i]}"
+  done
   echo ""
 
   # ── Hard check: 0 raw LaTeX in all 3 formats ──────────────────────────

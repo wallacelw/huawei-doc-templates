@@ -1,18 +1,16 @@
 # frozen_string_literal: true
 
 # huawei-latex-converter.rb
-# =====================================================================
-#  Custom Asciidoctor backend that converts AsciiDoc (.adoc) to
-#  LaTeX (.tex) using Huawei template class commands.
+# Custom Asciidoctor backend that converts AsciiDoc (.adoc) to
+# LaTeX (.tex) using Huawei template class commands.
 #
-#  Usage:
-#    asciidoctor -b huawei-latex \
-#      -r templates/_base/huawei-latex-converter.rb \
-#      doc.adoc -o doc.tex
+# Usage:
+#   asciidoctor -b huawei-latex \
+#     -r templates/_base/huawei-latex-converter.rb \
+#     doc.adoc -o doc.tex
 #
-#  Reads AsciiDoc document attributes for preamble generation and
-#  maps AsciiDoc AST nodes to Huawei LaTeX commands.
-# =====================================================================
+# Reads AsciiDoc document attributes for preamble generation and
+# maps AsciiDoc AST nodes to Huawei LaTeX commands.
 
 require 'asciidoctor'
 require 'asciidoctor/converter'
@@ -35,9 +33,7 @@ LATEX_ESCAPES = {
 # Build a regex that matches any escapable character.
 LATEX_ESCAPE_RE = /[\\%$#&_{\}~^]/
 
-# ─────────────────────────────────────────────────────────────────────
-#  Helper: escape LaTeX special characters in text
-# ─────────────────────────────────────────────────────────────────────
+# --- Helper: escape LaTeX special characters in text ---
 def latex_escape(text)
   return '' if text.nil? || text.empty?
   text.gsub(LATEX_ESCAPE_RE) { |ch| LATEX_ESCAPES[ch] }
@@ -52,10 +48,8 @@ def latex_escape_text(text)
   text.gsub(LATEX_TEXT_ESCAPE_RE) { |ch| LATEX_ESCAPES[ch] }
 end
 
-# ─────────────────────────────────────────────────────────────────────
-#  Helper: convert pixel width to linewidth fraction
-#  Heuristic: 600px ≈ 0.8\linewidth, 400px ≈ 0.5\linewidth
-# ─────────────────────────────────────────────────────────────────────
+# --- Helper: convert pixel width to linewidth fraction ---
+# Heuristic: 600px ≈ 0.8\linewidth, 400px ≈ 0.5\linewidth
 def pixel_width_to_linewidth(px)
   fraction = (px.to_i / 750.0).clamp(0.1, 1.0)
   # Round to one decimal place
@@ -63,9 +57,7 @@ def pixel_width_to_linewidth(px)
   "#{rounded}\\linewidth"
 end
 
-# ─────────────────────────────────────────────────────────────────────
-#  Helper: admonition type → LaTeX environment
-# ─────────────────────────────────────────────────────────────────────
+# --- Helper: admonition type → LaTeX environment ---
 ADMONITION_MAP = {
   'note'      => 'infobox',
   'tip'       => 'tip',
@@ -74,27 +66,11 @@ ADMONITION_MAP = {
   'important' => 'warning',
 }.freeze
 
-# ─────────────────────────────────────────────────────────────────────
-#  Helper: testfield label → LaTeX command/environment
-# ─────────────────────────────────────────────────────────────────────
-TESTFIELD_MAP = {
-  'Objective'     => :objective,
-  'Prerequisites' => :prerequisites,
-  'Procedure'     => :procedure,
-  'Expected'      => :expected,
-  'Result'        => :result,
-  'Remarks'       => :remarks,
-}.freeze
-
-# =====================================================================
-#  Register the 'huawei-latex' converter backend
-# =====================================================================
+# --- Register the 'huawei-latex' converter backend ---
 class HuaweiLatexConverter < Asciidoctor::Converter::Base
   register_for 'huawei-latex'
 
-  # ───────────────────────────────────────────────────────────────────
-  #  Main dispatch: route node transforms to specific converters
-  # ───────────────────────────────────────────────────────────────────
+  # --- Main dispatch: route node transforms to specific converters ---
   def convert node, transform = node.node_name, opts = {}
     # Check for custom role-based block converters first
     if node.respond_to?(:role) && node.role && respond_to?("convert_role_#{node.role}", true)
@@ -148,9 +124,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  DOCUMENT — generate full LaTeX file with preamble
-  # ===================================================================
+  # --- DOCUMENT — generate full LaTeX file with preamble ---
   def convert_document(node)
     # --- Determine template and class options ---
     template   = node.attr('template', 'guide')
@@ -214,16 +188,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines.join("\n")
   end
 
-  # ===================================================================
-  #  EMBEDDED — content without preamble (for includes)
-  # ===================================================================
+  # --- EMBEDDED — content without preamble (for includes) ---
   def convert_embedded(node)
     node.content
   end
 
-  # ===================================================================
-  #  SECTION — \section, \subsection, \subsubsection, \paragraph
-  # ===================================================================
+  # --- SECTION — \section, \subsection, \subsubsection, \paragraph ---
   def convert_section(node)
     # Level 0 is the document title (already in preamble)
     return '' if node.level == 0
@@ -239,14 +209,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  Helper: escape inline content from an AsciiDoc node
+  # --- Helper: escape inline content from an AsciiDoc node ---
   #
-  #  Gets node.content, unescapes HTML entities that asciidoctor adds,
-  #  then escapes LaTeX special characters that are NOT preceded by a
-  #  backslash (to avoid double-escaping already-generated LaTeX
-  #  commands like \textbf).
-  # ===================================================================
+  # Gets node.content, unescapes HTML entities that asciidoctor adds,
+  # then escapes LaTeX special characters that are NOT preceded by a
+  # backslash (to avoid double-escaping already-generated LaTeX
+  # commands like \textbf).
   def escape_inline_content(node)
     content = node.content
     return '' if content.nil? || content.empty?
@@ -257,18 +225,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
   end
 
-  # ===================================================================
-  #  PARAGRAPH — plain text paragraph
-  # ===================================================================
+  # --- PARAGRAPH — plain text paragraph ---
   def convert_paragraph(node)
     content = escape_inline_content(node)
     return '' if content.nil? || content.strip.empty?
     content
   end
 
-  # ===================================================================
-  #  ADMONITION — NOTE/TIP/WARNING/CAUTION/IMPORTANT → callout boxes
-  # ===================================================================
+  # --- ADMONITION — NOTE/TIP/WARNING/CAUTION/IMPORTANT → callout boxes ---
   def convert_admonition(node)
     admon_type = node.attr('name') || 'note'
     env = ADMONITION_MAP[admon_type] || 'infobox'
@@ -276,9 +240,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\begin{#{env}}\n#{content}\n\\end{#{env}}"
   end
 
-  # ===================================================================
-  #  LISTING — source code blocks → \begin{code}[lang]...\end{code}
-  # ===================================================================
+  # --- LISTING — source code blocks → \begin{code}[lang]...\end{code} ---
   def convert_listing(node)
     # Check for codefile class → \codefile[lang]{path}
     if node.role == 'codefile' || (node.attributes && node.attributes['1'] == 'codefile')
@@ -307,31 +269,19 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  LITERAL — literal/layout blocks → verbatim
-  # ===================================================================
+  # --- LITERAL — literal/layout blocks → verbatim ---
   def convert_literal(node)
     content = node.source || ''
     "\\begin{code}\n#{content}\n\\end{code}"
   end
 
-  # ===================================================================
-  #  TABLE — with .hutable or .longhutable role → Huawei table env
-  # ===================================================================
+  # --- TABLE — with .hutable or .longhutable role → Huawei table env ---
   def convert_table(node)
     role = node.role
     num_cols = node.columns ? node.columns.size : 1
     col_spec = "|#{'l|' * num_cols}"
 
-    # Determine table environment
-    if role == 'hutable'
-      env_name = 'hutable'
-    elsif role == 'longhutable'
-      env_name = 'longhutable'
-    else
-      # Default to hutable for any table
-      env_name = 'hutable'
-    end
+    env_name = role == 'longhutable' ? 'longhutable' : 'hutable'
 
     lines = []
     lines << "\\begin{#{env_name}}{#{col_spec}}"
@@ -383,9 +333,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines.join("\n")
   end
 
-  # ===================================================================
-  #  IMAGE — block image → \image or \imagecap
-  # ===================================================================
+  # --- IMAGE — block image → \image or \imagecap ---
   def convert_image(node)
     target = node.attr('target') || ''
     width  = node.attr('width')
@@ -411,9 +359,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  UNORDERED LIST → \begin{itemize}
-  # ===================================================================
+  # --- UNORDERED LIST → \begin{itemize} ---
   def convert_ulist(node)
     items = node.items.map do |item|
       text = item.text
@@ -424,9 +370,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\begin{itemize}\n#{items.join("\n")}\n\\end{itemize}"
   end
 
-  # ===================================================================
-  #  ORDERED LIST → \begin{enumerate}
-  # ===================================================================
+  # --- ORDERED LIST → \begin{enumerate} ---
   def convert_olist(node)
     items = node.items.map do |item|
       text = item.text
@@ -436,9 +380,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\begin{enumerate}\n#{items.join("\n")}\n\\end{enumerate}"
   end
 
-  # ===================================================================
-  #  DEFINITION LIST → used for changelog entries
-  # ===================================================================
+  # --- DEFINITION LIST → used for changelog entries ---
   def convert_dlist(node)
     # Default: render as description list
     # (changelog uses passthrough blocks, not role-based dispatch)
@@ -450,9 +392,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\begin{description}\n#{items.join("\n")}\n\\end{description}"
   end
 
-  # ===================================================================
-  #  CALLOUT LIST → numbered list with callout numbers
-  # ===================================================================
+  # --- CALLOUT LIST → numbered list with callout numbers ---
   def convert_colist(node)
     items = node.items.map do |item|
       "\\item #{item.text}"
@@ -460,9 +400,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\begin{enumerate}\n#{items.join("\n")}\n\\end{enumerate}"
   end
 
-  # ===================================================================
-  #  EXAMPLE BLOCK → tcolorbox-like
-  # ===================================================================
+  # --- EXAMPLE BLOCK → tcolorbox-like ---
   def convert_example(node)
     content = node.content
     if node.title?
@@ -472,59 +410,17 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  Technical template 5-section role handlers
-  #  [.problem], [.rootcauseanalysis], [.rootcause],
-  #  [.triggercondition], [.workaround] → LaTeX environments
-  # ===================================================================
-  def convert_role_problem(node)
-    "\\begin{problem}\n#{node.content}\n\\end{problem}"
+  # --- Technical template section roles — all emit \begin{role}\n...\n\end{role} ---
+  TECHNICAL_ROLES = %w[problem rootcauseanalysis rootcause triggercondition
+    workaround impact backupdata workaroundsteps verification rollback cleanup].freeze
+
+  TECHNICAL_ROLES.each do |role|
+    define_method("convert_role_#{role}") do |node|
+      "\\begin{#{role}}\n#{node.content}\n\\end{#{role}}"
+    end
   end
 
-  def convert_role_rootcauseanalysis(node)
-    "\\begin{rootcauseanalysis}\n#{node.content}\n\\end{rootcauseanalysis}"
-  end
-
-  def convert_role_rootcause(node)
-    "\\begin{rootcause}\n#{node.content}\n\\end{rootcause}"
-  end
-
-  def convert_role_triggercondition(node)
-    "\\begin{triggercondition}\n#{node.content}\n\\end{triggercondition}"
-  end
-
-  def convert_role_workaround(node)
-    "\\begin{workaround}\n#{node.content}\n\\end{workaround}"
-  end
-
-  # Technical template sub-role handlers
-  def convert_role_impact(node)
-    "\\begin{impact}\n#{node.content}\n\\end{impact}"
-  end
-
-  def convert_role_backupdata(node)
-    "\\begin{backupdata}\n#{node.content}\n\\end{backupdata}"
-  end
-
-  def convert_role_workaroundsteps(node)
-    "\\begin{workaroundsteps}\n#{node.content}\n\\end{workaroundsteps}"
-  end
-
-  def convert_role_verification(node)
-    "\\begin{verification}\n#{node.content}\n\\end{verification}"
-  end
-
-  def convert_role_rollback(node)
-    "\\begin{rollback}\n#{node.content}\n\\end{rollback}"
-  end
-
-  def convert_role_cleanup(node)
-    "\\begin{cleanup}\n#{node.content}\n\\end{cleanup}"
-  end
-
-  # ===================================================================
-  #  QUOTE BLOCK
-  # ===================================================================
+  # --- QUOTE BLOCK ---
   def convert_quote(node)
     content = node.content
     attribution = node.attr('attribution') || node.attr('cite')
@@ -535,9 +431,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  OPEN BLOCK — check for custom roles (.changelog, .testcase, .objectives)
-  # ===================================================================
+  # --- OPEN BLOCK — check for custom roles (.changelog, .testcase, .objectives) ---
   def convert_open(node)
     role = node.role
     if role && respond_to?("convert_role_#{role}", true)
@@ -547,16 +441,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     node.content
   end
 
-  # ===================================================================
-  #  PASSTHROUGH BLOCK — raw LaTeX
-  # ===================================================================
+  # --- PASSTHROUGH BLOCK — raw LaTeX ---
   def convert_pass(node)
     node.content
   end
 
-  # ===================================================================
-  #  FLOATING TITLE — unnumbered heading
-  # ===================================================================
+  # --- FLOATING TITLE — unnumbered heading ---
   def convert_floating_title(node)
     title = latex_escape(node.title)
     case node.level
@@ -567,23 +457,17 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  THEMATIC BREAK — horizontal rule
-  # ===================================================================
+  # --- THEMATIC BREAK — horizontal rule ---
   def convert_thematic_break(_node)
     "\n\\noindent\\rule{\\linewidth}{0.5pt}\n"
   end
 
-  # ===================================================================
-  #  PAGE BREAK
-  # ===================================================================
+  # --- PAGE BREAK ---
   def convert_page_break(_node)
     '\\clearpage'
   end
 
-  # ===================================================================
-  #  INLINE QUOTED — bold, italic, code, highlight, etc.
-  # ===================================================================
+  # --- INLINE QUOTED — bold, italic, code, highlight, etc. ---
   def convert_inline_quoted(node)
     text = latex_escape_text(node.text)
     case node.type
@@ -608,9 +492,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  INLINE ANCHOR — links and cross-references
-  # ===================================================================
+  # --- INLINE ANCHOR — links and cross-references ---
   def convert_inline_anchor(node)
     case node.type
     when :link
@@ -634,60 +516,44 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  INLINE IMAGE
-  # ===================================================================
+  # --- INLINE IMAGE ---
   def convert_inline_image(node)
     target = node.attr('target') || ''
     "\\image{#{target}}"
   end
 
-  # ===================================================================
-  #  INLINE BREAK — line break
-  # ===================================================================
+  # --- INLINE BREAK — line break ---
   def convert_inline_break(node)
     "#{latex_escape_text(node.text)}\\\\"
   end
 
-  # ===================================================================
-  #  INLINE BUTTON
-  # ===================================================================
+  # --- INLINE BUTTON ---
   def convert_inline_button(node)
     "\\textbf{#{latex_escape(node.text)}}"
   end
 
-  # ===================================================================
-  #  INLINE CALLOUT
-  # ===================================================================
+  # --- INLINE CALLOUT ---
   def convert_inline_callout(node)
     "\\textsuperscript{#{node.text}}"
   end
 
-  # ===================================================================
-  #  INLINE FOOTNOTE
-  # ===================================================================
+  # --- INLINE FOOTNOTE ---
   def convert_inline_footnote(node)
     "\\footnote{#{node.content}}"
   end
 
-  # ===================================================================
-  #  INLINE INDEX TERM
-  # ===================================================================
+  # --- INLINE INDEX TERM ---
   def convert_inline_indexterm(node)
     # Index terms are invisible in output
     ''
   end
 
-  # ===================================================================
-  #  INLINE KBD — keyboard input
-  # ===================================================================
+  # --- INLINE KBD — keyboard input ---
   def convert_inline_kbd(node)
     "\\inlinecode{#{node.text}}"
   end
 
-  # ===================================================================
-  #  INLINE MENU
-  # ===================================================================
+  # --- INLINE MENU ---
   def convert_inline_menu(node)
     items = node.attr('menus')
     if items
@@ -697,21 +563,15 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # ===================================================================
-  #  ICON
-  # ===================================================================
+  # --- ICON ---
   def convert_icon(_node)
     # Icons don't map cleanly to LaTeX — skip
     ''
   end
 
-  # ===================================================================
-  #  ROLE-BASED BLOCK CONVERTERS
-  # ===================================================================
+  # --- ROLE-BASED BLOCK CONVERTERS ---
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.objectives] open block → \begin{objectives}...\end{objectives}
-  # ───────────────────────────────────────────────────────────────────
+  # --- [.objectives] open block → \begin{objectives}...\end{objectives} ---
   def convert_role_objectives(node)
     lines = []
     lines << '\\begin{objectives}'
@@ -749,20 +609,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines.join("\n")
   end
 
-  # ===================================================================
-  #  ROLE-BASED INLINE (SPAN) CONVERTERS
-  # ===================================================================
+  # --- ROLE-BASED INLINE (SPAN) CONVERTERS ---
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.badge]#text# → \badge{text}
-  # ───────────────────────────────────────────────────────────────────
+  # --- [.badge]#text# → \badge{text} ---
   def convert_role_badge(node)
     "\\badge{#{latex_escape_text(node.text)}}"
   end
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.menu]#A ▸ B# → \menu{A, B}
-  # ───────────────────────────────────────────────────────────────────
+  # --- [.menu]#A ▸ B# → \menu{A, B} ---
   def convert_role_menu(node)
     text = node.text || node.content || ''
     # Split on ▸ (U+25B8) or ▻ (U+25BB) or >>
@@ -770,23 +624,17 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\menu{#{parts.join(', ')}}"
   end
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.note]#text# → \note{text}
-  # ───────────────────────────────────────────────────────────────────
+  # --- [.note]#text# → \note{text} ---
   def convert_role_note(node)
     "\\note{#{latex_escape_text(node.text)}}"
   end
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.param]#text# → \param{text}
-  # ───────────────────────────────────────────────────────────────────
+  # --- [.param]#text# → \param{text} ---
   def convert_role_param(node)
     "\\param{#{latex_escape_text(node.text)}}"
   end
 
-  # ───────────────────────────────────────────────────────────────────
-  #  [.badge-pass]#Pass# → \testresultbadge{Pass}
-  # ───────────────────────────────────────────────────────────────────
+  # --- [.badge-pass]#Pass# → \testresultbadge{Pass} ---
   def convert_role_badge_pass(node)
     "\\testresultbadge{#{node.text || 'Pass'}}"
   end
@@ -801,31 +649,5 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   def convert_role_badge_untested(node)
     "\\testresultbadge{#{node.text || 'Untested'}}"
-  end
-
-  # ───────────────────────────────────────────────────────────────────
-  #  [.hutable] / [.longhutable] — delegate to table converter
-  # ───────────────────────────────────────────────────────────────────
-  def convert_role_hutable(node)
-    convert_table(node)
-  end
-
-  def convert_role_longhutable(node)
-    convert_table(node)
-  end
-
-  # ───────────────────────────────────────────────────────────────────
-  #  [.general-objective] — handled inside objectives
-  # ───────────────────────────────────────────────────────────────────
-  def convert_role_general_objective(node)
-    "\\generalobjective{#{node.content}}"
-  end
-
-  # ───────────────────────────────────────────────────────────────────
-  #  [.testfield] — handled inside testcase
-  # ───────────────────────────────────────────────────────────────────
-  def convert_role_testfield(node)
-    # Standalone testfield (rare) — just emit content
-    node.content
   end
 end

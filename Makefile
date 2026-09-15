@@ -87,19 +87,6 @@ endef
 $(foreach tmpl,$(TEMPLATES),$(eval $(call TEMPLATE_CLEAN_RULES,$(tmpl))))
 
 # ============================================================================
-##@ Legacy guide aliases (backward compat — guide targets have no prefix)
-# ============================================================================
-
-md-pt: guide-md-pt ; @true
-md-en: guide-md-en ; @true
-docx-pt: guide-docx-pt ; @true
-docx-en: guide-docx-en ; @true
-html-pt: guide-html-pt ; @true
-html-en: guide-html-en ; @true
-pt: guide-pt ; @true
-en: guide-en ; @true
-
-# ============================================================================
 ##@ Setup guide (uses guide template, lives at examples/setup-guide/)
 # ============================================================================
 
@@ -169,40 +156,7 @@ preview: ## Preview document as HTML in browser (make preview DIR=examples/guide
 
 # ── Watch (recompile on save) ──
 watch: ## Watch .adoc and recompile PDF on save (make watch DIR=examples/guide/en)
-	@dir="$(DIR)"; \
-	srcdir="$$dir/src"; \
-	adoc=""; \
-	if [ -f "$$srcdir/main.adoc" ]; then adoc="main.adoc"; \
-	elif [ -f "$$srcdir/setup-guide.adoc" ]; then adoc="setup-guide.adoc"; fi; \
-	if [ -z "$$adoc" ]; then echo "Error: No .adoc file found in $$srcdir/"; exit 1; fi; \
-	echo "Watching $$srcdir/$$adoc for changes..."; \
-	echo "Press Ctrl+C to stop."; \
-	if command -v entr >/dev/null 2>&1; then \
-	  find "$$srcdir" -name "*.adoc" | entr -s \
-	    "echo 'Recompiling...'; \
-	     $(CURDIR)/scripts/build-adoc.sh $$srcdir/$$adoc $$srcdir/main.tex && \
-	     (cd $$srcdir && latexmk -xelatex main.tex 2>&1 | tail -3)"; \
-	elif command -v inotifywait >/dev/null 2>&1; then \
-	  while true; do \
-	    inotifywait -q -e modify "$$srcdir/$$adoc" >/dev/null 2>&1; \
-	    echo "Recompiling..."; \
-	    $(CURDIR)/scripts/build-adoc.sh "$$srcdir/$$adoc" "$$srcdir/main.tex" && \
-	    (cd "$$srcdir" && latexmk -xelatex main.tex 2>&1 | tail -3); \
-	  done; \
-	else \
-	  echo "Warning: Neither 'entr' nor 'inotifywait' found. Using polling fallback."; \
-	  last_mtime=0; \
-	  while true; do \
-	    current_mtime=$$(stat -c %Y "$$srcdir/$$adoc" 2>/dev/null || stat -f %m "$$srcdir/$$adoc"); \
-	    if [ "$$current_mtime" != "$$last_mtime" ]; then \
-	      last_mtime=$$current_mtime; \
-	      echo "Recompiling..."; \
-	      $(CURDIR)/scripts/build-adoc.sh "$$srcdir/$$adoc" "$$srcdir/main.tex" && \
-	      (cd "$$srcdir" && latexmk -xelatex main.tex 2>&1 | tail -3); \
-	    fi; \
-	    sleep 1; \
-	  done; \
-	fi
+	@./scripts/watch.sh "$(DIR)"
 
 # ============================================================================
 ##@ Testing
@@ -239,11 +193,6 @@ clean-formats: ## Remove generated multi-format files (DOCX/MD/HTML)
 		done; \
 	done
 	rm -f examples/setup-guide/setup-guide.docx examples/setup-guide/setup-guide.md examples/setup-guide/setup-guide.html
-
-# Legacy clean aliases (backward compat)
-clean-pt: clean-guide-pt ; @true
-clean-en: clean-guide-en ; @true
-clean-samples: clean-guide-samples ; @true
 
 clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=<name>.adoc])
 	@if [ -z "$(DIR)" ]; then echo "Usage: make clean-project DIR=<path> [FILE=<name>.adoc]"; exit 1; fi
@@ -282,10 +231,6 @@ TEMPLATE_CLEAN_PHONY := $(foreach tmpl,$(TEMPLATES), \
 .PHONY: test
 .PHONY: clean clean-examples clean-setup-guide clean-project clean-formats
 .PHONY: $(TEMPLATE_CLEAN_PHONY)
-# Legacy clean aliases
-.PHONY: clean-pt clean-en clean-samples
-# Legacy guide aliases
-.PHONY: md-pt md-en docx-pt docx-en html-pt html-en pt en
 # Setup guide format targets
 .PHONY: md-sg docx-sg html-sg
 # Aggregate format targets

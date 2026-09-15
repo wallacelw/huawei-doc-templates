@@ -81,23 +81,25 @@ while [[ $# -gt 0 ]]; do
         --dry-run) DRY_RUN=1; shift ;;
         --all)     FLAG_PDF=true; FLAG_DOCX=true; FLAG_MD=true; FLAG_HTML=true; shift ;;
         -h|--help)
-            echo "Usage: ./scripts/build.sh [OPTIONS] [PROJECT-DIR]"
-            echo ""
-            echo "Options:"
-            echo "  --pdf       Generate PDF only"
-            echo "  --docx      Generate DOCX only"
-            echo "  --md        Generate Markdown only"
-            echo "  --html      Generate HTML only"
-            echo "  --all       Generate all formats"
-            echo "  --dry-run   Show what would be built without building"
-            echo "  --template T  Use template T (auto-detected from .latexmkrc if omitted)"
-            echo "  -h, --help  Show this help message"
-            echo ""
-            echo "Examples:"
-            echo "  ./scripts/build.sh                           # interactive, current dir"
-            echo "  ./scripts/build.sh examples/guide/en         # interactive, specified project"
-            echo "  ./scripts/build.sh --pdf examples/guide/en   # PDF only"
-            echo "  ./scripts/build.sh --all examples/guide/en   # all formats"
+            cat <<'EOF'
+Usage: ./scripts/build.sh [OPTIONS] [PROJECT-DIR]
+
+Options:
+  --pdf       Generate PDF only
+  --docx      Generate DOCX only
+  --md        Generate Markdown only
+  --html      Generate HTML only
+  --all       Generate all formats
+  --dry-run   Show what would be built without building
+  --template T  Use template T (auto-detected from .latexmkrc if omitted)
+  -h, --help  Show this help message
+
+Examples:
+  ./scripts/build.sh                           # interactive, current dir
+  ./scripts/build.sh examples/guide/en         # interactive, specified project
+  ./scripts/build.sh --pdf examples/guide/en   # PDF only
+  ./scripts/build.sh --all examples/guide/en   # all formats
+EOF
             exit 0
             ;;
         -*)
@@ -120,12 +122,6 @@ PROJECT_DIR="$(realpath "$PROJECT_DIR" 2>/dev/null)" || {
     echo "Error: Project directory does not exist: $orig_dir" >&2
     exit 1
 }
-
-# ── Validate project directory ───────────────────────────────────────────
-if [ ! -d "$PROJECT_DIR" ]; then
-    echo "Error: Project directory does not exist: $PROJECT_DIR" >&2
-    exit 1
-fi
 
 # ── Source directory (src/ subfolder) ───────────────────────────────────
 SRC_DIR="$PROJECT_DIR/src"
@@ -234,6 +230,7 @@ check_deps() {
 
 # ── Interactive menu ─────────────────────────────────────────────────────
 interactive_menu() {
+    local -a opts=("PDF      (via XeLaTeX + latexmk)" "DOCX     (via Pandoc)" "Markdown (via Pandoc)" "HTML     (via Pandoc)" "All formats")
     echo ""
     echo "========================================"
     echo "Huawei Cloud Document Builder"
@@ -243,35 +240,23 @@ interactive_menu() {
     echo ""
     echo "Select output formats (enter numbers separated by spaces, or 'all'):"
     echo ""
-    echo "  1) PDF      (via XeLaTeX + latexmk)"
-    echo "  2) DOCX     (via Pandoc)"
-    echo "  3) Markdown (via Pandoc)"
-    echo "  4) HTML     (via Pandoc)"
-    echo "  5) All formats"
+    for i in "${!opts[@]}"; do
+        printf "  %d) %s\n" "$((i+1))" "${opts[$i]}"
+    done
     echo ""
 
     while true; do
         printf "Enter choice: "
         read -r choice
-
-        # Normalize input
         choice="$(echo "$choice" | tr '[:upper:]' '[:lower:]' | xargs)"
 
-        if [ -z "$choice" ]; then
-            echo "Please enter a selection."
-            continue
+        if [ -z "$choice" ]; then echo "Please enter a selection."; continue; fi
+
+        # Handle 'all' keyword or option 5
+        if [ "$choice" = "all" ] || [ "$choice" = "5" ]; then
+            FLAG_PDF=true; FLAG_DOCX=true; FLAG_MD=true; FLAG_HTML=true; break
         fi
 
-        # Handle 'all' keyword
-        if [ "$choice" = "all" ]; then
-            FLAG_PDF=true
-            FLAG_DOCX=true
-            FLAG_MD=true
-            FLAG_HTML=true
-            break
-        fi
-
-        # Parse numbers
         valid=true
         for token in $choice; do
             case "$token" in
@@ -279,26 +264,14 @@ interactive_menu() {
                 2) FLAG_DOCX=true ;;
                 3) FLAG_MD=true   ;;
                 4) FLAG_HTML=true ;;
-                5)
-                    FLAG_PDF=true
-                    FLAG_DOCX=true
-                    FLAG_MD=true
-                    FLAG_HTML=true
-                    ;;
-                *)
-                    echo "Invalid selection: '$token'. Enter numbers 1-5 or 'all'."
-                    valid=false
-                    break
-                    ;;
+                *) echo "Invalid selection: '$token'. Enter numbers 1-5 or 'all'."; valid=false; break ;;
             esac
         done
 
         if [ "$valid" = true ]; then
-            # Ensure at least one format selected
             if [ "$FLAG_PDF" = false ] && [ "$FLAG_DOCX" = false ] && \
                [ "$FLAG_MD" = false ] && [ "$FLAG_HTML" = false ]; then
-                echo "No format selected. Please try again."
-                continue
+                echo "No format selected. Please try again."; continue
             fi
             break
         fi
@@ -508,26 +481,14 @@ show_summary() {
     echo "Generation Complete"
     echo "========================================"
 
-    pad_label() {
-        case "$1" in
-            PDF)      echo "PDF:     " ;;
-            DOCX)     echo "DOCX:    " ;;
-            Markdown) echo "Markdown:" ;;
-            HTML)     echo "HTML:    " ;;
-            *)        echo "${1}: " ;;
-        esac
-    }
-
     for entry in "${RESULTS_OK[@]}"; do
-        local label="${entry%%:*}"
-        local detail="${entry#*:}"
-        printf "${GREEN}✓${RESET} %s %s\n" "$(pad_label "$label")" "$detail"
+        local label="${entry%%:*}" detail="${entry#*:}"
+        printf "${GREEN}✓${RESET} %-9s %s\n" "$label:" "$detail"
     done
 
     for entry in "${RESULTS_FAIL[@]}"; do
-        local label="${entry%%:*}"
-        local detail="${entry#*:}"
-        printf "${RED}✗${RESET} %s %s\n" "$(pad_label "$label")" "$detail"
+        local label="${entry%%:*}" detail="${entry#*:}"
+        printf "${RED}✗${RESET} %-9s %s\n" "$label:" "$detail"
     done
 
     echo ""
@@ -536,8 +497,7 @@ show_summary() {
 # ── Main ─────────────────────────────────────────────────────────────────
 
 # If no format flags set, go interactive
-if [ "$FLAG_PDF" = false ] && [ "$FLAG_DOCX" = false ] && \
-   [ "$FLAG_MD" = false ] && [ "$FLAG_HTML" = false ]; then
+if [ "$FLAG_PDF" = false ] && [ "$FLAG_DOCX" = false ] && [ "$FLAG_MD" = false ] && [ "$FLAG_HTML" = false ]; then
     interactive_menu
 fi
 
