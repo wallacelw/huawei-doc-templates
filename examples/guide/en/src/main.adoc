@@ -1,0 +1,240 @@
+= Guide: Getting Started with Huawei Cloud ECS
+:template: guide
+:lang: en
+:header-title: Huawei Cloud -- ECS Quick Start Guide
+:cover-text: Huawei Technologies CO., LTD
+:version: 3.6.0
+:header-logo: common-assets/huawei-logo-header.png
+:cover-logo: common-assets/huawei-logo-cover.png
+
+NOTE: This document demonstrates the `guide` template (`guide.cls`) for
+Huawei Cloud guides. It exercises all available commands and environments:
+cover page, table of contents, objectives, code blocks, images, callouts,
+badge, changelog, and the menu path command.
+
+== Provision an Elastic Cloud Server
+
+[.objectives]
+====
+[.general-objective]#This lab walks you through provisioning an Elastic Cloud Server
+(ECS) on Huawei Cloud via the Console. By the end you will be able to
+launch a virtual machine, connect to it over SSH, and verify that it is
+running.#
+
+*Prerequisites:*
+
+- Active IAM account on Huawei Cloud (valid username and password).
+- A web browser (Google Chrome, Mozilla Firefox, or Microsoft Edge).
+- An SSH client installed locally (OpenSSH, PuTTY, etc.).
+- A key pair created in the Console, or permission to create one.
+====
+
+NOTE: This guide covers the basic ECS provisioning flow. For advanced operations,
+consult the official Huawei Cloud documentation.
+
+=== Launch the instance
+
+*Objective:* Create a single ECS instance in the `sa-brazil-1` region
+using the Console wizard.
+
+*Step by step:*
+
+. In the Console, open the service catalog and navigate to
+  menu:Console[Elastic Cloud Server].
++
+image::assets/exemplo-menu.png[width=80%]
++
+. Click *Create ECS* and fill in the basic configuration:
++
+----
+Name:           web-server-01
+Flavor:         s6.small.1 (1 vCPU, 1 GB RAM)
+Image:          Ubuntu 22.04 Server 64bit
+Disk:           40 GB General Purpose SSD
+VPC:            vpc-default
+Subnet:         subnet-default
+Security Group: sg-ssh (allows inbound TCP 22)
+----
++
+. Under *Login Configuration*, select the key pair you created
+  earlier. Click *Create Now* and wait for the status to change
+  to *Running*.
++
+image::assets/exemplo-login.png[width=50%]
++
+NOTE: The instance is assigned a public IP (EIP). If you need a fixed IP,
+allocate a dedicated EIP and bind it after creation.
++
+WARNING: The EIP assigned during creation is released when the instance is deleted.
+Allocate a dedicated EIP if you need to keep the address.
+
+*Step by step:*
+
+=== Connect over SSH
+
+==== Retrieve the public IP
+
+On the ECS details page, copy the *EIP* (Elastic IP) field. This is
+the address you will use to connect.
+
+===== Using OpenSSH
+From a terminal, connect with the private key that matches the key pair
+selected during creation:
+
+[source,bash]
+----
+chmod 400 ~/.ssh/huawei_key.pem
+ssh -i ~/.ssh/huawei_key.pem ubuntu@<EIP>
+----
+
+===== Using PuTTY
+Convert the key to PPK format with PuTTYgen, then open a session to the
+EIP with the converted key.
+
+=== Verify the instance
+
+Once connected, run a few checks:
+
+[source,bash]
+----
+uname -a          # confirm OS version
+df -h             # check disk space
+systemctl status  # verify services are running
+----
+
+Alternatively, save the checks to a script and run it with pass:[\codefile[bash]{assets/example-script.sh}].
+
+==== Recommended flavors
+
+The table below lists recommended ECS flavors for development workloads:
+
+[.hutable]
+|===
+| Flavor | vCPU / RAM | Use case
+
+| ac8.large.2  | 2 vCPU / 4 GB  | Light development
+| ac8.xlarge.2 | 4 vCPU / 8 GB  | Recommended --- full coding stack
+| ac8.2xlarge.2 | 8 vCPU / 16 GB | Heavy workloads + multiple agents
+|===
+
+image::assets/ecs-flavors.png[alt="Screenshot of the ECS flavor selection page in the Console"]
+
+NOTE: This is an English sample that exercises every command and
+environment provided by the `guide` class. Use it as a reference
+when writing your own guides.
+
+== Configure the Terraform Provider
+
+[.objectives]
+====
+[.general-objective]#This chapter shows how to obtain an AK/SK pair from the Console
+and declare the Huawei Cloud provider in a Terraform configuration file,
+preparing the environment for Infrastructure as Code.#
+
+*Prerequisites:*
+
+- Chapter 1 completed (Console access working).
+- IAM permission to create access credentials.
+- `terraform` installed locally (version 1.0 or later).
+====
+
+=== Create an AK/SK
+
+*Objective:* Generate an Access Key ID / Secret Access Key pair to authenticate
+external tools with Huawei Cloud.
+
+In the Console, click your username in the top-right corner and open
+*My Credentials*. In the *Access Keys* section, click
+*Create Access Key* and download the generated file. Store it in a
+safe location: the Secret Access Key is shown only once.
+
+=== Declare the provider
+
+*Step by step:*
+
+. Create a file named *provider.tf* in your project directory
+  with the following content:
++
+----
+terraform {
+  required_providers {
+    huaweicloud = {
+      source  = "huaweicloud/huaweicloud"
+      version = ">= 1.60.0"
+    }
+  }
+}
+
+provider "huaweicloud" {
+  region     = "sa-brazil-1"
+  access_key = "YOUR_ACCESS_KEY_HERE"
+  secret_key = "YOUR_SECRET_KEY_HERE"
+}
+----
++
+  Replace the *access_key* and *secret_key* values with the
+  credentials obtained in the previous section.
++
+. In a terminal, in the project folder, initialize the Terraform
+  working directory:
++
+[source,bash]
+----
+terraform init
+terraform plan
+----
++
+NOTE: Never commit the *provider.tf* file with real credentials.
+Use environment variables or a state file ignored by version control.
+
+=== Next steps
+
+With the provider declared, you can start defining resources in
+`terraform`. For the full list of available resources, see the official
+documentation at
+https://registry.terraform.io/providers/huaweicloud/huaweicloud/latest/docs[Huawei Cloud Provider].
+
+TIP: Use `terraform validate` to check syntax before applying changes.
+
+[.badge]#Example#
+
+== Clean Up
+
+[.objectives]
+====
+[.general-objective]#Remove the resources created in this lab to avoid ongoing charges.#
+====
+
+*Step by step:*
+
+. In the Console, navigate to *Elastic Cloud Server*.
+. Select the instance `web-server-01`, click *More* and
+  choose *Delete*.
+. Confirm deletion. Optionally release the EIP if it was dedicated.
+
+NOTE: If you used Terraform, run `terraform destroy` instead to remove
+all resources declared in the configuration.
+
+== Brand Color Palette
+
+The template defines auxiliary brand colors aligned to the Huawei Cloud
+Brand Guidelines:
+
+[.hutable]
+|===
+| Color | HEX | Pantone | Sample
+
+| Rose Red | `#C40054` | 7636 | pass:[\textcolor{rosered}{\rule{2cm}{4pt}}]
+| Dark Red | `#7F0001` | 483C | pass:[\textcolor{darkred}{\rule{2cm}{4pt}}]
+| Orange | `#ED6D00` | 165C | pass:[\textcolor{huaweiorange}{\rule{2cm}{4pt}}]
+| Yellow | `#FCC800` | 7406C | pass:[\textcolor{huaweiyellow}{\rule{2cm}{4pt}}]
+| Green | `#62B230` | 3501C | pass:[\textcolor{huaweigreen}{\rule{2cm}{4pt}}]
+| Blue | `#30B5C5` | 2227C | pass:[\textcolor{huaweiblue}{\rule{2cm}{4pt}}]
+|===
+
+++++
+\begin{changelog}
+\changelogentry{3.6.0}{2026-09-16}{\item Added authors feature on the cover page.}
+\changelogentry{1.0.0}{2026-08-05}{\item Initial version. \item Added callout boxes, badge, and changelog support.}
+\end{changelog}
+++++

@@ -43,6 +43,15 @@ def latex_escape(text)
   text.gsub(LATEX_ESCAPE_RE) { |ch| LATEX_ESCAPES[ch] }
 end
 
+# Escape LaTeX special chars EXCEPT backslash (for inline text that may
+# contain passthroughs or generated commands).  Used in inline handlers
+# where node.text returns raw AsciiDoc text.
+LATEX_TEXT_ESCAPE_RE = /[%$#&_{}~^]/
+def latex_escape_text(text)
+  return '' if text.nil? || text.empty?
+  text.gsub(LATEX_TEXT_ESCAPE_RE) { |ch| LATEX_ESCAPES[ch] }
+end
+
 # ─────────────────────────────────────────────────────────────────────
 #  Helper: convert pixel width to linewidth fraction
 #  Heuristic: 600px ≈ 0.8\linewidth, 400px ≈ 0.5\linewidth
@@ -252,8 +261,9 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     return '' if content.nil? || content.empty?
     # Unescape HTML entities that asciidoctor adds
     content = content.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&amp;', '&').gsub('&quot;', '"')
-    # Escape LaTeX special chars not preceded by a backslash
-    content.gsub(/(?<!\\)([%$#&_{}~^])/) { |ch| LATEX_ESCAPES[ch] }
+    # Escape LaTeX special chars not preceded by a backslash.
+    # Don't escape { } — they appear in generated LaTeX commands from inline handlers.
+    content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
   end
 
   # ===================================================================
@@ -279,6 +289,15 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   #  LISTING — source code blocks → \begin{code}[lang]...\end{code}
   # ===================================================================
   def convert_listing(node)
+    # Check for codefile class → \codefile[lang]{path}
+    if node.role == 'codefile' || (node.attributes && node.attributes['1'] == 'codefile')
+      file = node.attr('file')
+      lang = node.attr('lang')
+      if file
+        return lang ? "\\codefile[#{lang}]{#{file}}" : "\\codefile{#{file}}"
+      end
+    end
+
     # Check for include:: directive inside source block → \codefile
     source = node.source || ''
     if source.include?('include::')
@@ -351,14 +370,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     unless rows_body.empty?
       lines << '\\tbody'
       rows_body.each do |row|
-        cells = row.map { |cell| latex_escape(cell.text) }
+        cells = row.map { |cell| cell.content }
         lines << "#{cells.join(' & ')} \\\\"
       end
     end
 
     # Footer rows (rare, but handle them)
     rows_foot.each do |row|
-      cells = row.map { |cell| latex_escape(cell.text) }
+      cells = row.map { |cell| cell.content }
       lines << "#{cells.join(' & ')} \\\\"
     end
 
@@ -408,7 +427,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Build optional width parameter
     width_opt = ''
     if width
-      if width =~ /^\d+$/  # pure number = pixels
+      if width =~ /^(\d+)%$/  # percentage like "50%"
+        frac = $1.to_i / 100.0
+        width_opt = "[width=#{frac}\\linewidth]"
+      elsif width =~ /^\d+$/  # pure number = pixels
         width_opt = "[width=#{pixel_width_to_linewidth(width)}]"
       else
         width_opt = "[width=#{width}]"
@@ -427,7 +449,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # ===================================================================
   def convert_ulist(node)
     items = node.items.map do |item|
-      text = latex_escape(item.text)
+      text = item.text
       # Check for nested content (compound list items)
       nested = item.blocks.any? ? "\n#{item.content}" : ''
       "\\item #{text}#{nested}"
@@ -440,7 +462,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # ===================================================================
   def convert_olist(node)
     items = node.items.map do |item|
-      text = latex_escape(item.text)
+      text = item.text
       nested = item.blocks.any? ? "\n#{item.content}" : ''
       "\\item #{text}#{nested}"
     end
@@ -546,7 +568,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   #  INLINE QUOTED — bold, italic, code, highlight, etc.
   # ===================================================================
   def convert_inline_quoted(node)
-    text = node.text
+    text = latex_escape_text(node.text)
     case node.type
     when :strong
       "\\textbf{#{text}}"
@@ -681,49 +703,37 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines = []
     lines << '\\begin{changelog}'
 
-    # Walk child blocks looking for a dlist
     node.blocks.each do |block|
-      if block.node_name == 'dlist'
+      if block.role == 'entry'
+        # [.entry version="..." date="..."] block
+        version = block.attr('version') || ''
+        date = block.attr('date') || ''
+        # Convert content (bullet items) to LaTeX \item entries
+        items_latex = convert(block)
+        lines << "\\changelogentry{#{version}}{#{date}}{#{items_latex}}"
+      elsif block.node_name == 'dlist'
         block.items.each do |terms, desc|
-          # Term = version number
           version = terms.map(&:text).join.strip
-
-          # Description block: first line = date, rest = items
           desc_text = desc ? desc.text : ''
-          desc_content = desc && desc.content? ? desc.content : ''
-
-          # Parse date from the first line of description
           date = ''
           items_text = ''
-
           if desc_text && !desc_text.empty?
-            # The desc text often contains the date on the first line
-            # and items follow. In AsciiDoc dlist, desc is a paragraph.
-            # Format: "date\n* item1\n* item2"
             parts = desc_text.split("\n", 2)
             date = parts[0].strip
             items_text = parts[1] || ''
           end
-
-          # Convert bullet items to \item entries
           if items_text && !items_text.empty?
-            # Strip leading "* " from each line and wrap in \item
             item_lines = items_text.strip.split("\n").map do |line|
               cleaned = line.gsub(/^\*\s+/, '')
               "\\item #{cleaned}" unless cleaned.strip.empty?
             end.compact
             items_latex = item_lines.join(' ')
-          elsif desc_content && !desc_content.strip.empty?
-            # Content may have already been converted with \item
-            items_latex = desc_content.strip
           else
             items_latex = "\\item #{desc_text}"
           end
-
           lines << "\\changelogentry{#{version}}{#{date}}{#{items_latex}}"
         end
       elsif block.node_name == 'paragraph'
-        # Standalone paragraph inside changelog — skip or emit as-is
         lines << block.content
       end
     end
@@ -822,28 +832,30 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
     node.blocks.each do |block|
       if block.role == 'general-objective'
-        lines << "\\generalobjective{#{block.content}}"
+        lines << "\\generalobjective{#{block.text}}"
       elsif block.role == 'prerequisites'
         lines << '\\prerequisites'
         # Prerequisites items — render as itemize
         if block.blocks
           block.blocks.each do |child|
             if child.node_name == 'ulist'
-              items = child.items.map { |item| "\\item #{item.text}" }
-              lines << "\\begin{itemize}"
-              lines += items
-              lines << '\\end{itemize}'
+              lines << convert(child)
             else
               lines << child.content
             end
           end
         end
       elsif block.role == 'objective'
-        lines << "\\objective{#{block.content}}"
+        lines << "\\objective{#{block.text}}"
       elsif block.role == 'stepbystep'
         lines << '\\stepbystep'
       else
-        lines << block.content
+        # Handle list blocks by calling the converter directly
+        if block.node_name == 'ulist' || block.node_name == 'olist'
+          lines << convert(block)
+        else
+          lines << block.content
+        end
       end
     end
 
