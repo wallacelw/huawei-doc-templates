@@ -1,0 +1,242 @@
+/* huawei.css — Huawei brand styles for AsciiDoctor HTML5 output */
+/* Usage: asciidoctor -b html5 -a linkcss -a stylesheet=huawei.css doc.adoc */
+
+/* ── Brand Colors ─────────────────────────────────────────────── */
+:root {
+  /* Corporate */
+  --huaweired: #C7000B;
+  --ruleblack: #000000;
+  /* Callout */
+  --warningbg: #FFF3E0;
+  --warningfg: #ED6D00;
+  --tipbg: #E8F5E9;
+  --tipfg: #62B230;
+  --infobg: #E0F7FA;
+  --infofg: #30B5C5;
+  /* Code block */
+  --codebg: #F6F8FA;
+  --codetext: #1F2328;
+  --codeborder: #E1E4E8;
+  /* Links */
+  --linkblue: #0000FF;
+  /* Auxiliary brand */
+  --rosered: #C40054;
+  --darkred: #7F0001;
+  --huaweiorange: #ED6D00;
+  --huaweiyellow: #FCC800;
+  --huaweigreen: #62B230;
+  --huaweiblue: #30B5C5;
+  /* Monochrome */
+  --huaweiblack: #000000;
+  --huaweigray90: #E5E5E5;
+  --huaweigray80: #CCCCCC;
+  --huaweigray50: #808080;
+  --huaweigray30: #4D4D4D;
+  --huaweiwhite: #FFFFFF;
+}
+
+/* ── Base & Layout ────────────────────────────────────────────── */
+body {
+  font-family: 'HarmonyOS Sans', 'Liberation Sans', sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.5;
+  color: var(--huaweiblack);
+  text-align: left;
+  margin: 0;
+  padding: 0;
+}
+#content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2cm 2cm 1cm;
+}
+
+/* ── Headings ─────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 { color: var(--huaweiblack); margin-top: 1.2em; }
+h1 {
+  font-size: 20pt; font-weight: bold;
+  border-top: 2px solid var(--huaweired);
+  padding-top: 0.4em;
+  page-break-after: avoid;
+}
+h2 { font-size: 18pt; }
+h3 { font-size: 16pt; }
+h4 { font-size: 14pt; }
+.sectnum { color: var(--huaweired); }
+
+/* ── Links ────────────────────────────────────────────────────── */
+a { color: var(--linkblue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Inline Elements ──────────────────────────────────────────── */
+strong { font-weight: bold; }
+em { font-style: italic; }
+code {
+  font-family: 'Cascadia Code', 'DejaVu Sans Mono', monospace;
+  color: var(--codetext);
+  font-size: 0.9em;
+  background: var(--codebg);
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+}
+.badge {
+  display: inline-block;
+  background: var(--huaweired);
+  color: var(--huaweiwhite);
+  font-size: 0.75em;
+  font-weight: bold;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+}
+
+/* ── Callout Boxes (Admonitions) ──────────────────────────────── */
+.admonitionblock { margin: 0.8em 0; border-radius: 0; }
+.admonitionblock .content { padding: 6pt 8pt; }
+.admonitionblock.warning,
+.admonitionblock.caution,
+.admonitionblock.important {
+  background: var(--warningbg);
+  border-left: 3px solid var(--warningfg);
+}
+.admonitionblock.warning .title,
+.admonitionblock.caution .title,
+.admonitionblock.important .title {
+  color: var(--huaweired); font-weight: bold;
+}
+.admonitionblock.tip {
+  background: var(--tipbg);
+  border-left: 3px solid var(--tipfg);
+}
+.admonitionblock.tip .title { color: var(--tipfg); font-weight: bold; }
+.admonitionblock.note {
+  background: var(--infobg);
+  border-left: 3px solid var(--infofg);
+}
+.admonitionblock.note .title { color: var(--infofg); font-weight: bold; }
+
+/* ── Tables ───────────────────────────────────────────────────── */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+table.tableblock th, table.tableblock td {
+  padding: 6px;
+  border: 1px solid var(--huaweired);
+}
+/* hutable / longhutable role */
+table.hutable > thead > tr > th,
+table.longhutable > thead > tr > th {
+  background: var(--huaweired);
+  color: var(--huaweiwhite);
+  font-weight: bold;
+}
+table.hutable > tbody > tr:nth-child(odd),
+table.longhutable > tbody > tr:nth-child(odd) { background: var(--huaweiwhite); }
+table.hutable > tbody > tr:nth-child(even),
+table.longhutable > tbody > tr:nth-child(even) { background: var(--codebg); }
+
+/* ── Code Blocks ──────────────────────────────────────────────── */
+pre, pre.highlight {
+  font-family: 'Cascadia Code', 'DejaVu Sans Mono', monospace;
+  font-size: 10pt;
+  background: var(--codebg);
+  color: var(--codetext);
+  border: 1px solid var(--codeborder);
+  margin-left: 0.7cm;
+  margin-right: 0.5cm;
+  padding: 0.6em 0.8em;
+  overflow-x: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+pre code { background: none; padding: 0; border-radius: 0; font-size: inherit; }
+
+/* ── Syntax Highlighting (GitHub-style) ───────────────────────── */
+.hljs-keyword { color: #D73A49; }
+.hljs-string  { color: #032F62; }
+.hljs-number  { color: #005CC5; }
+.hljs-comment { color: #6A737D; font-style: italic; }
+.hljs-function .hljs-title { color: #6F42C1; }
+.hljs-built_in { color: #E36209; }
+.hljs-literal { color: #005CC5; }
+.hljs-type    { color: #D73A49; }
+.hljs-attr    { color: #005CC5; }
+.hljs-selector-tag { color: #D73A49; }
+
+/* ── TOC ──────────────────────────────────────────────────────── */
+#toc {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  font-size: 0.9em;
+}
+#toc ul { list-style: none; padding-left: 1em; }
+#toc a { color: var(--huaweigray30); }
+#toc a:hover { color: var(--huaweired); }
+.toc-active > a { color: var(--huaweired); font-weight: bold; }
+
+/* ── Changelog ────────────────────────────────────────────────── */
+.changelog {
+  border-top: 1px solid var(--ruleblack);
+  border-bottom: 1px solid var(--ruleblack);
+  padding: 0.5em 0;
+  margin: 1em 0;
+}
+.changelog .version { font-weight: bold; float: left; }
+.changelog .date { font-style: italic; float: right; }
+.changelog ul { clear: both; padding-left: 1.5em; list-style: disc; }
+
+/* ── Testcase ─────────────────────────────────────────────────── */
+.testcase {
+  border-left: 3px solid var(--huaweired);
+  padding: 0.5em 0.8em;
+  margin: 0.5em 0;
+}
+.testfield { background: var(--codebg); padding: 0.3em 0.6em; margin: 0.2em 0; }
+.testfield .label { font-weight: bold; color: var(--huaweired); }
+.badge-pass    { background: var(--huaweigreen);  color: var(--huaweiwhite); }
+.badge-fail    { background: var(--huaweired);     color: var(--huaweiwhite); }
+.badge-blocked { background: var(--huaweiorange);  color: var(--huaweiwhite); }
+.badge-untested{ background: var(--huaweigray50);  color: var(--huaweiwhite); }
+.badge-pass, .badge-fail, .badge-blocked, .badge-untested {
+  display: inline-block; font-size: 0.75em; font-weight: bold;
+  padding: 0.15em 0.5em; border-radius: 10px;
+}
+
+/* ── Objectives ───────────────────────────────────────────────── */
+.objectives { border-bottom: 1.5pt solid var(--ruleblack); padding-bottom: 0.5em; margin-bottom: 0.8em; }
+.objectives .label { font-weight: bold; }
+
+/* ── Other Blocks ─────────────────────────────────────────────── */
+blockquote { border-left: 3px solid var(--huaweigray80); padding-left: 1em; font-style: italic; margin: 0.8em 0; }
+.sidebarblock { background: var(--huaweigray90); padding: 0.8em; margin: 0.8em 0; }
+.exampleblock { margin: 0.8em 0; }
+.footnote { font-size: 0.85em; vertical-align: super; }
+#footnotes { font-size: 0.85em; border-top: 1px solid var(--huaweigray80); margin-top: 1.5em; padding-top: 0.5em; }
+hr { border: none; border-top: 1px solid var(--ruleblack); margin: 1em 0; }
+
+/* ── Header / Footer (print) ──────────────────────────────────── */
+#header { text-align: center; margin-bottom: 1em; }
+#footer { text-align: center; font-size: 0.85em; color: var(--huaweigray50); }
+
+/* ── Print ────────────────────────────────────────────────────── */
+@media print {
+  body { font-size: 10.5pt; }
+  #content { max-width: none; margin: 0; padding: 0; }
+  #toc { position: static; }
+  h1 { page-break-after: always; }
+  a { color: var(--huaweiblack); text-decoration: none; }
+  pre { border: 1px solid var(--codeborder); }
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #content { padding: 1cm; }
+  h1 { font-size: 16pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 13pt; }
+  pre { margin-left: 0; margin-right: 0; }
+  #toc { position: static; }
+}
