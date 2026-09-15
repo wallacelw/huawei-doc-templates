@@ -231,7 +231,7 @@ asks.
 | `:version: 1.0.0` | Document version, shown on the cover page (e.g. "v1.0.0"). | `:version: 2.1.0` |
 | `:date: 2026-09-16` | Document date, shown on the cover page next to the version. | `:date: 2026-09-16` |
 | `:authors: Name` | One or more authors on the cover page. Optional — omit to hide. | `:authors: John Smith, Jane Doe` |
-| `:guidetitle: ...` | Big cover title. | `:guidetitle: Guide: ECS Provisioning` |
+| `= Document Title` | Big cover title (set via AsciiDoc level-0 heading). | `= Guide: ECS Provisioning` |
 | `:header-title: ...` | Centered header text on body pages. | `:header-title: Huawei Cloud -- ECS` |
 | `:cover-text: ...` | Line under the cover logo (default `Huawei Technologies CO., LTD`). | `:cover-text: Huawei Technologies CO., LTD` |
 | `:header-logo: path` | Header logo image path (default `common-assets/huawei-logo-header.png`). | `:header-logo: assets/custom-logo.png` |

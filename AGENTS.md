@@ -279,7 +279,8 @@ approval. Changing them breaks existing documents and reproducibility.
 ### L15. Shared formatting lives in `templates/_base/` modules
 - All template classes load shared `.sty` modules from `templates/_base/`.
 - Modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
-  huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared.
+  huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared,
+  huawei-cover, huawei-titles, huawei-toc.
 - Shared code modules: huawei-latex-converter.rb (AsciiDoc-to-LaTeX converter),
   docx_fix.py (DOCX post-processing), embed-images.py (MD image embedding).
 - Template-specific code (cover, TOC, section styling) stays in the template `.cls` file.

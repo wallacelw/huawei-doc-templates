@@ -56,8 +56,11 @@ examples/setup-guide/setup-guide.docx
 examples/setup-guide/setup-guide.html
 # Generated LaTeX from AsciiDoc (build artifacts, not source)
 examples/*/src/main.tex
+examples/*/*/src/main.tex
 examples/*/src/setup-guide.tex
 documents/*/src/main.tex
+# Session files
+session-*.md
 # User documents — ignore everything in documents/ except README.md
 documents/*
 !documents/README.md

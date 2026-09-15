@@ -2,12 +2,11 @@
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-# v6.0.0: Lua filters may be removed in favor of AsciiDoc pipeline.
-# Skip gracefully if the shared filter is gone.
-if [ ! -f "$REPO_ROOT/templates/_base/pandoc-common.lua" ]; then
-    echo "SKIP: Lua filters removed in v6.0.0"
-    exit 0
-fi
+# v6.0.0: Lua filters are legacy — superseded by huawei-latex-converter.rb
+# AsciiDoc pipeline (asciidoctor -b huawei-latex + asciidoctor-reducer → pandoc -f asciidoc)
+# replaces the old .tex → pandoc -f latex+raw_tex --lua-filter pipeline.
+echo "SKIP: Lua filter tests are legacy (superseded by huawei-latex-converter.rb in v6.0.0)"
+exit 0
 
 PASS=0; FAIL=0
 

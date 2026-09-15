@@ -440,8 +440,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   #  DEFINITION LIST → used for changelog entries
   # ===================================================================
   def convert_dlist(node)
-    # Check if parent has .changelog role — handled by convert_role_changelog
     # Default: render as description list
+    # (changelog uses passthrough blocks, not role-based dispatch)
     items = node.items.map do |terms, desc|
       term_text = terms.map(&:text).join(', ')
       desc_text = desc ? desc.content : ''

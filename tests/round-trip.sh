@@ -19,6 +19,8 @@ get_template_paths() {
     if [ ! -f "$REPO_ROOT/templates/${template}/${template}.cls" ]; then
         template="guide"  # fallback
     fi
+    # For .adoc sources: asciidoctor-reducer → pandoc -f asciidoc (no Lua filter)
+    # For .tex sources (legacy): pandoc -f latex+raw_tex --lua-filter
     FILTER="$REPO_ROOT/templates/${template}/${template}-pandoc.lua"
     HTML_TMPL="$REPO_ROOT/templates/${template}/${template}-template.html"
     REF_DOCX="$REPO_ROOT/templates/${template}/${template}-reference.docx"
@@ -276,15 +278,17 @@ for entry in "${SAMPLES[@]}"; do
   # Resolve source file based on format (adoc or tex)
   if [ "$src_fmt" = "adoc" ]; then
     src_file="$REPO_ROOT/$sample/src/${basename}.adoc"
-    # For .adoc sources, convert to .tex first via asciidoctor, then use pandoc
+    USE_ADOC=true
+    # For .adoc sources, convert to .tex first via custom backend
     tex_file="$RT_TMPDIR/${basename}-from-adoc.tex"
-    if ! asciidoctor -b latex -o "$tex_file" "$src_file" 2>/dev/null; then
+    if ! asciidoctor -b huawei-latex -r "$REPO_ROOT/templates/_base/huawei-latex-converter.rb" "$src_file" -o "$tex_file" 2>/dev/null; then
       echo "  SKIP: asciidoctor conversion failed for $src_file"
       continue
     fi
   else
     src_file="$REPO_ROOT/$sample/src/${basename}.tex"
     tex_file="$src_file"
+    USE_ADOC=false
   fi
 
   if [ ! -f "$tex_file" ]; then
@@ -296,21 +300,42 @@ for entry in "${SAMPLES[@]}"; do
   get_template_paths "$sample"
 
   # ── Generate Markdown ──────────────────────────────────────────────────
-  pandoc -f latex+raw_tex --lua-filter="$FILTER" -t markdown --wrap=none \
-    "$tex_file" -o "$RT_TMPDIR/rt.md" 2>/dev/null
+  if [[ "$USE_ADOC" == "true" ]]; then
+    tmp_adoc=$(mktemp --suffix=.adoc)
+    asciidoctor-reducer "$src_file" > "$tmp_adoc" 2>/dev/null || cp "$src_file" "$tmp_adoc"
+    pandoc -f asciidoc -t gfm "$tmp_adoc" -o "$RT_TMPDIR/rt.md" 2>/dev/null
+    rm -f "$tmp_adoc"
+  else
+    pandoc -f latex+raw_tex --lua-filter="$FILTER" -t markdown --wrap=none \
+      "$tex_file" -o "$RT_TMPDIR/rt.md" 2>/dev/null
+  fi
 
   # ── Generate HTML ──────────────────────────────────────────────────────
-  pandoc -f latex+raw_tex --lua-filter="$FILTER" --template="$HTML_TMPL" -s -t html5 \
-    "$tex_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
+  if [[ "$USE_ADOC" == "true" ]]; then
+    asciidoctor -b html5 -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" "$src_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
+  else
+    pandoc -f latex+raw_tex --lua-filter="$FILTER" --template="$HTML_TMPL" -s -t html5 \
+      "$tex_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
+  fi
 
   # ── Generate DOCX ──────────────────────────────────────────────────────
   docx_outdir="$RT_TMPDIR/docx_out"
   rm -rf "$docx_outdir"
   mkdir -p "$docx_outdir"
-  pandoc -f latex+raw_tex --lua-filter="$FILTER" \
-    --reference-doc="$REF_DOCX" --number-sections \
-    --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
-    -t docx "$tex_file" -o "$docx_outdir/${basename}.docx" 2>/dev/null
+  if [[ "$USE_ADOC" == "true" ]]; then
+    tmp_adoc=$(mktemp --suffix=.adoc)
+    asciidoctor-reducer "$src_file" > "$tmp_adoc" 2>/dev/null || cp "$src_file" "$tmp_adoc"
+    pandoc -f asciidoc \
+      --reference-doc="$REF_DOCX" --number-sections \
+      --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
+      "$tmp_adoc" -o "$docx_outdir/${basename}.docx" 2>/dev/null
+    rm -f "$tmp_adoc"
+  else
+    pandoc -f latex+raw_tex --lua-filter="$FILTER" \
+      --reference-doc="$REF_DOCX" --number-sections \
+      --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
+      -t docx "$tex_file" -o "$docx_outdir/${basename}.docx" 2>/dev/null
+  fi
   # Post-process with --fix (same pipeline as scripts/build.sh)
   if [ -f "$docx_outdir/${basename}.docx" ]; then
     python3 "$FIX_SCRIPT" --fix "$docx_outdir/${basename}.docx" 2>/dev/null || true

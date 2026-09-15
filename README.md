@@ -272,8 +272,8 @@ for the technical report template syntax reference.
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
 │   ├── _base/               # shared formatting modules and converter
-│   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter (940 lines)
-│   │   ├── huawei.css               # Huawei brand CSS for HTML output (242 lines)
+│   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter (831 lines)
+│   │   ├── huawei.css               # Huawei brand CSS for HTML output (367 lines)
 │   │   ├── docx_fix.py              # shared DOCX post-processing
 │   │   └── embed-images.py          # shared MD image embedding
 │   ├── guide/               # self-contained template + skill
@@ -313,7 +313,7 @@ for the technical report template syntax reference.
 ├── tests/
 │   ├── cases/           # Lua filter test cases (legacy, used by old Lua filter pipeline)
 │   ├── expected/        # expected filter output (.md.expected) (legacy, used by old Lua filter pipeline)
-│   ├── test-filter.sh   # Lua filter unit tests
+│   ├── test-filter.sh   # Lua filter unit tests (legacy, skipped)
 │   ├── round-trip.sh    # cross-format validation (MD + DOCX + HTML)
 │   ├── test-docx-fix.sh # DOCX --fix post-processing smoke test
 │   └── test-sync.sh     # version + doc consistency check
@@ -337,6 +337,17 @@ for the technical report template syntax reference.
     │   │   │   └── .latexmkrc
     │   │   └── main.pdf
     │   └── en/               # English technical report
+    │       ├── src/
+    │       │   ├── main.adoc
+    │       │   └── .latexmkrc
+    │       └── main.pdf
+    ├── testbook/              # samples for the testbook template
+    │   ├── pt/               # Portuguese test cases
+    │   │   ├── src/
+    │   │   │   ├── main.adoc
+    │   │   │   └── .latexmkrc
+    │   │   └── main.pdf
+    │   └── en/               # English test cases
     │       ├── src/
     │       │   ├── main.adoc
     │       │   └── .latexmkrc

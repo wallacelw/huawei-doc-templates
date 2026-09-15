@@ -4,6 +4,29 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.2 (2026-09-16)
+
+### Fixes
+
+- **.gitignore: Fixed generated .tex coverage** — added `examples/*/*/src/main.tex`
+  pattern to cover nested sample directories (guide/en, guide/pt, etc.).
+- **Test scripts: Updated for AsciiDoc pipeline**:
+  - `round-trip.sh`: Now uses `asciidoctor -b huawei-latex -r converter.rb` instead
+    of `asciidoctor -b latex`; DOCX/MD/HTML generation branches on `.adoc` source.
+  - `test-docx-fix.sh`: Detects `.adoc` and generates `.tex` before testing;
+    DOCX generation uses `asciidoctor-reducer → pandoc -f asciidoc`.
+  - `test-filter.sh`: Skips with clear message (Lua filter tests are legacy).
+- **AGENTS.md L15: Added missing modules** — `huawei-cover`, `huawei-titles`,
+  `huawei-toc` were not listed in the shared modules enumeration.
+- **Converter: Fixed stale comment** — removed reference to deleted
+  `convert_role_changelog` method.
+- **SKILL.md: Fixed `:guidetitle:`** — replaced with `= Document Title` (level-0
+  heading), which is how the converter actually reads the document title.
+- **README.md: Fixed stale line counts** — converter 940→831, CSS 242→367.
+- **README.md: Added testbook samples** to project layout tree.
+- **README.md: Marked test-filter.sh as legacy** in project layout.
+- **.gitignore: Added `session-*.md`** pattern for session files.
+
 ## v6.0.1 (2026-09-16)
 
 ### Fixes

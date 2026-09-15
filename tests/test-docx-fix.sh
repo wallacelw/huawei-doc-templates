@@ -84,18 +84,34 @@ run_template_tests() {
   local SAMPLE_DIR="$5"
   local COMMON_ASSETS="$6"
 
+  local ADOC_FILE="$SAMPLE_DIR/src/main.adoc"
   local TEX_FILE="$SAMPLE_DIR/src/main.tex"
   local DOCX_OUT="$TMPDIR_FIX/${TEMPLATE_NAME}-main.docx"
+
+  # For .adoc sources, generate .tex via custom backend if not already present
+  if [[ -f "$ADOC_FILE" && ! -f "$TEX_FILE" ]]; then
+    asciidoctor -b huawei-latex -r "$REPO_ROOT/templates/_base/huawei-latex-converter.rb" "$ADOC_FILE" -o "$TEX_FILE"
+  fi
 
   echo ""
   echo "=== DOCX --fix smoke test: $TEMPLATE_NAME ==="
 
   # ── Generate DOCX from en sample ───────────────────────────────────────
   echo "Generating DOCX..."
-  pandoc -f latex+raw_tex --lua-filter="$FILTER" \
-    --reference-doc="$REF_DOCX" --number-sections \
-    --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
-    -t docx "$TEX_FILE" -o "$DOCX_OUT" 2>/dev/null
+  if [[ -f "$ADOC_FILE" ]]; then
+    tmp_adoc=$(mktemp --suffix=.adoc)
+    asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
+    pandoc -f asciidoc \
+      --reference-doc="$REF_DOCX" --number-sections \
+      --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
+      "$tmp_adoc" -o "$DOCX_OUT" 2>/dev/null
+    rm -f "$tmp_adoc"
+  else
+    pandoc -f latex+raw_tex --lua-filter="$FILTER" \
+      --reference-doc="$REF_DOCX" --number-sections \
+      --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
+      -t docx "$TEX_FILE" -o "$DOCX_OUT" 2>/dev/null
+  fi
 
   echo "Running --fix..."
   python3 "$FIX_SCRIPT" --fix "$DOCX_OUT" 2>/dev/null
@@ -284,7 +300,9 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     sample_dir="$REPO_ROOT/examples/${tmpl_name}/en"
     common_assets="$REPO_ROOT/templates/${tmpl_name}/common-assets"
 
-    if [ -f "$fix_script" ] && [ -f "$filter" ] && [ -f "$ref_docx" ]; then
+    # Run if fix_script + ref_docx exist, and either .adoc source or legacy Lua filter is available
+    adoc_source="$sample_dir/src/main.adoc"
+    if [ -f "$fix_script" ] && [ -f "$ref_docx" ] && { [ -f "$adoc_source" ] || [ -f "$filter" ]; }; then
         run_template_tests "$tmpl_name" "$fix_script" "$filter" "$ref_docx" "$sample_dir" "$common_assets"
     fi
 done
