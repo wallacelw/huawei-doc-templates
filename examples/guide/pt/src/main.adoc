@@ -100,7 +100,7 @@ A tabela abaixo lista as regiões suportadas para o Brasil e América Latina:
 | Santiago  | Chile | `la-south-2`
 |===
 
-image::assets/console-regions.png[alt="Captura de tela do seletor de região no Console"]
+pass:[\imageplaceholder{assets/console-regions.png}{Captura de tela do seletor de região no Console}]
 
 == Configurar credenciais para a CLI
 
@@ -255,7 +255,7 @@ digraph G {
   
   Inicio [label="Início", fillcolor="#62B230", fontcolor=white];
   Auth [label="Autenticar"];
-  Deploy [%label="Implantar ECS"];
+  Deploy [label="Implantar ECS"];
   Config [label="Configurar Rede"];
   Pronto [label="Pronto", fillcolor="#62B230", fontcolor=white];
   

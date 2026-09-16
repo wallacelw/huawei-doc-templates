@@ -4,6 +4,21 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.6 (2026-09-16)
+
+### Fixes
+
+- **guide/pt: Fixed graphviz typo** (`[%label` → `[label` in Deploy node).
+- **guide/pt: Fixed missing image** (`console-regions.png` → `\imageplaceholder`
+  passthrough, same pattern as guide/en `ecs-flavors.png`).
+- **Git cleanup: Untracked diagram PNGs and .asciidoctor cache** — these are
+  build artifacts, now properly gitignored. Added `.asciidoctor/` to .gitignore.
+
+### Verification
+
+- guide/en PDF: 13 pages, 695KB — 3 diagrams embedded ✅
+- guide/pt PDF: 14 pages, 711KB — 3 diagrams embedded ✅
+
 ## v6.0.5 (2026-09-16)
 
 ### Fixes
