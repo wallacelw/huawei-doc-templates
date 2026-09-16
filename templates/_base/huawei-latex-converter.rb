@@ -294,8 +294,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Header rows
     unless rows_head.empty?
       rows_head.each do |header_row|
-        header_cells = header_row.map { |cell| "\\thd{#{cell.content}}" }
-        lines << "#{header_cells.join(' & ')} \\\\"
+        header_cells = header_row.map do |cell|
+          content = cell.content
+          content = content.is_a?(Array) ? content.join : content
+          "\\thd{#{content}}"
+        end
+        lines << "\\rowcolor{huaweired} #{header_cells.join(' & ')} \\\\"
       end
       if env_name == 'longhutable'
         lines << '\\endhead'

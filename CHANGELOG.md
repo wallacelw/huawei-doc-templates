@@ -4,6 +4,28 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.5 (2026-09-16)
+
+### Fixes
+
+- **Table headers now show Huawei red background**: Added `\rowcolor{huaweired}`
+  before header cells in converter. Previously header text was white-on-white
+  (invisible) because the red row color was missing.
+- **Table header cell content**: Fixed `cell.content` returning Ruby arrays
+  (`["Flavor"]` instead of `Flavor`) — now joins arrays before emitting `\thd{}`.
+
+### Features
+
+- **All 3 diagram types now render in PDF**: PlantUML (sequence diagrams),
+  graphviz (flowcharts), and mermaid (flowcharts) all generate PNG images
+  and are included in the PDF output.
+- **Diagram examples in guide/pt**: Added Portuguese diagram section with
+  PlantUML, graphviz, and mermaid examples (matches guide/en).
+- **build-adoc.sh**: PlantUML uses `plantuml-native` when available (avoids
+  system JAR incompatibility). Mermaid uses puppeteer-config.json for
+  `--no-sandbox` support when running as root.
+- **puppeteer-config.json**: New file for mermaid-cli `--no-sandbox` support.
+
 ## v6.0.4 (2026-09-16)
 
 ### Cleanup

@@ -221,6 +221,60 @@ Diretrizes de Marca da Huawei Cloud:
 | Blue | `#30B5C5` | 2227C | pass:[\textcolor{huaweiblue}{\rule{2cm}{4pt}}]
 |===
 
+== Diagramas de Arquitetura
+
+Esta seção demonstra suporte a diagramas inline usando blocos de diagrama
+AsciiDoc. Os diagramas são convertidos para imagens durante o build.
+
+=== Diagrama de Sequência (PlantUML)
+
+[plantuml,diagrama-sequencia,png]
+....
+@startuml
+actor Usuário
+participant "Console Web" as Console
+participant "Gateway de API" as API
+database "Banco de Dados" as DB
+
+Usuário -> Console : Clicar "Criar ECS"
+Console -> API : POST /ecs
+API -> DB : INSERT instância
+DB --> API : sucesso
+API --> Console : 201 Created
+Console --> Usuário : "ECS criado"
+@enduml
+....
+
+=== Fluxograma (Graphviz)
+
+[graphviz,fluxograma,png]
+....
+digraph G {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor="#E0F7FA"];
+  
+  Inicio [label="Início", fillcolor="#62B230", fontcolor=white];
+  Auth [label="Autenticar"];
+  Deploy [%label="Implantar ECS"];
+  Config [label="Configurar Rede"];
+  Pronto [label="Pronto", fillcolor="#62B230", fontcolor=white];
+  
+  Inicio -> Auth -> Deploy -> Config -> Pronto;
+}
+....
+
+=== Fluxograma (Mermaid)
+
+[mermaid,fluxograma-mermaid,png]
+....
+graph TD
+    A[Solicitação do Usuário] --> B{Verificação de Auth}
+    B -->|Aprovado| C[Processar Solicitação]
+    B -->|Rejeitado| D[Retornar 401]
+    C --> E[Retornar Resposta]
+    D --> F[Registrar Erro]
+....
+
 ++++
 \begin{changelog}
 \changelogentry{3.6.0}{\today}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}

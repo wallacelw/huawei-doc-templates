@@ -52,7 +52,25 @@ if [ -z "$OUTPUT" ]; then
   OUTPUT="${INPUT%.adoc}.tex"
 fi
 
+# PlantUML: use plantuml-native if available, otherwise set classpath
+# (Don't set DIAGRAM_PLANTUML_CLASSPATH if plantuml-native exists — the system
+# JAR may be incompatible with asciidoctor-diagram's internal preprocessor)
+if ! command -v plantuml-native >/dev/null 2>&1; then
+  if [ -f "/usr/share/plantuml/plantuml.jar" ]; then
+    export DIAGRAM_PLANTUML_CLASSPATH="/usr/share/plantuml/plantuml.jar"
+  fi
+fi
+
 # Run asciidoctor with the huawei-latex backend
-asciidoctor -b huawei-latex -r "$CONVERTER" -r asciidoctor-diagram "$INPUT" -o "$OUTPUT"
+# asciidoctor-diagram is optional (only needed for [plantuml]/[graphviz]/[mermaid] blocks)
+DIAGRAM_OPTS=""
+if gem list asciidoctor-diagram >/dev/null 2>&1; then
+  DIAGRAM_OPTS="-r asciidoctor-diagram"
+fi
+
+# Mermaid: mmdc should include --no-sandbox if running as root
+# (configure via puppeteer-config.json or mmdc-safe wrapper)
+
+asciidoctor -b huawei-latex -r "$CONVERTER" $DIAGRAM_OPTS "$INPUT" -o "$OUTPUT"
 
 echo "Generated: $OUTPUT"
