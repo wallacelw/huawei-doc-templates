@@ -138,7 +138,7 @@ Parameter: *timeout* should be set to 300 seconds.
 The technical report supports inline diagrams for architecture visualization.
 
 .Sequence diagram of incident response
-[plantuml,tech-sequence,png]
+[plantuml.diagram,tech-sequence,png]
 ....
 @startuml
 actor "On-Call Engineer" as Engineer
@@ -154,7 +154,7 @@ Engineer -> Monitor : Acknowledge alert
 ....
 
 .Incident flowchart
-[graphviz,tech-flowchart,png]
+[graphviz.diagram,tech-flowchart,png]
 ....
 digraph G {
   rankdir=LR;
@@ -172,7 +172,7 @@ digraph G {
 ....
 
 .Incident resolution flow
-[mermaid,tech-mermaid,png]
+[mermaid.diagram,tech-mermaid,png]
 ....
 graph TD
     A[Alert Received] --> B{Severity?}

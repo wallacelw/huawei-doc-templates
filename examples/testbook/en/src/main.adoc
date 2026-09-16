@@ -456,7 +456,7 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the t
 Diagrams can be used to visualize test flows and architectures.
 
 .Sequence diagram of test execution
-[plantuml,test-sequence,png]
+[plantuml.diagram,test-sequence,png]
 ....
 @startuml
 actor "Test Runner" as Runner
@@ -473,7 +473,7 @@ Framework --> Runner : Summary
 ....
 
 .Test flowchart
-[graphviz,test-flowchart,png]
+[graphviz.diagram,test-flowchart,png]
 ....
 digraph G {
   rankdir=TB;

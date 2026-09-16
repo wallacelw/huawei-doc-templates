@@ -1,7 +1,7 @@
 %% huawei-images.sty
 %% =====================================================================
-%%  Image commands: \image, \imagecap, \imageplaceholder with key-value
-%%  sizing options.
+%%  Image and diagram commands: \image, \imagecap, \diagramcap,
+%%  \imageplaceholder with key-value sizing options.
 %%  Extracted from guide.cls v2.0.0 decomposition.
 %% =====================================================================
 \ProvidesPackage{huawei-images}[2026/08/20 Huawei image commands]
@@ -47,6 +47,23 @@
   {\leftskip=0pt\rightskip=0pt\parindent=0pt\centering
    \includegraphics[width=\lg@img@width,height=\lg@img@height,keepaspectratio]{#2}\par
    \vspace{2pt}\captionof{figure}{#3}\par}%
+  \medskip}
+
+% Diagram counter (separate from figure counter)
+\newcounter{diagram}
+
+% \diagramcap[options]{file}{caption}  (with numbered caption — Diagram N)
+% Same options as \image.  Do not include "Diagram N" in the caption —
+% the command adds it automatically.
+\newcommand{\diagramcap}[3][]{%
+  \def\lg@img@width{0.9\linewidth}%
+  \def\lg@img@height{0.5\textheight}%
+  \setkeys{guideimg}{#1}%
+  \lg@checkimg{#2}%
+  \par\medskip
+  {\leftskip=0pt\rightskip=0pt\parindent=0pt\centering
+   \includegraphics[width=\lg@img@width,height=\lg@img@height,keepaspectratio]{#2}\par
+   \vspace{2pt}\refstepcounter{diagram}\textbf{Diagram \thediagram:} #3\par}%
   \medskip}
 
 % \imageplaceholder{path}{description}

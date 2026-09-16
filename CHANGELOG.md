@@ -4,6 +4,18 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.8 (2026-09-17)
+
+### Features
+
+- **Diagram captions with separate counter**: Diagrams now use "Diagram 1:",
+  "Diagram 2:", etc. — separate from "Figure N:" used by regular images.
+  - New `\diagramcap` command in `huawei-images.sty` with dedicated `diagram` counter.
+  - Converter detects `.diagram` role on image nodes and uses `\diagramcap`
+    instead of `\imagecap`.
+  - All diagram blocks in all 6 samples now have `.diagram` role
+    (e.g., `[plantuml.diagram,...]`, `[graphviz.diagram,...]`).
+
 ## v6.0.7 (2026-09-17)
 
 ### Architecture

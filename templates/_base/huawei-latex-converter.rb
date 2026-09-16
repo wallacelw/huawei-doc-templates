@@ -357,7 +357,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
 
     if title && !title.empty?
-      "\\imagecap#{width_opt}{#{target}}{#{latex_escape(title)}}"
+      # Use \diagramcap for diagram-generated images, \imagecap for regular images
+      if node.role && node.role.include?('diagram')
+        "\\diagramcap#{width_opt}{#{target}}{#{latex_escape(title)}}"
+      else
+        "\\imagecap#{width_opt}{#{target}}{#{latex_escape(title)}}"
+      end
     else
       "\\image#{width_opt}{#{target}}"
     end

@@ -456,7 +456,7 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do 
 Diagramas podem ser usados para visualizar fluxos e arquiteturas de teste.
 
 .Diagrama de sequência da execução de teste
-[plantuml,test-sequencia,png]
+[plantuml.diagram,test-sequencia,png]
 ....
 @startuml
 actor "Executor de Teste" as Executor
@@ -473,7 +473,7 @@ Framework --> Executor : Resumo
 ....
 
 .Fluxograma de teste
-[graphviz,test-fluxograma,png]
+[graphviz.diagram,test-fluxograma,png]
 ....
 digraph G {
   rankdir=TB;

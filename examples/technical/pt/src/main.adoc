@@ -140,7 +140,7 @@ Parâmetro: *timeout* deve ser definido como 300 segundos.
 O relatório técnico suporta diagramas inline para visualização de arquitetura.
 
 .Diagrama de sequência da resposta ao incidente
-[plantuml,tech-sequencia,png]
+[plantuml.diagram,tech-sequencia,png]
 ....
 @startuml
 actor "Engenheiro de Plantão" as Engenheiro
@@ -156,7 +156,7 @@ Engenheiro -> Monitora : Confirmar alerta
 ....
 
 .Fluxograma de incidente
-[graphviz,tech-fluxograma,png]
+[graphviz.diagram,tech-fluxograma,png]
 ....
 digraph G {
   rankdir=LR;
@@ -174,7 +174,7 @@ digraph G {
 ....
 
 .Fluxo de resolução de incidente
-[mermaid,tech-fluxo-mermaid,png]
+[mermaid.diagram,tech-fluxo-mermaid,png]
 ....
 graph TD
     A[Alerta Recebido] --> B{Severidade?}
