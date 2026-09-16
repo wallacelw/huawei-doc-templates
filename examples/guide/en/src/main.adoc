@@ -222,6 +222,7 @@ Diagrams are converted to images during the build process.
 
 === PlantUML Sequence Diagram
 
+.Sequence diagram of ECS creation
 [plantuml,sequence-diagram,png]
 ....
 @startuml
@@ -241,6 +242,7 @@ Console --> User : "ECS created"
 
 === Graphviz Flowchart
 
+.Flowchart of ECS deployment process
 [graphviz,flowchart,png]
 ....
 digraph G {
@@ -259,6 +261,7 @@ digraph G {
 
 === Mermaid Flowchart
 
+.Flowchart of request authentication
 [mermaid,mermaid-flow,png]
 ....
 graph TD

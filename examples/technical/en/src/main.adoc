@@ -133,6 +133,59 @@ Status: [.badge]#Verified#
 
 Parameter: *timeout* should be set to 300 seconds.
 
+== Architecture Diagrams
+
+The technical report supports inline diagrams for architecture visualization.
+
+.Sequence diagram of incident response
+[plantuml,tech-sequence,png]
+....
+@startuml
+actor "On-Call Engineer" as Engineer
+participant "Monitoring System" as Monitor
+participant "Ticket System" as Ticket
+database "Log Storage" as Logs
+
+Monitor -> Engineer : Alert triggered
+Engineer -> Logs : Query error logs
+Engineer -> Ticket : Create incident ticket
+Engineer -> Monitor : Acknowledge alert
+@enduml
+....
+
+.Incident flowchart
+[graphviz,tech-flowchart,png]
+....
+digraph G {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor="#FFF3E0"];
+  
+  Alert [label="Alert", fillcolor="#ED6D00", fontcolor=white];
+  Investigate [label="Investigate"];
+  Resolve [label="Resolve", fillcolor="#62B230", fontcolor=white];
+  Escalate [label="Escalate", fillcolor="#C7000B", fontcolor=white];
+  
+  Alert -> Investigate;
+  Investigate -> Resolve [label="fixed"];
+  Investigate -> Escalate [label="needs help"];
+}
+....
+
+.Incident resolution flow
+[mermaid,tech-mermaid,png]
+....
+graph TD
+    A[Alert Received] --> B{Severity?}
+    B -->|Critical| C[Page On-Call]
+    B -->|Warning| D[Create Ticket]
+    B -->|Info| E[Log Only]
+    C --> F[Investigate]
+    D --> F
+    F --> G{Resolved?}
+    G -->|Yes| H[Close Ticket]
+    G -->|No| I[Escalate]
+....
+
 == Brand Color Palette
 
 The template defines auxiliary brand colors aligned to the Huawei Cloud

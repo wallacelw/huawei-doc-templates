@@ -135,6 +135,59 @@ Status: [.badge]#Verificado#
 
 Parâmetro: *timeout* deve ser definido como 300 segundos.
 
+== Diagramas de Arquitetura
+
+O relatório técnico suporta diagramas inline para visualização de arquitetura.
+
+.Diagrama de sequência da resposta ao incidente
+[plantuml,tech-sequencia,png]
+....
+@startuml
+actor "Engenheiro de Plantão" as Engenheiro
+participant "Sistema de Monitoramento" as Monitora
+participant "Sistema de Tickets" as Tickets
+database "Armazenamento de Logs" as Logs
+
+Monitora -> Engenheiro : Alerta disparado
+Engenheiro -> Logs : Consultar logs de erro
+Engenheiro -> Tickets : Criar ticket de incidente
+Engenheiro -> Monitora : Confirmar alerta
+@enduml
+....
+
+.Fluxograma de incidente
+[graphviz,tech-fluxograma,png]
+....
+digraph G {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor="#FFF3E0"];
+  
+  Alerta [label="Alerta", fillcolor="#ED6D00", fontcolor=white];
+  Investigar [label="Investigar"];
+  Resolver [label="Resolver", fillcolor="#62B230", fontcolor=white];
+  Escalar [label="Escalar", fillcolor="#C7000B", fontcolor=white];
+  
+  Alerta -> Investigar;
+  Investigar -> Resolver [label="corrigido"];
+  Investigar -> Escalar [label="precisa ajuda"];
+}
+....
+
+.Fluxo de resolução de incidente
+[mermaid,tech-fluxo-mermaid,png]
+....
+graph TD
+    A[Alerta Recebido] --> B{Severidade?}
+    B -->|Crítica| C[Chamar Plantão]
+    B -->|Aviso| D[Criar Ticket]
+    B -->|Info| E[Registrar Only]
+    C --> F[Investigar]
+    D --> F
+    F --> G{Resolvido?}
+    G -->|Sim| H[Fechar Ticket]
+    G -->|Não| I[Escalar]
+....
+
 == Paleta de Cores da Marca
 
 O template define cores auxiliares da marca alinhadas às

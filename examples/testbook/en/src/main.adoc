@@ -451,6 +451,46 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the t
 \end{testsummary}
 ++++
 
+=== Test Architecture Diagrams
+
+Diagrams can be used to visualize test flows and architectures.
+
+.Sequence diagram of test execution
+[plantuml,test-sequence,png]
+....
+@startuml
+actor "Test Runner" as Runner
+participant "Test Framework" as Framework
+participant "Application" as App
+
+Runner -> Framework : Execute test suite
+Framework -> App : Setup
+Framework -> App : Run test case
+App --> Framework : Result
+Framework -> App : Teardown
+Framework --> Runner : Summary
+@enduml
+....
+
+.Test flowchart
+[graphviz,test-flowchart,png]
+....
+digraph G {
+  rankdir=TB;
+  node [shape=box, style=filled, fillcolor="#E0F7FA"];
+  
+  Start [label="Start", fillcolor="#62B230", fontcolor=white];
+  Setup [label="Setup"];
+  Execute [label="Execute Tests"];
+  Pass [label="Pass", fillcolor="#62B230", fontcolor=white];
+  Fail [label="Fail", fillcolor="#C7000B", fontcolor=white];
+  
+  Start -> Setup -> Execute;
+  Execute -> Pass [label="success"];
+  Execute -> Fail [label="error"];
+}
+....
+
 === Brand Color Palette
 
 The template defines auxiliary brand colors aligned to the Huawei Cloud

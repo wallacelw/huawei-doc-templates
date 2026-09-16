@@ -61,10 +61,19 @@ examples/*/src/setup-guide.tex
 documents/*/src/main.tex
 # Generated diagram images (build artifacts from asciidoctor-diagram)
 examples/*/src/sequence*.png
+examples/*/*/src/sequence*.png
 examples/*/src/flowchart*.png
+examples/*/*/src/flowchart*.png
 examples/*/src/mermaid*.png
+examples/*/*/src/mermaid*.png
 examples/*/src/diagrama*.png
+examples/*/*/src/diagrama*.png
 examples/*/src/fluxograma*.png
+examples/*/*/src/fluxograma*.png
+examples/*/src/tech-*.png
+examples/*/*/src/tech-*.png
+examples/*/src/test-*.png
+examples/*/*/src/test-*.png
 # Session files
 session-*.md
 # User documents — ignore everything in documents/ except README.md

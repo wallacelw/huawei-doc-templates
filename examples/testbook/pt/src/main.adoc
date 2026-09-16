@@ -451,6 +451,46 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do 
 \end{testsummary}
 ++++
 
+=== Diagramas de Arquitetura de Teste
+
+Diagramas podem ser usados para visualizar fluxos e arquiteturas de teste.
+
+.Diagrama de sequência da execução de teste
+[plantuml,test-sequencia,png]
+....
+@startuml
+actor "Executor de Teste" as Executor
+participant "Framework de Teste" as Framework
+participant "Aplicação" as App
+
+Executor -> Framework : Executar suíte de testes
+Framework -> App : Configurar
+Framework -> App : Executar caso de teste
+App --> Framework : Resultado
+Framework -> App : Finalizar
+Framework --> Executor : Resumo
+@enduml
+....
+
+.Fluxograma de teste
+[graphviz,test-fluxograma,png]
+....
+digraph G {
+  rankdir=TB;
+  node [shape=box, style=filled, fillcolor="#E0F7FA"];
+  
+  Inicio [label="Início", fillcolor="#62B230", fontcolor=white];
+  Configurar [label="Configurar"];
+  Executar [label="Executar Testes"];
+  Passou [label="Passou", fillcolor="#62B230", fontcolor=white];
+  Falhou [label="Falhou", fillcolor="#C7000B", fontcolor=white];
+  
+  Inicio -> Configurar -> Executar;
+  Executar -> Passou [label="sucesso"];
+  Executar -> Falhou [label="erro"];
+}
+....
+
 === Paleta de Cores da Marca
 
 O template define cores auxiliares da marca alinhadas às

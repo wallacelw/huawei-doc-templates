@@ -4,6 +4,31 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.7 (2026-09-17)
+
+### Architecture
+
+- **Core/template inheritance model documented**: `templates/_base/` contains
+  core shared components (tables, diagrams, code blocks, images/figures,
+  callouts, changelog, colors, fonts, page layout). Each template inherits
+  core and adds template-specific features (technical: 5-section structure,
+  testbook: testcase/testsummary). Updated AGENTS.md L15 with full model.
+- **SKILL.md reorganization**: Each SKILL.md now has clear "Core Components"
+  and "Template-Specific Features" sections. Files remain self-sufficient
+  (no external references) but clearly distinguish shared vs template-specific.
+- **Diagrams as core component**: All 3 diagram types (PlantUML, graphviz,
+  mermaid) now demonstrated in all template samples with captions:
+  - guide/en, guide/pt: 3 diagrams each (PlantUML + graphviz + mermaid)
+  - technical/en, technical/pt: 3 diagrams each
+  - testbook/en, testbook/pt: 2 diagrams each (PlantUML + graphviz)
+- **Diagram captions**: All diagram blocks now have `.Caption text` titles
+  that render as numbered figure captions via `\imagecap`.
+
+### Fixes
+
+- **.gitignore**: Added `examples/*/*/src/` patterns for nested diagram PNGs
+  (previous patterns only matched one-level-deep directories).
+
 ## v6.0.6 (2026-09-16)
 
 ### Fixes

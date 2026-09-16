@@ -276,14 +276,21 @@ approval. Changing them breaks existing documents and reproducibility.
   body rows). Do not reintroduce raw `tabular` + manual `\midrule`/`\bottomrule`
   in samples — use `[.hutable]`.
 
-### L15. Shared formatting lives in `templates/_base/` modules
-- All template classes load shared `.sty` modules from `templates/_base/`.
-- Modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
-  huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared,
-  huawei-cover, huawei-titles, huawei-toc.
-- Shared code modules: huawei-latex-converter.rb (AsciiDoc-to-LaTeX converter),
-  docx_fix.py (DOCX post-processing), embed-images.py (MD image embedding).
-- Template-specific code (cover, TOC, section styling) stays in the template `.cls` file.
+### L15. Core/template inheritance: shared components in `templates/_base/`
+- **Core components** live in `templates/_base/` and are inherited by all templates:
+  - LaTeX modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
+    huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared,
+    huawei-cover, huawei-titles, huawei-toc.
+  - Converter: huawei-latex-converter.rb (AsciiDoc → LaTeX, shared by all templates).
+  - Output styling: huawei.css (HTML), huawei.js (copy-to-clipboard), docinfo.html.
+  - Post-processing: docx_fix.py (DOCX), embed-images.py (MD).
+  - Diagram config: puppeteer-config.json (mermaid --no-sandbox).
+- **Template-specific** code stays in `templates/<name>/<name>.cls`:
+  - guide: base template (no additions beyond core).
+  - technical: 5-section structure (problem, rootcauseanalysis, rootcause, triggercondition, workaround).
+  - testbook: testcase/testsummary environments, test result badges, `:noanswers:` option.
+- Each SKILL.md is self-sufficient (no shared/external references) but organized with
+  "Core Components" and "Template-Specific Features" sections.
 - Do not add `\RequirePackage` calls inside `.sty` modules — all packages are loaded
   by the template class file.
 

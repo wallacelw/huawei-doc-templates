@@ -228,6 +228,7 @@ AsciiDoc. Os diagramas são convertidos para imagens durante o build.
 
 === Diagrama de Sequência (PlantUML)
 
+.Diagrama de sequência da criação de ECS
 [plantuml,diagrama-sequencia,png]
 ....
 @startuml
@@ -247,6 +248,7 @@ Console --> Usuário : "ECS criado"
 
 === Fluxograma (Graphviz)
 
+.Fluxograma do processo de implantação
 [graphviz,fluxograma,png]
 ....
 digraph G {
@@ -265,6 +267,7 @@ digraph G {
 
 === Fluxograma (Mermaid)
 
+.Fluxograma de autenticação de solicitação
 [mermaid,fluxograma-mermaid,png]
 ....
 graph TD
