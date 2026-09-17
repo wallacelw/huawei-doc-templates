@@ -330,6 +330,7 @@ Remarks fields.
 ++++
 \begin{testcase}{Verify MRS cluster deployment}
   \testobjective{Confirm that the MRS cluster is deployed.}
+  \testscope{MRS deployment; Cluster health}
   \begin{testprerequisites}
     \teststep{Terraform apply completed.}
   \end{testprerequisites}
@@ -353,6 +354,7 @@ is automatic — the next `testcase` will be "Testcase 2: ...").
 | Field command | English label | Portuguese label | Required |
 |---|---|---|---|
 | `\testobjective{...}` | Objective | Objetivo | Yes |
+| `\testscope{...}` | Test Scope | Escopo do Teste | Yes |
 | `\begin{testprerequisites}...\end{testprerequisites}` | Prerequisites | Pré-requisitos | Yes |
 | `\begin{testprocedure}...\end{testprocedure}` | Procedure | Procedimento | Yes |
 | `\begin{testexpected}...\end{testexpected}` | Expected Result | Resultado Esperado | Yes |

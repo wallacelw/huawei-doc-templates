@@ -90,6 +90,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testobjective{Confirmar que o cluster MapReduce Service (MRS) está implantado
     com os componentes necessários (HDFS, YARN, Spark, Hive) e que todos os nós
     apresentam status saudável.}
+  \testscope{Implantação do cluster MRS; Monitoramento de saúde; Verificação de status dos nós}
   \begin{testprerequisites}
     \teststep{Aplicação da infraestrutura Terraform concluída com sucesso.}
     \teststep{ID do cluster MRS disponível na saída do Terraform.}
@@ -121,6 +122,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testobjective{Confirmar que o bucket do Object Storage Service (OBS) utilizado
     para o data lake da POC está criado, possui a classe de armazenamento correta
     e é acessível com a política IAM designada.}
+  \testscope{Criação de bucket OBS; Acessibilidade de dados; Configuração de armazenamento}
   \begin{testprerequisites}
     \teststep{Nome do bucket OBS definido na configuração Terraform.}
     \teststep{Política IAM concedendo acesso de leitura/escrita ao bucket está anexada ao usuário de teste.}
@@ -150,6 +152,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testobjective{Confirmar que a VPC, a sub-rede e os grupos de segurança estão
     configurados conforme o diagrama de arquitetura de rede, com os blocos CIDR
     e regras de entrada/saída corretos.}
+  \testscope{Configuração de VPC; Configuração de subnet; Regras de security group}
   \begin{testprerequisites}
     \teststep{IDs da VPC e da sub-rede disponíveis na saída do Terraform.}
     \teststep{Nomes dos grupos de segurança documentados na arquitetura da solução.}
@@ -180,6 +183,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testobjective{Confirmar que a instância do DataArts Studio (Dayu) está
     provisionada, o workspace está acessível e os usuários IAM designados
     conseguem acessar com a função \textbf{Dayu\_User}.}
+  \testscope{Provisionamento do DataArts Studio; Acesso ao workspace; Atribuição de função IAM}
   \begin{testprerequisites}
     \teststep{Instância do DataArts Studio provisionada e com status \textbf{Executando}.}
     \teststep{Usuário IAM de teste possui a função \textbf{Dayu\_User} atribuída.}
@@ -206,6 +210,7 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
   \testobjective{Confirmar que um pipeline em lote do DataArts Studio consegue
     ingerir dados CSV do OBS, aplicar uma transformação básica
     e gravar o resultado no caminho OBS de destino.}
+  \testscope{Pipeline de ingestão de dados; Transformação OBS-to-OBS; Execução de pipeline de dados}
   \begin{testprerequisites}
     \teststep{Caso de Teste 4 concluído (workspace do DataArts Studio acessível).}
     \teststep{Arquivo CSV de origem (\inlinecode{customers.csv}) existe no bucket OBS raw.}
@@ -242,6 +247,7 @@ obsutil stat obs://poc-datalake-curated/customers/output.csv
   \testobjective{Confirmar que uma consulta Spark SQL pode ser executada no
     cluster MRS para ler dados de uma tabela Hive e retornar resultados
     corretos, validando a integração entre o MRS e o data lake.}
+  \testscope{Execução Spark SQL; Integração com tabela Hive; Validação do data lake MRS}
   \begin{testprerequisites}
     \teststep{Caso de Teste 1 concluído (cluster MRS saudável).}
     \teststep{Tabela Hive \inlinecode{poc\_db.customers} existe e contém dados carregados pelo pipeline de ingestão.}
@@ -281,6 +287,7 @@ spark-sql --master yarn \
     ao bucket OBS — usuários autorizados podem ler/escrever enquanto usuários
     não autorizados são negados, e a política do bucket segue o princípio
     do menor privilégio.}
+  \testscope{Aplicação de política IAM; Controle de acesso OBS; Validação de menor privilégio}
   \begin{testprerequisites}
     \teststep{Bucket OBS \inlinecode{poc-datalake-raw} existe com a política IAM designada.}
     \teststep{Dois usuários IAM de teste: um com função \textbf{OBS\_ReadWrite}, outro sem permissões OBS.}
@@ -321,6 +328,7 @@ obsutil ls obs://poc-datalake-raw/
   \testobjective{Confirmar que colunas de dados sensíveis (ex.: campos PII) são
     mascaradas conforme a regra de mascaramento do DataArts Studio quando
     consultadas por usuários não administradores.}
+  \testscope{Regras de mascaramento de dados; Proteção de PII; Acesso a dados de não-admin}
   \begin{testprerequisites}
     \teststep{Caso de Teste 4 concluído (workspace do DataArts Studio acessível).}
     \teststep{Regra de mascaramento configurada para a coluna \inlinecode{customers.ssn} (Número de Seguro Social).}
@@ -350,6 +358,7 @@ obsutil ls obs://poc-datalake-raw/
   \testobjective{Confirmar que a configuração Terraform implanta todos os
     recursos de infraestrutura necessários (VPC, MRS, OBS, DataArts Studio)
     sem erros e que o arquivo de estado reflete os recursos esperados.}
+  \testscope{Infraestrutura como Código; Implantação via Terraform; Verificação de estado de recursos}
   \begin{testprerequisites}
     \teststep{CLI \inlinecode{terraform} instalada (versão $\geq$ 1.0).}
     \teststep{Credenciais AK/SK configuradas via variáveis de ambiente ou \param{provider.tf}.}
@@ -397,6 +406,7 @@ terraform state list | wc -l
   \testobjective{Confirmar que todos os arquivos de dados de teste necessários
     (CSV, JSON) podem ser carregados no bucket OBS designado e são acessíveis
     pelo pipeline do DataArts Studio.}
+  \testscope{Carregamento de dados no OBS; Preparação de dados de teste; Conectividade do pipeline de dados}
   \begin{testprerequisites}
     \teststep{Caso de Teste 2 concluído (bucket OBS acessível).}
     \teststep{Arquivos de dados de teste preparados no diretório local \param{./test-data/}.}

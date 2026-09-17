@@ -4,6 +4,17 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.9 (2026-09-17)
+
+### Features
+
+- **New testcase field: Test Scope** (`\testscope{...}`) — added between
+  Objective and Prerequisites in the testcase environment. Contains the
+  topics or requirements that the testcase covers.
+  - Language-aware: "Test Scope" (en) / "Escopo do Teste" (pt).
+  - Added to all 10 testcases in both testbook/en and testbook/pt samples.
+  - Documented in SKILL.md command reference table and usage example.
+
 ## v6.0.8 (2026-09-17)
 
 ### Features

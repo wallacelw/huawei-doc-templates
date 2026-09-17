@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{guide}[2026/09/16 Huawei Guide template v6.0.8]
+\ProvidesClass{guide}[2026/09/16 Huawei Guide template v6.0.9]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

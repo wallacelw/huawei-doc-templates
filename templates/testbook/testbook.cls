@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/16 Huawei Test Book template v6.0.8]
+\ProvidesClass{testbook}[2026/09/16 Huawei Test Book template v6.0.9]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -98,6 +98,7 @@
   \newcommand{\lg@testcases}{Casos de Teste}
   \newcommand{\lg@testcase}{Caso de Teste}
   \newcommand{\lg@objective}{Objetivo}
+  \newcommand{\lg@testscope}{Escopo do Teste}
   \newcommand{\lg@prerequisites}{Pré-requisitos}
   \newcommand{\lg@procedure}{Procedimento}
   \newcommand{\lg@expectedresult}{Resultado Esperado}
@@ -110,6 +111,7 @@
   \newcommand{\lg@testcases}{Test Cases}
   \newcommand{\lg@testcase}{Testcase}
   \newcommand{\lg@objective}{Objective}
+  \newcommand{\lg@testscope}{Test Scope}
   \newcommand{\lg@prerequisites}{Prerequisites}
   \newcommand{\lg@procedure}{Procedure}
   \newcommand{\lg@expectedresult}{Expected Result}
@@ -141,7 +143,8 @@
 %
 % Field order (workflow: design → execute):
 %   1. Objective       — what to verify
-%   2. Prerequisites   — what must be true before starting
+%   2. Test Scope      — topics/requirements covered by this testcase
+%   3. Prerequisites   — what must be true before starting
 %   3. Procedure       — step-by-step actions (testprocedure environment)
 %   4. Expected Result — what should happen
 %   5. Test Result     — pass/fail badge (filled after execution)
@@ -150,6 +153,7 @@
 % Usage:
 %   \begin{testcase}{Test case title}
 %     \testobjective{Verify that X can be created.}
+%     \testscope{REQ-001: ECS creation; REQ-003: Network configuration}
 %     \begin{testprerequisites}
 %       \teststep{X is running.}
 %       \teststep{Y is configured.}
@@ -211,6 +215,7 @@
 % Prerequisites, Procedure, and Expected Result are environments with
 % auto-numbered \teststep items — uniform code, same visual style.
 \newcommand{\testobjective}[1]{\lg@testfield{\lg@objective}{#1}}
+\newcommand{\testscope}[1]{\lg@testfield{\lg@testscope}{#1}}
 \newcommand{\testresult}[1]{%
   \if@showanswers
     \lg@testfield{\lg@testresult}{#1}
