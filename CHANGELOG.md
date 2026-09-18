@@ -4,6 +4,18 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.1.2 (2026-09-18)
+
+### Fixes
+
+- **Table width overflow**: Tables now use `p{...}` paragraph columns
+  with auto-wrap instead of `l` (natural width) columns. Column widths
+  are computed equally from `\linewidth` using `\dimexpr`, preventing
+  tables from exceeding page width.
+- **Table placement**: Tables now always start on a dedicated line with
+  a paragraph break before and after, preventing tables from rendering
+  inline with preceding paragraph text.
+
 ## v6.1.1 (2026-09-18)
 
 ### Fixes

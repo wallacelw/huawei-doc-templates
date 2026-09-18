@@ -298,7 +298,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def convert_table(node)
     role = node.role
     num_cols = node.columns ? node.columns.size : 1
-    col_spec = "|#{'l|' * num_cols}"
+    # Use p{...} columns with auto-wrap instead of l (natural width)
+    # Equal-width columns computed from \linewidth
+    width_expr = "\\dimexpr(\\linewidth-#{num_cols+1}\\arrayrulewidth-#{2*num_cols}\\tabcolsep)/#{num_cols}\\relax"
+    col_spec = "|>{\\raggedright\\arraybackslash}p{#{width_expr}}|" * num_cols
 
     env_name = role == 'longhutable' ? 'longhutable' : 'hutable'
 
@@ -359,10 +362,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       wrapped += lines
       wrapped << "\\caption{#{caption}}"
       wrapped << '\\end{table}'
-      return wrapped.join("\n")
+      return "\n#{wrapped.join("\n")}\n"
     end
 
-    lines.join("\n")
+    "\n#{lines.join("\n")}\n"
   end
 
   # --- IMAGE — block image → \image or \imagecap ---
