@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.6]
+\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.7]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

@@ -703,7 +703,7 @@ between your coding tools and Huawei ModelArts MaaS (Model-as-a-Service)
 models. It provides:
 
 - **Load balancing** --- distributes requests across multiple MaaS API
-  keys (N keys \$\to\$ N deployments per model per format).
+  keys (N keys → N deployments per model per format).
 
 - **Virtual key management** --- each coding tool gets its own virtual
   key with unlimited budget, isolated from the real MaaS keys.
@@ -712,8 +712,8 @@ models. It provides:
   (`/v1/chat/completions`) and Anthropic Messages (`/v1/messages`), so
   tools using different API formats can all reach the same MaaS models.
 
-- **Budget tracking** --- per-key spend tracking via LiteLLM  
-  PostgreSQL, with cost-per-token configured for all models.
+- **Budget tracking** --- per-key spend tracking via LiteLLM PostgreSQL,
+  with cost-per-token configured for all models.
 
 - **Full observability** --- Prometheus metrics + Grafana 39-panel
   dashboard (latency, errors, throughput, tokens, cache, cost).
@@ -913,8 +913,8 @@ times. It merges VS Code settings rather than overwriting them, and
     <div class="note">
 
     If an existing installation is detected, the one-liner prompts to
-    update: `Update v3.3.6 $\to$ v3.3.7? [Y/n]`. It pulls the latest
-    version and re-runs the installer. No need to `git pull` manually.
+    update: `Update v3.3.6 → v3.3.7? [Y/n]`. It pulls the latest version
+    and re-runs the installer. No need to `git pull` manually.
 
     </div>
 
@@ -1119,7 +1119,7 @@ To update the Huawei document templates project:
     ```
 
 2.  The script pulls the latest version, shows the version change
-    (`v3.3.6 $\to$ v3.3.7`), and re-runs the installer. New templates,
+    (`v3.3.6 → v3.3.7`), and re-runs the installer. New templates,
     commands, or modules are installed automatically.
 
 ## Uninstalling the MaaS Gateway

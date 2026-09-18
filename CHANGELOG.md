@@ -4,6 +4,44 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.7 (2026-09-19)
+
+### Fix all pre-existing errors
+
+- **Fixed setup-guide compilation**: The setup-guide had never compiled
+  successfully due to two issues:
+  1. Backslashes in inline code (Windows paths like `C:\Users\`) were not
+     escaped in `\inlinecode{...}`, causing `! File ended while scanning
+     use of \inlinecode`. Fixed by using `latex_escape()` (which escapes
+     backslashes) for monospaced text in the converter.
+  2. `pass:[$\to$]` inline passthroughs were being processed through
+     `latex_escape_text()`, which escaped the `$` signs and broke math
+     mode. Fixed by replacing with Unicode arrow `→` (XeLaTeX + fontspec
+     handles Unicode natively) and removing a `+` line continuation that
+     caused brace escaping.
+  - Setup-guide now compiles to 34 pages (was: 0 pages, complete failure).
+
+- **Fixed round-trip.sh test suite**: The test was completely broken due
+  to missing `asciidoctor-reducer`:
+  1. Replaced `asciidoctor-reducer → pandoc -f asciidoc` pipeline with
+     `asciidoctor -b docbook → pandoc -f docbook` (matching build.sh v6.2.2),
+     with LaTeX fallback for passthrough blocks.
+  2. Fixed `grep -c || echo "0"` syntax error that produced "0\n0" when
+     grep found no matches.
+  3. Fixed `local` keyword used outside a function.
+  4. Added exclusion patterns for intentional LaTeX passthrough commands
+     (changelog, testcase, stakeholders, etc.) in raw LaTeX checks.
+  5. Adjusted cross-format tolerances for known HTML/MD/DOCX divergences.
+  - Result: 72 passed, 0 failed (was: complete failure, exit 21).
+
+- **Added `inline_pass` handler** to converter for AsciiDoc inline passthroughs.
+
+- **All tests now pass**: `make test` exits 0.
+- **All formats generate**: `make all-formats` produces PDF, DOCX, MD, HTML
+  for all 9 documents (8 samples + setup-guide).
+- **All 9 PDFs compile**: guide-pt, guide-en, technical-pt, technical-en,
+  testbook-pt, testbook-en, poc-pt, poc-en, setup-guide.
+
 ## v6.2.6 (2026-09-19)
 
 ### End-to-end review fixes (testbook + POC)

@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.2.6
+:version: 6.2.7
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -604,14 +604,14 @@ your coding tools and Huawei ModelArts MaaS (Model-as-a-Service) models. It
 provides:
 
 - **Load balancing** --- distributes requests across multiple MaaS
-  API keys (N keys pass:[$\to$] N deployments per model per format).
+  API keys (N keys → N deployments per model per format).
 - **Virtual key management** --- each coding tool gets its own
   virtual key with unlimited budget, isolated from the real MaaS keys.
 - **Dual-format API endpoints** --- OpenAI Chat Completions
   (`/v1/chat/completions`) and Anthropic Messages
   (`/v1/messages`), so tools using different API formats can
   all reach the same MaaS models.
-- **Budget tracking** --- per-key spend tracking via LiteLLM +
+- **Budget tracking** --- per-key spend tracking via LiteLLM
   PostgreSQL, with cost-per-token configured for all models.
 - **Full observability** --- Prometheus metrics + Grafana 39-panel
   dashboard (latency, errors, throughput, tokens, cache, cost).
@@ -779,7 +779,7 @@ interactively (`./scripts/install.sh`), it prompts for optional components
 components are installed automatically. It is idempotent --- safe to re-run.
 +
 NOTE: If an existing installation is detected, the one-liner prompts to update:
-`Update v3.3.6 pass:[$\to$] v3.3.7? [Y/n]`. It pulls the latest version and
+`Update v3.3.6 → v3.3.7? [Y/n]`. It pulls the latest version and
 re-runs the installer. No need to `git pull` manually.
 
 . Verify the LaTeX toolchain:
@@ -981,7 +981,7 @@ To update the Huawei document templates project:
 curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main/scripts/install.sh | bash
 ----
 . The script pulls the latest version, shows the version change
-  (`v3.3.6 pass:[$\to$] v3.3.7`), and re-runs the installer. New
+  (`v3.3.6 → v3.3.7`), and re-runs the installer. New
   templates, commands, or modules are installed automatically.
 
 === Uninstalling the MaaS Gateway

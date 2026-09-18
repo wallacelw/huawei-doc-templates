@@ -130,6 +130,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     when 'inline_indexterm' then convert_inline_indexterm(node)
     when 'inline_kbd'      then convert_inline_kbd(node)
     when 'inline_menu'     then convert_inline_menu(node)
+    when 'inline_pass'     then node.text
     when 'icon'            then convert_icon(node)
 
     # List items — just return their text content
@@ -531,7 +532,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     when :emphasis
       "\\emph{#{text}}"
     when :monospaced
-      "\\inlinecode{#{text}}"
+      "\\inlinecode{#{latex_escape(node.text)}}"
     when :double
       "``#{text}''"
     when :single
