@@ -3,7 +3,7 @@
 # Verifies that the --fix pipeline produces correct heading styles,
 # list indentation, and footer page numbers in the generated DOCX.
 # Also verifies pandoc version pin and loud-failure assertions.
-# Tests all templates (guide, technical, testbook).
+# Tests all templates (guide, technical, testbook, poc).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

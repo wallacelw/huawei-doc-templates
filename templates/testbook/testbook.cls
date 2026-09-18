@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/16 Huawei Test Book template v6.1.0]
+\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.1.1]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -90,6 +90,7 @@
 \RequirePackage{huawei-toc}
 \RequirePackage{huawei-cover}
 \RequirePackage{huawei-shared}
+\RequirePackage{huawei-badges}
 
 % =====================================================================
 %  LANGUAGE-AWARE LABELS
@@ -345,18 +346,18 @@
 
 \newcommand{\testresultbadge}[1]{%
   \ifstrequal{#1}{Pass}{%
-    \tcbox[on line,colback=tipbg,colframe=tipfg,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Pass\,}%
+    \huaweibadge{tipbg}{tipfg}{Pass}%
   }{%
     \ifstrequal{#1}{Fail}{%
-      \tcbox[on line,colback=red!15,colframe=huaweired,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Fail\,}%
+      \huaweibadge{red!15}{huaweired}{Fail}%
     }{%
       \ifstrequal{#1}{Blocked}{%
-        \tcbox[on line,colback=warningbg,colframe=warningfg,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Blocked\,}%
+        \huaweibadge{warningbg}{warningfg}{Blocked}%
       }{%
         \ifstrequal{#1}{Untested}{%
-          \tcbox[on line,colback=codebg,colframe=ruleblack,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,Untested\,}%
+          \huaweibadge{codebg}{ruleblack}{Untested}%
         }{%
-          \tcbox[on line,colback=codebg,colframe=ruleblack,boxrule=0.8pt,arc=2pt,fontupper=\bfseries\small]{\,#1\,}%
+          \huaweibadge{codebg}{ruleblack}{#1}%
         }%
       }%
     }%

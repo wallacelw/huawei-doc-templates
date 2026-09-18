@@ -446,7 +446,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # --- CALLOUT LIST → numbered list with callout numbers ---
   def convert_colist(node)
     items = node.items.map do |item|
-      "\\item #{item.text}"
+      "\\item #{process_text(item.text)}"
     end
     "\\begin{enumerate}\n#{items.join("\n")}\n\\end{enumerate}"
   end
@@ -487,12 +487,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # --- OPEN BLOCK — check for custom roles (.changelog, .testcase, .objectives) ---
+  # --- OPEN BLOCK — default: pass through content ---
   def convert_open(node)
-    role = node.role
-    if role && respond_to?("convert_role_#{role}", true)
-      return send("convert_role_#{role}", node)
-    end
     # Default: just pass through content
     node.content
   end

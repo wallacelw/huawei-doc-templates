@@ -19,7 +19,7 @@ curl -fsSL https://raw.githubusercontent.com/wallacelw/huawei-doc-templates/main
 ```
 
 If an existing installation is detected, the one-liner prompts to update
-(`Update v6.0.0 → v6.0.1? [Y/n]`) and pulls the latest version.
+(`Update v6.0.9 → v6.1.0? [Y/n]`) and pulls the latest version.
 
 **Or step by step:**
 
@@ -271,13 +271,13 @@ for the technical report template syntax reference.
 ├── opencode.json            # skill discovery: scans templates/ for SKILL.md
 ├── README.md                # this file
 ├── LICENSE                  # MIT
-├── .luacheckrc             # Lua static analysis config (legacy, used by old Lua filter pipeline)
 ├── .vscode/
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
 │   ├── _base/               # shared formatting modules and converter
-│   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter (831 lines)
-│   │   ├── huawei.css               # Huawei brand CSS for HTML output (367 lines)
+│   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter (728 lines)
+│   │   ├── huawei.css               # Huawei brand CSS for HTML output (337 lines)
+│   │   ├── huawei-badges.sty        # shared badge rendering (\huaweibadge)
 │   │   ├── docx_fix.py              # shared DOCX post-processing
 │   │   └── embed-images.py          # shared MD image embedding
 │   ├── guide/               # self-contained template + skill
@@ -298,22 +298,24 @@ for the technical report template syntax reference.
 │   │   ├── README.md         # template-specific details (brief)
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX)
 │   │   └── common-assets/    # logos
-│   └── testbook/             # test case template + skill
-│       ├── testbook.cls       # LaTeX class (testcase environment, cover page)
-│       ├── testbook-template.html  # HTML template for Pandoc
-│       ├── create-testbook-reference-docx.py  # DOCX reference style generator
-│       ├── testbook-reference.docx  # reference DOCX with Huawei styles
-│       ├── SKILL.md          # opencode skill + AsciiDoc syntax reference
-│       ├── README.md         # template-specific details (brief)
-│       ├── .latexmkrc        # latexmk config (XeLaTeX)
-│       └── common-assets/    # logos
-│   ├── poc/                  # POC/homologation template + skill
-│   │   ├── poc.cls            # LaTeX class (result badges, stakeholders, signatures)
+│   ├── testbook/             # test case template + skill
+│   │   ├── testbook.cls       # LaTeX class (testcase environment, cover page)
+│   │   ├── testbook-template.html  # HTML template for Pandoc
+│   │   ├── create-testbook-reference-docx.py  # DOCX reference style generator
+│   │   ├── testbook-reference.docx  # reference DOCX with Huawei styles
 │   │   ├── SKILL.md          # opencode skill + AsciiDoc syntax reference
 │   │   ├── README.md         # template-specific details (brief)
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX)
 │   │   └── common-assets/    # logos
-│   └── _base/                # (shared modules listed above)
+│   ├── poc/                  # POC/homologation template + skill
+│   │   ├── poc.cls            # LaTeX class (result badges, stakeholders, signatures)
+│   │   ├── poc-template.html   # HTML template for Pandoc
+│   │   ├── create-poc-reference-docx.py  # DOCX reference style generator
+│   │   ├── poc-reference.docx  # reference DOCX with Huawei styles
+│   │   ├── SKILL.md          # opencode skill + AsciiDoc syntax reference
+│   │   ├── README.md         # template-specific details (brief)
+│   │   ├── .latexmkrc        # latexmk config (XeLaTeX)
+│   │   └── common-assets/    # logos
 ├── documents/               # user-created documents (one subfolder per doc)
 │   ├── README.md            # folder description and structure
 │   └── my-guide/            # example: a new document project
@@ -322,8 +324,6 @@ for the technical report template syntax reference.
 │       │   └── .latexmkrc   # TEXINPUTS → ../../templates/_base/ + ../../templates/guide/; $out_dir='..'
 │       └── assets/           # project-specific images
 ├── tests/
-│   ├── cases/           # Lua filter test cases (legacy, used by old Lua filter pipeline)
-│   ├── expected/        # expected filter output (.md.expected) (legacy, used by old Lua filter pipeline)
 │   ├── test-filter.sh   # Lua filter unit tests (legacy, skipped)
 │   ├── round-trip.sh    # cross-format validation (MD + DOCX + HTML)
 │   ├── test-docx-fix.sh # DOCX --fix post-processing smoke test

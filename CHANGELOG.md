@@ -4,6 +4,27 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.1.1 (2026-09-18)
+
+### Fixes
+
+- **SKILL.md skeleton**: Fixed undefined `\signatureblock` → `\signaturecell`
+  with explicit `&` and `\\ \hline`.
+- **AGENTS.md**: Added poc template to L15, "Adding a new command", and
+  "File editing rules" sections. Added `huawei-badges` to module list.
+- **README.md**: Fixed project layout tree (malformed markers, duplicate
+  `_base/`, missing poc files). Updated stale line counts (converter
+  831→728, CSS 367→337). Removed references to deleted files
+  (`.luacheckrc`, `tests/cases/`, `tests/expected/`).
+- **testbook.cls**: Refactored `\testresultbadge` to use shared
+  `\huaweibadge` from `huawei-badges.sty` (eliminates duplicated styling).
+- **guide.cls, technical.cls**: Added `\fvset{breaklines,breakanywhere}`
+  for consistent code block line breaking across all templates.
+- **Converter**: Removed dead role check in `convert_open`. Applied
+  `process_text` to `convert_colist` for consistent entity handling.
+- **Various**: Updated stale comments, cls dates, and .latexmkrc
+  documentation across all templates.
+
 ## v6.1.0 (2026-09-18)
 
 ### Features

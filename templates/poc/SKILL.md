@@ -404,8 +404,7 @@ Observations and caveats.
 
 ++++
 \begin{signatures}
-\signatureblock{Name}{Title}{email}{Address}
-\signatureblock{Name}{Title}{email}{Address}
+\signaturecell{Name}{Title}{email}{Address} & \signaturecell{Name}{Title}{email}{Address} \\ \hline
 \end{signatures}
 ++++
 ```

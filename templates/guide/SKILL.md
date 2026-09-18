@@ -405,7 +405,7 @@ multi-format output options.
 `latexmk main.tex` → PDF.
 
 **Never use pdflatex** — the class loads `fontspec` which requires XeLaTeX.
-**Never hand-edit .tex** — it is generated from `.adoc` (see L21).
+**Never hand-edit .tex** — it is generated from `.adoc` (see L16).
 
 ### Multi-format output
 

@@ -9,7 +9,7 @@
 %%    3. Preamble: Executive Summary, Background, Goal & Objectives,
 %%       Solution Overview
 %%    4. Scope & Planning: Scope, Premises, Methodology, Activities,
-%%       Chronogram, Responsibility Matrix
+%%       Schedule, Responsibility Matrix
 %%    5. Conclusion: Expected Results, Actual Results, Comments,
 %%       Conclusion, Signatures
 %%    6. Changelog (optional)
@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.1.0]
+\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.1.1]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

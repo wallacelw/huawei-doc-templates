@@ -30,7 +30,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/16 Huawei Technical Report template v6.1.0]
+\ProvidesClass{technical}[2026/09/18 Huawei Technical Report template v6.1.1]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -60,6 +60,7 @@
 \RequirePackage{enumitem}
 \RequirePackage{fancyvrb}
 \RequirePackage{fvextra}
+\fvset{breaklines,breakanywhere}
 \RequirePackage[most]{tcolorbox}
 \RequirePackage{etoolbox}
 \RequirePackage{booktabs}

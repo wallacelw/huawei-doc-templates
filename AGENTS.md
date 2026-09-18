@@ -280,7 +280,7 @@ approval. Changing them breaks existing documents and reproducibility.
 - **Core components** live in `templates/_base/` and are inherited by all templates:
   - LaTeX modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
     huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared,
-    huawei-cover, huawei-titles, huawei-toc.
+    huawei-cover, huawei-titles, huawei-toc, huawei-badges.
   - Converter: huawei-latex-converter.rb (AsciiDoc → LaTeX, shared by all templates).
   - Output styling: huawei.css (HTML), huawei.js (copy-to-clipboard), docinfo.html.
   - Post-processing: docx_fix.py (DOCX), embed-images.py (MD).
@@ -289,6 +289,7 @@ approval. Changing them breaks existing documents and reproducibility.
   - guide: base template (no additions beyond core).
   - technical: 5-section structure (problem, rootcauseanalysis, rootcause, triggercondition, workaround).
   - testbook: testcase/testsummary environments, test result badges, `:noanswers:` option.
+  - poc: result badges, stakeholders, closing record, signatures.
 - Each SKILL.md is self-sufficient (no shared/external references) but organized with
   "Core Components" and "Template-Specific Features" sections.
 - Do not add `\RequirePackage` calls inside `.sty` modules — all packages are loaded
@@ -502,8 +503,8 @@ at the repo root registers `templates/` as a discovery path.
 
 ## How to extend the existing template
 
-### Adding a new command to `guide.cls`, `technical.cls`, or `testbook.cls`
-1. Define the command in the appropriate `.cls` file (`guide.cls`, `technical.cls`, or `testbook.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
+### Adding a new command to `guide.cls`, `technical.cls`, `testbook.cls`, or `poc.cls`
+1. Define the command in the appropriate `.cls` file (`guide.cls`, `technical.cls`, `testbook.cls`, or `poc.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the AsciiDoc role or passthrough pattern to `huawei-latex-converter.rb`.
 4. Add the syntax to the reference tables in `SKILL.md` and `README.md`.
@@ -567,6 +568,7 @@ The naming convention is critical:
   affect every document. Test with both samples before committing.
 - **`technical.cls`** — technical-report-specific formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
 - **`testbook.cls`** — test-book-specific formatting (cover, TOC, titles, testcase environment). Same rules as `guide.cls`. Test with both samples before committing.
+- **`poc.cls`** — POC/homologation-specific formatting (cover, TOC, titles, result badges, stakeholders, signatures). Same rules as `guide.cls`. Test with both samples before committing.
 - **`templates/_base/huawei-latex-converter.rb`** — shared AsciiDoc-to-LaTeX
   converter. Changes affect ALL templates' PDF output. Test with
   `make samples` before committing.

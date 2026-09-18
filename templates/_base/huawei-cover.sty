@@ -1,12 +1,12 @@
 %% huawei-cover.sty — Shared cover page layout for Huawei templates.
 %% Provides \makecover with title, logo, cover text, authors, version/date/time.
-%% Used by guide and testbook. Technical has its own cover.
+%% Used by guide, technical, testbook, and poc.
 %% Depends on: \lg@doctitle, \lg@docversion, \lg@docdate (from huawei-changelog.sty),
 %%             \if@showtime, \if@changelog, \if@showauthors (from class file).
 \ProvidesPackage{huawei-cover}[2026/09/14 Huawei cover page]
 
 % =====================================================================
-%  COVER — shared by guide and testbook
+%  COVER — shared by guide, technical, testbook, and poc
 % =====================================================================
 \newcommand{\lg@covertext}{Huawei Technologies CO., LTD}
 \newcommand{\setcovertext}[1]{\renewcommand{\lg@covertext}{#1}}
