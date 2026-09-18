@@ -4,6 +4,28 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.3 (2026-09-19)
+
+### Table overflow fix
+
+- **Fixed 223pt table overflow in POC stakeholders**: The `stakeholders`
+  `tabular` was inline within a paragraph (no `\par` before it), so the
+  preceding text plus the table width exceeded `\linewidth`. Added `\par`
+  at the start and end of `stakeholders`, `closingrecord`, and
+  `signatures` environments to force them into their own paragraphs.
+- **Added `ragged2e` package**: Replaced `\raggedright` with `\RaggedRight`
+  in all table column specs (converter + POC environments) to allow
+  hyphenation within table cells.
+- **Added `seqsplit` package**: Email addresses in `\stakeholderrow` and
+  `\signaturecell` now use `\seqsplit` to break at any character, preventing
+  long unbreakable strings from overflowing column widths.
+- **Proportional column widths**: Replaced fixed-width columns (3cm, 2.5cm,
+  3.5cm) with proportional `\dimexpr`-based widths (15%, 35%, 20%, 30%)
+  in `stakeholders`; 30%/70% in `closingrecord`; 50%/50% in `signatures`.
+- All 8 sample PDFs verified. POC overfull warnings reduced from 9→8 (PT)
+  and 8→7 (EN). Remaining overflows are minor (<27pt, from long Portuguese
+  words in activity list paragraphs and `\dimexpr` rounding <1mm).
+
 ## v6.2.2 (2026-09-19)
 
 ### Build pipeline fix

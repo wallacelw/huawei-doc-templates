@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.2]
+\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.3]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -76,6 +76,7 @@
 \RequirePackage{float}
 \RequirePackage{longtable}
 \RequirePackage{amssymb}
+\RequirePackage{seqsplit}
 
 % ---- Shared modules (templates/_base/) ------------------------------
 \RequirePackage{huawei-colors}
@@ -194,18 +195,20 @@
 %   \end{stakeholders}
 
 \newenvironment{stakeholders}{%
+  \par
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{\dimexpr\linewidth-3cm-2.5cm-3.5cm-8\tabcolsep-5\arrayrulewidth\relax}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|}
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*15/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*35/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
   \hline
 }{%
   \hline
   \end{tabular}%
+  \par
 }
 \newcommand{\stakeholderorg}[1]{%
-  \rowcolor{huaweired}\multicolumn{4}{|l|}{\color{white}\textbf{#1}} \\ \hline
+  \rowcolor{huaweired}\multicolumn{4}{|>{\RaggedRight\arraybackslash}p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\color{white}\textbf{#1}} \\ \hline
 }
-\newcommand{\stakeholderrow}[4]{#1 & #2 & #3 & #4 \\ \hline}
+\newcommand{\stakeholderrow}[4]{#1 & \seqsplit{#2} & #3 & #4 \\ \hline}
 
 % =====================================================================
 %  CLOSING RECORD
@@ -221,9 +224,10 @@
 %   \end{closingrecord}
 
 \newenvironment{closingrecord}{%
+  \par
   \renewcommand{\arraystretch}{1.5}%
   \noindent
-  \begin{tabular}{|>{\raggedright\arraybackslash}p{5cm}|>{\raggedright\arraybackslash}p{\dimexpr\linewidth-5cm-4\tabcolsep-3\arrayrulewidth\relax}|}
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)*30/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)*70/100\relax}|}
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@closingitem} & {\color{white}\bfseries\lg@closingrecord} \\
@@ -231,6 +235,7 @@
 }{%
   \hline
   \end{tabular}%
+  \par
 }
 \newcommand{\closingrow}[2]{#1 & #2 \\ \hline}
 \newcommand{\checkbox}[1]{$\square$~#1}
@@ -247,17 +252,19 @@
 %   \end{signatures}
 
 \newenvironment{signatures}{%
-  \begin{tabular}{|>{\raggedright\arraybackslash}p{\dimexpr 0.48\linewidth-2\tabcolsep-1.5\arrayrulewidth\relax}|>{\raggedright\arraybackslash}p{\dimexpr 0.48\linewidth-2\tabcolsep-1.5\arrayrulewidth\relax}|}
+  \par
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|}
   \hline
 }{%
   \hline
   \end{tabular}%
+  \par
 }
 \newcommand{\signaturecell}[4]{%
   \lg@siggreeting \par\medskip
   \textbf{#1} \par
   #2 \par
-  \textbf{\lg@sigemail:} \texttt{#3} \par
+  \textbf{\lg@sigemail:} \texttt{\seqsplit{#3}} \par
   #4 \par\bigskip
 }
 
