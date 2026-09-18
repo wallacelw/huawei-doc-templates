@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.3]
+\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.4]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -100,9 +100,9 @@
 \if@portuguese
   % POC result labels
   \newcommand{\lg@pocpass}{Atendido}
-  \newcommand{\lg@pocpartial}{Atendido com ressalvas}
-  \newcommand{\lg@pocfail}{Não atendido}
-  \newcommand{\lg@pocskip}{Não testado}
+  \newcommand{\lg@pocpartial}{Parcial}
+  \newcommand{\lg@pocfail}{Falha}
+  \newcommand{\lg@pocskip}{Ignorado}
   % Closing record labels
   \newcommand{\lg@closingitem}{Item}
   \newcommand{\lg@closingrecord}{Registro}

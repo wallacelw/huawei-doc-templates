@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.3]
+\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.4]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -346,18 +346,18 @@
 
 \newcommand{\testresultbadge}[1]{%
   \ifstrequal{#1}{Pass}{%
-    \huaweibadge{tipbg}{tipfg}{Pass}%
+    \huaweibadge[1.5cm]{tipbg}{tipfg}{Pass}%
   }{%
     \ifstrequal{#1}{Fail}{%
-      \huaweibadge{red!15}{huaweired}{Fail}%
+      \huaweibadge[1.5cm]{red!15}{huaweired}{Fail}%
     }{%
       \ifstrequal{#1}{Blocked}{%
-        \huaweibadge{warningbg}{warningfg}{Blocked}%
+        \huaweibadge[1.5cm]{warningbg}{warningfg}{Blocked}%
       }{%
         \ifstrequal{#1}{Untested}{%
-          \huaweibadge{codebg}{ruleblack}{Untested}%
+          \huaweibadge[1.5cm]{codebg}{ruleblack}{Untested}%
         }{%
-          \huaweibadge{codebg}{ruleblack}{#1}%
+          \huaweibadge[1.5cm]{codebg}{ruleblack}{#1}%
         }%
       }%
     }%

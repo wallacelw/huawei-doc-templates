@@ -4,6 +4,22 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.4 (2026-09-19)
+
+### Badge standardization
+
+- **Fixed badge alignment and sizing**: All POC result badges (Pass, Partial,
+  Fail, Skip) now have a uniform 2cm width with centered text, ensuring
+  consistent alignment in tables and inline contexts.
+- **Added configurable width to `\huaweibadge`**: The shared badge command
+  now accepts an optional width parameter (default 2cm). Testbook uses
+  1.5cm for its narrower table columns.
+- **Shortened Portuguese labels**:
+  - "Atendido com ressalvas" → "Parcial" (21→7 chars)
+  - "Não atendido" → "Falha" (12→5 chars)
+  - "Não testado" → "Ignorado" (11→8 chars)
+- All 8 sample PDFs verified.
+
 ## v6.2.3 (2026-09-19)
 
 ### Table overflow fix
