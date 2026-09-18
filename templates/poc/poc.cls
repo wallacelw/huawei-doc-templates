@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.5]
+\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.6]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -201,7 +201,6 @@
   \begin{tabular}{|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*15/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*35/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
   \hline
 }{%
-  \hline
   \end{tabular}%
   \par
 }
@@ -233,7 +232,6 @@
   {\color{white}\bfseries\lg@closingitem} & {\color{white}\bfseries\lg@closingrecord} \\
   \hline
 }{%
-  \hline
   \end{tabular}%
   \par
 }
@@ -256,7 +254,6 @@
   \begin{tabular}{|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|}
   \hline
 }{%
-  \hline
   \end{tabular}%
   \par
 }

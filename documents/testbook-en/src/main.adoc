@@ -16,6 +16,8 @@ result badges, and changelog.
 
 == Introduction
 
+[.badge]#New#
+
 [.objectives]
 ====
 [.general-objective]#Validate the Huawei Cloud Data Platform deployment for the
@@ -315,7 +317,7 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Unauthorized user receives HTTP 403 on both upload and list operations.}
     \teststep{Bucket policy grants only the intended read/write permissions to the designated roles.}
   \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
+  \testresult{\testresultbadge{Fail}}
   \testremarks{Check the Cloud Trail logs if access denial is not returned as expected — there may be a policy inheritance from the project or domain level.}
 
   \note{IAM policy changes can take up to 5 minutes to propagate. Wait before
@@ -346,7 +348,7 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Non-admin user sees masked values in the \inlinecode{ssn} column.}
     \teststep{Admin user sees real values in the \inlinecode{ssn} column.}
   \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
+  \testresult{\testresultbadge{Blocked}}
   \testremarks{Data masking rules apply at query time — the underlying data in OBS/HDFS is not modified.}
 \end{testcase}
 ++++
@@ -435,7 +437,7 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
     \teststep{Downloaded file checksum matches the local original.}
     \teststep{DataArts Studio data source connection can read the files.}
   \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
+  \testresult{\testresultbadge{Untested}}
   \testremarks{Large files ($>$1 GB) should be uploaded using the OBS multipart upload feature for better reliability.}
 
   \note{Refer to the \weblink{https://support.huaweicloud.com/intl/en-us/obs/index.html}{Huawei Cloud OBS Documentation} for advanced upload options and troubleshooting.}
@@ -454,10 +456,10 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the t
   \testsummaryrow{4}{Verify DataArts Studio workspace creation}{\testresultbadge{Pass}}
   \testsummaryrow{5}{Verify data ingestion pipeline execution}{\testresultbadge{Pass}}
   \testsummaryrow{6}{Verify Spark SQL query on MRS cluster}{\testresultbadge{Pass}}
-  \testsummaryrow{7}{Verify IAM policy enforcement on OBS buckets}{\testresultbadge{Pass}}
-  \testsummaryrow{8}{Verify DataArts Studio data masking rule}{\testresultbadge{Pass}}
+  \testsummaryrow{7}{Verify IAM policy enforcement on OBS buckets}{\testresultbadge{Fail}}
+  \testsummaryrow{8}{Verify DataArts Studio data masking rule}{\testresultbadge{Blocked}}
   \testsummaryrow{9}{Verify Terraform infrastructure deployment}{\testresultbadge{Pass}}
-  \testsummaryrow{10}{Verify test data upload to OBS}{\testresultbadge{Pass}}
+  \testsummaryrow{10}{Verify test data upload to OBS}{\testresultbadge{Untested}}
 \end{testsummary}
 ++++
 

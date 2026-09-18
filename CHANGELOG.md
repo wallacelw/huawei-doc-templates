@@ -4,6 +4,43 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.6 (2026-09-19)
+
+### End-to-end review fixes (testbook + POC)
+
+- **Fixed double `\hline`** in stakeholders, closingrecord, signatures, and
+  testsummary environments — removed redundant closing `\hline` that produced
+  double horizontal rules at table bottoms.
+- **Updated stale Portuguese labels** in POC SKILL.md and README.md to match
+  v6.2.4 code changes (Parcial/Falha/Ignorado).
+- **Fixed POC SKILL.md changelog example** to use `\item` entries instead of
+  plain text inside `\changelogentry`.
+- **Fixed testbook SKILL.md badge color descriptions** — badges have light
+  background, colored border, black text (not white text on colored background).
+- **Documented `testlist` environment** in testbook SKILL.md (was defined in
+  cls but undocumented).
+- **Added `\testscope` to testbook skeleton** (was documented as required but
+  missing from skeleton).
+- **Added 5 shared header attributes** to POC SKILL.md (`:header-title:`,
+  `:cover-text:`, `:header-logo:`, `:cover-logo:`, `:indentbody:`).
+- **Removed undocumented `:testbooktitle:` attribute** from testbook SKILL.md
+  (converter uses standard AsciiDoc `= Title` line).
+- **Fixed comment numbering** in testbook.cls field order comment.
+- **Changed `\raggedright` to `\RaggedRight`** in testsummary table for
+  consistency with all other custom tables.
+- **Added `poc` to test-filter.sh** template markers pattern.
+- **Created missing `assets/` directories** for POC samples.
+- **Samples now demonstrate all badge types**: testbook shows Pass/Fail/Blocked/
+  Untested; POC shows Pass/Partial/Fail/Skip.
+- **Added WARNING, TIP admonitions and code blocks** to POC samples.
+- **Added `[.badge]` role demonstration** to testbook samples.
+- **Used `\lg@` language-aware labels** in POC sample checkbox calls instead
+  of hardcoded text.
+- **Aligned PT/EN activity counts** in POC samples (both now have 12 activities).
+- **Updated huawei-badges.sty description** in POC SKILL.md (loaded by both
+  testbook and poc, not just poc).
+- All 8 sample PDFs verified, all 24 formats (PDF/DOCX/MD/HTML) generated.
+
 ## v6.2.5 (2026-09-19)
 
 ### Vertical alignment fix

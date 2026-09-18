@@ -16,6 +16,8 @@ result badges e histórico de versões.
 
 == Introdução
 
+[.badge]#Novo#
+
 [.objectives]
 ====
 [.general-objective]#Validar a implantação da Plataforma de Dados do Huawei Cloud para o
@@ -316,7 +318,7 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Usuário não autorizado recebe HTTP 403 nas operações de carregamento e listagem.}
     \teststep{Política do bucket concede apenas as permissões de leitura/escrita pretendidas às funções designadas.}
   \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
+  \testresult{\testresultbadge{Fail}}
   \testremarks{Verificar os logs do Cloud Trail se a negação de acesso não for retornada conforme esperado — pode haver herança de política do projeto ou domínio.}
 
   \note{Alterações em políticas IAM podem levar até 5 minutos para propagar. Aguardar antes de retestar após modificar uma política.}
@@ -346,7 +348,7 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Usuário não administrador visualiza valores mascarados na coluna \inlinecode{ssn}.}
     \teststep{Usuário administrador visualiza valores reais na coluna \inlinecode{ssn}.}
   \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
+  \testresult{\testresultbadge{Blocked}}
   \testremarks{Regras de mascaramento de dados são aplicadas no momento da consulta — os dados subjacentes no OBS/HDFS não são modificados.}
 \end{testcase}
 ++++
@@ -435,7 +437,7 @@ obsutil ls obs://poc-datalake-raw/ -limit=20
     \teststep{O checksum do arquivo baixado corresponde ao original local.}
     \teststep{A conexão de fonte de dados do DataArts Studio consegue ler os arquivos.}
   \end{testexpected}
-  \testresult{\testresultbadge{Pass}}
+  \testresult{\testresultbadge{Untested}}
   \testremarks{Arquivos grandes ($>$1 GB) devem ser carregados usando o recurso de upload multipart do OBS para maior confiabilidade.}
 
   \note{Consulte a \weblink{https://support.huaweicloud.com/obs/index.html}{Documentação do Huawei Cloud OBS} para opções avançadas de upload e solução de problemas.}
@@ -454,10 +456,10 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do 
   \testsummaryrow{4}{Verificar criação do workspace do DataArts Studio}{\testresultbadge{Pass}}
   \testsummaryrow{5}{Verificar execução do pipeline de ingestão de dados}{\testresultbadge{Pass}}
   \testsummaryrow{6}{Verificar consulta Spark SQL no cluster MRS}{\testresultbadge{Pass}}
-  \testsummaryrow{7}{Verificar aplicação de política IAM nos buckets OBS}{\testresultbadge{Pass}}
-  \testsummaryrow{8}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Pass}}
+  \testsummaryrow{7}{Verificar aplicação de política IAM nos buckets OBS}{\testresultbadge{Fail}}
+  \testsummaryrow{8}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Blocked}}
   \testsummaryrow{9}{Verificar implantação de infraestrutura via Terraform}{\testresultbadge{Pass}}
-  \testsummaryrow{10}{Verificar carregamento de dados de teste no OBS}{\testresultbadge{Pass}}
+  \testsummaryrow{10}{Verificar carregamento de dados de teste no OBS}{\testresultbadge{Untested}}
 \end{testsummary}
 ++++
 

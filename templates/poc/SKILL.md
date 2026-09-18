@@ -69,7 +69,7 @@ template-specific configuration:
 | `huawei-shared.sty` | `\inlinecode`, `\badge`, `\menu`, `\note`, `\param` |
 
 Note: `huawei-badges.sty` (`\huaweibadge`) is also in `templates/_base/`
-but is currently loaded only by `poc.cls`. It provides the generic badge
+and is loaded by `testbook.cls` and `poc.cls`. It provides the generic badge
 rendering used by `\pocresult`.
 
 ---
@@ -85,9 +85,14 @@ rendering used by `\pocresult`.
 | `:version: 1.0.0` | Document version on cover page | Required |
 | `:date: 2026-09-18` | Override the date on cover page | Optional |
 | `:authors: Name` | Author(s) on cover page | Optional |
+| `:header-title: ...` | Centered header text on body pages | `:header-title: Huawei Cloud -- ECS` |
+| `:cover-text: ...` | Line under the cover logo (default `Huawei Technologies CO., LTD`) | `:cover-text: Huawei Technologies CO., LTD` |
+| `:header-logo: path` | Header logo image path (default `common-assets/huawei-logo-header.png`) | `:header-logo: assets/custom-logo.png` |
+| `:cover-logo: path` | Cover logo image path (default `common-assets/huawei-logo-cover.png`) | `:cover-logo: assets/custom-cover.png` |
 | `:nochangelog:` | Suppress changelog section | Optional |
 | `:noauthors:` | Hide authors even if set | Optional |
 | `:notime:` | Hide compilation time on cover | Optional |
+| `:indentbody:` | Indent all running text | `:indentbody:` |
 
 ### Section structure (15 sections, 3 parts)
 
@@ -149,9 +154,9 @@ Colored badges for POC/homologation results. Language-aware labels.
 | Role | AsciiDoc | LaTeX | Color | PT label | EN label |
 |------|----------|-------|-------|----------|----------|
 | Pass | `[.result-pass]#Pass#` | `\pocresult{Pass}` | Green | Atendido | Pass |
-| Partial | `[.result-partial]#Partial#` | `\pocresult{Partial}` | Orange | Atendido com ressalvas | Partial |
-| Fail | `[.result-fail]#Fail#` | `\pocresult{Fail}` | Red | Não atendido | Fail |
-| Skip | `[.result-skip]#Skip#` | `\pocresult{Skip}` | Gray | Não testado | Skip |
+| Partial | `[.result-partial]#Partial#` | `\pocresult{Partial}` | Orange | Parcial | Partial |
+| Fail | `[.result-fail]#Fail#` | `\pocresult{Fail}` | Red | Falha | Fail |
+| Skip | `[.result-skip]#Skip#` | `\pocresult{Skip}` | Gray | Ignorado | Skip |
 
 #### 4. Activities list (roman numerals)
 
@@ -221,7 +226,9 @@ newest first. Suppress with `:nochangelog:` header attribute.
 ```asciidoc
 ++++
 \begin{changelog}
-\changelogentry{1.1.0}{2026-09-20}{Added stakeholder table and result badges.}
+\changelogentry{1.1.0}{2026-09-20}{
+  \item Added stakeholder table and result badges.
+}
 \changelogentry{1.0.0}{2026-09-18}{Initial version.}
 \end{changelog}
 ++++

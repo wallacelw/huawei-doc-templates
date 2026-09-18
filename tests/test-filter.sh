@@ -29,8 +29,8 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
         fi
         # Skip template-specific test cases for wrong filter
         first_line=$(head -1 "$tex_file" 2>/dev/null)
-        if echo "$first_line" | grep -qE '% (guide|technical|tech|testbook)-only'; then
-            test_marker=$(echo "$first_line" | grep -oE '(guide|technical|tech|testbook)-only' | sed 's/-only//')
+        if echo "$first_line" | grep -qE '% (guide|technical|tech|testbook|poc)-only'; then
+            test_marker=$(echo "$first_line" | grep -oE '(guide|technical|tech|testbook|poc)-only' | sed 's/-only//')
             # Normalize "tech" to "technical" for comparison
             [ "$test_marker" = "tech" ] && test_marker="technical"
             if [ "$test_marker" != "$tmpl_name" ]; then

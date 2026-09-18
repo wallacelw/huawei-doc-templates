@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.5]
+\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.6]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -146,10 +146,10 @@
 %   1. Objective       — what to verify
 %   2. Test Scope      — topics/requirements covered by this testcase
 %   3. Prerequisites   — what must be true before starting
-%   3. Procedure       — step-by-step actions (testprocedure environment)
-%   4. Expected Result — what should happen
-%   5. Test Result     — pass/fail badge (filled after execution)
-%   6. Remarks         — observations (filled after execution)
+%   4. Procedure       — step-by-step actions (testprocedure environment)
+%   5. Expected Result — what should happen
+%   6. Test Result     — pass/fail badge (filled after execution)
+%   7. Remarks         — observations (filled after execution)
 %
 % Usage:
 %   \begin{testcase}{Test case title}
@@ -212,7 +212,7 @@
 }
 
 % Test case field commands and environments.
-% Order: Objective, Prerequisites, Procedure, Expected, Test Result, Remarks
+% Order: Objective, Test Scope, Prerequisites, Procedure, Expected, Test Result, Remarks
 % Prerequisites, Procedure, and Expected Result are environments with
 % auto-numbered \teststep items — uniform code, same visual style.
 \newcommand{\testobjective}[1]{\lg@testfield{\lg@objective}{#1}}
@@ -268,7 +268,7 @@
   \renewcommand{\arraystretch}{1.3}%
   \noindent
   % middle column = \linewidth - (2 x 2.5cm side columns) - 6\tabcolsep - 4\arrayrulewidth
-  \begin{tabular}{|>{\raggedright\arraybackslash}m{2.5cm}|>{\raggedright\arraybackslash}m{\dimexpr\linewidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\centering\arraybackslash}m{2.5cm}|}%
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{2.5cm}|>{\RaggedRight\arraybackslash}m{\dimexpr\linewidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\Centering\arraybackslash}m{2.5cm}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@testcaseid} &
@@ -276,7 +276,6 @@
   {\color{white}\bfseries\lg@teststatus} \\
   \hline
 }{%
-  \hline
   \end{tabular}%
   \vspace{0.5cm}%
 }

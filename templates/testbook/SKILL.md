@@ -302,7 +302,6 @@ The following features are specific to the testbook template:
 
 | Attribute | Purpose | Example |
 |---|---|---|
-| `:testbooktitle: ...` | Big cover title (default "Test Book"). | `:testbooktitle: Test Book: ECS POC` |
 | `:noanswers:` | Hide Test Result and Remarks fields in all test cases. | `:noanswers:` |
 
 ### Test case environment
@@ -361,6 +360,23 @@ is automatic — the next `testcase` will be "Testcase 2: ...").
 | `\testresult{...}` | Test Result | Resultado do Teste | No (hidden by `:noanswers:`) |
 | `\testremarks{...}` | Remarks | Observações | No (hidden by `:noanswers:`) |
 
+### Test list environment
+
+The `testlist` environment provides a numbered list with red bold numbers,
+for use inside testcase fields (prerequisites, expected result, remarks)
+where consistent numbered formatting is needed.
+
+```latex
+\begin{testlist}
+  \item First step
+  \item Second step
+\end{testlist}
+```
+
+| Command | Purpose |
+|---|---|
+| `\begin{testlist} ... \end{testlist}` | Numbered list with red bold numbers (1., 2., 3., …). Use inside testcase fields. |
+
 ### Test summary table
 
 The `testsummary` environment uses a LaTeX passthrough block. It renders a
@@ -398,10 +414,10 @@ gray for Untested. Used inside passthrough blocks.
 
 | Command | Color | Use |
 |---|---|---|
-| `\testresultbadge{Pass}` | Green background, white text | Test step/case passed. |
-| `\testresultbadge{Fail}` | Red background, white text | Test step/case failed. |
-| `\testresultbadge{Blocked}` | Orange background, white text | Test step/case blocked by dependency. |
-| `\testresultbadge{Untested}` | Gray background, white text | Test step/case not yet executed. |
+| `\testresultbadge{Pass}` | Light green bg, green border, black text | Test step/case passed. |
+| `\testresultbadge{Fail}` | Light red bg, red border, black text | Test step/case failed. |
+| `\testresultbadge{Blocked}` | Light orange bg, orange border, black text | Test step/case blocked by dependency. |
+| `\testresultbadge{Untested}` | Light gray bg, black border, black text | Test step/case not yet executed. |
 
 **Badge labels are not translated** — they always display in English
 (Pass, Fail, Blocked, Untested) regardless of the `:lang:` attribute.
@@ -493,6 +509,7 @@ gray for Untested. Used inside passthrough blocks.
 ++++
 \begin{testcase}{<test case title>}
   \testobjective{Verify that <functionality> works as expected.}
+  \testscope{<scope of this test case>}
   \begin{testprerequisites}
     \teststep{System is running.}
     \teststep{User is logged in.}
@@ -514,6 +531,7 @@ gray for Untested. Used inside passthrough blocks.
 ++++
 \begin{testcase}{<another test case title>}
   \testobjective{Verify that <other functionality> behaves correctly.}
+  \testscope{<scope of this test case>}
   \begin{testprerequisites}
     \teststep{Testcase 1 completed.}
   \end{testprerequisites}
@@ -535,6 +553,7 @@ gray for Untested. Used inside passthrough blocks.
 ++++
 \begin{testcase}{<test case in domain 2>}
   \testobjective{...}
+  \testscope{...}
   \begin{testprerequisites}
     \teststep{...}
   \end{testprerequisites}

@@ -81,15 +81,16 @@ scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 | `:notime:` | Hides the compilation time on the cover page. |
 | `:nochangelog:` | Suppresses the changelog and hides version/date/time on cover. |
 | `:noauthors:` | Hides authors even if set. |
+| `:indentbody:` | Indents all running text by 0.6 cm. Default off (text flush to the left margin). |
 
 ### Label translations
 
 | Token | English (default) | Portuguese (`:lang: pt`) |
 |---|---|---|
 | Pass | Pass | Atendido |
-| Partial | Partial | Atendido com ressalvas |
-| Fail | Fail | Não atendido |
-| Skip | Skip | Não testado |
+| Partial | Partial | Parcial |
+| Fail | Fail | Falha |
+| Skip | Skip | Ignorado |
 | Signature greeting | Sincerely, | At.te, |
 | Closing item | Item | Item |
 | Closing record | Record | Registro |

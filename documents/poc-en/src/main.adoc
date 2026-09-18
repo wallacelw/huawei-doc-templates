@@ -120,6 +120,11 @@ Each activity will be classified using the following scale:
 
 === Evidence to Be Collected
 
+[source,bash]
+----
+hcloud ECS servers list --region sa-brazil-1
+----
+
 [.evidence]
 * Architecture diagram of the deployed environment with versions and components.
 * Screenshots of relevant configurations and executions.
@@ -141,6 +146,10 @@ The PoC will be considered successful when:
 NOTE: Verbal declaration or commercial presentation alone must not be considered proof. Functionality should be executed by the team in the PoC environment and its result registered.
 
 == Planned Activities
+
+WARNING: Ensure all security groups are configured before deploying resources to avoid unauthorized access.
+
+TIP: Use tags to organize resources by environment (dev, staging, production) for easier management.
 
 [.activities]
 . Provision VPC, subnets, and security groups on Huawei Cloud.
@@ -231,7 +240,7 @@ ELB configured with health checks and session stickiness. Backend server group i
 . *Configure IAM policies and KMS encryption keys.*
 +
 IAM policies created for application service accounts. KMS keys created for OBS and RDS encryption. All storage encrypted at rest.
-[.result-pass]#Pass#
+[.result-fail]#Fail#
 
 . *Deploy the application and run smoke tests.*
 +
@@ -240,8 +249,8 @@ Application deployed successfully. Smoke tests passed for all critical user jour
 
 . *Execute load test with 10,000 concurrent users.*
 +
-Load test completed. 10,000 concurrent users sustained for 30 minutes. Average response time: 145ms (p95: 189ms). Error rate: 0.02%.
-[.result-pass]#Pass#
+Load test not executed due to load testing tool license expiration. Rescheduled after license renewal.
+[.result-skip]#Skip#
 
 . *Test failover by terminating a primary database node.*
 +
@@ -269,7 +278,7 @@ All evidence collected and organized in the evidence package. Some screenshots n
 
 ++++
 \begin{closingrecord}
-\closingrow{Preliminary result}{\checkbox{Homologated} \checkbox{With reservations} \checkbox{Not homologated}}
+\closingrow{Preliminary result}{\checkbox{\lg@pochomologated} \checkbox{\lg@pocwithreservations} \checkbox{\lg@pocnothomologated}}
 \closingrow{Critical pending items}{None}
 \closingrow{Deadline for complementary evidence}{2026-10-15}
 \closingrow{Responsible parties}{Jane Doe, John Smith}

@@ -119,6 +119,12 @@ Cada atividade será classificada conforme a escala abaixo:
 
 === Evidências a Serem Coletadas
 
+[source,bash]
+----
+# Listar servidores ECS na região de homologação
+hcloud ECS servers list --region sa-brazil-1
+----
+
 [.evidence]
 * Diagrama da arquitetura efetivamente homologada, com versões e componentes.
 * Capturas de tela das configurações e execuções relevantes.
@@ -141,11 +147,17 @@ NOTE: Declaração verbal ou apresentação comercial não deve, isoladamente, s
 
 == Atividades Planejadas
 
+WARNING: Certifique-se de que todos os security groups estejam configurados antes de implantar recursos para evitar acesso não autorizado.
+
+TIP: Utilize tags para organizar recursos por ambiente (dev, staging, produção) para facilitar a gestão.
+
 [.activities]
 . Provisionar VPC, sub-redes e security groups na Huawei Cloud.
 . Criar instâncias ECS e validar configurações de computação.
 . Criar buckets no OBS e configurar políticas de ciclo de vida.
+. Criar instância RDS for MySQL com configuração primary/standby.
 . Configurar políticas de IAM, usuários, grupos e roles.
+. Configurar ELB para distribuir tráfego entre os nós.
 . Criar cluster CCE e configurar node pools.
 . Implantar contêineres de aplicação no CCE a partir do SWR.
 . Configurar dashboards e alarmes no CES.
@@ -209,9 +221,19 @@ Instâncias ECS criadas com flavor adequado. Discos anexados e imagens configura
 Buckets OBS criados para arquivos estáticos e backups. Política de ciclo de vida configurada para transição para cold storage após 30 dias.
 [.result-pass]#Pass#
 
+. *Criar instância RDS for MySQL com configuração primary/standby.*
++
+Instância RDS criada com configuração primary/standby. Backups automáticos habilitados com retenção de 7 dias. Grupo de parâmetros ajustado para a carga de trabalho.
+[.result-pass]#Pass#
+
 . *Configurar políticas de IAM, usuários, grupos e roles.*
 +
 Políticas de IAM criadas seguindo princípio de menor privilégio. Grupos e usuários configurados. Roles atribuídas corretamente.
+[.result-fail]#Fail#
+
+. *Configurar ELB para distribuir tráfego entre os nós.*
++
+ELB configurado com health checks e afinidade de sessão. Grupo de servidores backend inclui nós da camada web. Listener configurado na porta 443 com certificado TLS.
 [.result-pass]#Pass#
 
 . *Criar cluster CCE e configurar node pools.*
@@ -231,8 +253,8 @@ Dashboards configurados para CPU, memória, rede e disco. Regras de alarme defin
 
 . *Executar testes de conectividade e validação ponta a ponta.*
 +
-Testes de conectividade entre sub-redes concluídos. Validação ponta a ponta do fluxo de aplicação bem-sucedida.
-[.result-pass]#Pass#
+Testes de conectividade não executados devido a indisponibilidade temporária do ambiente de testes. Reagendado após restauração do ambiente.
+[.result-skip]#Skip#
 
 . *Testar failover e recuperação de instâncias.*
 +
@@ -255,7 +277,7 @@ Evidências coletadas e organizadas no pacote. Algumas capturas de tela precisam
 
 ++++
 \begin{closingrecord}
-\closingrow{Resultado preliminar}{\checkbox{Homologada} \checkbox{Homologada com ressalvas} \checkbox{Não homologada}}
+\closingrow{Resultado preliminar}{\checkbox{\lg@pochomologated} \checkbox{\lg@pocwithreservations} \checkbox{\lg@pocnothomologated}}
 \closingrow{Pendências críticas}{Nenhuma}
 \closingrow{Prazo para evidências complementares}{2026-10-15}
 \closingrow{Responsáveis}{Pedro Oliveira, Carlos Santos}
