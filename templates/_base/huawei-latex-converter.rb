@@ -39,6 +39,20 @@ def latex_escape(text)
   text.gsub(LATEX_ESCAPE_RE) { |ch| LATEX_ESCAPES[ch] }
 end
 
+# --- Helper: unescape HTML entities that asciidoctor adds ---
+def unescape_html_entities(text)
+  return text if text.nil? || text.empty?
+  text.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&quot;', '"').gsub('&amp;', '&')
+      .gsub(/&#(\d+);/) { |m| begin $1.to_i.chr(Encoding::UTF_8) rescue m end }
+end
+
+# --- Helper: unescape entities then escape LaTeX special chars ---
+def process_text(text)
+  return '' if text.nil? || text.empty?
+  text = unescape_html_entities(text)
+  text.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
+end
+
 # Escape LaTeX special chars EXCEPT backslash (for inline text that may
 # contain passthroughs or generated commands).  Used in inline handlers
 # where node.text returns raw AsciiDoc text.
@@ -73,8 +87,11 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # --- Main dispatch: route node transforms to specific converters ---
   def convert node, transform = node.node_name, opts = {}
     # Check for custom role-based block converters first
-    if node.respond_to?(:role) && node.role && respond_to?("convert_role_#{node.role}", true)
-      return send("convert_role_#{node.role}", node)
+    if node.respond_to?(:role) && node.role
+      role_method = node.role.tr('-', '_')
+      if respond_to?("convert_role_#{role_method}", true)
+        return send("convert_role_#{role_method}", node)
+      end
     end
 
     case transform
@@ -220,6 +237,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     return '' if content.nil? || content.empty?
     # Unescape HTML entities that asciidoctor adds
     content = content.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&quot;', '"').gsub('&amp;', '&')
+    # Unescape numeric HTML entities (smart quotes, dashes, etc.)
+    content = content.gsub(/&#(\d+);/) { |m| begin $1.to_i.chr(Encoding::UTF_8) rescue m end }
     # Escape LaTeX special chars not preceded by a backslash.
     # Don't escape { } — they appear in generated LaTeX commands from inline handlers.
     content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
@@ -378,24 +397,38 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   end
 
   # --- UNORDERED LIST → \begin{itemize} ---
+  # Special role: [.evidence] → checkbox list with \square bullets
   def convert_ulist(node)
-    items = node.items.map do |item|
-      text = item.text
-      # Check for nested content (compound list items)
-      nested = item.blocks.any? ? "\n#{item.content}" : ''
-      "\\item #{text}#{nested}"
+    if node.role == 'evidence'
+      items = node.items.map do |item|
+        text = process_text(item.text)
+        nested = item.blocks.any? ? "\n#{item.content}" : ''
+        "\\item[$\\square$] #{text}#{nested}"
+      end
+      "\\begin{itemize}[leftmargin=2.5em, itemsep=0.3em]\n#{items.join("\n")}\n\\end{itemize}"
+    else
+      items = node.items.map do |item|
+        text = process_text(item.text)
+        nested = item.blocks.any? ? "\n#{item.content}" : ''
+        "\\item #{text}#{nested}"
+      end
+      "\\begin{itemize}\n#{items.join("\n")}\n\\end{itemize}"
     end
-    "\\begin{itemize}\n#{items.join("\n")}\n\\end{itemize}"
   end
 
   # --- ORDERED LIST → \begin{enumerate} ---
+  # Special role: [.activities] → roman numeral enumerate
   def convert_olist(node)
     items = node.items.map do |item|
-      text = item.text
+      text = process_text(item.text)
       nested = item.blocks.any? ? "\n#{item.content}" : ''
       "\\item #{text}#{nested}"
     end
-    "\\begin{enumerate}\n#{items.join("\n")}\n\\end{enumerate}"
+    if node.role == 'activities'
+      "\\begin{enumerate}[label=\\roman*., leftmargin=2.5em, itemsep=0.5em]\n#{items.join("\n")}\n\\end{enumerate}"
+    else
+      "\\begin{enumerate}\n#{items.join("\n")}\n\\end{enumerate}"
+    end
   end
 
   # --- DEFINITION LIST → used for changelog entries ---
@@ -436,6 +469,11 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     define_method("convert_role_#{role}") do |node|
       "\\begin{#{role}}\n#{node.content}\n\\end{#{role}}"
     end
+  end
+
+  # --- POC objective block role → \begin{objectiveblock}...\end{objectiveblock} ---
+  def convert_role_objective(node)
+    "\\begin{objectiveblock}\n#{node.content}\n\\end{objectiveblock}"
   end
 
   # --- QUOTE BLOCK ---
@@ -667,5 +705,24 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   def convert_role_badge_untested(node)
     "\\testresultbadge{#{node.text || 'Untested'}}"
+  end
+
+  # --- POC result badges → \pocresult{Pass|Partial|Fail|Skip} ---
+  # Role determines the output value; node.text is intentionally ignored
+  # to prevent contradictory input like [.result-pass]#Fail#.
+  def convert_role_result_pass(node)
+    "\\pocresult{Pass}"
+  end
+
+  def convert_role_result_partial(node)
+    "\\pocresult{Partial}"
+  end
+
+  def convert_role_result_fail(node)
+    "\\pocresult{Fail}"
+  end
+
+  def convert_role_result_skip(node)
+    "\\pocresult{Skip}"
   end
 end

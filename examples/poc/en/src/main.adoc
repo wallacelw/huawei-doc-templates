@@ -1,0 +1,289 @@
+= Proof of Concept
+:template: poc
+:lang: en
+:version: 1.0.0
+:authors: Jane Doe
+:nochangelog:
+
+NOTE: This document uses the `poc` template. It demonstrates all 15 sections and all POC-specific environments (stakeholders, objective block, result badges, activities, evidence checklist, closing record, signatures).
+
+== Executive Summary
+
+This document defines the scope, objectives, and execution plan for a proof of concept (PoC) to migrate a generic three-tier web application to Huawei Cloud. The PoC will validate that the target architecture meets the performance, availability, and security requirements of the workload.
+
+The following stakeholders are involved in this PoC:
+
+++++
+\begin{stakeholders}
+\stakeholderorg{Customer}
+\stakeholderrow{John Smith}{john.smith@example.com}{(555) 123-4567}{Technical Lead}
+\stakeholderrow{Robert Wilson}{robert.wilson@example.com}{(555) 234-5678}{Project Manager}
+\stakeholderorg{Huawei Cloud}
+\stakeholderrow{Jane Doe}{jane.doe@huawei.com}{(555) 345-6789}{Cloud Solutions Architect}
+\stakeholderrow{Alice Brown}{alice.brown@huawei.com}{(555) 456-7890}{Technical Account Manager}
+\end{stakeholders}
+++++
+
+== Background
+
+The customer currently runs a three-tier web application on an on-premises virtualization platform. The application consists of a frontend web layer, an application server layer, and a database layer. Peak traffic occurs during business hours, with predictable batch processing overnight.
+
+The on-premises infrastructure is reaching end of life. The customer has selected Huawei Cloud as the target platform and wants to validate that the cloud services can support the application's performance and availability requirements before committing to a full migration.
+
+== Goal and Objectives
+
+[.objective]
+Migrate the three-tier web application to Huawei Cloud and validate that the target architecture meets performance, availability, and security requirements equivalent to or better than the current on-premises deployment.
+
+Specific objectives:
+
+* Deploy the application on Huawei Cloud using CCE (Cloud Container Engine), RDS (Relational Database Service), and OBS (Object Storage Service).
+* Validate that the application handles the expected peak load of 10,000 concurrent users.
+* Confirm that automated failover and recovery work as designed.
+* Verify that security controls (IAM, security groups, KMS) meet the customer's compliance requirements.
+* Demonstrate end-to-end monitoring and alerting using Cloud Eye Service (CES).
+
+== Solution Overview
+
+=== Application Architecture
+
+The application consists of three tiers:
+
+* **Web tier:** Nginx serving static content and reverse-proxying to the application tier. Deployed on CCE with auto-scaling.
+* **Application tier:** Java Spring Boot application running in containers on CCE. Connects to RDS for transactional data and OBS for file storage.
+* **Database tier:** RDS for MySQL with a primary/standby configuration for high availability.
+
+image::common-assets/exemplo-menu.png[width=80%]
+
+=== Target Cloud Architecture
+
+The target architecture on Huawei Cloud includes the following components:
+
+[.hutable]
+|===
+| Component | Service | Purpose
+
+| Load Balancer | ELB (Elastic Load Balance) | Distributes traffic across web tier nodes
+| Web Tier | CCE (Cloud Container Engine) | Containerized Nginx with auto-scaling
+| App Tier | CCE (Cloud Container Engine) | Containerized Spring Boot application
+| Database | RDS for MySQL | Primary/standby HA configuration
+| File Storage | OBS (Object Storage Service) | Static assets and uploaded files
+| Identity | IAM | User management and access control
+| Encryption | KMS (Key Management Service) | Encryption key management
+| Monitoring | CES (Cloud Eye Service) | Metrics, alarms, and dashboards
+| Container Registry | SWR (Software Repository for Containers) | Container image storage and management
+|===
+
+== Scope
+
+[.hutable]
+|===
+| Domain | What Will Be Tested
+
+| Compute | CCE cluster creation, node scaling, container deployment
+| Storage | OBS bucket creation, file upload/download, lifecycle policies
+| Database | RDS instance creation, failover, backup and restore
+| Networking | VPC configuration, subnet design, ELB setup, security groups
+| Security | IAM policies, KMS key usage, encrypted storage
+| Monitoring | CES dashboards, alarm rules, notification channels
+|===
+
+Out of scope:
+
+* Data migration from the on-premises database (handled in a separate phase).
+* Application code changes or refactoring.
+* Disaster recovery across regions (validated in a later PoC).
+
+== Premises and Preparation
+
+* The customer has an active Huawei Cloud account with sufficient quotas for CCE, RDS, and OBS resources.
+* The application container images are available in SWR (Software Repository for Containers).
+* The customer has provided a representative test dataset (sanitized and anonymized).
+* Network connectivity between the customer environment and Huawei Cloud is established via VPN.
+* The Huawei Cloud team has access to the console and API endpoints for the target region.
+
+== Methodology
+
+=== Result Classification
+
+Each activity will be classified using the following scale:
+
+[.hutable]
+|===
+| Result | Interpretation
+
+| [.result-pass]#Pass# | Functionality executed and evidenced without relevant limitation.
+| [.result-partial]#Partial# | Functionality proven, but with restriction, dependency, or additional configuration needed.
+| [.result-fail]#Fail# | Functionality not executed, not proven, or incompatible with required behavior.
+| [.result-skip]#Skip# | No execution condition. Must have justification and posterior plan.
+|===
+
+=== Evidence to Be Collected
+
+[.evidence]
+* Architecture diagram of the deployed environment with versions and components.
+* Screenshots of relevant configurations and executions.
+* Load test results showing concurrent user counts and response times.
+* Failover test logs and recovery time measurements.
+* Security configuration exports (IAM policies, security group rules).
+* Monitoring dashboards and alarm configurations.
+* API call logs for automated operations.
+
+=== Conclusion Criteria
+
+The PoC will be considered successful when:
+
+* All critical activities are classified as Pass or Partial without material risk.
+* The application handles 10,000 concurrent users with response time under 200ms (p95).
+* Automated failover completes within 30 seconds.
+* Security controls meet the customer's compliance checklist.
+
+NOTE: Verbal declaration or commercial presentation alone must not be considered proof. Functionality should be executed by the team in the PoC environment and its result registered.
+
+== Planned Activities
+
+[.activities]
+. Provision VPC, subnets, and security groups on Huawei Cloud.
+. Create CCE cluster and configure node pools for web and app tiers.
+. Deploy container images to CCE from SWR.
+. Create RDS for MySQL instance with primary/standby configuration.
+. Create OBS buckets and configure lifecycle policies.
+. Configure ELB to distribute traffic across web tier nodes.
+. Configure IAM policies and KMS encryption keys.
+. Deploy the application and run smoke tests.
+. Execute load test with 10,000 concurrent users.
+. Test failover by terminating a primary database node.
+. Verify monitoring dashboards and alarm notifications.
+. Collect and organize all evidence.
+
+== Schedule
+
+[.hutable]
+|===
+| Day | Time | Activity | Responsible
+
+| Day 1 | 09:00-12:00 | Infrastructure provisioning | Huawei Cloud
+| Day 1 | 14:00-17:00 | Application deployment | Huawei Cloud + Customer
+| Day 2 | 09:00-12:00 | Load testing | Customer
+| Day 2 | 14:00-17:00 | Failover and security testing | Huawei Cloud + Customer
+| Day 3 | 09:00-12:00 | Monitoring validation | Huawei Cloud
+| Day 3 | 14:00-17:00 | Evidence collection and review | Both
+|===
+
+== Responsibility Matrix
+
+[.hutable]
+|===
+| Party | Responsibilities
+
+| Customer | Provide test data, validate application behavior, execute load tests, review results.
+| Huawei Cloud | Provision infrastructure, deploy application, configure services, provide technical support.
+| Joint | Review evidence, classify results, prepare conclusion, sign off.
+|===
+
+== Expected Results
+
+[.hutable]
+|===
+| Deliverable | Minimum Content
+
+| Deployment guide | Step-by-step instructions for reproducing the environment.
+| Load test report | Concurrent users, response times, error rates, throughput.
+| Failover test report | Failover time, data integrity verification, recovery steps.
+| Security validation | IAM policy review, encryption verification, access control tests.
+| Monitoring evidence | Dashboard screenshots, alarm configurations, notification logs.
+| Executive summary | Synthesis of results: pass, pass with reservations, or fail.
+|===
+
+== Actual Results
+
+[.activities]
+. *Provision VPC, subnets, and security groups.*
++
+VPC created with three subnets (web, app, data). Security groups configured with least-privilege rules. All resources provisioned without errors.
+[.result-pass]#Pass#
+
+. *Create CCE cluster and configure node pools.*
++
+CCE cluster created with two node pools (web: 2-10 nodes, app: 2-8 nodes). Auto-scaling policies configured based on CPU utilization.
+[.result-pass]#Pass#
+
+. *Deploy container images to CCE.*
++
+Both web and app container images deployed from SWR. Health checks passing. Rolling update strategy configured.
+[.result-pass]#Pass#
+
+. *Create RDS for MySQL instance.*
++
+RDS instance created with primary/standby configuration. Automated backups enabled with 7-day retention. Parameter group tuned for the workload.
+[.result-pass]#Pass#
+
+. *Create OBS buckets and configure lifecycle policies.*
++
+OBS buckets created for static assets and uploads. Lifecycle policy configured to transition objects to cold storage after 30 days.
+[.result-pass]#Pass#
+
+. *Configure ELB.*
++
+ELB configured with health checks and session stickiness. Backend server group includes web tier nodes. Listener configured on port 443 with TLS certificate.
+[.result-pass]#Pass#
+
+. *Configure IAM policies and KMS encryption keys.*
++
+IAM policies created for application service accounts. KMS keys created for OBS and RDS encryption. All storage encrypted at rest.
+[.result-pass]#Pass#
+
+. *Deploy the application and run smoke tests.*
++
+Application deployed successfully. Smoke tests passed for all critical user journeys (login, browse, checkout, logout).
+[.result-pass]#Pass#
+
+. *Execute load test with 10,000 concurrent users.*
++
+Load test completed. 10,000 concurrent users sustained for 30 minutes. Average response time: 145ms (p95: 189ms). Error rate: 0.02%.
+[.result-pass]#Pass#
+
+. *Test failover by terminating a primary database node.*
++
+Primary node terminated. Failover to standby completed in 22 seconds. No data loss detected. Application recovered automatically.
+[.result-pass]#Pass#
+
+. *Verify monitoring dashboards and alarm notifications.*
++
+CES dashboards configured for CPU, memory, network, and disk metrics. Alarm rules set for threshold breaches. Test alarm triggered notification correctly.
+[.result-partial]#Partial#
+
+. *Collect and organize all evidence.*
++
+All evidence collected and organized in the evidence package. Some screenshots need to be retaken at higher resolution.
+[.result-partial]#Partial#
+
+== Comments and Remarks
+
+* The load test results exceeded expectations — the target was 200ms p95 response time, and the actual was 189ms.
+* Failover time of 22 seconds is well within the 30-second target.
+* Monitoring validation was partial because the CES dashboard for database metrics requires a custom plugin that was not available during the PoC. This is a known limitation that will be addressed in the production deployment.
+* No security issues were identified during the PoC. All storage is encrypted, IAM policies follow least-privilege, and security groups restrict access appropriately.
+
+== Conclusion
+
+++++
+\begin{closingrecord}
+\closingrow{Preliminary result}{\checkbox{Homologated} \checkbox{With reservations} \checkbox{Not homologated}}
+\closingrow{Critical pending items}{None}
+\closingrow{Deadline for complementary evidence}{2026-10-15}
+\closingrow{Responsible parties}{Jane Doe, John Smith}
+\closingrow{Final observations}{PoC successful. Monitoring dashboard plugin to be addressed in production deployment.}
+\end{closingrecord}
+++++
+
+NOTE: The criteria above are an operational proposal for the PoC evaluation. The formal decision should observe the governance and contracting instruments applicable to the customer.
+
+== Signatures
+
+++++
+\begin{signatures}
+\signaturecell{Jane Doe}{Cloud Solutions Architect}{jane.doe@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{John Smith}{Technical Lead}{john.smith@example.com}{Example Corp, 456 Business Street} \\ \hline
+\signaturecell{Alice Brown}{Technical Account Manager}{alice.brown@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{Robert Wilson}{Project Manager}{robert.wilson@example.com}{Example Corp, 456 Business Street} \\ \hline
+\end{signatures}
+++++

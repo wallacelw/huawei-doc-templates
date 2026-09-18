@@ -4,6 +4,39 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.1.0 (2026-09-18)
+
+### Features
+
+- **New `poc` template** for Proof of Concept and homologation documents.
+  - 3-part, 15-section structure (Preamble → Scope & Planning → Conclusion).
+  - 7 POC-specific environments: stakeholders table, objective block,
+    result badges (Pass/Partial/Fail/Skip), activities list (roman numerals),
+    evidence checklist (checkboxes), closing record, signatures.
+  - Language-aware labels (Portuguese and English).
+  - Two samples (pt + en) with fake data and public Huawei Cloud services.
+
+### New shared module
+
+- `templates/_base/huawei-badges.sty` — generic `\huaweibadge` command
+  for colored tcolorbox badges. Used by `\pocresult` in poc.cls.
+
+### Converter changes (additive)
+
+- 7 new role handlers: `objective`, `result-pass/partial/fail/skip`,
+  `activities` (roman numeral list), `evidence` (checkbox list).
+- Normalized hyphens to underscores in role dispatch (fixes inline span
+  roles like `[.result-pass]`).
+- Added numeric HTML entity unescaping (`&#8217;` → UTF-8) for smart quotes.
+- Added `process_text` helper for list item text processing.
+
+### Fixes
+
+- Fixed `tabularx` + tcolorbox `enhanced jigsaw` conflict in stakeholders
+  table (replaced `tabularx` with `tabular` + fixed widths).
+- Fixed `\ifodd` conditional inside tabular in signatures environment
+  (replaced with explicit `\signaturecell` + `&` / `\\ \hline`).
+
 ## v6.0.10 (2026-09-17)
 
 ### Fixes

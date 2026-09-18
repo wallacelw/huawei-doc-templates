@@ -1,0 +1,275 @@
+= Roteiro de Homologação
+:template: poc
+:lang: pt
+:version: 1.0.0
+:authors: Carlos Santos
+:nochangelog:
+
+NOTE: Este documento utiliza o template `poc`. Demonstra todas as 15 seções e todos os ambientes específicos do POC (stakeholders, bloco de objetivo, badges de resultado, atividades, checklist de evidências, registro de encerramento, assinaturas).
+
+== Resumo Executivo
+
+Este documento define o escopo, os objetivos e o plano de execução para a homologação técnica de serviços de nuvem Huawei Cloud. A homologação deverá demonstrar o funcionamento integrado dos serviços ECS, OBS, VPC, IAM e CCE, cobrindo provisionamento, conectividade, segurança e observabilidade.
+
+Os contatos envolvidos na homologação:
+
+++++
+\begin{stakeholders}
+\stakeholderorg{Cliente}
+\stakeholderrow{Carlos Santos}{carlos.santos@exemplo.com}{(555) 111-2222}{Responsável Técnico}
+\stakeholderrow{Ana Lima}{ana.lima@exemplo.com}{(555) 222-3333}{Gerente de Projeto}
+\stakeholderorg{Huawei Cloud}
+\stakeholderrow{Pedro Oliveira}{pedro.oliveira@huawei.com}{(555) 333-4444}{Arquiteto de Soluções Cloud}
+\stakeholderrow{Mariana Costa}{mariana.costa@huawei.com}{(555) 444-5555}{Gerente de Contas Técnico}
+\end{stakeholders}
+++++
+
+== Contexto
+
+A organização atualmente utiliza infraestrutura on-premises para suas cargas de trabalho de computação e armazenamento. A infraestrutura está próxima do fim do ciclo de vida e a organização selecionou Huawei Cloud como plataforma de destino.
+
+A homologação técnica é necessária para validar que os serviços de nuvem atendem aos requisitos de desempenho, disponibilidade e segurança antes da migração completa das cargas de trabalho.
+
+== Objetivos e Metas
+
+[.objective]
+Validar, em ambiente representativo, as principais capacidades dos serviços Huawei Cloud (ECS, OBS, VPC, IAM, CCE), com foco em execução prática e evidências observáveis.
+
+Objetivos específicos:
+
+* Provisionar instâncias ECS e validar configurações de computação.
+* Criar buckets no OBS e validar armazenamento e acesso a objetos.
+* Configurar VPC com sub-redes e security groups.
+* Validar políticas de IAM e controle de acesso granular.
+* Implantar um cluster CCE e validar orquestração de contêineres.
+* Demonstrar monitoramento com Cloud Eye Service (CES).
+
+== Visão da Solução
+
+=== Arquitetura da Aplicação
+
+A carga de trabalho de validação consiste em:
+
+* **Camada de computação:** Instâncias ECS para aplicação web e processamento batch.
+* **Camada de armazenamento:** Buckets OBS para arquivos estáticos e backups.
+* **Camada de rede:** VPC com sub-redes públicas e privadas, security groups com regras de menor privilégio.
+* **Camada de orquestração:** Cluster CCE para contêineres de aplicação com auto-scaling.
+
+image::common-assets/exemplo-menu.png[width=80%]
+
+=== Componentes da Solução
+
+[.hutable]
+|===
+| Componente | Serviço | Propósito
+
+| Computação | ECS (Elastic Cloud Server) | Instâncias para aplicação web e batch
+| Armazenamento | OBS (Object Storage Service) | Arquivos estáticos e backups
+| Rede | VPC (Virtual Private Cloud) | Isolamento de rede e sub-redes
+| Segurança | IAM (Identity and Access Management) | Gestão de identidade e acesso
+| Orquestração | CCE (Cloud Container Engine) | Cluster de contêineres com auto-scaling
+| Monitoramento | CES (Cloud Eye Service) | Métricas, alarmes e dashboards
+| Registro de Contêineres | SWR (Software Repository for Containers) | Armazenamento e gestão de imagens
+| Balanceamento | ELB (Elastic Load Balance) | Distribuição de tráfego entre nós
+|===
+
+== Escopo
+
+[.hutable]
+|===
+| Domínio | O Que Deve Ser Observado
+
+| Computação | Criação de instâncias ECS, configuração de flavor, discos e imagens
+| Armazenamento | Criação de buckets OBS, upload/download, políticas de ciclo de vida
+| Rede | Configuração de VPC, sub-redes, route tables, security groups
+| Segurança | Políticas de IAM, roles, usuários e grupos, criptografia
+| Orquestração | Criação de cluster CCE, node pools, deploy de contêineres, auto-scaling
+| Monitoramento | Dashboards do CES, regras de alarme, notificações
+|===
+
+Fora do escopo:
+
+* Migração de dados do ambiente on-premises (fase separada).
+* Configuração de disaster recovery entre regiões (PoC futuro).
+* Refatoração de código da aplicação.
+
+== Premissas e Preparação
+
+* A organização possui conta ativa na Huawei Cloud com cotas suficientes para ECS, OBS e CCE.
+* O ambiente de rede entre a organização e Huawei Cloud está estabelecido via VPN.
+* Imagens de contêiner estão disponíveis no SWR (Software Repository for Containers).
+* Conjunto de dados representativo foi preparado e sanitizado.
+* A equipe da Huawei Cloud possui acesso ao console e API endpoints da região de destino.
+
+== Metodologia
+
+=== Classificação de Resultados
+
+Cada atividade será classificada conforme a escala abaixo:
+
+[.hutable]
+|===
+| Resultado | Interpretação
+
+| [.result-pass]#Pass# | Funcionalidade executada e evidenciada sem limitação relevante.
+| [.result-partial]#Partial# | Funcionalidade comprovada, mas com restrição, dependência ou configuração adicional.
+| [.result-fail]#Fail# | Funcionalidade não executada, não comprovada ou incompatível.
+| [.result-skip]#Skip# | Sem condição de execução. Deve haver justificativa e plano posterior.
+|===
+
+=== Evidências a Serem Coletadas
+
+[.evidence]
+* Diagrama da arquitetura efetivamente homologada, com versões e componentes.
+* Capturas de tela das configurações e execuções relevantes.
+* Logs de provisionamento, deploy e operação dos serviços.
+* Resultados de consultas e amostras de dados antes/depois de transformações.
+* Exportações de políticas de IAM e regras de security groups.
+* Dashboards de monitoramento e configurações de alarme.
+* Registro de falhas controladas e ações de recuperação.
+
+=== Critérios para Conclusão
+
+A homologação será considerada concluída quando:
+
+* Todos os testes classificados como críticos estiverem Atendidos ou Atendidos com ressalvas sem risco material.
+* O fluxo ponta a ponta puder ser reproduzido no ambiente testado.
+* As evidências forem suficientes para permitir auditoria posterior do resultado.
+* Eventuais ressalvas tiverem impacto, responsável e plano de tratamento registrados.
+
+NOTE: Declaração verbal ou apresentação comercial não deve, isoladamente, ser considerada comprovação. A funcionalidade deve ser executada pela equipe no ambiente de homologação e seu resultado registrado.
+
+== Atividades Planejadas
+
+[.activities]
+. Provisionar VPC, sub-redes e security groups na Huawei Cloud.
+. Criar instâncias ECS e validar configurações de computação.
+. Criar buckets no OBS e configurar políticas de ciclo de vida.
+. Configurar políticas de IAM, usuários, grupos e roles.
+. Criar cluster CCE e configurar node pools.
+. Implantar contêineres de aplicação no CCE a partir do SWR.
+. Configurar dashboards e alarmes no CES.
+. Executar testes de conectividade e validação ponta a ponta.
+. Testar failover e recuperação de instâncias.
+. Coletar e organizar todas as evidências.
+
+== Cronograma
+
+[.hutable]
+|===
+| Dia | Horário | Atividade | Responsável
+
+| Dia 1 | 09:00-12:00 | Provisionamento de infraestrutura | Huawei Cloud
+| Dia 1 | 14:00-17:00 | Configuração de OBS e IAM | Huawei Cloud
+| Dia 2 | 09:00-12:00 | Deploy no CCE e testes | Huawei Cloud + Cliente
+| Dia 2 | 14:00-17:00 | Testes de failover e monitoramento | Huawei Cloud + Cliente
+| Dia 3 | 09:00-12:00 | Coleta de evidências e revisão | Ambos
+| Dia 3 | 14:00-17:00 | Conclusão e encerramento | Ambos
+|===
+
+== Matriz de Responsabilidades
+
+[.hutable]
+|===
+| Parte | Responsabilidades
+
+| Cliente | Fornecer dados de teste, validar comportamento da aplicação, revisar resultados.
+| Huawei Cloud | Provisionar infraestrutura, configurar serviços, prestar suporte técnico, entregar evidências.
+| Compartilhado | Revisar evidências, classificar resultados, preparar conclusão, assinar encerramento.
+|===
+
+== Resultados Esperados
+
+[.hutable]
+|===
+| Produto | Conteúdo Mínimo
+
+| Matriz de homologação | Resultado e evidência de cada teste, com ressalvas e responsável.
+| Relatório de achados | Limitações, gaps, dependências, riscos e pontos a esclarecer.
+| Pacote de evidências | Capturas, logs, relatórios, configurações e artefatos.
+| Fluxo ponta a ponta | Registro do caminho desde provisionamento até operação.
+| Conclusão executiva | Síntese: homologada, com ressalvas ou não homologada.
+|===
+
+== Resultados Obtidos
+
+[.activities]
+. *Provisionar VPC, sub-redes e security groups.*
++
+VPC criada com três sub-redes (pública, aplicação, dados). Security groups configurados com regras de menor privilégio. Todos os recursos provisionados sem erros.
+[.result-pass]#Pass#
+
+. *Criar instâncias ECS e validar configurações.*
++
+Instâncias ECS criadas com flavor adequado. Discos anexados e imagens configuradas. Validação de conectividade SSH concluída com sucesso.
+[.result-pass]#Pass#
+
+. *Criar buckets no OBS e configurar políticas de ciclo de vida.*
++
+Buckets OBS criados para arquivos estáticos e backups. Política de ciclo de vida configurada para transição para cold storage após 30 dias.
+[.result-pass]#Pass#
+
+. *Configurar políticas de IAM, usuários, grupos e roles.*
++
+Políticas de IAM criadas seguindo princípio de menor privilégio. Grupos e usuários configurados. Roles atribuídas corretamente.
+[.result-pass]#Pass#
+
+. *Criar cluster CCE e configurar node pools.*
++
+Cluster CCE criado com dois node pools. Auto-scaling configurado baseado em utilização de CPU. Health checks funcionando corretamente.
+[.result-pass]#Pass#
+
+. *Implantar contêineres de aplicação no CCE.*
++
+Contêineres implantados a partir do SWR. Rolling update configurado. Aplicação acessível via ELB.
+[.result-pass]#Pass#
+
+. *Configurar dashboards e alarmes no CES.*
++
+Dashboards configurados para CPU, memória, rede e disco. Regras de alarme definidas para limiares críticos. Notificações testadas com sucesso.
+[.result-partial]#Partial#
+
+. *Executar testes de conectividade e validação ponta a ponta.*
++
+Testes de conectividade entre sub-redes concluídos. Validação ponta a ponta do fluxo de aplicação bem-sucedida.
+[.result-pass]#Pass#
+
+. *Testar failover e recuperação de instâncias.*
++
+Failover de instância ECS testado. Recuperação automática concluída em 45 segundos. Sem perda de dados detectada.
+[.result-pass]#Pass#
+
+. *Coletar e organizar todas as evidências.*
++
+Evidências coletadas e organizadas no pacote. Algumas capturas de tela precisam ser refeitas em maior resolução.
+[.result-partial]#Partial#
+
+== Comentários e Observações
+
+* O provisionamento de todos os serviços foi concluído sem erros, demonstrando a maturidade da plataforma.
+* O failover de ECS em 45 segundos está dentro do requisito de 60 segundos.
+* A validação de monitoramento foi parcial porque o dashboard de métricas de banco de dados requer um plugin customizado que não estava disponível durante a homologação. Será endereçado no deployment de produção.
+* Nenhuma questão de segurança foi identificada. Todas as políticas de IAM seguem menor privilégio e security groups restringem acesso adequadamente.
+
+== Conclusão
+
+++++
+\begin{closingrecord}
+\closingrow{Resultado preliminar}{\checkbox{Homologada} \checkbox{Homologada com ressalvas} \checkbox{Não homologada}}
+\closingrow{Pendências críticas}{Nenhuma}
+\closingrow{Prazo para evidências complementares}{2026-10-15}
+\closingrow{Responsáveis}{Pedro Oliveira, Carlos Santos}
+\closingrow{Observações finais}{Homologação bem-sucedida. Plugin de monitoramento a ser endereçado no deployment de produção.}
+\end{closingrecord}
+++++
+
+NOTE: Os critérios acima são uma proposta operacional para a homologação. A decisão formal deve observar a governança e os instrumentos de contratação aplicáveis.
+
+== Assinaturas
+
+++++
+\begin{signatures}
+\signaturecell{Pedro Oliveira}{Arquiteto de Soluções Cloud}{pedro.oliveira@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Carlos Santos}{Responsável Técnico}{carlos.santos@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
+\signaturecell{Mariana Costa}{Gerente de Contas Técnico}{mariana.costa@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Ana Lima}{Gerente de Projeto}{ana.lima@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
+\end{signatures}
+++++

@@ -120,7 +120,7 @@ also delete the repository directory (requires typing `yes` to confirm).
 ```bash
 make                 # show help (list all available targets)
 make all             # compile everything: all samples + setup-guide + all formats (MD + DOCX + HTML)
-make samples         # compile all template samples (guide + technical + testbook, PT + EN)
+make samples         # compile all template samples (guide + technical + testbook + poc, PT + EN)
 make examples        # compile setup-guide, copy PDF to repo root
 make pt              # compile Portuguese sample only (guide-only legacy alias)
 make en              # compile English sample only (guide-only legacy alias)
@@ -245,6 +245,7 @@ Note: `.tex` files are generated from `.adoc` — edit the `.adoc` source instea
 | [`guide`](templates/guide/) | `/skill huawei-template-guide` | Huawei Cloud guide — branded cover, header, TOC, giant chapter numbers, objectives block, code blocks, tables, callout boxes, badges, changelog. English (default) and Portuguese. Source: AsciiDoc → LaTeX → PDF. |
 | [`technical`](templates/technical/) | `/skill huawei-template-technical` | Huawei Cloud technical report — 5-section structure (problem → root cause analysis → root cause → trigger condition → workaround), branded cover with version info table, TOC, callout boxes, tables, code blocks. Source: AsciiDoc → LaTeX → PDF. Portuguese and English. |
 | [`testbook`](templates/testbook/) | `/skill huawei-template-testbook` | Huawei Cloud test case document — POC/acceptance test cases with structured `testcase` environment (Objective, Prerequisites, Procedure, Expected Result, Remarks, Test Result), test scope and acceptance method tables, `:noanswers:` attribute for clean handouts. Source: AsciiDoc → LaTeX → PDF. Portuguese and English. |
+| [`poc`](templates/poc/) | `/skill huawei-template-poc` | Huawei Cloud Proof of Concept / homologation document — 3-part, 15-section structure (Preamble → Scope & Planning → Conclusion), stakeholders table, result badges (Pass/Partial/Fail/Skip), activities list, evidence checklist, closing record, signatures. Source: AsciiDoc → LaTeX → PDF. Portuguese and English. |
 
 - **Diagram support**: PlantUML, graphviz, and mermaid diagrams can be embedded directly in `.adoc` files using `[plantuml]`, `[graphviz]`, and `[mermaid]` blocks. Requires `asciidoctor-diagram` gem and corresponding tools (Java+PlantUML, graphviz, mermaid-cli).
 - **Brand color palette**: Auxiliary colors (Orange, Green, Blue, etc.) and monochrome scale from Huawei Cloud Brand Guidelines. See `brand-guidelines/BRAND-GUIDELINES.md` for the full reference.
@@ -306,6 +307,13 @@ for the technical report template syntax reference.
 │       ├── README.md         # template-specific details (brief)
 │       ├── .latexmkrc        # latexmk config (XeLaTeX)
 │       └── common-assets/    # logos
+│   ├── poc/                  # POC/homologation template + skill
+│   │   ├── poc.cls            # LaTeX class (result badges, stakeholders, signatures)
+│   │   ├── SKILL.md          # opencode skill + AsciiDoc syntax reference
+│   │   ├── README.md         # template-specific details (brief)
+│   │   ├── .latexmkrc        # latexmk config (XeLaTeX)
+│   │   └── common-assets/    # logos
+│   └── _base/                # (shared modules listed above)
 ├── documents/               # user-created documents (one subfolder per doc)
 │   ├── README.md            # folder description and structure
 │   └── my-guide/            # example: a new document project
@@ -351,6 +359,17 @@ for the technical report template syntax reference.
     │   │   │   └── .latexmkrc
     │   │   └── main.pdf
     │   └── en/               # English test cases
+    │       ├── src/
+    │       │   ├── main.adoc
+    │       │   └── .latexmkrc
+    │       └── main.pdf
+    ├── poc/                   # samples for the POC template
+    │   ├── pt/               # Portuguese POC/homologation
+    │   │   ├── src/
+    │   │   │   ├── main.adoc
+    │   │   │   └── .latexmkrc
+    │   │   └── main.pdf
+    │   └── en/               # English POC/homologation
     │       ├── src/
     │       │   ├── main.adoc
     │       │   └── .latexmkrc

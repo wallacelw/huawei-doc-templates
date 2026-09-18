@@ -1,0 +1,28 @@
+%% huawei-badges.sty
+%% =====================================================================
+%%  Shared badge rendering for Huawei document templates.
+%%
+%%  Provides \huaweibadge — a generic colored tcolorbox badge suitable
+%%  for inline use.  Template-specific badges (e.g. \pocresult in poc.cls,
+%%  \testresultbadge in testbook.cls) build on top of this command.
+%%
+%%  Note: This is distinct from \badge in huawei-shared.sty, which is a
+%%  simple red \colorbox label for inline code-like badges.  \huaweibadge
+%%  provides configurable colors and tcolorbox styling for result badges.
+%%
+%%  Usage:
+%%    \huaweibadge{tipbg}{tipfg}{Pass}
+%%    \huaweibadge{warningbg}{warningfg}{Partial}
+%%    \huaweibadge{red!15}{huaweired}{Fail}
+%%    \huaweibadge{codebg}{huaweigray50}{Skip}
+%% =====================================================================
+\ProvidesPackage{huawei-badges}[2026/09/18 Huawei shared badge module v6.1.0]
+
+% Requires tcolorbox (loaded by template class files).
+\newcommand{\huaweibadge}[3]{%
+  \mbox{\tcbox[on line, colback=#1, colframe=#2,
+         boxrule=0.8pt, arc=2pt,
+         fontupper=\bfseries\small]{\,#3\,}}%
+}
+
+\endinput
