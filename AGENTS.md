@@ -19,8 +19,9 @@ LaTeX is generated, not hand-edited.
 
 ## Workflow
 
-1. Edit `.adoc` source files.
-2. Validate end-to-end (see below).
+1. Edit `.Adoc` source files.
+2. Validate end-to-end (see below) — including `make all-formats` for all
+   output formats (PDF, DOCX, MD, HTML).
 3. Quality pass: spawn a fresh subagent to review all changes (see below).
 4. Commit with a clear message (see Git conventions).
 5. Push: `git push origin main && git push --tags`.
@@ -39,6 +40,15 @@ Before committing, validate the change from **all** relevant perspectives:
    for all template samples) and `make test` (runs `test-filter.sh`,
    `round-trip.sh`, `test-docx-fix.sh`, `test-sync.sh`). All must pass.
    Verify 0 raw LaTeX blocks in output.
+
+   **Generate all output formats:** After every change, also run
+   `make all-formats` to produce DOCX, Markdown, and HTML for all
+   samples. This ensures that changes to the converter, class files,
+   or shared modules do not break secondary output formats. Check
+   that each format renders correctly (headings, tables, callouts,
+   code blocks, images). PDF is the primary reference (L18); DOCX,
+   MD, and HTML must match it as closely as possible. Do not commit
+   until all four formats are verified.
 
 2. **Cross-file consistency:** If you changed one file, check every file that
    references it:
