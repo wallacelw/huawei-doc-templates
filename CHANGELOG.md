@@ -4,6 +4,18 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.5 (2026-09-19)
+
+### Vertical alignment fix
+
+- **Changed table column type from `p{...}` to `m{...}`**: All table columns
+  now vertically center content within each row instead of aligning to the top.
+  This affects all `hutable` tables (converter), POC environments (stakeholders,
+  closingrecord, signatures), and testbook `testsummary` tables.
+- Badges, text, and other content in multi-line table cells are now properly
+  vertically centered.
+- All 8 sample PDFs verified, no regression in overfull warnings.
+
 ## v6.2.4 (2026-09-19)
 
 ### Badge standardization

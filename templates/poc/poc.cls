@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.4]
+\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.5]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -198,7 +198,7 @@
   \par
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*15/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*35/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*15/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*35/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
   \hline
 }{%
   \hline
@@ -206,7 +206,7 @@
   \par
 }
 \newcommand{\stakeholderorg}[1]{%
-  \rowcolor{huaweired}\multicolumn{4}{|>{\RaggedRight\arraybackslash}p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\color{white}\textbf{#1}} \\ \hline
+  \rowcolor{huaweired}\multicolumn{4}{|>{\RaggedRight\arraybackslash}m{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\color{white}\textbf{#1}} \\ \hline
 }
 \newcommand{\stakeholderrow}[4]{#1 & \seqsplit{#2} & #3 & #4 \\ \hline}
 
@@ -227,7 +227,7 @@
   \par
   \renewcommand{\arraystretch}{1.5}%
   \noindent
-  \begin{tabular}{|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)*30/100\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)*70/100\relax}|}
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)*30/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)*70/100\relax}|}
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@closingitem} & {\color{white}\bfseries\lg@closingrecord} \\
@@ -253,7 +253,7 @@
 
 \newenvironment{signatures}{%
   \par
-  \begin{tabular}{|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|>{\RaggedRight\arraybackslash}p{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|}
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}|}
   \hline
 }{%
   \hline

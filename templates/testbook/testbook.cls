@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.4]
+\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.5]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -268,7 +268,7 @@
   \renewcommand{\arraystretch}{1.3}%
   \noindent
   % middle column = \linewidth - (2 x 2.5cm side columns) - 6\tabcolsep - 4\arrayrulewidth
-  \begin{tabular}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{\dimexpr\linewidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\centering\arraybackslash}p{2.5cm}|}%
+  \begin{tabular}{|>{\raggedright\arraybackslash}m{2.5cm}|>{\raggedright\arraybackslash}m{\dimexpr\linewidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\centering\arraybackslash}m{2.5cm}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@testcaseid} &

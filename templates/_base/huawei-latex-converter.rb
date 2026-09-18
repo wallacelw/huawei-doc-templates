@@ -301,7 +301,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Use p{...} columns with auto-wrap instead of l (natural width)
     # Equal-width columns computed from \linewidth
     width_expr = "\\dimexpr(\\linewidth-#{num_cols+1}\\arrayrulewidth-#{2*num_cols}\\tabcolsep)/#{num_cols}\\relax"
-    col_spec = "|>{\\RaggedRight\\arraybackslash}p{#{width_expr}}|" * num_cols
+    col_spec = "|>{\\RaggedRight\\arraybackslash}m{#{width_expr}}|" * num_cols
 
     env_name = role == 'longhutable' ? 'longhutable' : 'hutable'
 

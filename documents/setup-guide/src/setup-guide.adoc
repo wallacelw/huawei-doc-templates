@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.2.4
+:version: 6.2.5
 
 == Provision a Flexus X Instance on Huawei Cloud
 
