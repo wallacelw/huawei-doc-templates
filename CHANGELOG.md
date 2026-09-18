@@ -4,6 +4,21 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.2 (2026-09-19)
+
+### Build pipeline fix
+
+- **Fixed multi-format generation**: Replaced broken `asciidoctor-reducer →
+  pandoc -f asciidoc` pipeline with `asciidoctor -b docbook → pandoc -f docbook`.
+  The old pipeline failed because `asciidoctor-reducer` is not installed and
+  pandoc doesn't support `-f asciidoc`.
+- **Added LaTeX fallback**: Documents with raw LaTeX passthrough blocks (e.g.
+  POC signatures) produce invalid docbook XML. The DOCX/MD generation now
+  falls back to the LaTeX pipeline (`pandoc -f latex+raw_tex`) when the
+  docbook pipeline fails.
+- **All 24 formats verified**: 8 samples × 3 formats (MD + DOCX + HTML) +
+  setup-guide × 3 formats = 27 outputs, all succeed.
+
 ## v6.2.1 (2026-09-19)
 
 ### Council review fixes (8 HIGH, 17 MEDIUM)

@@ -369,19 +369,21 @@ generate_docx() {
     fi
     echo "  Generating DOCX..."
     if [[ -n "$ADOC_FILE" ]]; then
-        # AsciiDoc pipeline: asciidoctor-reducer -> pandoc
-        local tmp_adoc
-        tmp_adoc=$(mktemp --suffix=.adoc)
-        asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
-        pandoc -f asciidoc --reference-doc="$REF_DOCX" \
+        # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
+        # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
+        local tmp_dbk
+        tmp_dbk=$(mktemp --suffix=.dbk)
+        asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null
+        if [ $? -eq 0 ] && pandoc -f docbook --reference-doc="$REF_DOCX" \
             --number-sections \
             --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
-            "$tmp_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
-            RESULTS_FAIL+=("DOCX:pandoc failed")
-            rm -f "$tmp_adoc"
-            return
-        }
-        rm -f "$tmp_adoc"
+            "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
+            rm -f "$tmp_dbk"
+        else
+            rm -f "$tmp_dbk"
+            echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
+            generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
+        fi
     else
         # Legacy .tex pipeline
         generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
@@ -413,16 +415,18 @@ generate_md() {
     fi
     echo "  Generating Markdown..."
     if [[ -n "$ADOC_FILE" ]]; then
-        # AsciiDoc pipeline: asciidoctor-reducer -> pandoc
-        local tmp_adoc
-        tmp_adoc=$(mktemp --suffix=.adoc)
-        asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
-        pandoc -f asciidoc -t gfm "$tmp_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
-            RESULTS_FAIL+=("Markdown:pandoc failed")
-            rm -f "$tmp_adoc"
-            return
-        }
-        rm -f "$tmp_adoc"
+        # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
+        # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
+        local tmp_dbk
+        tmp_dbk=$(mktemp --suffix=.dbk)
+        asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null
+        if [ $? -eq 0 ] && pandoc -f docbook -t gfm "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
+            rm -f "$tmp_dbk"
+        else
+            rm -f "$tmp_dbk"
+            echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
+            generate_pandoc_format "Markdown" markdown md
+        fi
     else
         # Legacy .tex pipeline
         generate_pandoc_format "Markdown" markdown md
