@@ -57,7 +57,7 @@ scripts/build-adoc.sh src/main.adoc src/main.tex && latexmk src/main.tex
 
 Two samples demonstrate all roles and passthrough blocks:
 
-- [`examples/technical/pt/src/main.adoc`](../../examples/technical/pt/src/main.adoc) — Portuguese
-- [`examples/technical/en/src/main.adoc`](../../examples/technical/en/src/main.adoc) — English
+- [`documents/technical-pt/src/main.adoc`](../../documents/technical-pt/src/main.adoc) — Portuguese
+- [`documents/technical-en/src/main.adoc`](../../documents/technical-en/src/main.adoc) — English
 
 Compile with `make technical-pt` / `make technical-en` from the repo root.

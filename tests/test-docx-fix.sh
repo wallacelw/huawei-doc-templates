@@ -297,7 +297,7 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     fix_script="$REPO_ROOT/templates/${tmpl_name}/create-${tmpl_name}-reference-docx.py"
     filter="$REPO_ROOT/templates/${tmpl_name}/${tmpl_name}-pandoc.lua"
     ref_docx="$REPO_ROOT/templates/${tmpl_name}/${tmpl_name}-reference.docx"
-    sample_dir="$REPO_ROOT/examples/${tmpl_name}/en"
+    sample_dir="$REPO_ROOT/documents/${tmpl_name}-en"
     common_assets="$REPO_ROOT/templates/${tmpl_name}/common-assets"
 
     # Run if fix_script + ref_docx exist, and either .adoc source or legacy Lua filter is available

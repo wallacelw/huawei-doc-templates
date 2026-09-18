@@ -3,10 +3,10 @@
 #
 # Usage:
 #   ./scripts/build.sh                           # interactive, current directory
-#   ./scripts/build.sh examples/guide/en         # interactive, specified project
-#   ./scripts/build.sh --pdf examples/guide/en   # non-interactive: PDF only
-#   ./scripts/build.sh --pdf --docx examples/guide/en
-#   ./scripts/build.sh --all examples/guide/en
+#   ./scripts/build.sh documents/guide-en         # interactive, specified project
+#   ./scripts/build.sh --pdf documents/guide-en   # non-interactive: PDF only
+#   ./scripts/build.sh --pdf --docx documents/guide-en
+#   ./scripts/build.sh --all documents/guide-en
 
 set -euo pipefail
 
@@ -96,9 +96,9 @@ Options:
 
 Examples:
   ./scripts/build.sh                           # interactive, current dir
-  ./scripts/build.sh examples/guide/en         # interactive, specified project
-  ./scripts/build.sh --pdf examples/guide/en   # PDF only
-  ./scripts/build.sh --all examples/guide/en   # all formats
+  ./scripts/build.sh documents/guide-en         # interactive, specified project
+  ./scripts/build.sh --pdf documents/guide-en   # PDF only
+  ./scripts/build.sh --all documents/guide-en   # all formats
 EOF
             exit 0
             ;;

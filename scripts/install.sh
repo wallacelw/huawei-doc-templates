@@ -550,7 +550,7 @@ for tmpl_dir in "$SCRIPT_DIR"/templates/*/; do
     [ "$tmpl_name" = "_base" ] && continue
     [ ! -f "$tmpl_dir/${tmpl_name}.cls" ] && continue
 
-    for lang_dir in "$SCRIPT_DIR/examples/$tmpl_name"/*/; do
+    for lang_dir in "$SCRIPT_DIR/documents/$tmpl_name"-*/; do
         [ ! -d "$lang_dir" ] && continue
         lang_name=$(basename "$lang_dir")
         compile_sample "$lang_dir" "${tmpl_name} ${lang_name} sample"
@@ -558,7 +558,7 @@ for tmpl_dir in "$SCRIPT_DIR"/templates/*/; do
 done
 
 # Setup guide (special case — uses guide template)
-compile_sample "$SCRIPT_DIR/examples/setup-guide" "Setup guide" "setup-guide.tex"
+compile_sample "$SCRIPT_DIR/documents/setup-guide" "Setup guide" "setup-guide.tex"
 
 # ── Summary ──
 echo ""

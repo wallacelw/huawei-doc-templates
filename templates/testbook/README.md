@@ -135,7 +135,7 @@ Colors are defined in `templates/_base/huawei-colors.sty` and fonts in
 
 Two samples demonstrate all roles and passthrough blocks:
 
-- [`examples/testbook/pt/src/main.adoc`](../../examples/testbook/pt/src/main.adoc) — Portuguese
-- [`examples/testbook/en/src/main.adoc`](../../examples/testbook/en/src/main.adoc) — English
+- [`documents/testbook-pt/src/main.adoc`](../../documents/testbook-pt/src/main.adoc) — Portuguese
+- [`documents/testbook-en/src/main.adoc`](../../documents/testbook-en/src/main.adoc) — English
 
 Compile with `make testbook-pt` / `make testbook-en` from the repo root.

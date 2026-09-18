@@ -527,7 +527,7 @@ confirm no glyphs are missing:
 
 ```sh
 make pt                               # compile Portuguese sample
-grep -i "Missing character" examples/guide/pt/main.log   # must produce no output
+grep -i "Missing character" documents/guide-pt/main.log   # must produce no output
 ```
 
 XeLaTeX emits `Missing character: There is no <glyph>` for any code point the
@@ -554,17 +554,17 @@ templates/guide/
     └── example-script.sh        # example code file for codefile
 
 # Each document has its own assets/ folder for project-specific files:
-examples/guide/
-├── pt/
-│   ├── src/
-│   │   ├── .latexmkrc  # TEXINPUTS → ../../../templates/guide/; $out_dir='..'
-│   │   └── main.adoc   # Portuguese sample (reference)
-│   └── assets/         # project-specific images and files
-└── en/
-    ├── src/
-    │   ├── .latexmkrc
-    │   └── main.adoc   # English sample (reference)
-    └── assets/         # project-specific images and files
+documents/guide-pt/
+├── src/
+│   ├── .latexmkrc  # TEXINPUTS → ../../../templates/guide/; $out_dir='..'
+│   └── main.adoc   # Portuguese sample (reference)
+└── assets/         # project-specific images and files
+
+documents/guide-en/
+├── src/
+│   ├── .latexmkrc
+│   └── main.adoc   # English sample (reference)
+└── assets/         # project-specific images and files
 
 # User-created documents go in documents/ (see Quick start):
 documents/

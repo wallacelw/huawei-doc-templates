@@ -365,7 +365,7 @@ if [ "$REMOVE_REPO" = true ]; then
     echo ""
     echo -e "  ${C_BOLD}All files will be lost:${C_RESET}"
     log_dim "• Source templates (.cls, .sty, .lua, .py)"
-    log_dim "• Sample documents (examples/)"
+    log_dim "• Sample documents (documents/)"
     log_dim "• User documents (documents/)"
     log_dim "• Assets (images, logos)"
     log_dim "• Git history"

@@ -2,8 +2,8 @@
 # watch.sh — Watch .adoc files and recompile PDF on save
 #
 # Usage:
-#   ./scripts/watch.sh examples/guide/en
-#   ./scripts/watch.sh examples/setup-guide
+#   ./scripts/watch.sh documents/guide-en
+#   ./scripts/watch.sh documents/setup-guide
 #
 # Uses entr if available, falls back to inotifywait, then polling.
 set -euo pipefail

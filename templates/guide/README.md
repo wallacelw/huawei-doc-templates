@@ -85,7 +85,7 @@ Colors are defined in `templates/_base/huawei-colors.sty` and fonts in
 
 Two samples demonstrate all roles and passthrough blocks:
 
-- [`examples/guide/pt/src/main.adoc`](../../examples/guide/pt/src/main.adoc) — Portuguese
-- [`examples/guide/en/src/main.adoc`](../../examples/guide/en/src/main.adoc) — English
+- [`documents/guide-pt/src/main.adoc`](../../documents/guide-pt/src/main.adoc) — Portuguese
+- [`documents/guide-en/src/main.adoc`](../../documents/guide-en/src/main.adoc) — English
 
 Compile with `make guide-pt` / `make guide-en` from the repo root.

@@ -4,6 +4,24 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.0 (2026-09-18)
+
+### Restructuring
+
+- **Unified document location**: Merged `examples/` into `documents/`.
+  All documents (samples + user docs) now live in `documents/`.
+  - `examples/guide/pt/` → `documents/guide-pt/`
+  - `examples/guide/en/` → `documents/guide-en/`
+  - Same pattern for technical, testbook, poc samples.
+  - `examples/setup-guide/` + `setup-guide/` → `documents/setup-guide/`
+- **Simplified directory depth**: `documents/<name>/src/` (3 levels)
+  instead of `examples/<template>/<lang>/src/` (4 levels). All
+  `.latexmkrc` TEXINPUTS paths updated.
+- **Updated all references**: Makefile, build scripts, test scripts,
+  .gitignore, README.md, AGENTS.md, all SKILL.md and template README.md
+  files updated to use `documents/` paths.
+- **Removed**: `examples/` directory, root-level `setup-guide/` directory.
+
 ## v6.1.2 (2026-09-18)
 
 ### Fixes

@@ -98,7 +98,7 @@ scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 
 Two samples demonstrate all 15 sections and all POC-specific environments:
 
-- [`examples/poc/pt/src/main.adoc`](../../examples/poc/pt/src/main.adoc) — Portuguese
-- [`examples/poc/en/src/main.adoc`](../../examples/poc/en/src/main.adoc) — English
+- [`documents/poc-pt/src/main.adoc`](../../documents/poc-pt/src/main.adoc) — Portuguese
+- [`documents/poc-en/src/main.adoc`](../../documents/poc-en/src/main.adoc) — English
 
 Compile with `make poc-pt` / `make poc-en` from the repo root.

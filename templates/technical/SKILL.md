@@ -435,17 +435,17 @@ templates/technical/
     └── huawei-logo-cover.png
 
 # Samples:
-examples/technical/
-├── pt/
-│   ├── src/
-│   │   ├── .latexmkrc
-│   │   └── main.adoc               # Portuguese sample
-│   └── main.pdf                    # compiled output
-└── en/
-    ├── src/
-    │   ├── .latexmkrc
-    │   └── main.adoc               # English sample
-    └── main.pdf
+documents/technical-pt/
+├── src/
+│   ├── .latexmkrc
+│   └── main.adoc               # Portuguese sample
+└── main.pdf                    # compiled output
+
+documents/technical-en/
+├── src/
+│   ├── .latexmkrc
+│   └── main.adoc               # English sample
+└── main.pdf
 
 # User-created documents go in documents/:
 documents/

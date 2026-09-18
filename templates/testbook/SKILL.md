@@ -600,17 +600,17 @@ templates/testbook/
     └── example-script.sh        # example code file for codefile
 
 # Each document has its own assets/ folder for project-specific files:
-examples/testbook/
-├── pt/
-│   ├── src/
-│   │   ├── .latexmkrc  # TEXINPUTS → ../../../templates/testbook/; $out_dir='..'
-│   │   └── main.adoc   # Portuguese sample (reference)
-│   └── assets/         # project-specific images and files
-└── en/
-    ├── src/
-    │   ├── .latexmkrc
-    │   └── main.adoc   # English sample (reference)
-    └── assets/         # project-specific images and files
+documents/testbook-pt/
+├── src/
+│   ├── .latexmkrc  # TEXINPUTS → ../../../templates/testbook/; $out_dir='..'
+│   └── main.adoc   # Portuguese sample (reference)
+└── assets/         # project-specific images and files
+
+documents/testbook-en/
+├── src/
+│   ├── .latexmkrc
+│   └── main.adoc   # English sample (reference)
+└── assets/         # project-specific images and files
 
 # User-created documents go in documents/ (see Quick start):
 documents/

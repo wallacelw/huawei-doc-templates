@@ -12,9 +12,9 @@ PASS=0; FAIL=0
 # ── Template-aware path resolution ──────────────────────────────────────────
 get_template_paths() {
     local sample_dir="$1"
-    # Extract template from path: examples/<template>/<lang>
+    # Extract template from path: documents/<template>-<lang>
     local template
-    template=$(basename "$(dirname "$sample_dir")")
+    template=$(basename "$sample_dir" | sed 's/-pt$//;s/-en$//')
     # Validate: check templates/${template}/${template}.cls exists
     if [ ! -f "$REPO_ROOT/templates/${template}/${template}.cls" ]; then
         template="guide"  # fallback
@@ -251,23 +251,23 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     [ "$tmpl_name" = "_base" ] && continue
     [ ! -f "$tmpl_dir/${tmpl_name}.cls" ] && continue
 
-    for lang_dir in "$REPO_ROOT/examples/$tmpl_name"/*/; do
-        [ ! -d "$lang_dir" ] && continue
-        lang_name=$(basename "$lang_dir")
-        if [ -f "$lang_dir/src/main.adoc" ]; then
-            SAMPLES+=("examples/$tmpl_name/$lang_name main adoc")
+    for doc_dir in "$REPO_ROOT/documents/$tmpl_name"-*/; do
+        [ ! -d "$doc_dir" ] && continue
+        doc_name=$(basename "$doc_dir")
+        if [ -f "$doc_dir/src/main.adoc" ]; then
+            SAMPLES+=("documents/$doc_name main adoc")
         fi
     done
 done
 # Setup guide (special case — uses guide template, different filename)
-if [ -f "$REPO_ROOT/examples/setup-guide/src/setup-guide.adoc" ]; then
-    SAMPLES+=("examples/setup-guide setup-guide adoc")
+if [ -f "$REPO_ROOT/documents/setup-guide/src/setup-guide.adoc" ]; then
+    SAMPLES+=("documents/setup-guide setup-guide adoc")
 fi
 
 # ── Main loop ──────────────────────────────────────────────────────────────
 for entry in "${SAMPLES[@]}"; do
   read -r sample basename src_fmt <<< "$entry"
-  name=$(basename "$(dirname "$sample")")/$(basename "$sample")
+  name=$(basename "$sample")
   echo "=== $name ==="
 
   # Resolve source file (all samples are .adoc)
@@ -352,7 +352,7 @@ for entry in "${SAMPLES[@]}"; do
   # H1: ±2 tolerance (HTML template may add title <h1>; DOCX may differ by 1)
   # setup-guide has more divergence due to many chapters + code blocks
   h1_tol=2
-  if [ "$name" = "examples/setup-guide" ]; then h1_tol=6; fi
+  if [ "$name" = "setup-guide" ]; then h1_tol=6; fi
   check_tol3 "H1 count (MD/HTML/DOCX)" "$md_h1" "$html_h1" "$docx_h1" "$h1_tol"
 
   # H2: ±1 tolerance
@@ -370,7 +370,7 @@ for entry in "${SAMPLES[@]}"; do
   # Primary comparison: HTML vs DOCX (tighter); MD is informational.
   # setup-guide has many code blocks across 8 chapters — wider divergence
   code_tol=25
-  if [ "$name" = "examples/setup-guide" ]; then code_tol=35; fi
+  if [ "$name" = "setup-guide" ]; then code_tol=35; fi
   check_tol "Code blocks HTML vs DOCX" "$html_code" "$docx_code_blocks" "$code_tol"
 
   # Tables + callouts combined comparison.
@@ -388,7 +388,7 @@ for entry in "${SAMPLES[@]}"; do
   html_tc=$((html_tables + html_callouts))
   docx_tc=$docx_tables
   tc_tol=5
-  if [ "$name" = "examples/setup-guide" ]; then tc_tol=20; fi
+  if [ "$name" = "setup-guide" ]; then tc_tol=20; fi
   # testbook uses definition lists for testcases (v4.0+), which render
   # as grid tables in MD (header+footer separators counted separately)
   # but as regular tables in HTML/DOCX. Wider tolerance needed.

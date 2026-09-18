@@ -35,20 +35,14 @@ help: ## Show this help message
 TEMPLATE_SAMPLES := $(foreach tmpl,$(TEMPLATES),$(tmpl)-samples)
 TEMPLATE_FORMATS := $(foreach tmpl,$(TEMPLATES),$(tmpl)-formats)
 
-all: samples examples all-formats ## Compile everything (samples + setup-guide + all formats)
+all: samples setup-guide all-formats ## Compile everything (samples + setup-guide + all formats)
 
 samples: $(TEMPLATE_SAMPLES) ## Compile all samples (all templates, PT + EN)
 
-examples: setup-guide ## Compile the setup-guide and copy all formats to setup-guide/
-
-setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
-	./scripts/build-adoc.sh examples/setup-guide/src/setup-guide.adoc
-	cd examples/setup-guide/src && latexmk setup-guide.tex
-	./scripts/build.sh --all examples/setup-guide
-	cp examples/setup-guide/setup-guide.pdf  setup-guide/setup-guide.pdf
-	cp examples/setup-guide/setup-guide.md   setup-guide/setup-guide.md
-	cp examples/setup-guide/setup-guide.docx setup-guide/setup-guide.docx
-	cp examples/setup-guide/setup-guide.html setup-guide/setup-guide.html
+setup-guide: ## Compile the setup-guide and generate all formats
+	./scripts/build-adoc.sh documents/setup-guide/src/setup-guide.adoc
+	cd documents/setup-guide/src && latexmk setup-guide.tex
+	./scripts/build.sh --all documents/setup-guide
 
 # ── Per-template rules (auto-generated via eval) ─────────────────────────────
 # Each template gets: <t>-pt, <t>-en, <t>-samples,
@@ -56,20 +50,20 @@ setup-guide: ## Compile the setup-guide and copy all formats to setup-guide/
 #   <t>-html-pt, <t>-html-en, <t>-html, <t>-formats
 
 define TEMPLATE_RULES
-$(1)-md-pt:   ; ./scripts/build.sh --md examples/$(1)/pt
-$(1)-md-en:   ; ./scripts/build.sh --md examples/$(1)/en
-$(1)-docx-pt: ; ./scripts/build.sh --docx examples/$(1)/pt
-$(1)-docx-en: ; ./scripts/build.sh --docx examples/$(1)/en
-$(1)-html-pt: ; ./scripts/build.sh --html examples/$(1)/pt
-$(1)-html-en: ; ./scripts/build.sh --html examples/$(1)/en
+$(1)-md-pt:   ; ./scripts/build.sh --md documents/$(1)-pt
+$(1)-md-en:   ; ./scripts/build.sh --md documents/$(1)-en
+$(1)-docx-pt: ; ./scripts/build.sh --docx documents/$(1)-pt
+$(1)-docx-en: ; ./scripts/build.sh --docx documents/$(1)-en
+$(1)-html-pt: ; ./scripts/build.sh --html documents/$(1)-pt
+$(1)-html-en: ; ./scripts/build.sh --html documents/$(1)-en
 
 $(1)-md:   $(1)-md-pt $(1)-md-en   ; @true
 $(1)-docx: $(1)-docx-pt $(1)-docx-en ; @true
 $(1)-html: $(1)-html-pt $(1)-html-en ; @true
 $(1)-formats: $(1)-md $(1)-docx $(1)-html ; @true
 
-$(1)-pt: ; ./scripts/build-adoc.sh examples/$(1)/pt/src/main.adoc && cd examples/$(1)/pt/src && latexmk main.tex
-$(1)-en: ; ./scripts/build-adoc.sh examples/$(1)/en/src/main.adoc && cd examples/$(1)/en/src && latexmk main.tex
+$(1)-pt: ; ./scripts/build-adoc.sh documents/$(1)-pt/src/main.adoc && cd documents/$(1)-pt/src && latexmk main.tex
+$(1)-en: ; ./scripts/build-adoc.sh documents/$(1)-en/src/main.adoc && cd documents/$(1)-en/src && latexmk main.tex
 $(1)-samples: $(1)-pt $(1)-en ; @true
 endef
 
@@ -79,20 +73,20 @@ $(foreach tmpl,$(TEMPLATES),$(eval $(call TEMPLATE_RULES,$(tmpl))))
 # Each template gets: clean-<t>-pt, clean-<t>-en, clean-<t>-samples
 
 define TEMPLATE_CLEAN_RULES
-clean-$(1)-pt: ; cd examples/$(1)/pt/src && latexmk -C main.tex; rm -f examples/$(1)/pt/src/main.tex examples/$(1)/pt/main.pdf
-clean-$(1)-en: ; cd examples/$(1)/en/src && latexmk -C main.tex; rm -f examples/$(1)/en/src/main.tex examples/$(1)/en/main.pdf
+clean-$(1)-pt: ; cd documents/$(1)-pt/src && latexmk -C main.tex; rm -f documents/$(1)-pt/src/main.tex documents/$(1)-pt/main.pdf
+clean-$(1)-en: ; cd documents/$(1)-en/src && latexmk -C main.tex; rm -f documents/$(1)-en/src/main.tex documents/$(1)-en/main.pdf
 clean-$(1)-samples: clean-$(1)-pt clean-$(1)-en ; @true
 endef
 
 $(foreach tmpl,$(TEMPLATES),$(eval $(call TEMPLATE_CLEAN_RULES,$(tmpl))))
 
 # ============================================================================
-##@ Setup guide (uses guide template, lives at examples/setup-guide/)
+##@ Setup guide (uses guide template, lives at documents/setup-guide/)
 # ============================================================================
 
-md-sg:   ; ./scripts/build.sh --md examples/setup-guide
-docx-sg: ; ./scripts/build.sh --docx examples/setup-guide
-html-sg: ; ./scripts/build.sh --html examples/setup-guide
+md-sg:   ; ./scripts/build.sh --md documents/setup-guide
+docx-sg: ; ./scripts/build.sh --docx documents/setup-guide
+html-sg: ; ./scripts/build.sh --html documents/setup-guide
 
 # ============================================================================
 ##@ Multi-format output (DOCX, Markdown, HTML via Pandoc)
@@ -136,7 +130,7 @@ menu: ## Interactive format menu (delegates to build.sh)
 # ============================================================================
 
 # ── Preview (HTML in browser) ──
-preview: ## Preview document as HTML in browser (make preview DIR=examples/guide/en)
+preview: ## Preview document as HTML in browser (make preview DIR=documents/guide-en)
 	@dir="$(DIR)"; \
 	adoc=""; \
 	if [ -f "$$dir/src/main.adoc" ]; then adoc="$$dir/src/main.adoc"; \
@@ -155,7 +149,7 @@ preview: ## Preview document as HTML in browser (make preview DIR=examples/guide
 	xdg-open "$$out" 2>/dev/null || open "$$out" 2>/dev/null || echo "Open manually: $$out"
 
 # ── Watch (recompile on save) ──
-watch: ## Watch .adoc and recompile PDF on save (make watch DIR=examples/guide/en)
+watch: ## Watch .adoc and recompile PDF on save (make watch DIR=documents/guide-en)
 	@./scripts/watch.sh "$(DIR)"
 
 # ============================================================================
@@ -174,14 +168,11 @@ test: ## Run all tests (filter units, round-trip, DOCX fix, version sync)
 
 TEMPLATE_CLEAN_SAMPLES := $(foreach tmpl,$(TEMPLATES),clean-$(tmpl)-samples)
 
-clean: $(TEMPLATE_CLEAN_SAMPLES) clean-examples clean-formats ## Remove all build artifacts
+clean: $(TEMPLATE_CLEAN_SAMPLES) clean-setup-guide clean-formats ## Remove all build artifacts
 
-clean-examples: clean-setup-guide ## Clean the setup-guide
-
-clean-setup-guide: ## Clean the setup-guide and the root format copies
-	cd examples/setup-guide/src && latexmk -C setup-guide.tex
-	rm -f examples/setup-guide/src/setup-guide.tex examples/setup-guide/setup-guide.pdf
-	rm -f setup-guide/setup-guide.pdf setup-guide/setup-guide.md setup-guide/setup-guide.docx setup-guide/setup-guide.html
+clean-setup-guide: ## Clean the setup-guide
+	cd documents/setup-guide/src && latexmk -C setup-guide.tex
+	rm -f documents/setup-guide/src/setup-guide.tex documents/setup-guide/setup-guide.pdf
 
 clean-formats: ## Remove generated multi-format files (DOCX/MD/HTML)
 	@for tmpl_dir in templates/*/; do \
@@ -189,10 +180,10 @@ clean-formats: ## Remove generated multi-format files (DOCX/MD/HTML)
 		[ "$$tmpl" = "_base" ] && continue; \
 		[ ! -f "$$tmpl_dir/$$tmpl.cls" ] && continue; \
 		for lang in pt en; do \
-			rm -f examples/$$tmpl/$$lang/main.docx examples/$$tmpl/$$lang/main.md examples/$$tmpl/$$lang/main.html 2>/dev/null; \
+			rm -f documents/$$tmpl-$$lang/main.docx documents/$$tmpl-$$lang/main.md documents/$$tmpl-$$lang/main.html 2>/dev/null; \
 		done; \
 	done
-	rm -f examples/setup-guide/setup-guide.docx examples/setup-guide/setup-guide.md examples/setup-guide/setup-guide.html
+	rm -f documents/setup-guide/setup-guide.docx documents/setup-guide/setup-guide.md documents/setup-guide/setup-guide.html
 
 clean-project: ## Clean a specific project (make clean-project DIR=<path> [FILE=<name>.adoc])
 	@if [ -z "$(DIR)" ]; then echo "Usage: make clean-project DIR=<path> [FILE=<name>.adoc]"; exit 1; fi
@@ -225,11 +216,11 @@ TEMPLATE_PHONY := $(foreach tmpl,$(TEMPLATES), \
 TEMPLATE_CLEAN_PHONY := $(foreach tmpl,$(TEMPLATES), \
 	clean-$(tmpl)-pt clean-$(tmpl)-en clean-$(tmpl)-samples)
 
-.PHONY: help all samples examples setup-guide project menu preview watch
+.PHONY: help all samples setup-guide project menu preview watch
 .PHONY: $(TEMPLATE_PHONY)
 .PHONY: technical
 .PHONY: test
-.PHONY: clean clean-examples clean-setup-guide clean-project clean-formats
+.PHONY: clean clean-setup-guide clean-project clean-formats
 .PHONY: $(TEMPLATE_CLEAN_PHONY)
 # Setup guide format targets
 .PHONY: md-sg docx-sg html-sg

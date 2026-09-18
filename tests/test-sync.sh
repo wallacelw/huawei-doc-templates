@@ -10,8 +10,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLS_FILE="$REPO_ROOT/templates/guide/guide.cls"
-TEX_FILE="$REPO_ROOT/examples/setup-guide/src/setup-guide.tex"
-ADOC_FILE="$REPO_ROOT/examples/setup-guide/src/setup-guide.adoc"
+TEX_FILE="$REPO_ROOT/documents/setup-guide/src/setup-guide.tex"
+ADOC_FILE="$REPO_ROOT/documents/setup-guide/src/setup-guide.adoc"
 MAKEFILE="$REPO_ROOT/Makefile"
 
 # --- Extract cls version from \ProvidesClass line ---

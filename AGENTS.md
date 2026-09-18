@@ -52,9 +52,9 @@ Before committing, validate the change from **all** relevant perspectives:
 
 2. **Cross-file consistency:** If you changed one file, check every file that
    references it:
-   - Changed `guide.cls`, `technical.cls`, or `testbook.cls`? Check `SKILL.md` command tables,
-     `README.md` (template), both samples (`examples/<name>/pt/` + `en/`),
-     and `setup-guide.adoc`.
+    - Changed `guide.cls`, `technical.cls`, or `testbook.cls`? Check `SKILL.md` command tables,
+      `README.md` (template), both samples (`documents/<name>-pt/` + `documents/<name>-en/`),
+      and `setup-guide.adoc`.
    - Changed a `templates/_base/huawei-*.sty` module? Check all templates that
      load it, all samples, and `setup-guide.adoc`.
    - Changed `huawei-latex-converter.rb`? Check all templates' PDF output —
@@ -274,7 +274,8 @@ approval. Changing them breaks existing documents and reproducibility.
 - Each document is self-contained: `src/` (with `.adoc` and `.latexmkrc`),
   `assets/`.
 - Skills create new document folders inside `documents/` by default.
-- Samples and examples stay in `examples/`; `documents/` is for user work.
+- Samples also live in `documents/` (e.g., `documents/guide-pt/`,
+  `documents/guide-en/`, `documents/setup-guide/`).
 
 ### L14. Floats default to [H] (in-source order, no drifting)
 - The class loads `float` and sets `\fps@figure`/`\fps@table` to `H`, so
@@ -440,7 +441,7 @@ See [README.md "Project layout"](README.md) for the full tree.
 ## Sample and example conventions
 
 - **Two samples per template**: each template `<name>` has exactly two samples
-  in `examples/<name>/pt/` and `examples/<name>/en/` (Portuguese and English).
+  in `documents/<name>-pt/` and `documents/<name>-en/` (Portuguese and English).
   Samples demonstrate all available AsciiDoc roles and syntax.
 - **Assets folders**: template shared assets (logos, sample images) live in
   `templates/<name>/common-assets/`. Each document has its own `assets/`
@@ -449,12 +450,10 @@ See [README.md "Project layout"](README.md) for the full tree.
   Logos default to `common-assets/` (template-level).
 - **Template explanation**: each sample includes a `NOTE:` admonition on the
   first page explaining which template it uses and what it demonstrates.
-- **Setup guide is additional**: `examples/setup-guide/` is not a sample — it
+- **Setup guide is additional**: `documents/setup-guide/` is not a sample — it
   is a real-world document used for validation and actual installation
   instructions. Its multi-entry changelog exercises versioning in depth, and
   it demonstrates features in a practical context.
-- **Setup guide PDF in root**: `make examples` copies `setup-guide.pdf` to the
-  repo root for easy reading. The copy is gitignored (build artifact).
 - **Self-contained**: each sample/example has its own `.latexmkrc` with
   `TEXINPUTS` pointing to `templates/<name>/`. Never share `.latexmkrc` files.
 
@@ -473,7 +472,7 @@ at the repo root registers `templates/` as a discovery path.
    - `README.md` — human-readable documentation
    - `.latexmkrc` — latexmk config (XeLaTeX, TZ=America/Sao_Paulo default)
    - `common-assets/` — logos, sample images
-   - Samples live in `examples/<name>/pt/` and `examples/<name>/en/` (see below)
+   - Samples live in `documents/<name>-pt/` and `documents/<name>-en/` (see below)
 
 2. **SKILL.md format** — must start with YAML frontmatter:
    ```yaml
@@ -518,7 +517,7 @@ at the repo root registers `templates/` as a discovery path.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the AsciiDoc role or passthrough pattern to `huawei-latex-converter.rb`.
 4. Add the syntax to the reference tables in `SKILL.md` and `README.md`.
-5. Demonstrate the syntax in all template samples (`examples/guide/pt/`, `examples/guide/en/`, `examples/technical/pt/`, `examples/technical/en/`, `examples/testbook/pt/`, `examples/testbook/en/`).
+5. Demonstrate the syntax in all template samples (`documents/guide-pt/`, `documents/guide-en/`, `documents/technical-pt/`, `documents/technical-en/`, `documents/testbook-pt/`, `documents/testbook-en/`).
 6. Compile both samples to verify: `make samples`.
 7. Commit only if both samples compile without errors.
 
@@ -552,7 +551,7 @@ at the repo root registers `templates/` as a discovery path.
    - `<name>-template.html` — HTML template for Pandoc
    - `SKILL.md`, `README.md`, `.latexmkrc`, `common-assets/`
 
-2. **Create samples** in `examples/<name>/pt/` and `examples/<name>/en/`
+2. **Create samples** in `documents/<name>-pt/` and `documents/<name>-en/`
    with `.adoc` source files.
 
 3. **Done** — no changes needed to:
@@ -567,7 +566,7 @@ The naming convention is critical:
 - DOCX fix: `templates/<name>/create-<name>-reference-docx.py`
 - Reference DOCX: `templates/<name>/<name>-reference.docx`
 - HTML template: `templates/<name>/<name>-template.html`
-- Samples: `examples/<name>/{pt,en}/src/main.adoc`
+- Samples: `documents/<name>-{pt,en}/src/main.adoc`
 
 ---
 
@@ -688,13 +687,13 @@ git config --local --unset user.email
 
 ### Compiled PDFs are committed
 
-`examples/guide/pt/main.pdf`, `examples/guide/en/main.pdf`,
-`examples/setup-guide/setup-guide.pdf`, `examples/technical/pt/main.pdf`,
-and `examples/technical/en/main.pdf` are committed to git for validation.
+`documents/guide-pt/main.pdf`, `documents/guide-en/main.pdf`,
+`documents/setup-guide/setup-guide.pdf`, `documents/technical-pt/main.pdf`,
+and `documents/technical-en/main.pdf` are committed to git for validation.
 All other PDFs are gitignored. Always recompile and commit updated PDFs when
 `.adoc`, `.cls`, or `.sty` files change.
 
-The `setup-guide/` folder at the repo root contains pre-compiled setup guide
+The `documents/setup-guide/` folder contains the compiled setup guide
 in all four formats (PDF, MD, DOCX, HTML) for users to read before cloning.
 These are committed to git. Run `make setup-guide` to regenerate.
 
