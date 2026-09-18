@@ -296,7 +296,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       rows_head.each do |header_row|
         header_cells = header_row.map do |cell|
           content = cell.content
-          content = content.is_a?(Array) ? content.join : content
+          content = content.is_a?(Array) ? content.join : content.to_s
+          content = content.gsub('&amp;', '&').gsub(/(?<!\\)&/) { '\\&' }
           "\\thd{#{content}}"
         end
         lines << "\\rowcolor{huaweired} #{header_cells.join(' & ')} \\\\"
@@ -310,14 +311,22 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     unless rows_body.empty?
       lines << '\\tbody'
       rows_body.each do |row|
-        cells = row.map { |cell| cell.content }
+        cells = row.map do |cell|
+          content = cell.content
+          content = content.is_a?(Array) ? content.join : content.to_s
+          content.gsub('&amp;', '&').gsub(/(?<!\\)&/) { '\\&' }
+        end
         lines << "#{cells.join(' & ')} \\\\"
       end
     end
 
     # Footer rows (rare, but handle them)
     rows_foot.each do |row|
-      cells = row.map { |cell| cell.content }
+      cells = row.map do |cell|
+        content = cell.content
+        content = content.is_a?(Array) ? content.join : content.to_s
+        content.gsub('&amp;', '&').gsub(/(?<!\\)&/) { '\\&' }
+      end
       lines << "#{cells.join(' & ')} \\\\"
     end
 

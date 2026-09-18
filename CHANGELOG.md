@@ -4,6 +4,18 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.0.10 (2026-09-17)
+
+### Fixes
+
+- **Table cell `&` escaping bug**: `&` in table cell content (e.g.,
+  "Data Engineering & DataArts Studio") was not being escaped to `\&`
+  for LaTeX, causing "Extra alignment tab" compilation errors in testbook
+  samples. Fixed by using block-form `gsub` in converter's table cell
+  processing (header, body, and footer cells).
+- **testbook/en and testbook/pt PDFs now compile successfully** (21 pages each)
+  with `\testscope` field rendering correctly.
+
 ## v6.0.9 (2026-09-17)
 
 ### Features

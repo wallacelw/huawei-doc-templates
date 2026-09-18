@@ -83,3 +83,4 @@ __pycache__/
 # Deepwork state (git-local, OpenCode-readable)
 .slim/deepwork/
 .asciidoctor/
+templates/poc-scope/*.docx
