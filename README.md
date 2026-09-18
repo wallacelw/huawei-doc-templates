@@ -121,8 +121,14 @@ also delete the repository directory (requires typing `yes` to confirm).
 make                 # show help (list all available targets)
 make all             # compile everything: all samples + setup-guide + all formats (MD + DOCX + HTML)
 make samples         # compile all template samples (guide + technical + testbook + poc, PT + EN)
-make pt              # compile Portuguese sample only (guide-only legacy alias)
-make en              # compile English sample only (guide-only legacy alias)
+make guide-pt        # compile Portuguese guide sample only
+make guide-en        # compile English guide sample only
+make technical-pt    # compile Portuguese technical sample only
+make technical-en    # compile English technical sample only
+make testbook-pt     # compile Portuguese testbook sample only
+make testbook-en     # compile English testbook sample only
+make poc-pt          # compile Portuguese POC sample only
+make poc-en          # compile English POC sample only
 make technical-samples # compile technical report samples (PT + EN, PDF)
 make technical DIR=documents/my-report  # compile a technical report (latexmk in src/)
 make setup-guide     # compile setup guide only
@@ -130,7 +136,7 @@ make project DIR=documents/my-guide   # compile a specific project (auto-detects
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
 make preview DIR=documents/guide-en  # generate HTML preview and open in browser
 make watch DIR=documents/guide-en    # watch .adoc files and recompile PDF on save (requires entr or inotifywait)
-make all-formats     # generate DOCX + MD + HTML for all samples + technical
+make all-formats     # generate DOCX + MD + HTML for all samples + setup-guide
 make clean           # remove all build artifacts
 make clean-formats   # remove generated multi-format files
 ```
@@ -200,7 +206,7 @@ DOCX, Markdown, and HTML are secondary outputs.
 ### Usage
 
 ```bash
-make all-formats    # MD + DOCX + HTML for all samples + technical reports
+make all-formats    # MD + DOCX + HTML for all samples + setup-guide
 make md             # Markdown only (guide pt + en + setup-guide)
 make docx           # DOCX only (guide pt + en + setup-guide)
 make html           # HTML only (guide pt + en + setup-guide)
@@ -273,7 +279,7 @@ for the technical report template syntax reference.
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
 │   ├── _base/               # shared formatting modules and converter
-│   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter (728 lines)
+│   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter
 │   │   ├── huawei.css               # Huawei brand CSS for HTML output (337 lines)
 │   │   ├── huawei-badges.sty        # shared badge rendering (\huaweibadge)
 │   │   ├── docx_fix.py              # shared DOCX post-processing

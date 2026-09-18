@@ -52,7 +52,7 @@ Before committing, validate the change from **all** relevant perspectives:
 
 2. **Cross-file consistency:** If you changed one file, check every file that
    references it:
-    - Changed `guide.cls`, `technical.cls`, or `testbook.cls`? Check `SKILL.md` command tables,
+    - Changed `guide.cls`, `technical.cls`, `testbook.cls`, or `poc.cls`? Check `SKILL.md` command tables,
       `README.md` (template), both samples (`documents/<name>-pt/` + `documents/<name>-en/`),
       and `setup-guide.adoc`.
    - Changed a `templates/_base/huawei-*.sty` module? Check all templates that
@@ -292,6 +292,7 @@ approval. Changing them breaks existing documents and reproducibility.
   - LaTeX modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
     huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared,
     huawei-cover, huawei-titles, huawei-toc, huawei-badges.
+  - (Note: `huawei-badges` is only loaded by templates that use badges: `testbook` and `poc`.)
   - Converter: huawei-latex-converter.rb (AsciiDoc → LaTeX, shared by all templates).
   - Output styling: huawei.css (HTML), huawei.js (copy-to-clipboard), docinfo.html.
   - Post-processing: docx_fix.py (DOCX), embed-images.py (MD).
@@ -336,7 +337,7 @@ approval. Changing them breaks existing documents and reproducibility.
   table styling, heading appearance, and spacing.
 - When adding or changing any visual element, update all formats to
   match the PDF. The Ruby converter, reference DOCX, and HTML template/CSS must
-  stay in sync with `guide.cls`, `technical.cls`, and `testbook.cls`.
+   stay in sync with `guide.cls`, `technical.cls`, `testbook.cls`, and `poc.cls`.
 
 ### L19. Authors are optional and hideable with `:noauthors:`
 - `:authors:` header attribute sets one or more authors displayed on the cover page.
@@ -517,7 +518,7 @@ at the repo root registers `templates/` as a discovery path.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the AsciiDoc role or passthrough pattern to `huawei-latex-converter.rb`.
 4. Add the syntax to the reference tables in `SKILL.md` and `README.md`.
-5. Demonstrate the syntax in all template samples (`documents/guide-pt/`, `documents/guide-en/`, `documents/technical-pt/`, `documents/technical-en/`, `documents/testbook-pt/`, `documents/testbook-en/`).
+5. Demonstrate the syntax in all template samples (`documents/guide-pt/`, `documents/guide-en/`, `documents/technical-pt/`, `documents/technical-en/`, `documents/testbook-pt/`, `documents/testbook-en/`, `documents/poc-pt/`, `documents/poc-en/`).
 6. Compile both samples to verify: `make samples`.
 7. Commit only if both samples compile without errors.
 
@@ -689,7 +690,9 @@ git config --local --unset user.email
 
 `documents/guide-pt/main.pdf`, `documents/guide-en/main.pdf`,
 `documents/setup-guide/setup-guide.pdf`, `documents/technical-pt/main.pdf`,
-and `documents/technical-en/main.pdf` are committed to git for validation.
+`documents/technical-en/main.pdf`, `documents/testbook-pt/main.pdf`,
+`documents/testbook-en/main.pdf`, `documents/poc-pt/main.pdf`,
+and `documents/poc-en/main.pdf` are committed to git for validation.
 All other PDFs are gitignored. Always recompile and commit updated PDFs when
 `.adoc`, `.cls`, or `.sty` files change.
 

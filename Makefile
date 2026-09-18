@@ -39,10 +39,9 @@ all: samples setup-guide all-formats ## Compile everything (samples + setup-guid
 
 samples: $(TEMPLATE_SAMPLES) ## Compile all samples (all templates, PT + EN)
 
-setup-guide: ## Compile the setup-guide and generate all formats
+setup-guide: ## Compile the setup-guide (PDF only; use all-formats for DOCX/MD/HTML)
 	./scripts/build-adoc.sh documents/setup-guide/src/setup-guide.adoc
 	cd documents/setup-guide/src && latexmk setup-guide.tex
-	./scripts/build.sh --all documents/setup-guide
 
 # ── Per-template rules (auto-generated via eval) ─────────────────────────────
 # Each template gets: <t>-pt, <t>-en, <t>-samples,
@@ -94,9 +93,9 @@ html-sg: ; ./scripts/build.sh --html documents/setup-guide
 
 all-formats: $(TEMPLATE_FORMATS) md-sg docx-sg html-sg ## Generate all formats (DOCX+MD+HTML) for all samples + setup-guide
 
-md:   md-pt md-en md-sg   ## Markdown for guide samples + setup-guide (use all-formats for all templates)
-docx: docx-pt docx-en docx-sg ## DOCX for guide samples + setup-guide (use all-formats for all templates)
-html: html-pt html-en html-sg ## HTML for guide samples + setup-guide (use all-formats for all templates)
+md:   guide-md-pt guide-md-en technical-md-pt technical-md-en testbook-md-pt testbook-md-en poc-md-pt poc-md-en md-sg   ## Markdown for all samples + setup-guide (use all-formats for all templates)
+docx: guide-docx-pt guide-docx-en technical-docx-pt technical-docx-en testbook-docx-pt testbook-docx-en poc-docx-pt poc-docx-en docx-sg ## DOCX for all samples + setup-guide (use all-formats for all templates)
+html: guide-html-pt guide-html-en technical-html-pt technical-html-en testbook-html-pt testbook-html-en poc-html-pt poc-html-en html-sg ## HTML for all samples + setup-guide (use all-formats for all templates)
 
 # ============================================================================
 ##@ Generic project compilation

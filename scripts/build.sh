@@ -373,7 +373,10 @@ generate_docx() {
         local tmp_adoc
         tmp_adoc=$(mktemp --suffix=.adoc)
         asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
-        pandoc -f asciidoc --reference-doc="$REF_DOCX" "$tmp_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
+        pandoc -f asciidoc --reference-doc="$REF_DOCX" \
+            --number-sections \
+            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
+            "$tmp_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
             RESULTS_FAIL+=("DOCX:pandoc failed")
             rm -f "$tmp_adoc"
             return
@@ -455,6 +458,7 @@ generate_html() {
             -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
             -a docinfodir="$REPO_ROOT/templates/_base" \
             -a docinfo1 \
+            -r asciidoctor-diagram \
             "$ADOC_FILE" -o "${PROJECT_DIR}/$out" 2>&1 || {
             RESULTS_FAIL+=("HTML:asciidoctor failed")
             return

@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.2.0
+:version: 6.2.1
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -793,7 +793,7 @@ latexmk --version
 === Compile the sample guides
 
 The project includes a self-documenting Makefile. To compile all samples
-(guide + technical, Portuguese + English):
+(guide + technical + testbook + poc, Portuguese + English):
 
 *Step by step:*
 
@@ -812,6 +812,10 @@ ls -l documents/guide-pt/main.pdf
 ls -l documents/guide-en/main.pdf
 ls -l documents/technical-pt/main.pdf
 ls -l documents/technical-en/main.pdf
+ls -l documents/testbook-pt/main.pdf
+ls -l documents/testbook-en/main.pdf
+ls -l documents/poc-pt/main.pdf
+ls -l documents/poc-en/main.pdf
 ----
 
 TIP: To compile a single project, use `make project DIR=documents/guide-pt`
@@ -845,7 +849,7 @@ opencode          # or: codex, claude --bare, pi
 - *Location* — where to create the project folder
 --
 +
-. The skill generates the `.tex` file, creates a
+. The skill generates the `.adoc` file, creates a
   `.latexmkrc` with the correct `TEXINPUTS`, compiles the
   document, and reports the page count.
 +

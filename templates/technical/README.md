@@ -41,7 +41,7 @@ make technical-en
 Or manually:
 
 ```bash
-scripts/build-adoc.sh src/main.adoc src/main.tex && latexmk src/main.tex
+scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 ```
 
 ## Header attributes

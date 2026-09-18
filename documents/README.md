@@ -12,17 +12,18 @@ reference.
    /skill huawei-template-guide         # for guides (how-to, training)
    /skill huawei-template-technical     # for technical reports (incident analysis)
    /skill huawei-template-testbook      # for test cases (POC, acceptance testing)
+   /skill huawei-template-poc           # for POC/homologation documents
    ```
 2. The skill will create a subfolder here, e.g. `documents/my-guide/`,
-   with all necessary files (`.tex`, `.latexmkrc`, `assets/`).
+   with all necessary files (`.adoc`, `.latexmkrc`, `assets/`).
 3. Compile from the repo root:
    ```
    make project DIR=documents/my-guide
    ```
    Or from inside the project folder:
    ```
-   cd documents/my-guide/src
-   latexmk main.tex
+    cd documents/my-guide/src
+    build-adoc.sh main.adoc && latexmk main.tex
    ```
 
 ## Structure
@@ -33,8 +34,8 @@ Each document is self-contained in its own subfolder:
 documents/
 +-- my-guide/
     +-- src/
-    |   +-- main.tex       # the document
-    |   +-- .latexmkrc     # XeLaTeX + TEXINPUTS → templates/_base/ + templates/guide/
+    |   +-- main.adoc      # the document
+    |   +-- .latexmkrc     # XeLaTeX + TEXINPUTS → templates/_base/ + templates/<name>/
     +-- assets/            # project-specific images
 ```
 

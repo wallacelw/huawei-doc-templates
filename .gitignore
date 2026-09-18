@@ -33,6 +33,8 @@
 !documents/technical-en/main.pdf
 !documents/testbook-pt/main.pdf
 !documents/testbook-en/main.pdf
+!documents/poc-pt/main.pdf
+!documents/poc-en/main.pdf
 # editor / os cruft
 .DS_Store
 *.swp
@@ -49,9 +51,7 @@ documents/testbook-*/main.html
 documents/poc-*/main.md
 documents/poc-*/main.docx
 documents/poc-*/main.html
-documents/setup-guide/setup-guide.md
-documents/setup-guide/setup-guide.docx
-documents/setup-guide/setup-guide.html
+
 # Generated LaTeX from AsciiDoc (build artifacts, not source)
 documents/*/src/main.tex
 documents/*/src/setup-guide.tex
@@ -77,8 +77,10 @@ documents/*
 !documents/poc-pt/
 !documents/poc-en/
 !documents/setup-guide/
+!documents/gallery/
+!documents/gallery/*/
 __pycache__/
 # Deepwork state (git-local, OpenCode-readable)
 .slim/deepwork/
 .asciidoctor/
-templates/poc-scope/*.docx
+

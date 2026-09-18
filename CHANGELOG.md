@@ -4,6 +4,42 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.2.1 (2026-09-19)
+
+### Council review fixes (8 HIGH, 17 MEDIUM)
+
+- **H1**: Fixed Makefile `md`/`docx`/`html` aggregate targets — prerequisites
+  now use correct template-prefixed names (e.g., `guide-md-pt` not `md-pt`).
+- **H2**: Removed non-existent `make pt`/`make en` from README; replaced with
+  correct per-template targets.
+- **H3+H4**: Fixed `watch.sh` — uses `-o` flag for `build-adoc.sh` and derives
+  `.tex` filename from `.adoc` filename (no longer hardcoded `main.tex`).
+- **H5**: Un-gitignored `documents/gallery/` — screenshots available after clone.
+- **H6**: Whitelisted POC sample PDFs in `.gitignore`.
+- **H8**: Fixed `install.sh` `compile_sample` to handle non-`main.adoc` files
+  (setup-guide compilation no longer skipped on fresh installs).
+- **M1**: Fixed template READMEs `build-adoc.sh` invocation examples (`-o` flag).
+- **M2**: Added `--number-sections` and `--resource-path` to `build.sh` DOCX.
+- **M3**: Added `asciidoctor-diagram` to `build.sh` HTML generation.
+- **M4**: Added `poc.cls` to AGENTS.md cross-file consistency checklist.
+- **M5**: Completed AGENTS.md "Compiled PDFs are committed" list (all 8 samples).
+- **M6**: Added poc samples to AGENTS.md "Adding a new command" list.
+- **M7**: Added POC skill to `install.sh` banner and summary.
+- **M8**: Fixed `documents/README.md` — `.tex` → `.adoc` as source format.
+- **M9**: Updated `setup-guide.adoc` — "guide + technical" → "all 4 templates".
+- **M10**: Fixed `setup-guide.adoc` — skill generates `.adoc`, not `.tex`.
+- **M11**: Fixed `install.sh` — `local` → `declare` outside functions.
+- **M12**: Fixed AGENTS.md L15 — `huawei-badges` only loaded by poc + testbook.
+- **M13**: Fixed README `make all-formats` description — "technical" → "setup-guide".
+- **M14**: Updated stale `examples/` comments in all template `.latexmkrc` files.
+- **M15**: Un-gitignored setup-guide multi-format outputs (match AGENTS.md).
+- **M16**: Fixed testbook/poc template `.latexmkrc` — removed wrong TEXINPUTS.
+- **M17**: Removed redundant setup-guide compilation in `make all`.
+- **L1**: Removed stale `templates/poc-scope/` from `.gitignore`.
+- **L3**: Removed stale converter line count from README.
+- **L10**: Fixed `documents/README.md` — generic `templates/<name>/` path.
+- **L16**: Fixed `build-adoc.sh` — error on multiple positional args.
+
 ## v6.2.0 (2026-09-18)
 
 ### Restructuring

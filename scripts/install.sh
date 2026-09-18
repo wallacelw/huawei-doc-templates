@@ -130,18 +130,18 @@ echo ""
 echo -e "  ${C_BOLD}What:${C_RESET}  AsciiDoc document templates for Huawei Cloud guides (XeLaTeX + latexmk, AsciiDoc + asciidoctor)"
 echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
-local -a installs=(
+declare -a installs=(
     "• XeLaTeX + latexmk + LaTeX packages"
     "• AsciiDoc + asciidoctor (source format + converter)"
     "• HarmonyOS Sans (body font, free commercial use)"
     "• Cascadia Code (code font, open source)"
-    "• opencode skills (/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook)"
+    "• opencode skills (/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook, /skill huawei-template-poc)"
     "• VS Code LaTeX Workshop (local + remote config)"
 )
 for line in "${installs[@]}"; do log_dim "$line"; done
 echo ""
 echo -e "  ${C_BOLD}Prerequisites:${C_RESET}"
-local -a prereqs=(
+declare -a prereqs=(
     "• Ubuntu 22.04+ (WSL or native)     (required)"
     "• apt-get, sudo                      (required)"
     "• VS Code CLI (code)                 (optional — for extension install)"
@@ -523,11 +523,27 @@ compile_sample() {
         echo "  Converting $adoc_file -> $tex_file"
         "$SCRIPT_DIR/scripts/build-adoc.sh" "$adoc_file" -o "$tex_file" || { log_warn "$label: build-adoc.sh failed"; return 1; }
         file="main.tex"
-    elif [[ -n "$file" && -f "$src_dir/$file" ]]; then
-        : # use provided file
     else
-        log_warn "$label not found at $src_dir — skipping"
-        return 1
+        # Fallback: find any .adoc file in src_dir (e.g. setup-guide.adoc)
+        local found_adoc=""
+        for candidate in "$src_dir"/*.adoc; do
+            if [[ -f "$candidate" ]]; then
+                found_adoc="$candidate"
+                break
+            fi
+        done
+        if [[ -n "$found_adoc" ]]; then
+            local adoc_base="$(basename "${found_adoc%.adoc}")"
+            local tex_file="$src_dir/${adoc_base}.tex"
+            echo "  Converting $found_adoc -> $tex_file"
+            "$SCRIPT_DIR/scripts/build-adoc.sh" "$found_adoc" -o "$tex_file" || { log_warn "$label: build-adoc.sh failed"; return 1; }
+            file="${adoc_base}.tex"
+        elif [[ -n "$file" && -f "$src_dir/$file" ]]; then
+            : # use provided file
+        else
+            log_warn "$label not found at $src_dir — skipping"
+            return 1
+        fi
     fi
 
     cd "$src_dir"
@@ -564,13 +580,13 @@ compile_sample "$SCRIPT_DIR/documents/setup-guide" "Setup guide" "setup-guide.te
 echo ""
 echo -e "${C_BOLD}${C_GREEN}  ✓ Setup complete${C_RESET}"
 echo ""
-local -a summary_rows=(
+declare -a summary_rows=(
     "Engine:"             "XeLaTeX (TeX Live)"
     "Build tool:"         "latexmk (.latexmkrc → xelatex)"
     "Source format:"      "AsciiDoc (.adoc → LaTeX via asciidoctor)"
     "Body font:"          "HarmonyOS Sans → Liberation Sans"
     "Code font:"          "Cascadia Code → DejaVu Sans Mono"
-    "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook"
+    "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook, /skill huawei-template-poc"
     "VS Code:"            "LaTeX Workshop (local + remote, -cd -xelatex)"
     "Timezone:"           "America/Sao_Paulo (GMT-3, overridable)"
     "Diagrams:"           "PlantUML + graphviz (optional: mermaid-cli for mermaid)"

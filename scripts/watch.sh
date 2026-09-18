@@ -26,8 +26,9 @@ echo "Press Ctrl+C to stop."
 
 recompile() {
     echo "Recompiling..."
-    "$REPO_ROOT/scripts/build-adoc.sh" "$srcdir/$adoc" "$srcdir/main.tex" &&
-    (cd "$srcdir" && latexmk -xelatex main.tex 2>&1 | tail -3)
+    local tex="${adoc%.adoc}.tex"
+    "$REPO_ROOT/scripts/build-adoc.sh" "$srcdir/$adoc" -o "$srcdir/$tex" &&
+    (cd "$srcdir" && latexmk -xelatex "$tex" 2>&1 | tail -3)
 }
 
 if command -v entr >/dev/null 2>&1; then

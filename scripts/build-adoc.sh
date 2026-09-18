@@ -32,6 +32,10 @@ while [[ $# -gt 0 ]]; do
       OUTPUT="$2"; shift 2
       ;;
     *)
+      if [ -n "$INPUT" ]; then
+        echo "Error: multiple input files specified. Use -o for output." >&2
+        exit 1
+      fi
       INPUT="$1"; shift
       ;;
   esac
