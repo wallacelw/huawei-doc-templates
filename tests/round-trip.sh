@@ -19,7 +19,7 @@ get_template_paths() {
     if [ ! -f "$REPO_ROOT/templates/${template}/${template}.cls" ]; then
         template="guide"  # fallback
     fi
-    # For .adoc sources: asciidoctor-reducer → pandoc -f asciidoc (no Lua filter)
+    # For .adoc sources: asciidoctor -b docbook → pandoc -f docbook (no Lua filter)
     # For .tex sources (legacy): pandoc -f latex+raw_tex --lua-filter
     FILTER="$REPO_ROOT/templates/${template}/${template}-pandoc.lua"
     HTML_TMPL="$REPO_ROOT/templates/${template}/${template}-template.html"
@@ -31,6 +31,59 @@ get_template_paths() {
 # Temp directory (cleaned up on exit)
 RT_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/rt-roundtrip.XXXXXX")"
 trap 'rm -rf "$RT_TMPDIR"' EXIT
+
+# ── Raw LaTeX exclusion patterns (single source of truth) ──────────────────
+# Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
+# These are LaTeX commands that appear in passthrough blocks by design.
+# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
+# Defined once here; the MD/DOCX/HTML raw-LaTeX checks below all read them
+# from the RAW_LATEX_EXCLUDED_BLOB env var (newline-joined, exported).
+readonly RAW_LATEX_EXCLUDED=(
+  '\\begin\{changelog\}'
+  '\\end\{changelog\}'
+  '\\changelogentry'
+  '\\textbackslash'
+  '\\begin\{testcase\}'
+  '\\end\{testcase\}'
+  '\\begin\{testsummary\}'
+  '\\end\{testsummary\}'
+  '\\testsummaryrow'
+  '\\testresultbadge'
+  '\\teststep'
+  '\\testobjective'
+  '\\begin\{testprerequisites\}'
+  '\\end\{testprerequisites\}'
+  '\\begin\{testprocedure\}'
+  '\\end\{testprocedure\}'
+  '\\begin\{testexpected\}'
+  '\\end\{testexpected\}'
+  '\\begin\{code\}'
+  '\\end\{code\}'
+  '\\inlinecode'
+  '\\begin\{stakeholders\}'
+  '\\end\{stakeholders\}'
+  '\\stakeholderrow'
+  '\\stakeholderorg'
+  '\\begin\{closingrecord\}'
+  '\\end\{closingrecord\}'
+  '\\closingrow'
+  '\\begin\{signatures\}'
+  '\\end\{signatures\}'
+  '\\signaturecell'
+  '\\pocresult'
+  '\\checkbox'
+  '\\begin\{activities\}'
+  '\\end\{activities\}'
+  '\\begin\{evidence\}'
+  '\\end\{evidence\}'
+  '\\begin\{objectiveblock\}'
+  '\\end\{objectiveblock\}'
+  '\\setreportversion'
+  '\\setreportdate'
+  '\\setreportscenario'
+)
+readonly RAW_LATEX_EXCLUDED_BLOB="$(printf '%s\n' "${RAW_LATEX_EXCLUDED[@]}")"
+export RAW_LATEX_EXCLUDED_BLOB
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -151,41 +204,15 @@ PYEOF
 count_raw_latex_md() {
   local md_file=$1
   python3 - "$md_file" << 'PYEOF'
-import sys, re
+import os, sys, re
 
 md_file = sys.argv[1]
 with open(md_file) as f:
     lines = f.readlines()
 
-# Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# These are LaTeX commands that appear in passthrough blocks by design.
-# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
-EXCLUDED = [
-    r"\\begin\{changelog\}", r"\\end\{changelog\}",
-    r"\\changelogentry",
-    r"\\textbackslash",
-    r"\\begin\{testcase\}", r"\\end\{testcase\}",
-    r"\\begin\{testsummary\}", r"\\end\{testsummary\}",
-    r"\\testsummaryrow", r"\\testresultbadge",
-    r"\\teststep", r"\\testobjective",
-    r"\\begin\{testprerequisites\}", r"\\end\{testprerequisites\}",
-    r"\\begin\{testprocedure\}", r"\\end\{testprocedure\}",
-    r"\\begin\{testexpected\}", r"\\end\{testexpected\}",
-    r"\\begin\{code\}", r"\\end\{code\}",
-    r"\\inlinecode",
-    r"\\begin\{stakeholders\}", r"\\end\{stakeholders\}",
-    r"\\stakeholderrow", r"\\stakeholderorg",
-    r"\\begin\{closingrecord\}", r"\\end\{closingrecord\}",
-    r"\\closingrow",
-    r"\\begin\{signatures\}", r"\\end\{signatures\}",
-    r"\\signaturecell",
-    r"\\pocresult",
-    r"\\checkbox",
-    r"\\begin\{activities\}", r"\\end\{activities\}",
-    r"\\begin\{evidence\}", r"\\end\{evidence\}",
-    r"\\begin\{objectiveblock\}", r"\\end\{objectiveblock\}",
-    r"\\setreportversion", r"\\setreportdate", r"\\setreportscenario",
-]
+# Intentional LaTeX passthrough patterns — single source of truth defined in
+# RAW_LATEX_EXCLUDED at the top of this script (read via env var).
+EXCLUDED = os.environ["RAW_LATEX_EXCLUDED_BLOB"].splitlines()
 excluded_re = re.compile("|".join(EXCLUDED))
 
 def is_excluded(text):
@@ -234,40 +261,14 @@ count_raw_latex_docx() {
     return
   fi
   python3 - "$doc_xml" << 'PYEOF'
-import xml.etree.ElementTree as ET, sys, re
+import xml.etree.ElementTree as ET, os, sys, re
 
 doc_xml = sys.argv[1]
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
-# Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# These are LaTeX commands that appear in passthrough blocks by design.
-# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
-EXCLUDED = [
-    r"\\begin\{changelog\}", r"\\end\{changelog\}",
-    r"\\changelogentry",
-    r"\\textbackslash",
-    r"\\begin\{testcase\}", r"\\end\{testcase\}",
-    r"\\begin\{testsummary\}", r"\\end\{testsummary\}",
-    r"\\testsummaryrow", r"\\testresultbadge",
-    r"\\teststep", r"\\testobjective",
-    r"\\begin\{testprerequisites\}", r"\\end\{testprerequisites\}",
-    r"\\begin\{testprocedure\}", r"\\end\{testprocedure\}",
-    r"\\begin\{testexpected\}", r"\\end\{testexpected\}",
-    r"\\begin\{code\}", r"\\end\{code\}",
-    r"\\inlinecode",
-    r"\\begin\{stakeholders\}", r"\\end\{stakeholders\}",
-    r"\\stakeholderrow", r"\\stakeholderorg",
-    r"\\begin\{closingrecord\}", r"\\end\{closingrecord\}",
-    r"\\closingrow",
-    r"\\begin\{signatures\}", r"\\end\{signatures\}",
-    r"\\signaturecell",
-    r"\\pocresult",
-    r"\\checkbox",
-    r"\\begin\{activities\}", r"\\end\{activities\}",
-    r"\\begin\{evidence\}", r"\\end\{evidence\}",
-    r"\\begin\{objectiveblock\}", r"\\end\{objectiveblock\}",
-    r"\\setreportversion", r"\\setreportdate", r"\\setreportscenario",
-]
+# Intentional LaTeX passthrough patterns — single source of truth defined in
+# RAW_LATEX_EXCLUDED at the top of this script (read via env var).
+EXCLUDED = os.environ["RAW_LATEX_EXCLUDED_BLOB"].splitlines()
 excluded_re = re.compile("|".join(EXCLUDED))
 
 def is_excluded(text):
@@ -530,38 +531,12 @@ for entry in "${SAMPLES[@]}"; do
 
   # HTML: no \begin{ outside <pre><code> blocks, no class="latex"
   raw_html=$(python3 - "$RT_TMPDIR/rt.html" << 'PYEOF'
-import sys, re
+import os, sys, re
 from html.parser import HTMLParser
 
-# Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# These are LaTeX commands that appear in passthrough blocks by design.
-# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
-EXCLUDED = [
-    r"\\begin\{changelog\}", r"\\end\{changelog\}",
-    r"\\changelogentry",
-    r"\\textbackslash",
-    r"\\begin\{testcase\}", r"\\end\{testcase\}",
-    r"\\begin\{testsummary\}", r"\\end\{testsummary\}",
-    r"\\testsummaryrow", r"\\testresultbadge",
-    r"\\teststep", r"\\testobjective",
-    r"\\begin\{testprerequisites\}", r"\\end\{testprerequisites\}",
-    r"\\begin\{testprocedure\}", r"\\end\{testprocedure\}",
-    r"\\begin\{testexpected\}", r"\\end\{testexpected\}",
-    r"\\begin\{code\}", r"\\end\{code\}",
-    r"\\inlinecode",
-    r"\\begin\{stakeholders\}", r"\\end\{stakeholders\}",
-    r"\\stakeholderrow", r"\\stakeholderorg",
-    r"\\begin\{closingrecord\}", r"\\end\{closingrecord\}",
-    r"\\closingrow",
-    r"\\begin\{signatures\}", r"\\end\{signatures\}",
-    r"\\signaturecell",
-    r"\\pocresult",
-    r"\\checkbox",
-    r"\\begin\{activities\}", r"\\end\{activities\}",
-    r"\\begin\{evidence\}", r"\\end\{evidence\}",
-    r"\\begin\{objectiveblock\}", r"\\end\{objectiveblock\}",
-    r"\\setreportversion", r"\\setreportdate", r"\\setreportscenario",
-]
+# Intentional LaTeX passthrough patterns — single source of truth defined in
+# RAW_LATEX_EXCLUDED at the top of this script (read via env var).
+EXCLUDED = os.environ["RAW_LATEX_EXCLUDED_BLOB"].splitlines()
 excluded_re = re.compile("|".join(EXCLUDED))
 
 def is_excluded(text):

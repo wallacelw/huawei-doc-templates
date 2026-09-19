@@ -99,13 +99,22 @@ run_template_tests() {
   # ── Generate DOCX from en sample ───────────────────────────────────────
   echo "Generating DOCX..."
   if [[ -f "$ADOC_FILE" ]]; then
-    tmp_adoc=$(mktemp --suffix=.adoc)
-    asciidoctor-reducer "$ADOC_FILE" > "$tmp_adoc" 2>/dev/null || cp "$ADOC_FILE" "$tmp_adoc"
-    pandoc -f asciidoc \
-      --reference-doc="$REF_DOCX" --number-sections \
-      --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
-      "$tmp_adoc" -o "$DOCX_OUT" 2>/dev/null
-    rm -f "$tmp_adoc"
+    # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
+    # Fallback: pandoc -f latex+raw_tex from generated .tex
+    local tmp_dbk
+    tmp_dbk=$(mktemp --suffix=.dbk)
+    if asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null && \
+       pandoc -f docbook \
+       --reference-doc="$REF_DOCX" --number-sections \
+       --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
+       "$tmp_dbk" -o "$DOCX_OUT" 2>/dev/null; then
+      : # success
+    else
+      pandoc -f latex+raw_tex "$TEX_FILE" \
+        --reference-doc="$REF_DOCX" --number-sections \
+        -o "$DOCX_OUT" 2>/dev/null || true
+    fi
+    rm -f "$tmp_dbk"
   else
     pandoc -f latex+raw_tex --lua-filter="$FILTER" \
       --reference-doc="$REF_DOCX" --number-sections \

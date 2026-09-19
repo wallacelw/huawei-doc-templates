@@ -200,6 +200,10 @@ log_desc "xelatex, latexmk, texlive-latex-extra, texlive-lang-portuguese, fonts,
 
 $SUDO apt-get update -qq
 log_dim "Installing packages..."
+# apt-get is noisy — filter routine output, but keep apt's real exit code.
+# set +e lets the pipeline finish so PIPESTATUS[0] (apt-get's status) can be
+# checked before -e aborts; the old `|| true` swallowed failures entirely.
+set +e
 $SUDO apt-get install -y \
     texlive-xetex \
     texlive-latex-extra \
@@ -213,7 +217,14 @@ $SUDO apt-get install -y \
     plantuml \
     python3-docx \
     ruby-full \
-    2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd\|already the newest\|automatically installed\|autoremove\|not upgraded\|newly installed\|upgraded" || true
+    2>&1 | grep -v "^$\|Reading\|Building\|Need to get\|After this\|Fetched\|Selecting\|Setting up\|Unpacking\|Preparing\|Processing\|update-alternatives\|man-db\|trigger\|qemu\|VM guests\|systemd\|already the newest\|automatically installed\|autoremove\|not upgraded\|newly installed\|upgraded"
+apt_install_status="${PIPESTATUS[0]}"
+set -e
+if [[ "$apt_install_status" -ne 0 ]]; then
+    log_error "apt-get install failed (exit code $apt_install_status)"
+    log_dim "Hint: check your network connection and apt sources (sudo apt-get update), then re-run install.sh"
+    exit 1
+fi
 
 log_done "TeX Live packages installed"
 
@@ -243,10 +254,12 @@ if [[ -n "$FVEXTRA_STY" ]] && grep -q 'backgroundcolor' "$FVEXTRA_STY" 2>/dev/nu
     log_ok "fvextra: already has backgroundcolor support"
 else
     log_desc "Downloading and building latest fvextra from CTAN..."
-    FVEXTRA_ZIP="/tmp/fvextra.zip"
-    FVEXTRA_BUILD="/tmp/fvextra-build"
+    # mktemp paths (no fixed /tmp names — avoids symlink attacks). The EXIT
+    # trap removes them on both success and failure (including set -e aborts).
+    FVEXTRA_ZIP="$(mktemp --suffix=.zip)"
+    FVEXTRA_BUILD="$(mktemp -d)"
+    trap 'rm -rf "$FVEXTRA_ZIP" "$FVEXTRA_BUILD"' EXIT
     if wget -q "https://mirrors.ctan.org/macros/latex/contrib/fvextra.zip" -O "$FVEXTRA_ZIP"; then
-        rm -rf "$FVEXTRA_BUILD"
         unzip -q "$FVEXTRA_ZIP" -d "$FVEXTRA_BUILD"
         (
             cd "$FVEXTRA_BUILD/fvextra" || exit 1

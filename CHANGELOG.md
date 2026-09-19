@@ -2,7 +2,59 @@
 
 All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
-(inside passthrough blocks).
+  (inside passthrough blocks).
+
+## v6.4.0 (2026-09-20)
+
+### Council improvement review + oracle quality pass
+
+Second council review (3 councillors) found 1 regression, 8 HIGH, 15 MEDIUM,
+10 LOW. Fresh @oracle quality pass found 4 MEDIUM, 6 LOW. All HIGH and
+MEDIUM fixed; LOW items fixed or noted.
+
+#### Converter
+
+- **R1 (regression)**: Fixed underscore escaping — `process_text`/`escape_inline_content`
+  were missing `_` in their regex, causing LaTeX math-mode errors. Added shared
+  `LATEX_TEXT_ESCAPE_NO_BACKSLASH_RE` constant with lookbehind.
+- **Xref mechanism**: Repaired broken cross-references — `[[id]]` now emits
+  `\label`+`\hypertarget` after `\section` (was only `\label` before the command,
+  which landed on the wrong page due to `\clearpage`). `sanitize_label` maps `_`→`-`.
+- **ZWS strip**: Strip `[\u200B\u2060\uFEFF]` in `unescape_html_entities` — asciidoctor
+  expands `--`/`...` to em dash/ellipsis + zero-width space, which HarmonyOS Sans lacks.
+- **Title entities**: Routed title paths through `escape_text_string` — `latex_escape`
+  didn't unescape HTML entities, causing raw `&#8212;` to leak into titles/captions.
+- **Evidence list**: `\item[$\square$]` → `\item[\fbox{\,}]` (math mode conflicts with
+  `m{}` columns). Inline escaping added for kbd/callout/menu/footnote/dlist/badges.
+- **Table cells**: Extracted `escape_table_cell` helper (fixes double-assignment bug).
+
+#### Tests
+
+- Expanded to **135 unit tests** (was 97): underscore escaping, xref mechanism,
+  ZWS strip, title entities, evidence/kbd/footnote/badges, untested converters.
+- Hardened helpers: fail on conversion failure or empty output (fixed dead
+  `CONVERT_FAILED` subshell bug).
+
+#### Scripts
+
+- `test-docx-fix.sh`: Replaced broken `asciidoctor-reducer` pipeline with
+  `asciidoctor -b docbook → pandoc -f docbook` (resolves `make test` Error 21).
+- `round-trip.sh`: Consolidated triplicated EXCLUDED list into single readonly array.
+- `install.sh`: apt-get PIPESTATUS capture + fail-loudly; fvextra mktemp + trap cleanup.
+- `Gemfile`: Removed `asciidoctor-reducer` dependency.
+
+#### Documentation
+
+- `templates/poc/SKILL.md`: Brought to parity (~15 sections added).
+- All `SKILL.md`: Fixed `.latexmkrc` templates, passthrough security notes, xref advice.
+- `templates/technical/SKILL.md`: Restructured skeleton (fixed nested `--` blocks).
+- All sample changelogs: Replaced `\today` with historical release dates.
+- `AGENTS.md`/`README.md`: Added `test-converter.sh` to test descriptions.
+
+#### Samples
+
+- `testbook-en`: Fixed malformed table row (missing cell separator in Security domain).
+- Version bumps: testbook 2.1.1, technical 3.6.1, guide-pt 3.6.1.
 
 ## v6.3.0 (2026-09-19)
 
@@ -20,18 +72,18 @@ All HIGH and key MEDIUM findings fixed.
 - **H2**: Fixed `set -e` dead fallback in `build.sh` and `round-trip.sh` —
   moved `asciidoctor -b docbook` inside `if` condition so fallback triggers.
 - **H3**: Fixed unescaped URLs in `\weblink` — added `latex_escape_url`
- -escaping `%` and `_` (hyperref handles `#` and `&` internally).
+  -escaping `%` and `_` (hyperref handles `#` and `&` internally).
 - **H4**: Fixed inconsistent escaping — `convert_role_note` and similar
   methods now use `process_text` instead of `latex_escape_text` to avoid
   double-escaping `\_` to `\\_` in mixed content.
 - **H5**: Updated stale `asciidoctor-reducer` references in all SKILL.md,
-  README.md, AGENTS.md to current `asciidoctor -b docbook< → pandoc -f docbook` pipeline.
+  README.md, AGENTS.md to current `asciidoctor -b docbook → pandoc -f docbook` pipeline.
 - **H6**: Removed non-existent `make pt` from guide SKILL.md.
-- **(H7**: Added `poc` to AGENTS.md L23 template list and L19 authors.
+- **H7**: Added `poc` to AGENTS.md L23 template list and L19 authors.
 - **H8**: Tightened round-trip.sh tolerances (H1 ±15→±5, H2 ±25→±10,
   code ±25→±10, tables ±10→±5) with per-template overrides.
 - **H9**: Narrowed raw LaTeX exclusion list — removed `\textbf`, `\item`,
-  `\today7, `\lg@` so leaks are detected.
+  `\today`, `\lg@` so leaks are detected.
 - **H10**: Created 97 unit tests for Ruby converter (`tests/test-converter.sh`)
   covering document structure, inline formatting, special characters,
   admonitions, tables, code blocks, images, header attributes, edge cases.

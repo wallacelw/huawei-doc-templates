@@ -1,7 +1,7 @@
 = [Analysis Report] The Enterprise Project List Is Not Displayed on the ECS Creation Page in 8.5.1 at the Brazil Site
 :template: technical
 :lang: en
-:version: 3.6.0
+:version: 3.6.1
 :header-title: Huawei Cloud --- Technical Report
 
 ++++
@@ -202,10 +202,11 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
-\changelogentry{3.6.0}{\today}{\item Added \inlinecode{\textbackslash setdocauthors} to demonstrate the authors feature on the cover page.}
-\changelogentry{1.3.0}{\today}{\item Updated to base template v3.0.1 — minor fixes (test auto-discovery, help text, comments, CI).}
-\changelogentry{1.2.0}{\today}{\item Updated to base template v3.0.0 — modular pipeline refactoring (shared Lua filter factory, shared DOCX fix logic, build system auto-discovery).}
-\changelogentry{1.1.0}{\today}{\item Added infobox explanation and demonstrations of shared formatting commands (callouts, code, tables, inline commands).}
-\changelogentry{1.0.0}{\today}{\item Initial version.}
+\changelogentry{3.6.1}{2026-09-19}{\item Fixed changelog dates — replaced \inlinecode{\textbackslash today} with the actual historical release dates.}
+\changelogentry{3.6.0}{2026-09-11}{\item Added \inlinecode{\textbackslash setdocauthors} to demonstrate the authors feature on the cover page.}
+\changelogentry{1.3.0}{2026-09-10}{\item Updated to base template v3.0.1 — minor fixes (test auto-discovery, help text, comments, CI).}
+\changelogentry{1.2.0}{2026-09-09}{\item Updated to base template v3.0.0 — modular pipeline refactoring (shared Lua filter factory, shared DOCX fix logic, build system auto-discovery).}
+\changelogentry{1.1.0}{2026-09-05}{\item Added infobox explanation and demonstrations of shared formatting commands (callouts, code, tables, inline commands).}
+\changelogentry{1.0.0}{2026-09-04}{\item Initial version.}
 \end{changelog}
 ++++

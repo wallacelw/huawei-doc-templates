@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
 :cover-text: Huawei Technologies CO., LTD
-:version: 2.1.0
+:version: 2.1.1
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -522,21 +522,24 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
-  \changelogentry{2.1.0}{\today}{
+  \changelogentry{2.1.1}{2026-09-19}{
+    \item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.
+  }
+  \changelogentry{2.1.0}{2026-09-13}{
     \item Reestruturação do documento para layout de 3 seções: Introdução, Casos de Teste (com subseções por domínio) e Conclusão (com tabela de resumo dos testes).
     \item Remoção dos prefixos manuais TC-XXX dos títulos dos casos de teste — o ambiente os numera automaticamente como "Caso de Teste 1:", "Caso de Teste 2:", etc.
     \item Atualização dos IDs do testsummary de TC-XXX para numeração automática 1--10.
     \item Alteração de teststeps de tabela tabular para parágrafos auto-numerados. \inlinecode{\textbackslash teststep} agora aceita 1 argumento (ação apenas). Imagens, blocos de código e callouts podem ser inseridos livremente entre os passos.
   }
-  \changelogentry{2.0.0}{\today}{
+  \changelogentry{2.0.0}{2026-09-13}{
     \item Layout de casos de teste redesenhado: barras de cabeçalho mini de largura total para cada campo, ambiente testprocedure com tabela de passos de 2 colunas, ordem dos campos atualizada (Resultado do Teste antes de Observações).
   }
-  \changelogentry{1.1.0}{\today}{
+  \changelogentry{1.1.0}{2026-09-12}{
     \item Adicionadas demonstrações abrangentes de recursos: caixas de destaque \inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox}; blocos \inlinecode{code}; \inlinecode{badge}; \inlinecode{weblink}; \inlinecode{note}; \inlinecode{param}; \inlinecode{image}, \inlinecode{imagecap} e \inlinecode{imageplaceholder}; caminhos \inlinecode{menu}; e referências \inlinecode{inlinecode}.
     \item Adicionados casos de teste de Segurança e Controle de Acesso.
     \item Adicionados casos de teste de Configuração do Ambiente e Ferramentas.
   }
-  \changelogentry{1.0.0}{\today}{
+  \changelogentry{1.0.0}{2026-09-12}{
     \item Versão inicial.
     \item Adicionados casos de teste de Arquitetura da Plataforma.
     \item Adicionados casos de teste de Engenharia de Dados.

@@ -38,7 +38,8 @@ Before committing, validate the change from **all** relevant perspectives:
 
 1. **Compile + test:** Run `make samples` (converts `.adoc` → `.tex` → PDF
    for all template samples) and `make test` (runs `test-filter.sh`,
-   `round-trip.sh`, `test-docx-fix.sh`, `test-sync.sh`). All must pass.
+   `round-trip.sh`, `test-docx-fix.sh`, `test-sync.sh`, `test-converter.sh`).
+   All must pass.
    Verify 0 raw LaTeX blocks in output.
 
    **Generate all output formats:** After every change, also run
@@ -322,7 +323,7 @@ approval. Changing them breaks existing documents and reproducibility.
 - Before tagging, validate: compile all samples (`make samples`, which converts
   `.adoc` → `.tex` → PDF for all templates), run all tests
   (`make test`, which runs `test-filter.sh`, `round-trip.sh`, `test-docx-fix.sh`,
-  and `test-sync.sh`), and verify 0 raw LaTeX blocks in output.
+  `test-sync.sh`, and `test-converter.sh`), and verify 0 raw LaTeX blocks in output.
 - Tag format: `v<major>.<minor>.<patch>` — patch for fixes, minor for features,
   major for breaking changes.
 - Push the tag: `git push --tags`.

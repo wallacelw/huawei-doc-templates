@@ -1272,128 +1272,135 @@ secondary text:
 | Gray 30% | `#4D4D4D` | 30%        |
 | White    | `#FFFFFF` | 100%       |
 
-\begin{changelog} \changelogentry{5.1.1}{\today}{\item Synced callout
-colors in DOCX/HTML/MD output to match brand palette. Added color
-palette demo.} \changelogentry{5.1.0}{\today}{\item Adopted brand
-guidelines auxiliary color palette and monochrome scale. Aligned callout
-colors to brand specifications.} \changelogentry{5.0.3}{\today}{\item
-Removed non-standard \inlinecode{\textbackslash badge} tags from
-testcases for consistency.} \changelogentry{5.0.2}{\today}{\item Long
-commands in test steps now render as code blocks instead of inline
-code.} \changelogentry{5.0.1}{\today}{\item Testcase caption centered
-above the block.} \changelogentry{5.0.0}{\today}{\item Major
-refactoring: extracted shared modules (huawei-titles, huawei-toc,
-huawei-cover), renamed \inlinecode{\textbackslash lg@guidetitle} to
+\begin{changelog} \changelogentry{6.4.0}{2026-09-20}{\item Fixed
+changelog dates — replaced \inlinecode{\textbackslash today} with
+historical release dates. Eliminated zero-width-space missing-glyph
+warnings from typographic substitutions.}
+\changelogentry{5.1.1}{2026-09-14}{\item Synced callout colors in
+DOCX/HTML/MD output to match brand palette. Added color palette demo.}
+\changelogentry{5.1.0}{2026-09-14}{\item Adopted brand guidelines
+auxiliary color palette and monochrome scale. Aligned callout colors to
+brand specifications.} \changelogentry{5.0.3}{2026-09-14}{\item Removed
+non-standard \inlinecode{\textbackslash badge} tags from testcases for
+consistency.} \changelogentry{5.0.2}{2026-09-14}{\item Long commands in
+test steps now render as code blocks instead of inline code.}
+\changelogentry{5.0.1}{2026-09-14}{\item Testcase caption centered above
+the block.} \changelogentry{5.0.0}{2026-09-14}{\item Major refactoring:
+extracted shared modules (huawei-titles, huawei-toc, huawei-cover),
+renamed \inlinecode{\textbackslash lg@guidetitle} to
 \inlinecode{\textbackslash lg@doctitle}, unified title API with
 \inlinecode{\textbackslash setdoctitle}, decomposed
 \inlinecode{docx\\fix.py} (680\$\to\$84 lines), added testbook unit
 tests, fixed build system error handling.}
-\changelogentry{4.7.0}{\today}{\item Testcase headings now formatted as
-captions (like figures/tables): bold \`\`Testcase N:'' followed by
+\changelogentry{4.7.0}{2026-09-14}{\item Testcase headings now formatted
+as captions (like figures/tables): bold \`\`Testcase N:'' followed by
 description. Changed label from \`\`Test Case'' to \`\`Testcase''.}
-\changelogentry{4.6.0}{\today}{\item Section restructure: Introduction,
-Test Cases (with category subsections), Conclusion. Testcases
-auto-numbered like figures/tables. Changed testcase from subsection to
-subsubsection.} \changelogentry{4.5.0}{\today}{\item Unified field APIs:
-\inlinecode{testprerequisites} and \inlinecode{testexpected} changed
-from commands to environments, matching \inlinecode{testprocedure}. All
-three now use \inlinecode{\textbackslash teststep} for auto-numbered
-items with red bold numbers. Uniform code, same visual style.}
-\changelogentry{4.4.0}{\today}{\item Code review fixes: removed dead
+\changelogentry{4.6.0}{2026-09-13}{\item Section restructure:
+Introduction, Test Cases (with category subsections), Conclusion.
+Testcases auto-numbered like figures/tables. Changed testcase from
+subsection to subsubsection.} \changelogentry{4.5.0}{2026-09-13}{\item
+Unified field APIs: \inlinecode{testprerequisites} and
+\inlinecode{testexpected} changed from commands to environments,
+matching \inlinecode{testprocedure}. All three now use
+\inlinecode{\textbackslash teststep} for auto-numbered items with red
+bold numbers. Uniform code, same visual style.}
+\changelogentry{4.4.0}{2026-09-13}{\item Code review fixes: removed dead
 labels, badge now uses Huawei brand colors (tipbg/tipfg, huaweired,
 warningbg/warningfg), Lua filter preserves formatting in DOCX/MD/HTML
 via parse\\latex\\blocks, testprocedure handler preserves non-step
-content (images, code, callouts).} \changelogentry{4.3.0}{\today}{\item
-Added \inlinecode{testlist} environment for numbered lists with red bold
-numbers in testcase fields. Fixed alignment: zeroed
-\inlinecode{\textbackslash parindent} inside testcase, indented
-procedure step numbering to align with \inlinecode{testlist} items.}
-\changelogentry{4.2.0}{\today}{\item Changed teststeps from tabular
-table to auto-numbered paragraphs. \inlinecode{\textbackslash teststep}
-now takes 1 arg (action only, numbering automatic). Removed
-\inlinecode{teststeps} environment. Images, code blocks, and callouts
-can be placed freely between steps inside \inlinecode{testprocedure}.}
-\changelogentry{4.1.0}{\today}{\item Testcase field redesign: full-width
-red mini header bars for each field. Changed \inlinecode{testprocedure}
-from command to environment wrapping 2-column teststeps (Step \|
-Action). Reordered fields: Test Result before Remarks. Updated Lua
-filter and round-trip test for grid table counting.}
-\changelogentry{4.0.0}{\today}{\item Redesigned testbook
+content (images, code, callouts).}
+\changelogentry{4.3.0}{2026-09-13}{\item Added \inlinecode{testlist}
+environment for numbered lists with red bold numbers in testcase fields.
+Fixed alignment: zeroed \inlinecode{\textbackslash parindent} inside
+testcase, indented procedure step numbering to align with
+\inlinecode{testlist} items.} \changelogentry{4.2.0}{2026-09-13}{\item
+Changed teststeps from tabular table to auto-numbered paragraphs.
+\inlinecode{\textbackslash teststep} now takes 1 arg (action only,
+numbering automatic). Removed \inlinecode{teststeps} environment.
+Images, code blocks, and callouts can be placed freely between steps
+inside \inlinecode{testprocedure}.}
+\changelogentry{4.1.0}{2026-09-13}{\item Testcase field redesign:
+full-width red mini header bars for each field. Changed
+\inlinecode{testprocedure} from command to environment wrapping 2-column
+teststeps (Step \| Action). Reordered fields: Test Result before
+Remarks. Updated Lua filter and round-trip test for grid table
+counting.} \changelogentry{4.0.0}{2026-09-13}{\item Redesigned testbook
 \inlinecode{testcase} environment: replaced 2-column tabular with
 breakable tcolorbox (red left-rule, stacked paragraph fields). Images,
 code blocks, callouts, and nested tables now render correctly and break
 across pages. Added \inlinecode{longhutable} environment for
 page-breaking tables. Updated Lua filter to produce definition lists for
-DOCX/MD/HTML.} \changelogentry{3.9.0}{\today}{\item Added testsummary
-environment, teststeps environment, and \inlinecode{\textbackslash
-testresultbadge} command to testbook template. Fixed testcase layout
-(full-width tabular with proper text alignment).}
-\changelogentry{3.8.1}{\today}{\item End-to-end quality review: fixed
-testbook PDF metadata title, removed stray user DOCX from template dir,
-fixed round-trip.sh variable typo, updated stale references in AGENTS.md
-and README.md, committed testbook sample PDFs, set TZ for pandoc cover
-time consistency, widened pandoc version range.}
-\changelogentry{3.8.0}{\today}{\item Removed Tips and Tricks chapter
+DOCX/MD/HTML.} \changelogentry{3.9.0}{2026-09-13}{\item Added
+testsummary environment, teststeps environment, and
+\inlinecode{\textbackslash testresultbadge} command to testbook
+template. Fixed testcase layout (full-width tabular with proper text
+alignment).} \changelogentry{3.8.1}{2026-09-13}{\item End-to-end quality
+review: fixed testbook PDF metadata title, removed stray user DOCX from
+template dir, fixed round-trip.sh variable typo, updated stale
+references in AGENTS.md and README.md, committed testbook sample PDFs,
+set TZ for pandoc cover time consistency, widened pandoc version range.}
+\changelogentry{3.8.0}{2026-09-13}{\item Removed Tips and Tricks chapter
 (tmux configuration) — required VS Code-specific keybindings that don't
-generalize across terminal setups.} \changelogentry{3.7.0}{\today}{\item
-Added \inlinecode{testbook} template for POC/acceptance test case
-documents with \inlinecode{testcase} environment and
-\inlinecode{\[noanswers\]} option.} \changelogentry{3.6.0}{\today}{\item
-Added \inlinecode{\textbackslash setdocauthors} command and
+generalize across terminal setups.}
+\changelogentry{3.7.0}{2026-09-12}{\item Added \inlinecode{testbook}
+template for POC/acceptance test case documents with
+\inlinecode{testcase} environment and \inlinecode{\[noanswers\]}
+option.} \changelogentry{3.6.0}{2026-09-11}{\item Added
+\inlinecode{\textbackslash setdocauthors} command and
 \inlinecode{\[noauthors\]} class option to both templates. Authors are
 displayed on the cover page (optional --- hidden if not set or if
 \inlinecode{\[noauthors\]} is passed). Demonstrated in all 4 samples.}
-\changelogentry{3.5.0}{\today}{\item Reorganized project structure:
+\changelogentry{3.5.0}{2026-09-11}{\item Reorganized project structure:
 moved \inlinecode{build.sh}, \inlinecode{install.sh}, and
 \inlinecode{uninstall.sh} from repo root to \inlinecode{scripts/}
 directory. Updated all references in Makefile, README, AGENTS.md,
 SKILL.md, and setup guide. One-liner URLs now use
 \inlinecode{main/scripts/install.sh}.}
-\changelogentry{3.4.0}{\today}{\item \inlinecode{install.sh}: opencode
-skills and VS Code LaTeX Workshop are now optional prompts (default
-yes). Removed LTeX extension (was failing to install). One-liner detects
-existing installation and prompts to update with version display
-(\inlinecode{v3.3.6 \$\to\$ v3.3.7}). Uses absolute paths to prevent
-nested clones. \item \inlinecode{uninstall.sh}: Added one-liner support
-(\inlinecode{curl \| bash}). Added \`\`Remove 100\\'' nuclear option
-(option 4) to interactive menu. Added \inlinecode{--repo} flag. \item
-Updated Chapter 6 with optional component prompts and update detection.
-Updated Chapter 7 with one-liner update/uninstall and full menu
-documentation.} \changelogentry{3.3.0}{\today}{\item Moved pre-compiled
-setup guide to \inlinecode{setup-guide/} folder in repo root with all
-four formats (PDF, MD, DOCX, HTML). Users can read these before cloning
-to understand the installation process. \item Updated Makefile
-\inlinecode{setup-guide} target to generate and copy all four formats.
-\item Updated README with pre-compiled setup guide section and format
-comparison table. \item Updated .gitignore to track all four formats in
-\inlinecode{setup-guide/}.} \changelogentry{3.2.1}{\today}{\item Renamed
-Chapter 7 from \`\`Clean Up'' to \`\`Operations and Maintenance''. Added
-subsections for updating and uninstalling both the MaaS Gateway and the
-document templates. Added cloud resource cleanup as an optional
-subsection.} \changelogentry{3.2.0}{\today}{\item Added
-\inlinecode{uninstall.sh} script with interactive menu,
-\inlinecode{--all}, \inlinecode{--yes}, and \inlinecode{--dry-run}
-flags. Removes opencode skills, .sty modules, HarmonyOS Sans font,
-/etc/LatexMk fix, and VS Code settings. \item Fixed
+\changelogentry{3.4.0}{2026-09-11}{\item \inlinecode{install.sh}:
+opencode skills and VS Code LaTeX Workshop are now optional prompts
+(default yes). Removed LTeX extension (was failing to install).
+One-liner detects existing installation and prompts to update with
+version display (\inlinecode{v3.3.6 \$\to\$ v3.3.7}). Uses absolute
+paths to prevent nested clones. \item \inlinecode{uninstall.sh}: Added
+one-liner support (\inlinecode{curl \| bash}). Added \`\`Remove 100\\''
+nuclear option (option 4) to interactive menu. Added \inlinecode{--repo}
+flag. \item Updated Chapter 6 with optional component prompts and update
+detection. Updated Chapter 7 with one-liner update/uninstall and full
+menu documentation.} \changelogentry{3.3.0}{2026-09-11}{\item Moved
+pre-compiled setup guide to \inlinecode{setup-guide/} folder in repo
+root with all four formats (PDF, MD, DOCX, HTML). Users can read these
+before cloning to understand the installation process. \item Updated
+Makefile \inlinecode{setup-guide} target to generate and copy all four
+formats. \item Updated README with pre-compiled setup guide section and
+format comparison table. \item Updated .gitignore to track all four
+formats in \inlinecode{setup-guide/}.}
+\changelogentry{3.2.1}{2026-09-11}{\item Renamed Chapter 7 from
+\`\`Clean Up'' to \`\`Operations and Maintenance''. Added subsections
+for updating and uninstalling both the MaaS Gateway and the document
+templates. Added cloud resource cleanup as an optional subsection.}
+\changelogentry{3.2.0}{2026-09-11}{\item Added \inlinecode{uninstall.sh}
+script with interactive menu, \inlinecode{--all}, \inlinecode{--yes},
+and \inlinecode{--dry-run} flags. Removes opencode skills, .sty modules,
+HarmonyOS Sans font, /etc/LatexMk fix, and VS Code settings. \item Fixed
 \inlinecode{install.sh}: show apt-get output (was hidden), suppressed
 fvextra build noise, fix font detection (\inlinecode{fc-list : family}),
 fix test compilation paths (\inlinecode{src/} subdirectory), fix LTeX
 extension success/failure reporting. \item Updated Chapter 7 with
-uninstall instructions.} \changelogentry{3.1.2}{\today}{\item Added
+uninstall instructions.} \changelogentry{3.1.2}{2026-09-11}{\item Added
 output format guide to README.md: comparison table of PDF, Markdown,
 DOCX, and HTML with purpose, copy-paste quality, and limitations.
 Recommends Markdown for copy-paste.}
-\changelogentry{3.1.1}{\today}{\item Updated MaaS Gateway chapter to
+\changelogentry{3.1.1}{2026-09-11}{\item Updated MaaS Gateway chapter to
 v1.10.9: non-interactive mode (\inlinecode{-y}) now suppresses all
 prompts (prerequisites, tool selection, skill install). \item Changed
 project clone path from \inlinecode{\textasciitilde} (root home) to
 \inlinecode{/home} as default working directory. \item Added project
 standards to AGENTS.md: workflow, end-to-end validation, code style, git
-conventions, when unsure.} \changelogentry{3.1.0}{\today}{\item Switched
-from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider, flavor
-\inlinecode{x1.4u.16g}) --- more cost-efficient and robust. Updated
-creation steps to match Flexus X console order: billing mode first,
-vCPU/RAM slider (no flavor dropdown), Cloud Eye monitoring
+conventions, when unsure.} \changelogentry{3.1.0}{2026-09-11}{\item
+Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider,
+flavor \inlinecode{x1.4u.16g}) --- more cost-efficient and robust.
+Updated creation steps to match Flexus X console order: billing mode
+first, vCPU/RAM slider (no flavor dropdown), Cloud Eye monitoring
 (recommended), then instance name and key pair login. Replaced
 screenshots with Flexus X console images. \item Rewrote Chapter 3:
 switched from \inlinecode{connect.exe} to \inlinecode{ncat} (from Nmap)
@@ -1406,14 +1413,14 @@ renumbered. \item Added verification checklist tables to all 7 chapters.
 \item Added mandatory reboot warning in Chapter 2 (SSH port change).
 Added troubleshooting subsection in Chapter 4 with common SSH connection
 issues and ncat debugging commands.}
-\changelogentry{3.0.1}{\today}{\item Minor fixes: test-filter.sh
+\changelogentry{3.0.1}{2026-09-10}{\item Minor fixes: test-filter.sh
 auto-discovery, build.sh help text, Makefile aggregate descriptions,
 5-section comment correction, CHANGELOG version gap note,
 callout-in-code fix, CI font auto-discovery, dofile path comment,
-test-sync.sh header.} \changelogentry{3.0.0}{\today}{\item Modular
+test-sync.sh header.} \changelogentry{3.0.0}{2026-09-09}{\item Modular
 pipeline refactoring: shared Lua filter factory, shared DOCX fix logic,
 build system auto-discovery, unified format pipeline, GitHub Actions
-CI.} \changelogentry{2.16.0}{\today}{\item Updated to match template
+CI.} \changelogentry{2.16.0}{2026-09-05}{\item Updated to match template
 v2.16.0 — Lua filter fixes, build system updates, and technical template
 parity improvements.} \changelogentry{2.13.0}{2026-08-24}{ \item
 Foundation refactoring Phase 4: make DOCX \texttt{--fix} post-processing

@@ -8,24 +8,43 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CONVERTER="$REPO_ROOT/templates/_base/huawei-latex-converter.rb"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
-PASS=0; FAIL=0; SKIP=0
+PASS=0; FAIL=0
+CONVERT_ERR="$TMPDIR/convert-err.log"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
+# convert: feed an AsciiDoc snippet through the converter; echo the .tex output.
+# On failure, echoes nothing and captures stderr to $CONVERT_ERR (a file, which
+# persists across the command-substitution subshell). assert_* detect failure
+# via empty output and report the captured stderr.
 convert() {
   local adoc="$1"
   local adoc_file="$TMPDIR/test.adoc"
   printf '%s\n' "$adoc" > "$adoc_file"
-  if ! asciidoctor -b huawei-latex -r "$CONVERTER" "$adoc_file" -o "$TMPDIR/test.tex" 2>/dev/null; then
+  if ! asciidoctor -b huawei-latex -r "$CONVERTER" "$adoc_file" -o "$TMPDIR/test.tex" 2>"$CONVERT_ERR"; then
     echo ""
-    return 1
+    return 0
   fi
   cat "$TMPDIR/test.tex"
 }
 
+# _check_output: fail the test if output is empty (conversion failed).
+# Prints the captured stderr to aid diagnosis.
+_check_output() {
+  local label="$1" actual="$2"
+  if [[ -z "$actual" ]]; then
+    echo "  FAIL: $label (conversion failed or produced empty output)"
+    echo "        stderr: $(head -c 300 "$CONVERT_ERR" 2>/dev/null)"
+    FAIL=$((FAIL + 1))
+    return 1
+  fi
+  return 0
+}
+
 assert_contains() {
   local label="$1" expected="$2" actual="$3"
-  if printf '%s' "$actual" | grep -qF "$expected"; then
+  _check_output "$label" "$actual" || return 0
+  if printf '%s' "$actual" | grep -qF -- "$expected"; then
     echo "  PASS: $label"
     PASS=$((PASS + 1))
   else
@@ -37,7 +56,8 @@ assert_contains() {
 
 assert_not_contains() {
   local label="$1" unexpected="$2" actual="$3"
-  if printf '%s' "$actual" | grep -qF "$unexpected"; then
+  _check_output "$label" "$actual" || return 0
+  if printf '%s' "$actual" | grep -qF -- "$unexpected"; then
     echo "  FAIL: $label"
     echo "        expected NOT to contain: $unexpected"
     FAIL=$((FAIL + 1))
@@ -49,7 +69,8 @@ assert_not_contains() {
 
 assert_matches() {
   local label="$1" pattern="$2" actual="$3"
-  if printf '%s' "$actual" | grep -qE "$pattern"; then
+  _check_output "$label" "$actual" || return 0
+  if printf '%s' "$actual" | grep -qE -- "$pattern"; then
     echo "  PASS: $label"
     PASS=$((PASS + 1))
   else
@@ -563,7 +584,7 @@ OUT=$(convert '= Test
 :template: guide
 
 [.param]#my_param#')
-assert_contains "param role → param cmd" '\param{my_param}' "$OUT"
+assert_contains "param role → param cmd" '\param{my\_param}' "$OUT"
 
 OUT=$(convert '= Test
 :template: guide
@@ -604,8 +625,285 @@ assert_contains "objectives → end objectives"   '\end{objectives}'   "$OUT"
 assert_contains "objectives → content present"   'Understand the system' "$OUT"
 
 # ════════════════════════════════════════════════════════════════════════════
+## 17. Underscore escaping in prose
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 17. Underscore escaping in prose ==="
+
+OUT=$(convert '= Test
+:template: guide
+
+[.note]#my_var#')
+assert_contains "note role underscore → escaped" '\note{my\_var}' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+
+[.badge]#a_b#')
+assert_contains "badge role underscore → escaped" '\badge{a\_b}' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+
+* item x_y')
+assert_contains "list item underscore → escaped" '\item item x\_y' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+
+The my_var value.')
+assert_contains "paragraph underscore → escaped" 'my\_var' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable]
+|===
+| Col n_1 | Col B
+|===')
+assert_contains "table cell underscore → escaped" 'Col n\_1' "$OUT"
+
+# No double-escape: a backslash-escaped underscore in source stays \_, not \\_
+OUT=$(convert '= Test
+:template: guide
+
+Value one\_two here.')
+assert_contains "no double-escape → stays \_" 'one\_two' "$OUT"
+assert_not_contains "no double-escape → not \\_" 'one\\_two' "$OUT"
+
+# No double-escape: monospaced underscore survives escape_inline_content
+OUT=$(convert '= Test
+:template: guide
+
+Mono `my_var` in prose.')
+assert_contains "mono underscore escaped once" '\inlinecode{my\_var}' "$OUT"
+assert_not_contains "mono underscore not double-escaped" '\inlinecode{my\\_var}' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
+## 18. Cross-reference mechanism
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 18. Cross-reference mechanism ==="
+
+# Inline anchor [[a_b]] → \label{a-b}\hypertarget{a-b}{}
+OUT=$(convert '= Test
+:template: guide
+
+See [[a_b]] inline.')
+assert_contains "inline ref → label+hypertarget sanitized" '\label{a-b}\hypertarget{a-b}{}' "$OUT"
+
+# xref <<a_b,Text>> → \hyperlink{a-b}{Text}
+OUT=$(convert '= Test
+:template: guide
+
+See <<a_b,Text>> here.')
+assert_contains "xref with text → hyperlink sanitized" '\hyperlink{a-b}{Text}' "$OUT"
+
+# Section with explicit id emits \label{...}\hypertarget{...}
+OUT=$(convert '= Test
+:template: guide
+
+[[my_section]]
+== My Section
+
+Content.')
+assert_contains "section explicit id → anchor" '\label{my-section}\hypertarget{my-section}{}' "$OUT"
+# M1: anchor must appear AFTER the sectioning command (not before), because
+# \section is redefined to \clearpage\lg@origsection.
+assert_matches "section anchor after \\section" '\\section\{My Section\}\\label\{my-section\}' "$OUT"
+
+# Auto-generated section id also gets an anchor
+OUT=$(convert '= Test
+:template: guide
+
+== Some Section
+
+Content.')
+assert_contains "section auto id → anchor" '\hypertarget{' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
+## 19. Evidence list, kbd, footnote, badges
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 19. Evidence list, kbd, footnote, badges ==="
+
+# Evidence list uses \fbox{\,} not $\square$
+OUT=$(convert '= Test
+:template: guide
+
+[.evidence]
+* Item one')
+assert_contains "evidence list → fbox bullet" '\item[\fbox{\,}]' "$OUT"
+
+# kbd macro escapes special chars (requires :experimental:)
+OUT=$(convert '= Test
+:template: guide
+:experimental:
+
+kbd:[a&b]')
+assert_contains "kbd → inlinecode escaped" '\inlinecode{a\&b}' "$OUT"
+
+# Footnote escapes $ and & (and does not crash)
+OUT=$(convert '= Test
+:template: guide
+
+Costs footnote:[Costs $5 & up].')
+assert_contains "footnote → escaped" '\footnote{Costs \$5 \& up}' "$OUT"
+
+# POC result role ignores contradictory text
+OUT=$(convert '= Test
+:template: poc
+
+[.result-pass]#Fail#')
+assert_contains "result-pass ignores text" '\pocresult{Pass}' "$OUT"
+assert_not_contains "result-pass no leak" '\pocresult{Fail}' "$OUT"
+
+# badge-pass escapes special chars
+OUT=$(convert '= Test
+:template: testbook
+
+[.badge-pass]#P&ss#')
+assert_contains "badge-pass → escaped" '\testresultbadge{P\&ss}' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
+## 20. Coverage for previously-untested converters
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 20. Coverage for previously-untested converters ==="
+
+# Passthrough block emits raw content
+OUT=$(convert '= Test
+:template: guide
+
+++++
+\raw{latex}
+++++')
+assert_contains "pass → raw passthrough" '\raw{latex}' "$OUT"
+
+# Quote with attribution
+OUT=$(convert '= Test
+:template: guide
+
+[quote, Author Name]
+Quoted text.')
+assert_contains "quote attribution → --- Author" '--- Author Name' "$OUT"
+
+# Callout list
+OUT=$(convert '= Test
+:template: guide
+
+----
+code <1>
+----
+
+<1> First callout
+<2> Second callout')
+assert_contains "colist → item" '\item First callout' "$OUT"
+
+# Floating title → \section*
+OUT=$(convert '= Test
+:template: guide
+
+[discrete]
+== Discrete Title')
+assert_contains "floating_title → section*" '\section*{Discrete Title}' "$OUT"
+
+# Thematic break → \rule
+OUT=$(convert '= Test
+:template: guide
+
+Before.
+
+---
+
+After.')
+assert_contains "thematic_break → rule" '\rule{\linewidth}{0.5pt}' "$OUT"
+
+# Inline break → \\
+OUT=$(convert '= Test
+:template: guide
+
+Line one +
+Line two.')
+assert_contains "inline_break → \\\\" 'one\\' "$OUT"
+
+# Inline button → \textbf
+OUT=$(convert '= Test
+:template: guide
+:experimental:
+
+Press btn:[Save] now.')
+assert_contains "inline_button → textbf" '\textbf{Save}' "$OUT"
+
+# Example with title → infobox
+OUT=$(convert '= Test
+:template: guide
+
+.Basic example
+====
+Content here.
+====')
+assert_contains "example with title → infobox" '\begin{infobox}' "$OUT"
+assert_contains "example title present" 'Basic example' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
+## 21. Zero-width-space stripping & title entity resolution
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 21. ZWS strip & title entities ==="
+
+# Asciidoctor expands -- to em dash + U+200B; U+200B must be stripped.
+OUT=$(convert '= Test
+:template: guide
+
+After 5--30 minutes.')
+assert_contains "em dash present" '5—30' "$OUT"
+assert_not_contains "no zero-width space" $'\u200b' "$OUT"
+
+# Section title with -- and ... : entities resolved, no raw &#8212; leak
+OUT=$(convert '= Test
+:template: guide
+
+== Range 5--30...End
+
+Text.')
+assert_contains "section title em dash resolved" '\section{Range 5—30…End}' "$OUT"
+assert_not_contains "section title no entity leak" '&#8212;' "$OUT"
+
+# Document title with entities resolved
+OUT=$(convert '= My--Doc...Title
+:template: guide
+
+Text.')
+assert_contains "doctitle entities resolved" '\setdoctitle{My—Doc…Title}' "$OUT"
+
+# Floating title with entities resolved
+OUT=$(convert '= Test
+:template: guide
+
+[discrete]
+== Float--Title...X
+
+Text.')
+assert_contains "floating title entities resolved" '\section*{Float—Title…X}' "$OUT"
+
+# Image caption with entities resolved
+OUT=$(convert '= Test
+:template: guide
+
+.Cap--tion...Y
+image::arch.png[alt]')
+assert_contains "image caption entities resolved" '\imagecap{arch.png}{Cap—tion…Y}' "$OUT"
+
+# Example title with entities resolved
+OUT=$(convert '= Test
+:template: guide
+
+.Ex--ample...W
+====
+Body.
+====')
+assert_contains "example title entities resolved" 'Ex—ample…W' "$OUT"
+assert_not_contains "example title no entity leak" '&#8230;' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
 # Summary
-# ═══════════════════#═════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 exit $FAIL

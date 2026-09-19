@@ -33,6 +33,11 @@ LATEX_ESCAPES = {
 # Build a regex that matches any escapable character.
 LATEX_ESCAPE_RE = /[\\%$#&_{\}~^]/
 
+# Regex for escaping text specials (% $ # & ~ ^ _) NOT preceded by a backslash.
+# The lookbehind avoids double-escaping already-escaped output (\_, \%, \&)
+# that inline handlers emit before escape_inline_content re-processes it.
+LATEX_TEXT_ESCAPE_NO_BACKSLASH_RE = /(?<!\\)([%$#&~^_])/
+
 # --- Helper: escape LaTeX special characters in text ---
 def latex_escape(text)
   return '' if text.nil? || text.empty?
@@ -44,13 +49,24 @@ def unescape_html_entities(text)
   return text if text.nil? || text.empty?
   text.gsub(/(?<!\\)&lt;/, '<').gsub(/(?<!\\)&gt;/, '>').gsub(/(?<!\\)&quot;/, '"').gsub(/(?<!\\)&amp;/, '&')
       .gsub(/(?<!\\)&#(\d+);/) { |m| begin $1.to_i.chr(Encoding::UTF_8) rescue m end }
+      # Strip invisible chars: Asciidoctor appends U+200B (zero-width space) to
+      # --/... expansions (&#8212;&#8203; / &#8230;&#8203;); HarmonyOS Sans lacks
+      # the glyph and XeLaTeX emits "Missing character" warnings.
+      .gsub(/[\u200B\u2060\uFEFF]/, '')
+end
+
+# --- Helper: unescape HTML entities then escape LaTeX text specials ---
+# Escapes % $ # & ~ ^ _ (not braces/backslash) unless already backslash-escaped,
+# so already-escaped output (\_, \%, \&) from inline handlers is not double-escaped.
+def escape_text_string(text)
+  text = unescape_html_entities(text.to_s)
+  text.gsub(LATEX_TEXT_ESCAPE_NO_BACKSLASH_RE) { |ch| LATEX_ESCAPES[ch] }
 end
 
 # --- Helper: unescape entities then escape LaTeX special chars ---
 def process_text(text)
   return '' if text.nil? || text.empty?
-  text = unescape_html_entities(text)
-  text.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
+  escape_text_string(text)
 end
 
 # --- Helper: escape LaTeX special characters in URLs ---
@@ -58,6 +74,19 @@ end
 def latex_escape_url(url)
   return '' if url.nil? || url.empty?
   url.gsub(/[%_]/) { |ch| LATEX_ESCAPES[ch] }
+end
+
+# --- Helper: sanitize a cross-reference label for hyperref ---
+# Replaces '_' with '-' so labels are hyperref-safe. Both \label/\hypertarget
+# (anchor side) and \hyperlink (xref side) use this function so they always match.
+def sanitize_label(target)
+  target.to_s.gsub('_', '-')
+end
+
+# --- Helper: escape table cell content (may be Array or String) ---
+def escape_table_cell(content)
+  content = content.is_a?(Array) ? content.join : content.to_s
+  escape_text_string(content)
 end
 
 # Escape LaTeX special chars EXCEPT backslash (for inline text that may
@@ -179,14 +208,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines = []
     lines << "\\documentclass#{class_opt_str}{#{template}}"
     lines << ''
-    lines << "\\setdoctitle{#{latex_escape(doctitle)}}" if doctitle
-    lines << "\\setdocauthors{#{latex_escape(authors)}}" if authors && !noauthors
-    lines << "\\setdocversion{#{latex_escape(version)}}" if version
+    lines << "\\setdoctitle{#{escape_text_string(doctitle)}}" if doctitle
+    lines << "\\setdocauthors{#{escape_text_string(authors)}}" if authors && !noauthors
+    lines << "\\setdocversion{#{escape_text_string(version)}}" if version
     if revdate
-      lines << "\\setdocdate{#{latex_escape(revdate)}}"
+      lines << "\\setdocdate{#{escape_text_string(revdate)}}"
     end
-    lines << "\\setheadertitle{#{latex_escape(header_title)}}" if header_title
-    lines << "\\setcovertext{#{latex_escape(cover_text)}}" if cover_text
+    lines << "\\setheadertitle{#{escape_text_string(header_title)}}" if header_title
+    lines << "\\setcovertext{#{escape_text_string(cover_text)}}" if cover_text
     header_logo = node.attr('header-logo')
     if header_logo
       lines << "\\setheaderlogo{#{header_logo}}"
@@ -222,14 +251,25 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Level 0 is the document title (already in preamble)
     return '' if node.level == 0
 
-    title = latex_escape(node.title)
+    title = escape_text_string(node.title)
     body = node.content
+    # Emit a hyperref anchor so <<section-id>> cross-references resolve.
+    # Asciidoctor auto-generates ids for all sections; sanitize them so the
+    # same name is used here and by \hyperlink in convert_inline_anchor.
+    # The anchor goes AFTER the sectioning command: \section is redefined to
+    # \clearpage\lg@origsection (huawei-titles.sty), so an anchor before it
+    # would land on the previous page and \label would capture the wrong counter.
+    anchor = ''
+    if node.id && !node.id.empty?
+      label = sanitize_label(node.id)
+      anchor = "\\label{#{label}}\\hypertarget{#{label}}{}"
+    end
     case node.level
-    when 1 then "\\section{#{title}}\n#{body}"
-    when 2 then "\\subsection{#{title}}\n#{body}"
-    when 3 then "\\subsubsection{#{title}}\n#{body}"
-    when 4 then "\\paragraph{#{title}}\n#{body}"
-    else "\\paragraph{#{title}}\n#{body}"  # deeper levels map to \paragraph
+    when 1 then "\\section{#{title}}#{anchor}\n#{body}"
+    when 2 then "\\subsection{#{title}}#{anchor}\n#{body}"
+    when 3 then "\\subsubsection{#{title}}#{anchor}\n#{body}"
+    when 4 then "\\paragraph{#{title}}#{anchor}\n#{body}"
+    else "\\paragraph{#{title}}#{anchor}\n#{body}"  # deeper levels map to \paragraph
     end
   end
 
@@ -242,12 +282,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def escape_inline_content(node)
     content = node.content
     return '' if content.nil? || content.empty?
-    # Unescape HTML entities that asciidoctor adds (lookbehind avoids
-    # corrupting already-escaped LaTeX like \&lt;).
-    content = unescape_html_entities(content)
-    # Escape LaTeX special chars not preceded by a backslash.
-    # Don't escape { } — they appear in generated LaTeX commands from inline handlers.
-    content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
+    # Unescape HTML entities that asciidoctor adds, then escape LaTeX special
+    # chars not preceded by a backslash (avoids double-escaping generated
+    # commands like \textbf). Don't escape { } — they appear in generated LaTeX.
+    escape_text_string(content)
   end
 
   # --- PARAGRAPH — plain text paragraph ---
@@ -321,11 +359,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     unless rows_head.empty?
       rows_head.each do |header_row|
         header_cells = header_row.map do |cell|
-          content = cell.content
-          content = content.is_a?(Array) ? content.join : content.to_s
-          content = content = unescape_html_entities(content.is_a?(Array) ? content.join : content.to_s)
-          content = content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
-          "\\thd{#{content}}"
+          "\\thd{#{escape_table_cell(cell.content)}}"
         end
         lines << "\\rowcolor{huaweired} #{header_cells.join(' & ')} \\\\"
       end
@@ -339,10 +373,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       lines << '\\tbody'
       rows_body.each do |row|
         cells = row.map do |cell|
-          content = cell.content
-          content = content.is_a?(Array) ? content.join : content.to_s
-          content = unescape_html_entities(content)
-          content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
+          escape_table_cell(cell.content)
         end
         lines << "#{cells.join(' & ')} \\\\"
       end
@@ -351,10 +382,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Footer rows (rare, but handle them)
     rows_foot.each do |row|
       cells = row.map do |cell|
-        content = cell.content
-        content = content.is_a?(Array) ? content.join : content.to_s
-        content = unescape_html_entities(content)
-        content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
+        escape_table_cell(cell.content)
       end
       lines << "#{cells.join(' & ')} \\\\"
     end
@@ -363,7 +391,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
     # Wrap in \begin{table}[H] if there's a title (caption)
     if node.title?
-      caption = latex_escape(node.title)
+      caption = escape_text_string(node.title)
       wrapped = []
       wrapped << '\\begin{table}[H]'
       wrapped += lines
@@ -397,9 +425,9 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     if title && !title.empty?
       # Use \diagramcap for diagram-generated images, \imagecap for regular images
       if node.role && node.role.include?('diagram')
-        "\\diagramcap#{width_opt}{#{target}}{#{latex_escape(title)}}"
+        "\\diagramcap#{width_opt}{#{target}}{#{escape_text_string(title)}}"
       else
-        "\\imagecap#{width_opt}{#{target}}{#{latex_escape(title)}}"
+        "\\imagecap#{width_opt}{#{target}}{#{escape_text_string(title)}}"
       end
     else
       "\\image#{width_opt}{#{target}}"
@@ -413,7 +441,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       items = node.items.map do |item|
         text = process_text(item.text)
         nested = item.blocks.any? ? "\n#{item.content}" : ''
-        "\\item[$\\square$] #{text}#{nested}"
+        "\\item[\\fbox{\\,}] #{text}#{nested}"
       end
       "\\begin{itemize}[leftmargin=2.5em, itemsep=0.3em]\n#{items.join("\n")}\n\\end{itemize}"
     else
@@ -447,7 +475,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # (changelog uses passthrough blocks, not role-based dispatch)
     items = node.items.map do |terms, desc|
       term_text = terms.map(&:text).join(', ')
-      desc_text = desc ? desc.content : ''
+      desc_text = desc ? escape_text_string(desc.content) : ''
       "\\item[#{latex_escape(term_text)}] #{desc_text}"
     end
     "\\begin{description}\n#{items.join("\n")}\n\\end{description}"
@@ -465,7 +493,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def convert_example(node)
     content = node.content
     if node.title?
-      "\\begin{infobox}\n#{latex_escape(node.title)}\n\n#{content}\n\\end{infobox}"
+      "\\begin{infobox}\n#{escape_text_string(node.title)}\n\n#{content}\n\\end{infobox}"
     else
       content
     end
@@ -510,7 +538,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- FLOATING TITLE — unnumbered heading ---
   def convert_floating_title(node)
-    title = latex_escape(node.title)
+    title = escape_text_string(node.title)
     case node.level
     when 1 then "\\section*{#{title}}"
     when 2 then "\\subsection*{#{title}}"
@@ -565,14 +593,20 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       "\\weblink{#{latex_escape_url(target)}}{#{latex_escape(link_text)}}"
     when :xref
       # Cross-reference: <<anchor,text>>
-      target = node.target
+      # Asciidoctor stores the id in target with a leading '#' (internal refs);
+      # strip it so the name matches the \hypertarget emitted by convert_section.
+      target = node.target.to_s.sub(/\A#/, '')
       text   = node.text || target
-      "\\hyperlink{#{target}}{#{latex_escape(text)}}"
+      "\\hyperlink{#{sanitize_label(target)}}{#{latex_escape(text)}}"
     when :ref
-      # Anchor definition: [[id]]
-      "\\label{#{node.target}}"
+      # Anchor definition: [[id]] — Asciidoctor stores the id in node.id.
+      # Emit both \label (for \ref) and \hypertarget (for \hyperlink) under the
+      # same sanitized name so xrefs resolve regardless of mechanism.
+      label = sanitize_label(node.id)
+      "\\label{#{label}}\\hypertarget{#{label}}{}"
     when :bibref
-      "\\label{#{node.target}}"
+      label = sanitize_label(node.id)
+      "\\label{#{label}}\\hypertarget{#{label}}{}"
     else
       node.text || ''
     end
@@ -596,12 +630,15 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- INLINE CALLOUT ---
   def convert_inline_callout(node)
-    "\\textsuperscript{#{node.text}}"
+    "\\textsuperscript{#{latex_escape(node.text)}}"
   end
 
   # --- INLINE FOOTNOTE ---
+  # NOTE: footnoteref:[id] and a second footnote:id[] arrive as type :xref and
+  # currently emit a duplicate \footnote{} instead of a same-number reference.
+  # Known limitation, not handled (no sample uses footnote refs).
   def convert_inline_footnote(node)
-    "\\footnote{#{node.content}}"
+    "\\footnote{#{escape_text_string(node.text)}}"
   end
 
   # --- INLINE INDEX TERM ---
@@ -612,14 +649,16 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- INLINE KBD — keyboard input ---
   def convert_inline_kbd(node)
-    "\\inlinecode{#{node.text}}"
+    keys = node.attr('keys')
+    text = keys.is_a?(Array) ? keys.join('+') : keys.to_s
+    "\\inlinecode{#{escape_text_string(text)}}"
   end
 
   # --- INLINE MENU ---
   def convert_inline_menu(node)
     items = node.attr('menus')
     if items
-      "\\menu{#{items.join(', ')}}"
+      "\\menu{#{items.map { |i| latex_escape(i) }.join(', ')}}"
     else
       "\\textbf{#{latex_escape(node.text)}}"
     end
@@ -680,10 +719,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- [.menu]#A ▸ B# → \menu{A, B} ---
   def convert_role_menu(node)
-    text = node.text || node.content || ''
+    text = node.text || ''
     # Split on ▸ (U+25B8) or ▻ (U+25BB) or >>
     parts = text.split(/[▸▻]|>>/).map(&:strip).reject(&:empty?)
-    "\\menu{#{parts.join(', ')}}"
+    "\\menu{#{parts.map { |p| escape_text_string(p) }.join(', ')}}"
   end
 
   # --- [.note]#text# → \note{text} ---
@@ -698,19 +737,19 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- [.badge-pass]#Pass# → \testresultbadge{Pass} ---
   def convert_role_badge_pass(node)
-    "\\testresultbadge{#{node.text || 'Pass'}}"
+    "\\testresultbadge{#{process_text(node.text || 'Pass')}}"
   end
 
   def convert_role_badge_fail(node)
-    "\\testresultbadge{#{node.text || 'Fail'}}"
+    "\\testresultbadge{#{process_text(node.text || 'Fail')}}"
   end
 
   def convert_role_badge_blocked(node)
-    "\\testresultbadge{#{node.text || 'Blocked'}}"
+    "\\testresultbadge{#{process_text(node.text || 'Blocked')}}"
   end
 
   def convert_role_badge_untested(node)
-    "\\testresultbadge{#{node.text || 'Untested'}}"
+    "\\testresultbadge{#{process_text(node.text || 'Untested')}}"
   end
 
   # --- POC result badges → \pocresult{Pass|Partial|Fail|Skip} ---

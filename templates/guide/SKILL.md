@@ -282,6 +282,7 @@ Renders as **File** → **Save** → **As** (bold items joined by arrows).
 |---|---|
 | `**Note:** <text>` | Italic observation paragraph. |
 | `link:url[text]` | Blue (`#0000FF`), clickable link. |
+| `<<id,Link text>>` | Cross-reference to `[[id]]`; always provide text — bare `<<id>>` shows the raw id. |
 | `**Console**` | Bold — use for UI terms. |
 
 ### Changelog / Versioning
@@ -465,13 +466,16 @@ The following features are specific to the guide template:
        - `.latexmkrc` — with `TEXINPUTS` pointing to this template directory.
          From `documents/<project-name>/src/`, the relative path to
          `templates/guide/` is `../../../templates/guide/`:
-         ```perl
-         $ENV{TEXINPUTS} = "../../../templates/_base/:../../../templates/guide/:" . ($ENV{TEXINPUTS} || "");
-         $pdf_mode = 5;
-         $xelatex = 'xelatex -interaction=nonstopmode %O %S';
-         $out_dir = '..';
-         $aux_dir = '.';
-         ```
+          ```perl
+          # latexmkrc — use XeLaTeX by default (the class loads fontspec, so pdflatex won't work)
+          # TEXINPUTS: ../ for assets/ in parent, then ../../../ for templates from src/
+          $ENV{TEXINPUTS} = "../:../../../templates/_base/:../../../templates/guide/:" . ($ENV{TEXINPUTS} || "");
+          $ENV{TZ} = "America/Sao_Paulo";  # default TZ (GMT-3); projects can override
+          $pdf_mode = 5;    # 5 = xelatex
+          $xelatex = 'xelatex -interaction=nonstopmode %O %S';
+          $out_dir = '..';  # Output PDF to parent directory
+          $aux_dir = '.';   # Keep aux files in src/
+          ```
            - **Timezone:** default `America/Sao_Paulo` (AGENTS.md L4).
              Override in `.latexmkrc` if needed (see [README.md](../../README.md)).
            - **Output:** `$out_dir = '..'` sends the PDF to the parent directory;
@@ -538,7 +542,7 @@ confirm no glyphs are missing:
 
 ```sh
 make guide-pt                         # compile Portuguese sample
-grep -i "Missing character" documents/guide-pt/main.log   # must produce no output
+grep -i "Missing character" documents/guide-pt/src/main.log   # must produce no output
 ```
 
 XeLaTeX emits `Missing character: There is no <glyph>` for any code point the
@@ -616,6 +620,7 @@ See [templates/guide/README.md](README.md) for customization options
 4. Use AsciiDoc roles (`.objectives`, `.hutable`, `.badge`) and admonitions
    (`WARNING:`, `TIP:`, `NOTE:`) — not raw LaTeX commands.
 5. Use passthrough blocks (`++++`) only for changelog and testcase.
+   Passthrough blocks execute raw LaTeX — only use them for trusted content.
 6. After edits, compile and check the PDF (TOC + page numbers need the
    second pass).
 7. **After any content change, bump the version and add a changelog entry**

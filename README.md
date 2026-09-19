@@ -377,7 +377,8 @@ for the technical report template syntax reference.
     ├── test-filter.sh   # Lua filter unit tests (legacy, skipped)
     ├── round-trip.sh    # cross-format validation (MD + DOCX + HTML)
     ├── test-docx-fix.sh # DOCX --fix post-processing smoke test
-    └── test-sync.sh     # version + doc consistency check
+    ├── test-sync.sh     # version + doc consistency check
+    └── test-converter.sh # Ruby converter unit tests
 ```
 
 ## Adding a new template

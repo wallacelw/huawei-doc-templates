@@ -157,6 +157,8 @@ image::path[width=80%,title="Console login screen."]
 [.badge]#New#
 ```
 
+**Cross-references:** use `<<id,Link text>>` — always provide text; a bare `<<id>>` shows the raw id.
+
 ### Changelog / Versioning
 
 The changelog uses a LaTeX passthrough block.
@@ -369,8 +371,12 @@ is automatic — the next `testcase` will be "Testcase 2: ...").
 | `\begin{testprerequisites}...\end{testprerequisites}` | Prerequisites | Pré-requisitos | Yes |
 | `\begin{testprocedure}...\end{testprocedure}` | Procedure | Procedimento | Yes |
 | `\begin{testexpected}...\end{testexpected}` | Expected Result | Resultado Esperado | Yes |
+| `\teststep{<action>}` | Step (auto-numbered) | Passo (auto-numerado) | Yes |
 | `\testresult{...}` | Test Result | Resultado do Teste | No (hidden by `:noanswers:`) |
 | `\testremarks{...}` | Remarks | Observações | No (hidden by `:noanswers:`) |
+
+`\teststep` is used inside `testprerequisites`, `testprocedure`, and
+`testexpected` — each call auto-numbers (1, 2, 3, …) with a red bold number.
 
 ### Test list environment
 
@@ -457,13 +463,14 @@ gray for Untested. Used inside passthrough blocks.
        - `.latexmkrc` — with `TEXINPUTS` pointing to this template directory.
          From `documents/<project-name>/src/`, the relative path to
          `templates/testbook/` is `../../../templates/testbook/`:
-         ```perl
-         $ENV{TEXINPUTS} = "../../../templates/_base/:../../../templates/testbook/:" . ($ENV{TEXINPUTS} || "");
-         $pdf_mode = 5;
-         $xelatex = 'xelatex -interaction=nonstopmode %O %S';
-         $out_dir = '..';
-         $aux_dir = '.';
-         ```
+          ```perl
+          $ENV{TEXINPUTS} = "../:../../../templates/_base/:../../../templates/testbook/:" . ($ENV{TEXINPUTS} || "");
+          $ENV{TZ} = "America/Sao_Paulo";
+          $pdf_mode = 5;
+          $xelatex = 'xelatex -interaction=nonstopmode %O %S';
+          $out_dir = '..';
+          $aux_dir = '.';
+          ```
            - **Timezone:** default `America/Sao_Paulo` (AGENTS.md L4).
              Override in `.latexmkrc` if needed (see [README.md](../../README.md)).
            - **Output:** `$out_dir = '..'` sends the PDF to the parent directory;
@@ -610,7 +617,7 @@ Teste*, *Objetivo*, *Pré-requisitos*, *Procedimento*, *Resultado Esperado*,
 confirm no glyphs are missing:
 
 ```sh
-grep -i "Missing character" main.log   # must produce no output
+grep -i "Missing character" documents/testbook-pt/src/main.log   # must produce no output
 ```
 
 ### Project layout (this directory)
@@ -679,6 +686,7 @@ See [templates/testbook/README.md](README.md) for customization options
    domain with auto-numbered `testcase` passthrough blocks), Section 3 Conclusion
    (test summary passthrough block).
 5. Use passthrough blocks (`++++`) for testcase, testsummary, and changelog.
+   Passthrough blocks execute raw LaTeX — only use them for trusted content.
 6. Use AsciiDoc roles and admonitions for everything else (`.objectives`,
    `.hutable`, `.badge`, `WARNING:`, `TIP:`, `NOTE:`).
 7. After edits, compile and check the PDF (TOC + page numbers need the

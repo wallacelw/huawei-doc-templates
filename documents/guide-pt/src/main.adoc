@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Guia de acesso ao Console
 :cover-text: Huawei Technologies CO., LTD
-:version: 3.6.0
+:version: 3.6.1
 :header-logo: common-assets/huawei-logo-header.png
 :cover-logo: common-assets/huawei-logo-cover.png
 
@@ -280,10 +280,11 @@ graph TD
 
 ++++
 \begin{changelog}
-\changelogentry{3.6.0}{\today}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}
-\changelogentry{1.10.0}{\today}{\item Atualização para modelo base v3.0.1 — correções menores (auto-descoberta de testes, textos de ajuda, comentários, CI).}
-\changelogentry{1.9.0}{\today}{\item Atualização para modelo base v3.0.0 — refatoração modular do pipeline (fábrica Lua compartilhada, lógica DOCX compartilhada, auto-descoberta do sistema de build).}
-\changelogentry{1.8.0}{\today}{\item Atualização do modelo base v2.16.0 — correções do filtro Lua e melhorias no sistema de build.}
+\changelogentry{3.6.1}{2026-09-19}{\item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.}
+\changelogentry{3.6.0}{2026-09-16}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}
+\changelogentry{1.10.0}{2026-09-10}{\item Atualização para modelo base v3.0.1 — correções menores (auto-descoberta de testes, textos de ajuda, comentários, CI).}
+\changelogentry{1.9.0}{2026-09-09}{\item Atualização para modelo base v3.0.0 — refatoração modular do pipeline (fábrica Lua compartilhada, lógica DOCX compartilhada, auto-descoberta do sistema de build).}
+\changelogentry{1.8.0}{2026-09-05}{\item Atualização do modelo base v2.16.0 — correções do filtro Lua e melhorias no sistema de build.}
 \changelogentry{1.7.0}{2026-08-17}{\item Adicionar capítulo de Limpeza para paridade com a amostra em inglês.}
 \changelogentry{1.6.0}{2026-08-12}{\item O ambiente \texttt{changelog} agora emite seu próprio cabeçalho de seção; \texttt{[nochangelog]} suprime cabeçalho e entradas em um único comando.}
 \changelogentry{1.5.2}{2026-08-12}{\item Adicionada linha de verificação de acentuação PT-BR no infobox do exemplo (exercita todos os acentos do português).}

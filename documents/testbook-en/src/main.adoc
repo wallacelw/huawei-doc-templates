@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
 :cover-text: Huawei Technologies CO., LTD
-:version: 2.1.0
+:version: 2.1.1
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -46,7 +46,7 @@ specified in the solution architecture.#
 | Platform Architecture | Core services are deployed, healthy, and reachable via the Console API.
 | Data Engineering | DataArts Studio pipelines can ingest, transform, and load data into the target storage.
 | Data Storage | OBS buckets and MRS HDFS accept writes/reads with correct permissions.
-| Security & IAM policies, VPC isolation, and security group rules enforce the intended access control.
+| Security | IAM policies, VPC isolation, and security group rules enforce the intended access control.
 |===
 
 === Preconditions and Preparations
@@ -522,21 +522,25 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
-  \changelogentry{2.1.0}{\today}{
+  \changelogentry{2.1.1}{2026-09-19}{
+    \item Fixed changelog dates — replaced \inlinecode{\textbackslash today} with the actual historical release dates.
+    \item Fixed malformed row in the test-scope table (Security domain) — the first cell separator was missing.
+  }
+  \changelogentry{2.1.0}{2026-09-13}{
     \item Restructured document to 3-section layout: Introduction, Test Cases (with subsections per domain), and Conclusion (with test summary table).
     \item Removed manual TC-XXX prefixes from testcase titles — the environment auto-numbers them as "Test Case 1:", "Test Case 2:", etc.
     \item Updated testsummary IDs from TC-XXX to auto-numbered 1--10.
     \item Changed teststeps from tabular table to auto-numbered paragraphs. \inlinecode{\textbackslash teststep} now takes 1 arg (action only). Images, code blocks, and callouts can be placed freely between steps.
   }
-  \changelogentry{2.0.0}{\today}{
+  \changelogentry{2.0.0}{2026-09-13}{
     \item Redesigned testcase layout: full-width mini header bars for each field, testprocedure environment with 2-column step table, field order updated (Test Result before Remarks).
   }
-  \changelogentry{1.1.0}{\today}{
+  \changelogentry{1.1.0}{2026-09-12}{
     \item Added comprehensive feature demonstrations: \inlinecode{warning}, \inlinecode{tip}, \inlinecode{infobox} callouts; \inlinecode{code} blocks; \inlinecode{badge}; \inlinecode{weblink}; \inlinecode{note}; \inlinecode{param}; \inlinecode{image}, \inlinecode{imagecap}, and \inlinecode{imageplaceholder}; \inlinecode{menu} paths; and \inlinecode{inlinecode} references.
     \item Added Security and Access Control test cases.
     \item Added Environment Setup and Tooling test cases.
   }
-  \changelogentry{1.0.0}{\today}{
+  \changelogentry{1.0.0}{2026-09-12}{
     \item Initial version.
     \item Added Platform Architecture test cases.
     \item Added Data Engineering test cases.

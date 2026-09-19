@@ -150,6 +150,8 @@ image::path[width=80%,title="Console login screen."]
 menu:File[Save[As]]
 ```
 
+**Cross-references:** use `<<id,Link text>>` — always provide text; a bare `<<id>>` shows the raw id.
+
 ### Changelog
 
 ```asciidoc
@@ -163,6 +165,9 @@ menu:File[Save[As]]
 ```
 The `changelog` environment emits its own section heading. Use the
 `:nochangelog:` attribute to suppress it.
+
+**Security note:** passthrough blocks (`++++`) execute raw LaTeX — only use
+them for trusted content.
 
 ### Versioning workflow (for AI-assisted edits)
 
@@ -271,9 +276,8 @@ The following features are specific to the technical template:
 
 ### Technical report attributes
 
-| Attribute | Purpose | Example |
-|---|---|---|
-| `:reporttitle: ...` | Report title (shown on cover page). | `:reporttitle: [Analysis Report] ECS Issue` |
+The report title is set by the AsciiDoc level-0 heading (`= <title>`) — there
+are no technical-specific header attributes.
 
 Note: `:reportversion:`, `:reportdate:`, and `:reportscenario:` are **not**
 header attributes — the converter does not read them. Set them via
@@ -333,13 +337,16 @@ The `workaround` role contains six subsections:
        - `.latexmkrc` — with `TEXINPUTS` pointing to the template directories.
          From `documents/<project-name>/src/`, the relative path to
          `templates/technical/` is `../../../templates/technical/`:
-         ```perl
-         $ENV{TEXINPUTS} = "../../../templates/_base/:../../../templates/technical/:" . ($ENV{TEXINPUTS} || "");
-         $pdf_mode = 5;
-         $xelatex = 'xelatex -interaction=nonstopmode %O %S';
-         $out_dir = '..';
-         $aux_dir = '.';
-         ```
+          ```perl
+          # latexmkrc — use XeLaTeX by default (the class loads fontspec, so pdflatex won't work)
+          # TEXINPUTS: ../ for assets/ in parent, then ../../../ for templates from src/
+          $ENV{TEXINPUTS} = "../:../../../templates/_base/:../../../templates/technical/:" . ($ENV{TEXINPUTS} || "");
+          $ENV{TZ} = "America/Sao_Paulo";  # default TZ (GMT-3); projects can override
+          $pdf_mode = 5;    # 5 = xelatex
+          $xelatex = 'xelatex -interaction=nonstopmode %O %S';
+          $out_dir = '..';  # Output PDF to parent directory
+          $aux_dir = '.';   # Keep aux files in src/
+          ```
      - `assets/` subfolder for project-specific images.
 
 3. **Compile and verify** — generate all four output formats:
@@ -371,59 +378,59 @@ The `workaround` role contains six subsections:
 ++++
 
 [.problem]
---
+====
 <problem description and impact>
---
+====
 
 [.rootcauseanalysis]
---
+====
 <step-by-step analysis>
---
+====
 
 [.rootcause]
---
+====
 <identified root cause>
---
+====
 
 [.triggercondition]
---
+====
 <when the issue occurs>
---
+====
 
 [.workaround]
---
+====
 
 [.impact]
---
+----
 <impact of the workaround>
---
+----
 
 [.backupdata]
---
+----
 <backup steps or N/A>
---
+----
 
 [.workaroundsteps]
---
+----
 <step-by-step workaround>
---
+----
 
 [.verification]
---
+----
 <how to verify the fix>
---
+----
 
 [.rollback]
---
+----
 <how to undo the workaround>
---
+----
 
 [.cleanup]
---
+----
 <post-fix cleanup steps>
---
+----
 
---
+====
 
 
 ++++
