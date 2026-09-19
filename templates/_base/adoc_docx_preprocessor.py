@@ -111,7 +111,7 @@ def convert_inline_latex(text, lang='en'):
     labels = LABELS.get(lang, LABELS['en'])
 
     # Order matters: escape sequences first, then commands
-    text = text.replace(r'\textbackslash', '\\\\')
+    text = text.replace(r'\textbackslash', '\\')
     text = text.replace(r'\_', '_')
     text = text.replace(r'\&', '&')
     text = text.replace(r'\%', '%')
@@ -334,7 +334,7 @@ def _process_testcase_inner(inner, lang, labels, out):
             break
 
         # \testobjective{text}
-        if inner[pos:pos + 14] == r'\testobjective':
+        if inner.startswith(r'\testobjective{', pos):
             r = find_cmd(inner, 'testobjective', pos)
             if r:
                 arg, _, after = r
@@ -345,7 +345,7 @@ def _process_testcase_inner(inner, lang, labels, out):
                 continue
 
         # \testscope{text}
-        if inner[pos:pos + 11] == r'\testscope':
+        if inner.startswith(r'\testscope{', pos):
             r = find_cmd(inner, 'testscope', pos)
             if r:
                 arg, _, after = r
@@ -356,7 +356,7 @@ def _process_testcase_inner(inner, lang, labels, out):
                 continue
 
         # \testresult{...}
-        if inner[pos:pos + 12] == r'\testresult{':
+        if inner.startswith(r'\testresult{', pos):
             r = find_cmd(inner, 'testresult', pos)
             if r:
                 arg, _, after = r
@@ -367,7 +367,7 @@ def _process_testcase_inner(inner, lang, labels, out):
                 continue
 
         # \testremarks{text}
-        if inner[pos:pos + 12] == r'\testremarks':
+        if inner.startswith(r'\testremarks{', pos):
             r = find_cmd(inner, 'testremarks', pos)
             if r:
                 arg, _, after = r
@@ -378,7 +378,7 @@ def _process_testcase_inner(inner, lang, labels, out):
                 continue
 
         # \note{text}
-        if inner[pos:pos + 6] == r'\note{':
+        if inner.startswith(r'\note{', pos):
             r = find_cmd(inner, 'note', pos)
             if r:
                 arg, _, after = r
@@ -498,7 +498,7 @@ def _process_step_list(env_content, lang, out):
             break
 
         # \teststep{text}
-        if env_content[pos:pos + 10] == r'\teststep{':
+        if env_content.startswith(r'\teststep{', pos):
             r = find_cmd(env_content, 'teststep', pos)
             if r:
                 arg, _, after = r

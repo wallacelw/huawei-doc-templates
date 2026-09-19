@@ -4,6 +4,42 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.4.2 (2026-09-20)
+
+### DOCX pre-processor fixes
+
+- **Fixed dropped Test Scope fields**: off-by-one in the testcase handler's
+  string comparison (`inner[pos:pos + 11] == r'\testscope'` — 11-char slice vs
+  10-char string, never equal) silently dropped all `\testscope{}` content
+  from testbook DOCX output. Refactored all command checks to
+  `str.startswith(pattern, pos)` to eliminate the bug class.
+- **Backslash rendering**: `\textbackslash` now converts to a single `\` in
+  DOCX output (was `\\`), matching the PDF rendering.
+- **Content verification**: exhaustive check across all 4 samples (poc-pt,
+  poc-en, testbook-pt, testbook-en) confirms 0 missing items — every
+  stakeholder row, closing record row, signature cell, testcase field
+  (objective, scope, prerequisites, procedure, expected, result, remarks),
+  test step, summary row, and changelog entry from the source `.adoc`
+  reaches the DOCX output.
+
+## v6.4.1 (2026-09-20)
+
+### DOCX pre-processor for POC and testbook templates
+
+- **New: `templates/_base/adoc_docx_preprocessor.py`** — transforms passthrough
+  LaTeX blocks (stakeholders, closingrecord, signatures, testcase, testsummary,
+  changelog) and custom roles (result badges, evidence, activities, objectives)
+  to AsciiDoc-native syntax before docbook conversion, recovering content that
+  was previously lost in DOCX output (POC 226→460 lines, testbook 493→783
+  lines).
+- **Extended `docx_fix.py`**: individual result badge character styles
+  (BadgePass/Fail/Partial/Skip/New/Blocked/Untested) with brand colors; hutable
+  table styling (red header row, alternating rows, full grid borders);
+  automatic badge marker detection and style application.
+- **Integrated into `build.sh`**: pre-processor runs before
+  `asciidoctor -b docbook` for poc and testbook templates, with graceful
+  fallback to the original `.adoc` if pre-processing fails.
+
 ## v6.4.0 (2026-09-20)
 
 ### Council improvement review + oracle quality pass

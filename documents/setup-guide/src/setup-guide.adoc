@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.4.0
+:version: 6.4.2
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.4.2}{2026-09-20}{\item DOCX output for POC and testbook templates now includes all passthrough content (stakeholders, closing record, signatures, test cases, test summary, changelog) via a new pre-processor. Fixed dropped Test Scope fields in testbook DOCX output.}
   \changelogentry{6.4.0}{2026-09-20}{\item Fixed changelog dates — replaced \inlinecode{\textbackslash today} with historical release dates. Eliminated zero-width-space missing-glyph warnings from typographic substitutions.}
   \changelogentry{5.1.1}{2026-09-14}{\item Synced callout colors in DOCX/HTML/MD output to match brand palette. Added color palette demo.}
   \changelogentry{5.1.0}{2026-09-14}{\item Adopted brand guidelines auxiliary color palette and monochrome scale. Aligned callout colors to brand specifications.}
