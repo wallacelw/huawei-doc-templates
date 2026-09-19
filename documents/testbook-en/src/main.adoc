@@ -44,7 +44,7 @@ specified in the solution architecture.#
 | Domain | What Should Be Observed
 
 | Platform Architecture | Core services are deployed, healthy, and reachable via the Console API.
-| Data Engineering & DataArts Studio pipelines can ingest, transform, and load data into the target storage.
+| Data Engineering | DataArts Studio pipelines can ingest, transform, and load data into the target storage.
 | Data Storage | OBS buckets and MRS HDFS accept writes/reads with correct permissions.
 | Security & IAM policies, VPC isolation, and security group rules enforce the intended access control.
 |===

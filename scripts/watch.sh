@@ -32,6 +32,7 @@ recompile() {
 }
 
 if command -v entr >/dev/null 2>&1; then
+    export -f recompile
     find "$srcdir" -name "*.adoc" | entr -s "recompile"
 elif command -v inotifywait >/dev/null 2>&1; then
     while true; do

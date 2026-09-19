@@ -373,11 +373,11 @@ generate_docx() {
         # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
         local tmp_dbk
         tmp_dbk=$(mktemp --suffix=.dbk)
-        asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null
-        if [ $? -eq 0 ] && pandoc -f docbook --reference-doc="$REF_DOCX" \
-            --number-sections \
-            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
-            "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
+        if asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null && \
+           pandoc -f docbook --reference-doc="$REF_DOCX" \
+             --number-sections \
+             --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
+             "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
             rm -f "$tmp_dbk"
         else
             rm -f "$tmp_dbk"
@@ -419,8 +419,8 @@ generate_md() {
         # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
         local tmp_dbk
         tmp_dbk=$(mktemp --suffix=.dbk)
-        asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null
-        if [ $? -eq 0 ] && pandoc -f docbook -t gfm "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
+        if asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null && \
+           pandoc -f docbook -t gfm "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
             rm -f "$tmp_dbk"
         else
             rm -f "$tmp_dbk"

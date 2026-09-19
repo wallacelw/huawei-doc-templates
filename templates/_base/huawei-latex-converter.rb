@@ -42,8 +42,8 @@ end
 # --- Helper: unescape HTML entities that asciidoctor adds ---
 def unescape_html_entities(text)
   return text if text.nil? || text.empty?
-  text.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&quot;', '"').gsub('&amp;', '&')
-      .gsub(/&#(\d+);/) { |m| begin $1.to_i.chr(Encoding::UTF_8) rescue m end }
+  text.gsub(/(?<!\\)&lt;/, '<').gsub(/(?<!\\)&gt;/, '>').gsub(/(?<!\\)&quot;/, '"').gsub(/(?<!\\)&amp;/, '&')
+      .gsub(/(?<!\\)&#(\d+);/) { |m| begin $1.to_i.chr(Encoding::UTF_8) rescue m end }
 end
 
 # --- Helper: unescape entities then escape LaTeX special chars ---
@@ -51,6 +51,13 @@ def process_text(text)
   return '' if text.nil? || text.empty?
   text = unescape_html_entities(text)
   text.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
+end
+
+# --- Helper: escape LaTeX special characters in URLs ---
+# Escapes % and _ which are TeX-special in URLs. Hyperref handles # and &, / : . - ? = ~ internally.
+def latex_escape_url(url)
+  return '' if url.nil? || url.empty?
+  url.gsub(/[%_]/) { |ch| LATEX_ESCAPES[ch] }
 end
 
 # Escape LaTeX special chars EXCEPT backslash (for inline text that may
@@ -130,7 +137,6 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     when 'inline_indexterm' then convert_inline_indexterm(node)
     when 'inline_kbd'      then convert_inline_kbd(node)
     when 'inline_menu'     then convert_inline_menu(node)
-    when 'inline_pass'     then node.text
     when 'icon'            then convert_icon(node)
 
     # List items — just return their text content
@@ -236,10 +242,9 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def escape_inline_content(node)
     content = node.content
     return '' if content.nil? || content.empty?
-    # Unescape HTML entities that asciidoctor adds
-    content = content.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&quot;', '"').gsub('&amp;', '&')
-    # Unescape numeric HTML entities (smart quotes, dashes, etc.)
-    content = content.gsub(/&#(\d+);/) { |m| begin $1.to_i.chr(Encoding::UTF_8) rescue m end }
+    # Unescape HTML entities that asciidoctor adds (lookbehind avoids
+    # corrupting already-escaped LaTeX like \&lt;).
+    content = unescape_html_entities(content)
     # Escape LaTeX special chars not preceded by a backslash.
     # Don't escape { } — they appear in generated LaTeX commands from inline handlers.
     content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
@@ -271,15 +276,13 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       end
     end
 
-    # Check for include:: directive inside source block → \codefile
-    source = node.source || ''
-    if source.include?('include::')
-      includes = source.scan(/include::([^\[]+)/).map(&:first)
-      return includes.map { |f| "\\codefile{#{f}}" }.join("\n")
-    end
+    # Only the explicit [.codefile] role triggers \codefile conversion.
+    # (Do NOT scan for include:: in source — it's literal text inside
+    # code blocks, not an AsciiDoc directive.)
 
     language = node.attr('language')
     # Code content is verbatim — use raw source, no escaping
+    source = node.source || ''
     code_text = source
 
     if language
@@ -302,7 +305,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Use p{...} columns with auto-wrap instead of l (natural width)
     # Equal-width columns computed from \linewidth
     width_expr = "\\dimexpr(\\linewidth-#{num_cols+1}\\arrayrulewidth-#{2*num_cols}\\tabcolsep)/#{num_cols}\\relax"
-    col_spec = "|>{\\RaggedRight\\arraybackslash}m{#{width_expr}}|" * num_cols
+    col_spec = "|>{\\RaggedRight\\arraybackslash}m{#{width_expr}}" * num_cols + "|"
 
     env_name = role == 'longhutable' ? 'longhutable' : 'hutable'
 
@@ -320,7 +323,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
         header_cells = header_row.map do |cell|
           content = cell.content
           content = content.is_a?(Array) ? content.join : content.to_s
-          content = content.gsub('&amp;', '&').gsub(/(?<!\\)&/) { '\\&' }
+          content = content = unescape_html_entities(content.is_a?(Array) ? content.join : content.to_s)
+          content = content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
           "\\thd{#{content}}"
         end
         lines << "\\rowcolor{huaweired} #{header_cells.join(' & ')} \\\\"
@@ -337,7 +341,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
         cells = row.map do |cell|
           content = cell.content
           content = content.is_a?(Array) ? content.join : content.to_s
-          content.gsub('&amp;', '&').gsub(/(?<!\\)&/) { '\\&' }
+          content = unescape_html_entities(content)
+          content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
         end
         lines << "#{cells.join(' & ')} \\\\"
       end
@@ -348,7 +353,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       cells = row.map do |cell|
         content = cell.content
         content = content.is_a?(Array) ? content.join : content.to_s
-        content.gsub('&amp;', '&').gsub(/(?<!\\)&/) { '\\&' }
+        content = unescape_html_entities(content)
+        content.gsub(/(?<!\\)([%$#&~^])/) { |ch| LATEX_ESCAPES[ch] }
       end
       lines << "#{cells.join(' & ')} \\\\"
     end
@@ -555,8 +561,8 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       target = node.target
       # Get link text; fall back to URL itself
       link_text = node.text.nil? || node.text.empty? ? target : node.text
-      # Don't escape URLs
-      "\\weblink{#{target}}{#{latex_escape(link_text)}}"
+      # Escape TeX-special chars in URL (%, #, &, _) but not URL-valid chars
+      "\\weblink{#{latex_escape_url(target)}}{#{latex_escape(link_text)}}"
     when :xref
       # Cross-reference: <<anchor,text>>
       target = node.target
@@ -634,7 +640,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
     node.blocks.each do |block|
       if block.role == 'general-objective'
-        lines << "\\generalobjective{#{block.text}}"
+        lines << "\\generalobjective{#{process_text(block.text)}}"
       elsif block.role == 'prerequisites'
         lines << '\\prerequisites'
         # Prerequisites items — render as itemize
@@ -648,7 +654,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
           end
         end
       elsif block.role == 'objective'
-        lines << "\\objective{#{block.text}}"
+        lines << "\\objective{#{process_text(block.text)}}"
       elsif block.role == 'stepbystep'
         lines << '\\stepbystep'
       else
@@ -669,7 +675,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- [.badge]#text# → \badge{text} ---
   def convert_role_badge(node)
-    "\\badge{#{latex_escape_text(node.text)}}"
+    "\\badge{#{process_text(node.text)}}"
   end
 
   # --- [.menu]#A ▸ B# → \menu{A, B} ---
@@ -682,12 +688,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- [.note]#text# → \note{text} ---
   def convert_role_note(node)
-    "\\note{#{latex_escape_text(node.text)}}"
+    "\\note{#{process_text(node.text)}}"
   end
 
   # --- [.param]#text# → \param{text} ---
   def convert_role_param(node)
-    "\\param{#{latex_escape_text(node.text)}}"
+    "\\param{#{process_text(node.text)}}"
   end
 
   # --- [.badge-pass]#Pass# → \testresultbadge{Pass} ---

@@ -278,7 +278,7 @@ All evidence collected and organized in the evidence package. Some screenshots n
 
 ++++
 \begin{closingrecord}
-\closingrow{Preliminary result}{\checkbox{\lg@pochomologated} \checkbox{\lg@pocwithreservations} \checkbox{\lg@pocnothomologated}}
+\closingrow{Preliminary result}{\checkbox{\pochomologated} \checkbox{\pocwithreservations} \checkbox{\pocnothomologated}}
 \closingrow{Critical pending items}{None}
 \closingrow{Deadline for complementary evidence}{2026-10-15}
 \closingrow{Responsible parties}{Jane Doe, John Smith}

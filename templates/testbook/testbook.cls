@@ -27,7 +27,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.2.7]
+\ProvidesClass{testbook}[2026/09/18 Huawei Test Book template v6.3.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -65,6 +65,7 @@
 \RequirePackage{booktabs}
 \RequirePackage{array}
 \RequirePackage{tabularx}
+\RequirePackage{ragged2e}
 \RequirePackage{babel}
 \if@portuguese
   \babelprovide[import,main]{brazilian}

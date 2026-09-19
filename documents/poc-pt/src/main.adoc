@@ -277,7 +277,7 @@ Evidências coletadas e organizadas no pacote. Algumas capturas de tela precisam
 
 ++++
 \begin{closingrecord}
-\closingrow{Resultado preliminar}{\checkbox{\lg@pochomologated} \checkbox{\lg@pocwithreservations} \checkbox{\lg@pocnothomologated}}
+\closingrow{Resultado preliminar}{\checkbox{\pochomologated} \checkbox{\pocwithreservations} \checkbox{\pocnothomologated}}
 \closingrow{Pendências críticas}{Nenhuma}
 \closingrow{Prazo para evidências complementares}{2026-10-15}
 \closingrow{Responsáveis}{Pedro Oliveira, Carlos Santos}

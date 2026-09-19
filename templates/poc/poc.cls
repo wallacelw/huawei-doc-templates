@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.2.7]
+\ProvidesClass{poc}[2026/09/18 Huawei POC template v6.3.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -65,6 +65,7 @@
 \RequirePackage{booktabs}
 \RequirePackage{array}
 \RequirePackage{tabularx}
+\RequirePackage{ragged2e}
 \RequirePackage{babel}
 \if@portuguese
   \babelprovide[import,main]{brazilian}
@@ -113,6 +114,10 @@
   \newcommand{\lg@pochomologated}{Homologada}
   \newcommand{\lg@pocwithreservations}{Homologada com ressalvas}
   \newcommand{\lg@pocnothomologated}{Não homologada}
+  % User-facing aliases (no @) for use in passthrough blocks
+  \newcommand{\pochomologated}{\lg@pochomologated}
+  \newcommand{\pocwithreservations}{\lg@pocwithreservations}
+  \newcommand{\pocnothomologated}{\lg@pocnothomologated}
 \else
   % POC result labels
   \newcommand{\lg@pocpass}{Pass}
@@ -129,6 +134,10 @@
   \newcommand{\lg@pochomologated}{Homologated}
   \newcommand{\lg@pocwithreservations}{With reservations}
   \newcommand{\lg@pocnothomologated}{Not homologated}
+  % User-facing aliases (no @) for use in passthrough blocks
+  \newcommand{\pochomologated}{\lg@pochomologated}
+  \newcommand{\pocwithreservations}{\lg@pocwithreservations}
+  \newcommand{\pocnothomologated}{\lg@pocnothomologated}
 \fi
 
 % ---- Cover ----------------------------------------------------------
@@ -215,7 +224,7 @@
 % Final classification table with checkboxes.
 % Usage (passthrough block):
 %   \begin{closingrecord}
-%   \closingrow{Preliminary result}{\checkbox{Homologated} \checkbox{With reservations}}
+%   \closingrow{Preliminary result}{\checkbox{\pochomologated} \checkbox{\pocwithreservations}}
 %   \closingrow{Critical pending items}{}
 %   \closingrow{Deadline for evidence}{2026-12-31}
 %   \closingrow{Responsibles}{Jane Doe}
@@ -236,7 +245,7 @@
   \par
 }
 \newcommand{\closingrow}[2]{#1 & #2 \\ \hline}
-\newcommand{\checkbox}[1]{$\square$~#1}
+\newcommand{\checkbox}[1]{\fbox{\,}~#1}
 
 % =====================================================================
 %  SIGNATURES

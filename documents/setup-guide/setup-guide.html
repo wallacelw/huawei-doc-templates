@@ -1462,7 +1462,7 @@ The first connection installs the VS Code Server on the remote instance, which
 requires outbound internet access on port 443 (HTTPS). The Flexus X instance
 has an EIP, so it typically has outbound internet access. If the connection
 hangs during server installation, verify with
-<code>curl -sI <a href="https://update.code.visualstudio.com" class="bare">https://update.code.visualstudio.com</a></code> from the instance.
+<code>curl -sI pass:https://update.code.visualstudio.com</code> from the instance.
 </td>
 </tr>
 </table>
@@ -1498,7 +1498,7 @@ user only.</p>
 <li>
 <p><strong>VS Code hangs on first connect</strong> --- instance cannot reach
 internet on port 443. <strong>Fix:</strong> verify
-<code>curl -sI <a href="https://update.code.visualstudio.com" class="bare">https://update.code.visualstudio.com</a></code> from the
+<code>curl -sI pass:https://update.code.visualstudio.com</code> from the
 instance.</p>
 </li>
 <li>
@@ -2868,7 +2868,7 @@ secondary text:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-09-19 05:28:38 +0800
+Last updated 2026-09-19 11:57:54 +0800
 </div>
 </div>
 </body>

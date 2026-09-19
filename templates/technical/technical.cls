@@ -30,7 +30,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/18 Huawei Technical Report template v6.2.7]
+\ProvidesClass{technical}[2026/09/18 Huawei Technical Report template v6.3.0]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse
@@ -65,6 +65,7 @@
 \RequirePackage{etoolbox}
 \RequirePackage{booktabs}
 \RequirePackage{array}
+\RequirePackage{ragged2e}
 \RequirePackage{babel}
 \if@portuguese
   \babelprovide[import,main]{brazilian}
@@ -88,6 +89,7 @@
 \RequirePackage{huawei-changelog}
 \RequirePackage{huawei-titles}
 \RequirePackage{huawei-toc}
+\RequirePackage{huawei-cover}
 \RequirePackage{huawei-shared}
 
 % ---- Titles (shared) ----------------------------------------------
@@ -161,24 +163,15 @@
 % =====================================================================
 %  COVER PAGE
 % =====================================================================
-% Compilation time from \time primitive
-\newcount\lg@hour
-\newcount\lg@min
-\newcount\lg@tmp
-\lg@hour=\time
-\divide\lg@hour by 60
-\lg@tmp=\lg@hour
-\multiply\lg@tmp by 60
-\lg@min=\time
-\advance\lg@min by -\lg@tmp
-\newcommand{\lg@covermeta}{%
+% \lg@hour, \lg@min, \lg@tmp are already allocated by huawei-cover.sty
+\renewcommand{\lg@covermeta}{%
   \ifx\lg@reportversion\@empty\else\textbf{v\lg@reportversion}\fi
   \ifx\lg@reportversion\@empty\else\ifx\lg@reportdate\@empty\else\ — \fi\fi
   \ifx\lg@reportdate\@empty\else\lg@reportdate\fi
   \if@showtime\ \two@digits{\lg@hour}:\two@digits{\lg@min}\fi%
 }
 
-\newcommand{\makecover}{%
+\renewcommand{\makecover}{%
   \begingroup
   \leftskip=0pt\relax
   \thispagestyle{empty}%

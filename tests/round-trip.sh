@@ -158,11 +158,12 @@ with open(md_file) as f:
     lines = f.readlines()
 
 # Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# Also excludes common LaTeX commands that appear inside passthrough blocks.
+# These are LaTeX commands that appear in passthrough blocks by design.
+# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
 EXCLUDED = [
     r"\\begin\{changelog\}", r"\\end\{changelog\}",
     r"\\changelogentry",
-    r"\\textbackslash", r"\\textbf",
+    r"\\textbackslash",
     r"\\begin\{testcase\}", r"\\end\{testcase\}",
     r"\\begin\{testsummary\}", r"\\end\{testsummary\}",
     r"\\testsummaryrow", r"\\testresultbadge",
@@ -180,8 +181,6 @@ EXCLUDED = [
     r"\\signaturecell",
     r"\\pocresult",
     r"\\checkbox",
-    r"\\lg@",
-    r"\\today", r"\\item",
     r"\\begin\{activities\}", r"\\end\{activities\}",
     r"\\begin\{evidence\}", r"\\end\{evidence\}",
     r"\\begin\{objectiveblock\}", r"\\end\{objectiveblock\}",
@@ -241,11 +240,12 @@ doc_xml = sys.argv[1]
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 # Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# Also excludes common LaTeX commands that appear inside passthrough blocks.
+# These are LaTeX commands that appear in passthrough blocks by design.
+# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
 EXCLUDED = [
     r"\\begin\{changelog\}", r"\\end\{changelog\}",
     r"\\changelogentry",
-    r"\\textbackslash", r"\\textbf",
+    r"\\textbackslash",
     r"\\begin\{testcase\}", r"\\end\{testcase\}",
     r"\\begin\{testsummary\}", r"\\end\{testsummary\}",
     r"\\testsummaryrow", r"\\testresultbadge",
@@ -263,8 +263,6 @@ EXCLUDED = [
     r"\\signaturecell",
     r"\\pocresult",
     r"\\checkbox",
-    r"\\lg@",
-    r"\\today", r"\\item",
     r"\\begin\{activities\}", r"\\end\{activities\}",
     r"\\begin\{evidence\}", r"\\end\{evidence\}",
     r"\\begin\{objectiveblock\}", r"\\end\{objectiveblock\}",
@@ -367,8 +365,8 @@ for entry in "${SAMPLES[@]}"; do
   # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
   # Fallback: pandoc -f latex+raw_tex from generated .tex
   tmp_dbk=$(mktemp --suffix=.dbk)
-  asciidoctor -b docbook "$src_file" -o "$tmp_dbk" 2>/dev/null
-  if [ $? -eq 0 ] && pandoc -f docbook -t gfm "$tmp_dbk" -o "$RT_TMPDIR/rt.md" 2>/dev/null; then
+  if asciidoctor -b docbook "$src_file" -o "$tmp_dbk" 2>/dev/null && \
+     pandoc -f docbook -t gfm "$tmp_dbk" -o "$RT_TMPDIR/rt.md" 2>/dev/null; then
     : # success
   else
     pandoc -f latex+raw_tex "$tex_file" -t gfm -o "$RT_TMPDIR/rt.md" 2>/dev/null || true
@@ -386,11 +384,11 @@ for entry in "${SAMPLES[@]}"; do
     # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
     # Fallback: pandoc -f latex+raw_tex from generated .tex
     tmp_dbk=$(mktemp --suffix=.dbk)
-    asciidoctor -b docbook "$src_file" -o "$tmp_dbk" 2>/dev/null
-    if [ $? -eq 0 ] && pandoc -f docbook \
-      --reference-doc="$REF_DOCX" --number-sections \
-      --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
-      "$tmp_dbk" -o "$docx_outdir/${basename}.docx" 2>/dev/null; then
+    if asciidoctor -b docbook "$src_file" -o "$tmp_dbk" 2>/dev/null && \
+       pandoc -f docbook \
+       --reference-doc="$REF_DOCX" --number-sections \
+       --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
+       "$tmp_dbk" -o "$docx_outdir/${basename}.docx" 2>/dev/null; then
       : # success
     else
       pandoc -f latex+raw_tex "$tex_file" \
@@ -440,14 +438,21 @@ for entry in "${SAMPLES[@]}"; do
 
   # ── Cross-format consistency ───────────────────────────────────────────
 
-  # H1: ±15 tolerance (HTML template uses different heading structure than MD/DOCX)
-  # setup-guide has more divergence due to many chapters + code blocks
-  h1_tol=15
-  if [ "$name" = "setup-guide" ]; then h1_tol=15; fi
+  # H1: ±5 tolerance (HTML template uses different heading structure than MD/DOCX;
+  # HTML puts doc title in <h1> and chapters in <h2>, MD/DOCX use H1 for chapters)
+  h1_tol=5
+  # poc has many sections → larger HTML heading shift (max_diff=14)
+  if [[ "$name" == *"poc"* ]]; then h1_tol=14; fi
+  # setup-guide: many chapters → larger HTML heading shift (max_diff=7)
+  if [ "$name" = "setup-guide" ]; then h1_tol=8; fi
   check_tol3 "H1 count (MD/HTML/DOCX)" "$md_h1" "$html_h1" "$docx_h1" "$h1_tol"
 
-  # H2: ±25 tolerance (HTML template heading structure differs from MD/DOCX)
-  check_tol3 "H2 count (MD/HTML/DOCX)" "$md_h2" "$html_h2" "$docx_h2" 25
+  # H2: ±10 tolerance (HTML template heading structure differs from MD/DOCX;
+  # HTML shifts all headings down one level, so H2 diff ≈ H1 count)
+  h2_tol=10
+  # setup-guide: many chapters → larger cumulative shift (max_diff=20)
+  if [ "$name" = "setup-guide" ]; then h2_tol=20; fi
+  check_tol3 "H2 count (MD/HTML/DOCX)" "$md_h2" "$html_h2" "$docx_h2" "$h2_tol"
 
   # Images: ±3 tolerance (MD pipeline may not handle all images)
   img_tol=3
@@ -461,9 +466,12 @@ for entry in "${SAMPLES[@]}"; do
   # DOCX may overcount because each SourceCode line is a separate paragraph and
   # non-contiguous lines (e.g. separated by list items) count as separate blocks.
   # Primary comparison: HTML vs DOCX (tighter); MD is informational.
-  # setup-guide has many code blocks across 8 chapters — wider divergence
-  code_tol=25
-  if [ "$name" = "setup-guide" ]; then code_tol=45; fi
+  # Default ±10: HTML and DOCX counts should be close for most documents.
+  # setup-guide has many code blocks across 8 chapters — wider divergence (±20)
+  code_tol=10
+  # setup-guide: HTML has 0 code blocks (asciidoctor doesn't emit <pre><code> for
+  # some listings), DOCX has ~37 SourceCode runs → large diff (max_diff=37)
+  if [ "$name" = "setup-guide" ]; then code_tol=37; fi
   check_tol "Code blocks HTML vs DOCX" "$html_code" "$docx_code_blocks" "$code_tol"
 
   # Tables + callouts combined comparison.
@@ -480,15 +488,19 @@ for entry in "${SAMPLES[@]}"; do
   md_tc=$((md_tables + md_callouts))
   html_tc=$((html_tables + html_callouts))
   docx_tc=$docx_tables
-  # HTML renders callouts as divs with classes, MD as blockquotes — large divergence
-  tc_tol=10
-  if [ "$name" = "setup-guide" ]; then tc_tol=35; fi
+  # HTML renders callouts as divs with classes, MD as blockquotes — divergence
+  # Default ±5: most documents have moderate callout/table divergence
+  tc_tol=5
+  # guide: HTML renders objectives as callout divs, MD doesn't (max_diff=8)
+  if [[ "$name" == *"guide"* ]]; then tc_tol=8; fi
+  # setup-guide: many callouts where MD blockquote keyword matching undercounts (max_diff=32)
+  if [ "$name" = "setup-guide" ]; then tc_tol=32; fi
   # testbook uses definition lists for testcases (v4.0+), which render
   # as grid tables in MD (header+footer separators counted separately)
   # but as regular tables in HTML/DOCX. Wider tolerance needed.
-  if [[ "$name" == *"testbook"* ]]; then tc_tol=15; fi
-  # poc renders stakeholders/signatures as tables in HTML but not MD/DOCX
-  if [[ "$name" == *"poc"* ]]; then tc_tol=15; fi
+  if [[ "$name" == *"testbook"* ]]; then tc_tol=10; fi
+  # poc renders stakeholders/signatures as tables in HTML but not MD/DOCX (max_diff=11)
+  if [[ "$name" == *"poc"* ]]; then tc_tol=11; fi
   check_tol3 "Tables+Callouts (MD/HTML/DOCX)" "$md_tc" "$html_tc" "$docx_tc" "$tc_tol"
 
   # ── Summary table ──────────────────────────────────────────────────────
@@ -522,11 +534,12 @@ import sys, re
 from html.parser import HTMLParser
 
 # Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# Also excludes common LaTeX commands that appear inside passthrough blocks.
+# These are LaTeX commands that appear in passthrough blocks by design.
+# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
 EXCLUDED = [
     r"\\begin\{changelog\}", r"\\end\{changelog\}",
     r"\\changelogentry",
-    r"\\textbackslash", r"\\textbf",
+    r"\\textbackslash",
     r"\\begin\{testcase\}", r"\\end\{testcase\}",
     r"\\begin\{testsummary\}", r"\\end\{testsummary\}",
     r"\\testsummaryrow", r"\\testresultbadge",
@@ -544,8 +557,6 @@ EXCLUDED = [
     r"\\signaturecell",
     r"\\pocresult",
     r"\\checkbox",
-    r"\\lg@",
-    r"\\today", r"\\item",
     r"\\begin\{activities\}", r"\\end\{activities\}",
     r"\\begin\{evidence\}", r"\\end\{evidence\}",
     r"\\begin\{objectiveblock\}", r"\\end\{objectiveblock\}",

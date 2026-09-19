@@ -237,18 +237,30 @@ make project DIR=documents/<project-name>   # from repo root (recommended)
 ### Multi-format output
 
 AsciiDoc → LaTeX → PDF is the primary output. HTML is generated directly
-from AsciiDoc. DOCX and Markdown are generated via Pandoc from `.adoc`.
+from AsciiDoc. DOCX and Markdown are generated via `asciidoctor -b docbook` →
+`pandoc -f docbook`.
+
+Use the Makefile for convenience:
+
+```bash
+make md              # Markdown only
+make docx            # DOCX only
+make html            # HTML only
+make all-formats     # MD + DOCX + HTML for all samples + setup-guide
+```
+
+Or run the commands directly:
 
 ```bash
 # HTML (direct from asciidoctor)
-asciidoctor -b html5 -a stylesheet=huawei.css src/main.adoc -o output.html
+asciidoctor -b html5 -a stylesheet=templates/_base/huawei.css src/main.adoc -o output.html
 
-# Markdown (via asciidoctor-reducer → pandoc)
-asciidoctor-reducer src/main.adoc | pandoc -f asciidoc -t markdown -o output.md
+# Markdown (via asciidoctor -b docbook → pandoc)
+asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook -t gfm /tmp/doc.dbk -o output.md
 
-# DOCX (via asciidoctor-reducer → pandoc)
-asciidoctor-reducer src/main.adoc | pandoc -f asciidoc \
-  --reference-doc=templates/technical/technical-reference.docx -t docx -o output.docx
+# DOCX (via asciidoctor -b docbook → pandoc)
+asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook \
+  --reference-doc=templates/technical/technical-reference.docx /tmp/doc.dbk -o output.docx
 ```
 
 ---
@@ -262,11 +274,18 @@ The following features are specific to the technical template:
 | Attribute | Purpose | Example |
 |---|---|---|
 | `:reporttitle: ...` | Report title (shown on cover page). | `:reporttitle: [Analysis Report] ECS Issue` |
-| `:reportversion: HCS 8.5.1` | Version info (shown in cover page version table). | `:reportversion: HCS 8.5.1` |
-| `:reportdate: 2026-09-16` | Report date (shown in cover page version table). | `:reportdate: 2026-09-16` |
-| `:reportscenario: Standard Scenario` | Installation scenario (shown in cover page version table). | `:reportscenario: Standard Scenario` |
 
-Note: `:reportversion:`, `:reportdate:`, and `:reportscenario:` are also set via passthrough blocks in the document body for the cover page version table.
+Note: `:reportversion:`, `:reportdate:`, and `:reportscenario:` are **not**
+header attributes — the converter does not read them. Set them via
+passthrough blocks in the document body:
+
+```asciidoc
+++++
+\setreportversion{HCS 8.5.1}
+\setreportdate{2025-08-13}
+\setreportscenario{Standard Scenario}
+++++
+```
 
 ### 5-section environments (the core structure)
 
@@ -343,10 +362,13 @@ The `workaround` role contains six subsections:
 :version: 1.0.0
 :date: 2026-09-16
 :authors: Author Name
-:reportversion: HCS <version>
-:reportdate: <date>
-:reportscenario: <scenario>
 :header-title: Huawei Cloud -- <short title>
+
+++++
+\setreportversion{HCS <version>}
+\setreportdate{<date>}
+\setreportscenario{<scenario>}
+++++
 
 [.problem]
 --

@@ -73,7 +73,7 @@ Run `make setup-guide` to regenerate all four formats after changing the source.
 - fvextra ≥ 1.5 (updated from CTAN if the system version is too old)
 - HarmonyOS Sans font (body text — from GitHub releases, SHA-256 verified)
 - Cascadia Code font (code — via `fonts-cascadia-code`)
-- asciidoctor + asciidoctor-reducer + asciidoctor-diagram (Ruby gems via Gemfile)
+- asciidoctor + asciidoctor-diagram (Ruby gems via Gemfile)
 - opencode skills (copies each `templates/*/SKILL.md` to `~/.config/opencode/skills/`)
 - VS Code LaTeX Workshop extension + settings (local and remote)
 
@@ -153,7 +153,7 @@ Each document follows this pipeline:
 1. **AsciiDoc → LaTeX:** `asciidoctor -b huawei-latex -r templates/_base/huawei-latex-converter.rb src/main.adoc -o src/main.tex`
 2. **LaTeX → PDF:** `latexmk src/main.tex` (XeLaTeX, configured in `.latexmkrc`)
 3. **AsciiDoc → HTML:** `asciidoctor -b html5 -a stylesheet=huawei.css src/main.adoc`
-4. **AsciiDoc → DOCX/MD:** via `asciidoctor-reducer` → `pandoc`
+4. **AsciiDoc → DOCX/MD:** via `asciidoctor -b docbook` → `pandoc -f docbook`
 
 The `scripts/build-adoc.sh` wrapper handles step 1 before latexmk.
 
@@ -201,7 +201,7 @@ DOCX, Markdown, and HTML are secondary outputs.
 ### Requirements
 
 - `pandoc >= 3.0` (install via `install.sh` or your package manager)
-- `asciidoctor` + `asciidoctor-reducer` (Ruby gems, installed by `install.sh`)
+- `asciidoctor` (Ruby gem, installed by `install.sh`)
 
 ### Usage
 
@@ -214,8 +214,8 @@ make clean-formats  # remove generated multi-format files
 ```
 
 HTML is generated directly from AsciiDoc with `huawei.css` for Huawei brand
-styling. DOCX and Markdown are generated via `asciidoctor-reducer` → Pandoc,
-using each template's reference DOCX for custom styles.
+styling. DOCX and Markdown are generated via `asciidoctor -b docbook` →
+`pandoc -f docbook`, using each template's reference DOCX for custom styles.
 
 Generated outputs are gitignored (build artifacts). Only the converter, CSS,
 reference DOCX, HTML template, and Python script are committed.
@@ -265,7 +265,7 @@ for the technical report template syntax reference.
 .
 ├── AGENTS.md               # project standards and locked decisions
 ├── CHANGELOG.md            # version history
-├── Gemfile                 # Ruby dependencies (asciidoctor, asciidoctor-reducer, asciidoctor-diagram)
+├── Gemfile                 # Ruby dependencies (asciidoctor, asciidoctor-diagram)
 ├── scripts/                # install, uninstall, and build scripts
 │   ├── install.sh          # one-command setup (clone + install + verify)
 │   ├── uninstall.sh        # remove installed artifacts (interactive or --all)

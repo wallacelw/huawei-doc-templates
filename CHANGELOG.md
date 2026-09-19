@@ -4,6 +4,67 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
 (inside passthrough blocks).
 
+## v6.3.0 (2026-09-19)
+
+### Council review: fix all HIGH + key MEDIUM findings
+
+Three independent councillors (gpt-5.6-luna, gemini-3-pro, claude-sonnet-4)
+reviewed the codebase end-to-end. Found 10 HIGH, 29 MEDIUM, 17 LOW findings.
+All HIGH and key MEDIUM findings fixed.
+
+#### HIGH findings fixed (10/10)
+
+- **H1**: Fixed `technical.cls` cover page — `\newcommand` on already-defined
+  commands was silently swallowed by nonstopmode. Changed to `\renewcommand`,
+  added missing `\RequirePackage{huawei-cover}`, removed redundant `\newcount`.
+- **H2**: Fixed `set -e` dead fallback in `build.sh` and `round-trip.sh` —
+  moved `asciidoctor -b docbook` inside `if` condition so fallback triggers.
+- **H3**: Fixed unescaped URLs in `\weblink` — added `latex_escape_url`
+ -escaping `%` and `_` (hyperref handles `#` and `&` internally).
+- **H4**: Fixed inconsistent escaping — `convert_role_note` and similar
+  methods now use `process_text` instead of `latex_escape_text` to avoid
+  double-escaping `\_` to `\\_` in mixed content.
+- **H5**: Updated stale `asciidoctor-reducer` references in all SKILL.md,
+  README.md, AGENTS.md to current `asciidoctor -b docbook< → pandoc -f docbook` pipeline.
+- **H6**: Removed non-existent `make pt` from guide SKILL.md.
+- **(H7**: Added `poc` to AGENTS.md L23 template list and L19 authors.
+- **H8**: Tightened round-trip.sh tolerances (H1 ±15→±5, H2 ±25→±10,
+  code ±25→±10, tables ±10→±5) with per-template overrides.
+- **H9**: Narrowed raw LaTeX exclusion list — removed `\textbf`, `\item`,
+  `\today7, `\lg@` so leaks are detected.
+- **H10**: Created 97 unit tests for Ruby converter (`tests/test-converter.sh`)
+  covering document structure, inline formatting, special characters,
+  admonitions, tables, code blocks, images, header attributes, edge cases.
+
+#### MEDIUM findings fixed (9/12)
+
+- **M2**: Removed `include::` false-positive scan in converter.
+- **M3**: Fixed `gem list asciidoctor-diagram` check (always returned 0).
+- **M5**: Moved `\RequirePackage{ragged2e}` from `huawei-shared.sty` to class
+  files (L15 compliance).
+- **M6**: Fixed `watch.sh` — exported `recompile` function for `entr -s`.
+- **M7**: Makefile `md`/`docx`/`html` targets now use auto-discovery.
+- **M9-M11**: Removed dead technical header attributes, updated SKILL.md.
+- **M12**: Fixed testbook-en malformed table row (missing `|` separator).
+
+#### Other fixes
+
+- Fixed POC `\checkbox` math mode conflict with `m{...}` columns — changed
+  `$\square$` to `\fbox{\,}` (text-mode box, no math mode).
+- Fixed POC `\lg@` labels — added user-facing aliases without `@` character
+  for use outside `\makeatletter` context.
+- Fixed setup-guide URL inside backticks causing broken LaTeX brace nesting.
+- Fixed table cell escaping for `%` in table content.
+- Fixed `unescape_html_entities` — added lookbehind to prevent corrupting
+  already-escaped LaTeX.
+
+#### Verification
+
+- All 9 PDFs compile with 0 errors (8 samples + setup-guide)
+- 72 round-trip tests pass, 0 failed
+- 97 converter unit tests pass, 0 failed
+- 40 multi-format outputs generated (PDF/DOCX/MD/HTML × 9 documents + extras)
+
 ## v6.2.7 (2026-09-19)
 
 ### Fix all pre-existing errors

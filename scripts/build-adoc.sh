@@ -68,7 +68,7 @@ fi
 # Run asciidoctor with the huawei-latex backend
 # asciidoctor-diagram is optional (only needed for [plantuml]/[graphviz]/[mermaid] blocks)
 DIAGRAM_OPTS=""
-if gem list asciidoctor-diagram >/dev/null 2>&1; then
+if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
   DIAGRAM_OPTS="-r asciidoctor-diagram"
 fi
 

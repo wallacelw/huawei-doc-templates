@@ -93,9 +93,9 @@ html-sg: ; ./scripts/build.sh --html documents/setup-guide
 
 all-formats: $(TEMPLATE_FORMATS) md-sg docx-sg html-sg ## Generate all formats (DOCX+MD+HTML) for all samples + setup-guide
 
-md:   guide-md-pt guide-md-en technical-md-pt technical-md-en testbook-md-pt testbook-md-en poc-md-pt poc-md-en md-sg   ## Markdown for all samples + setup-guide (use all-formats for all templates)
-docx: guide-docx-pt guide-docx-en technical-docx-pt technical-docx-en testbook-docx-pt testbook-docx-en poc-docx-pt poc-docx-en docx-sg ## DOCX for all samples + setup-guide (use all-formats for all templates)
-html: guide-html-pt guide-html-en technical-html-pt technical-html-en testbook-html-pt testbook-html-en poc-html-pt poc-html-en html-sg ## HTML for all samples + setup-guide (use all-formats for all templates)
+md:   $(foreach tmpl,$(TEMPLATES),$(tmpl)-md) md-sg   ## Markdown for all samples + setup-guide
+docx: $(foreach tmpl,$(TEMPLATES),$(tmpl)-docx) docx-sg ## DOCX for all samples + setup-guide
+html: $(foreach tmpl,$(TEMPLATES),$(tmpl)-html) html-sg ## HTML for all samples + setup-guide
 
 # ============================================================================
 ##@ Generic project compilation
@@ -155,11 +155,15 @@ watch: ## Watch .adoc and recompile PDF on save (make watch DIR=documents/guide-
 ##@ Testing
 # ============================================================================
 
-test: ## Run all tests (filter units, round-trip, DOCX fix, version sync)
+test: ## Run all tests (filter units, round-trip, DOCX fix, version sync, converter)
 	./tests/test-filter.sh
 	./tests/round-trip.sh
 	./tests/test-docx-fix.sh
 	./tests/test-sync.sh
+	./tests/test-converter.sh
+
+test-converter: ## Run converter unit tests only
+	./tests/test-converter.sh
 
 # ============================================================================
 ##@ Cleanup
@@ -218,7 +222,7 @@ TEMPLATE_CLEAN_PHONY := $(foreach tmpl,$(TEMPLATES), \
 .PHONY: help all samples setup-guide project menu preview watch
 .PHONY: $(TEMPLATE_PHONY)
 .PHONY: technical
-.PHONY: test
+.PHONY: test test-converter
 .PHONY: clean clean-setup-guide clean-project clean-formats
 .PHONY: $(TEMPLATE_CLEAN_PHONY)
 # Setup guide format targets

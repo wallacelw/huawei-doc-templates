@@ -23,7 +23,7 @@ reference.
    Or from inside the project folder:
    ```
     cd documents/my-guide/src
-    build-adoc.sh main.adoc && latexmk main.tex
+    ../../../scripts/build-adoc.sh main.adoc && latexmk main.tex
    ```
 
 ## Structure

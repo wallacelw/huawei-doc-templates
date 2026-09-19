@@ -410,19 +410,30 @@ multi-format output options.
 ### Multi-format output
 
 AsciiDoc → LaTeX → PDF is the primary output. HTML is generated directly
-from AsciiDoc. DOCX and Markdown are generated via Pandoc from `.adoc`
-(or asciidoctor-reducer → pandoc).
+from AsciiDoc. DOCX and Markdown are generated via `asciidoctor -b docbook` →
+`pandoc -f docbook`.
+
+Use the Makefile for convenience:
+
+```bash
+make md              # Markdown only
+make docx            # DOCX only
+make html            # HTML only
+make all-formats     # MD + DOCX + HTML for all samples + setup-guide
+```
+
+Or run the commands directly:
 
 ```bash
 # HTML (direct from asciidoctor)
-asciidoctor -b html5 -a stylesheet=huawei.css src/main.adoc -o output.html
+asciidoctor -b html5 -a stylesheet=templates/_base/huawei.css src/main.adoc -o output.html
 
-# Markdown (via asciidoctor-reducer → pandoc)
-asciidoctor-reducer src/main.adoc | pandoc -f asciidoc -t markdown -o output.md
+# Markdown (via asciidoctor -b docbook → pandoc)
+asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook -t gfm /tmp/doc.dbk -o output.md
 
-# DOCX (via asciidoctor-reducer → pandoc)
-asciidoctor-reducer src/main.adoc | pandoc -f asciidoc \
-  --reference-doc=templates/guide/guide-reference.docx -t docx -o output.docx
+# DOCX (via asciidoctor -b docbook → pandoc)
+asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook \
+  --reference-doc=templates/guide/guide-reference.docx /tmp/doc.dbk -o output.docx
 ```
 
 ---
@@ -526,7 +537,7 @@ Same skeleton but with `:lang: pt`. Labels switch automatically: *Sumário*,
 confirm no glyphs are missing:
 
 ```sh
-make pt                               # compile Portuguese sample
+make guide-pt                         # compile Portuguese sample
 grep -i "Missing character" documents/guide-pt/main.log   # must produce no output
 ```
 

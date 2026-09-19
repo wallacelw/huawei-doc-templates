@@ -3,9 +3,6 @@
 :lang: en
 :version: 3.6.0
 :header-title: Huawei Cloud --- Technical Report
-:report-version: HCS 8.5.1
-:report-date: 2025-08-13
-:report-scenario: Standard Scenario
 
 ++++
 \setreportversion{HCS 8.5.1}
