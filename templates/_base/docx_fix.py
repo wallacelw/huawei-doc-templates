@@ -722,6 +722,189 @@ def _add_badge_style(root, W_NS):
         elem.set(f"{{{W_NS}}}val", "16")  # 8pt
 
 
+# Badge style definitions: (style_id, bg_color, fg_color)
+RESULT_BADGE_STYLES = [
+    ("BadgePass",     "E8F5E9", "62B230"),   # green
+    ("BadgePartial",  "FFF3E0", "ED6D00"),   # orange
+    ("BadgeFail",     "C7000B", "FFFFFF"),   # red
+    ("BadgeSkip",     "F6F8FA", "1F2328"),   # gray
+    ("BadgeNew",      "C7000B", "FFFFFF"),   # red
+    ("BadgeBlocked",  "FFF3E0", "ED6D00"),   # orange
+    ("BadgeUntested", "F6F8FA", "1F2328"),   # gray
+]
+
+# Map marker text → style_id
+BADGE_MARKERS = {
+    "[PASS]": "BadgePass",
+    "[PARTIAL]": "BadgePartial",
+    "[FAIL]": "BadgeFail",
+    "[SKIP]": "BadgeSkip",
+    "[NEW]": "BadgeNew",
+    "[BLOCKED]": "BadgeBlocked",
+    "[UNTESTED]": "BadgeUntested",
+}
+
+
+def _add_result_badge_styles(root, W_NS):
+    """Add individual result badge character styles (green/red/orange/gray)."""
+    for style_id, bg, fg in RESULT_BADGE_STYLES:
+        s = None
+        for existing in root.findall(f"{{{W_NS}}}style"):
+            if existing.get(f"{{{W_NS}}}styleId") == style_id:
+                s = existing
+                break
+        if s is None:
+            s = etree.SubElement(root, f"{{{W_NS}}}style")
+            s.set(f"{{{W_NS}}}type", "character")
+            s.set(f"{{{W_NS}}}styleId", style_id)
+            etree.SubElement(s, f"{{{W_NS}}}name").set(
+                f"{{{W_NS}}}val", style_id)
+            etree.SubElement(s, f"{{{W_NS}}}uiPriority").set(
+                f"{{{W_NS}}}val", "99")
+        rPr = s.find(f"{{{W_NS}}}rPr")
+        if rPr is None:
+            rPr = etree.SubElement(s, f"{{{W_NS}}}rPr")
+        rf = rPr.find(f"{{{W_NS}}}rFonts")
+        if rf is None:
+            rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
+        rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+        rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+        if rPr.find(f"{{{W_NS}}}b") is None:
+            etree.SubElement(rPr, f"{{{W_NS}}}b")
+        color = rPr.find(f"{{{W_NS}}}color")
+        if color is None:
+            color = etree.SubElement(rPr, f"{{{W_NS}}}color")
+        color.set(f"{{{W_NS}}}val", fg)
+        shd = rPr.find(f"{{{W_NS}}}shd")
+        if shd is None:
+            shd = etree.SubElement(rPr, f"{{{W_NS}}}shd")
+        shd.set(f"{{{W_NS}}}val", "clear")
+        shd.set(f"{{{W_NS}}}color", "auto")
+        shd.set(f"{{{W_NS}}}fill", bg)
+        for tag in ['sz', 'szCs']:
+            elem = rPr.find(f"{{{W_NS}}}{tag}")
+            if elem is None:
+                elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+            elem.set(f"{{{W_NS}}}val", "16")  # 8pt
+
+
+def _apply_content_styling(docx_path):
+    """Apply badge character styles and hutable table styling to document content.
+
+    Called after styles.xml is written.  Uses python-docx to modify
+    document.xml (paragraphs, runs, tables).  python-docx preserves
+    styles.xml when saving.
+    """
+    from docx import Document
+    from docx.oxml.ns import qn
+
+    doc = Document(docx_path)
+    W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+    # --- Badge styling: find [PASS], [FAIL], etc. and apply character style ---
+    for paragraph in doc.paragraphs:
+        for run in paragraph.runs:
+            text = run.text.strip()
+            if text in BADGE_MARKERS:
+                style_id = BADGE_MARKERS[text]
+                rPr = run._element.find(qn('w:rPr'))
+                if rPr is None:
+                    rPr = etree.SubElement(run._element, qn('w:rPr'))
+                rStyle = rPr.find(qn('w:rStyle'))
+                if rStyle is None:
+                    rStyle = etree.SubElement(rPr, qn('w:rStyle'))
+                rStyle.set(qn('w:val'), style_id)
+
+    # Also check runs inside table cells
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        text = run.text.strip()
+                        if text in BADGE_MARKERS:
+                            style_id = BADGE_MARKERS[text]
+                            rPr = run._element.find(qn('w:rPr'))
+                            if rPr is None:
+                                rPr = etree.SubElement(
+                                    run._element, qn('w:rPr'))
+                            rStyle = rPr.find(qn('w:rStyle'))
+                            if rStyle is None:
+                                rStyle = etree.SubElement(
+                                    rPr, qn('w:rStyle'))
+                            rStyle.set(qn('w:val'), style_id)
+
+    # --- Hutable table styling: red header, alternating rows, full grid ---
+    for table in doc.tables:
+        tbl = table._element
+        tblPr = tbl.find(qn('w:tblPr'))
+        if tblPr is None:
+            tblPr = etree.SubElement(tbl, qn('w:tblPr'))
+
+        # Add table borders (full grid, red #C7000B)
+        tblBorders = tblPr.find(qn('w:tblBorders'))
+        if tblBorders is None:
+            tblBorders = etree.SubElement(tblPr, qn('w:tblBorders'))
+        for border_name in ['top', 'left', 'bottom', 'right',
+                            'insideH', 'insideV']:
+            border = tblBorders.find(qn(f'w:{border_name}'))
+            if border is None:
+                border = etree.SubElement(
+                    tblBorders, qn(f'w:{border_name}'))
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')  # 0.5pt
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), 'C7000B')
+
+        # Style header row (first row): red bg, white bold text
+        if len(table.rows) > 0:
+            header_row = table.rows[0]
+            for cell in header_row.cells:
+                tcPr = cell._element.find(qn('w:tcPr'))
+                if tcPr is None:
+                    tcPr = etree.SubElement(
+                        cell._element, qn('w:tcPr'))
+                shd = tcPr.find(qn('w:shd'))
+                if shd is None:
+                    shd = etree.SubElement(tcPr, qn('w:shd'))
+                shd.set(qn('w:val'), 'clear')
+                shd.set(qn('w:color'), 'auto')
+                shd.set(qn('w:fill'), 'C7000B')
+                # White bold text
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        rPr = run._element.find(qn('w:rPr'))
+                        if rPr is None:
+                            rPr = etree.SubElement(
+                                run._element, qn('w:rPr'))
+                        if rPr.find(qn('w:b')) is None:
+                            etree.SubElement(rPr, qn('w:b'))
+                        color = rPr.find(qn('w:color'))
+                        if color is None:
+                            color = etree.SubElement(
+                                rPr, qn('w:color'))
+                        color.set(qn('w:val'), 'FFFFFF')
+
+        # Alternating row colors (skip header row)
+        for i, row in enumerate(table.rows):
+            if i == 0:
+                continue  # header already styled
+            if i % 2 == 0:  # 3rd, 5th, etc. (0-indexed: 2, 4, ...)
+                for cell in row.cells:
+                    tcPr = cell._element.find(qn('w:tcPr'))
+                    if tcPr is None:
+                        tcPr = etree.SubElement(
+                            cell._element, qn('w:tcPr'))
+                    shd = tcPr.find(qn('w:shd'))
+                    if shd is None:
+                        shd = etree.SubElement(tcPr, qn('w:shd'))
+                    shd.set(qn('w:val'), 'clear')
+                    shd.set(qn('w:color'), 'auto')
+                    shd.set(qn('w:fill'), 'F6F8FA')
+
+    doc.save(docx_path)
+
+
 def _fix_toc_styles(root, W_NS):
     """Fix TOC1/TOC2/TOC3 + TOCHeading styles (Word built-in TOC entry styles)."""
     toc_configs = [
@@ -896,6 +1079,7 @@ def fix_generated_docx(docx_path):
     _fix_doc_defaults(root, W_NS)
     _add_caption_style(root, W_NS)
     _add_badge_style(root, W_NS)
+    _add_result_badge_styles(root, W_NS)
     _fix_toc_styles(root, W_NS)
 
     modified_xml = etree.tostring(
@@ -934,6 +1118,13 @@ def fix_generated_docx(docx_path):
                 else:
                     zout.writestr(item, zin.read(item.filename))
     shutil.move(tmp_path, docx_path)
+
+    # Apply badge character styles and hutable table styling to document content
+    try:
+        _apply_content_styling(docx_path)
+    except Exception as e:
+        log_warn(f"Content styling failed: {e}")
+
     print(f"✓ Fixed heading styles in {docx_path}")
 
 

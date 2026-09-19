@@ -369,11 +369,26 @@ generate_docx() {
     fi
     echo "  Generating DOCX..."
     if [[ -n "$ADOC_FILE" ]]; then
+        # Pre-process .adoc for DOCX (convert passthrough blocks + custom roles)
+        # Only for templates that have a pre-processor (poc, testbook)
+        local tmp_adoc=""
+        local docx_adoc="$ADOC_FILE"
+        if [[ "$TEMPLATE" == "poc" || "$TEMPLATE" == "testbook" ]]; then
+            tmp_adoc=$(mktemp --suffix=.adoc)
+            if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
+              --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+                docx_adoc="$tmp_adoc"
+            else
+                echo "  ↳ DOCX pre-processing failed, using original .adoc"
+                rm -f "$tmp_adoc"
+                tmp_adoc=""
+            fi
+        fi
         # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
         # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
         local tmp_dbk
         tmp_dbk=$(mktemp --suffix=.dbk)
-        if asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null && \
+        if asciidoctor -b docbook "$docx_adoc" -o "$tmp_dbk" 2>/dev/null && \
            pandoc -f docbook --reference-doc="$REF_DOCX" \
              --number-sections \
              --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
@@ -384,6 +399,7 @@ generate_docx() {
             echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
             generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
         fi
+        rm -f "$tmp_adoc"
     else
         # Legacy .tex pipeline
         generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
