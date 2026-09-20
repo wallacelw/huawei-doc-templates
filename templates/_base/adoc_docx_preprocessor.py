@@ -30,7 +30,11 @@ LABELS = {
         'expected': 'Expected Result',
         'result': 'Test Result',
         'remarks': 'Remarks',
-        'test_case': 'Test Case',
+        'test_case': 'Testcase',
+        'table': 'Table',
+        'diagram': 'Diagram',
+        'figure': 'Figure',
+        'changelog': 'Changelog',
         'sincerely': 'Sincerely,',
     },
     'pt': {
@@ -45,6 +49,10 @@ LABELS = {
         'result': 'Resultado do Teste',
         'remarks': 'Observações',
         'test_case': 'Caso de Teste',
+        'table': 'Tabela',
+        'diagram': 'Diagrama',
+        'figure': 'Figura',
+        'changelog': 'Histórico de versões',
         'sincerely': 'Atenciosamente,',
     },
 }
@@ -321,14 +329,27 @@ def convert_testcase(content, lang):
     inner = re.sub(r'\s*\\end\{testcase\}\s*$', '', inner)
 
     out = []
-    # Bold caption paragraph (not a heading): keeps test cases out of the
+    # Caption paragraph (not a heading): keeps test cases out of the
     # DOCX TOC and section numbering, matching the PDF where testcase
     # titles are centered captions, not TOC entries.
-    out.append('**' + labels['test_case'] + ' ' + str(tc_num) + ': ' + title + '**')
+    # PDF (testbook.cls): \textbf{\lg@testcase N:} title — only the
+    # symbol part is bold.
+    out.append('**' + labels['test_case'] + ' ' + str(tc_num) + ':** ' + title)
     out.append('')
+
+    # Markers delimit the tcolorbox body (PDF: red left rule).  docx_fix
+    # deletes them and draws a 3pt red left border on everything between.
+    # Only emitted for DOCX — MD/HTML have no post-processor to remove them.
+    if _TARGET == 'docx':
+        out.append('TESTCASE-START')
+        out.append('')
 
     # Process inner content
     _process_testcase_inner(inner, lang, labels, out)
+
+    if _TARGET == 'docx':
+        out.append('TESTCASE-END')
+        out.append('')
 
     return '\n'.join(out)
 
@@ -348,8 +369,9 @@ def _process_testcase_inner(inner, lang, labels, out):
             r = find_cmd(inner, 'testobjective', pos)
             if r:
                 arg, _, after = r
-                out.append('**' + labels['objective'] + ':** '
-                           + convert_inline_latex(arg.strip(), lang))
+                out.append('**' + labels['objective'] + '**')
+                out.append('')
+                out.append(convert_inline_latex(arg.strip(), lang))
                 out.append('')
                 pos = after
                 continue
@@ -359,8 +381,9 @@ def _process_testcase_inner(inner, lang, labels, out):
             r = find_cmd(inner, 'testscope', pos)
             if r:
                 arg, _, after = r
-                out.append('**' + labels['scope'] + ':** '
-                           + convert_inline_latex(arg.strip(), lang))
+                out.append('**' + labels['scope'] + '**')
+                out.append('')
+                out.append(convert_inline_latex(arg.strip(), lang))
                 out.append('')
                 pos = after
                 continue
@@ -371,7 +394,9 @@ def _process_testcase_inner(inner, lang, labels, out):
             if r:
                 arg, _, after = r
                 badge = convert_inline_latex(arg.strip(), lang)
-                out.append('**' + labels['result'] + ':** ' + badge)
+                out.append('**' + labels['result'] + '**')
+                out.append('')
+                out.append(badge)
                 out.append('')
                 pos = after
                 continue
@@ -381,8 +406,9 @@ def _process_testcase_inner(inner, lang, labels, out):
             r = find_cmd(inner, 'testremarks', pos)
             if r:
                 arg, _, after = r
-                out.append('**' + labels['remarks'] + ':** '
-                           + convert_inline_latex(arg.strip(), lang))
+                out.append('**' + labels['remarks'] + '**')
+                out.append('')
+                out.append(convert_inline_latex(arg.strip(), lang))
                 out.append('')
                 pos = after
                 continue
@@ -411,7 +437,7 @@ def _process_testcase_inner(inner, lang, labels, out):
                     pos += len(begin_pat)
                     break
                 env_content = inner[pos + len(begin_pat):end_idx]
-                out.append('**' + labels[label_key] + ':**')
+                out.append('**' + labels[label_key] + '**')
                 out.append('')
                 _process_step_list(env_content, lang, out)
                 out.append('')
@@ -497,9 +523,9 @@ def _process_testcase_inner(inner, lang, labels, out):
 
 
 def _process_step_list(env_content, lang, out):
-    """Process \\teststep items and interspersed code blocks."""
+    r"""Process \teststep items and interspersed code blocks."""
     pos = 0
-    first = True
+    step_num = 0
     while pos < len(env_content):
         # Skip whitespace
         while pos < len(env_content) and env_content[pos] in ' \t\n':
@@ -507,14 +533,16 @@ def _process_step_list(env_content, lang, out):
         if pos >= len(env_content):
             break
 
-        # \teststep{text}
+        # \teststep{text} — explicit bold number (PDF: red bold "N.").
+        # A plain paragraph keeps full styling control in docx_fix;
+        # AsciiDoc list markers would render via numbering.xml instead.
         if env_content.startswith(r'\teststep{', pos):
             r = find_cmd(env_content, 'teststep', pos)
             if r:
                 arg, _, after = r
-                prefix = '.' if first else '.'
-                out.append(prefix + ' ' + convert_inline_latex(arg.strip(), lang))
-                first = False
+                step_num += 1
+                out.append('**' + str(step_num) + '.** '
+                           + convert_inline_latex(arg.strip(), lang))
                 pos = after
                 continue
 
@@ -584,8 +612,15 @@ def convert_testsummary(content, lang):
 
 
 def convert_changelog(content, lang):
-    r"""Convert \begin{changelog}...\end{changelog} to AsciiDoc table."""
-    lines = ['[.hutable]', '|===', '| Version | Date | Changes', '']
+    r"""Convert \begin{changelog}...\end{changelog} to an AsciiDoc section.
+
+    PDF (L12): the changelog environment emits its own language-aware
+    section heading ("Changelog" / "Histórico de versões"), so the DOCX
+    conversion emits a level-1 heading before the table.
+    """
+    labels = LABELS.get(lang, LABELS['en'])
+    lines = ['== ' + labels['changelog'], '',
+             '[.hutable]', '|===', '| Version | Date | Changes', '']
     pos = 0
     while True:
         ce_pos = content.find(r'\changelogentry', pos)
@@ -725,6 +760,11 @@ def convert_inline_passthroughs(text, lang):
 # Main processing
 # ---------------------------------------------------------------------------
 
+# Target format: 'docx' emits TESTCASE-START/END markers (consumed and
+# deleted by docx_fix to draw the PDF's red left rule); 'md'/'html' have
+# no post-processor, so markers are skipped there.
+_TARGET = 'docx'
+
 # Map LaTeX environment names to handler functions
 POC_HANDLERS = {
     'stakeholders': convert_stakeholders,
@@ -747,7 +787,10 @@ def process_passthrough_blocks(content, template, lang):
     elif template == 'testbook':
         handlers = TESTBOOK_HANDLERS
     else:
-        return content
+        # guide/technical: the changelog passthrough is the only block
+        # environment used in practice (any other passthrough, e.g.
+        # \setreportversion, is cover metadata — dropped, not content).
+        handlers = {'changelog': convert_changelog}
 
     result = []
     lines = content.split('\n')
@@ -771,6 +814,13 @@ def process_passthrough_blocks(content, template, lang):
                 env_name = env_match.group(1)
                 handler = handlers.get(env_name)
                 if handler:
+                    # L12: :nochangelog: suppresses the changelog entirely
+                    # (PDF renders nothing) — drop the block, don't convert.
+                    if (env_name == 'changelog'
+                            and re.search(r'^:nochangelog:',
+                                          content, re.MULTILINE)):
+                        i = j + 1
+                        continue
                     converted = handler(block_content, lang)
                     result.append(converted)
                     i = j + 1
@@ -789,22 +839,44 @@ def detect_lang(content):
     return m.group(1) if m else 'en'
 
 
-def inject_cover_version(content):
-    """Inject a 'Version X' paragraph after the header block.
+PT_MONTHS = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+]
 
-    Approximates the PDF cover, which shows the version under the title.
-    Pandoc already emits the date (from docbook metadata) as its own
-    paragraph, so only the version number is injected here.
-    Skipped when :nochangelog: is set (the PDF hides version/date on the
-    cover then, per L12) or when no :version: attribute is present.
+
+def _cover_datetime(lang):
+    """Build the cover date/time like the PDF (LaTeX \\today + \\time).
+
+    Date: formatted per language (babel \\today).  Time: HH:MM build
+    time.  TZ defaults to America/Sao_Paulo (L4); an existing TZ env
+    var wins, matching latexmk's behavior.
     """
-    m = re.search(r'^:version:\s*(\S+)', content, re.MULTILINE)
-    if not m:
-        return content
-    if re.search(r'^:nochangelog:', content, re.MULTILINE):
-        return content
-    line = 'Version ' + m.group(1)
+    import datetime
+    import os
+    import time as _time
+    if 'TZ' not in os.environ:
+        os.environ['TZ'] = 'America/Sao_Paulo'
+    _time.tzset()
+    now = datetime.datetime.now()
+    if lang == 'pt':
+        date = '{0} de {1} de {2}'.format(
+            now.day, PT_MONTHS[now.month - 1], now.year)
+    else:
+        date = now.strftime('%B %d, %Y')
+    return date, now.strftime('%H:%M')
 
+
+def inject_cover_block(content, lang):
+    r"""Inject cover elements as the first body content.
+
+    Approximates the PDF cover (huawei-cover.sty): logo image, cover
+    text, and meta line 'vX — date time' (bold version, L5; :notime:
+    hides the time).  Pandoc already renders title, authors, and date;
+    docx_fix reorders (title → logo → cover text → authors → meta) and
+    deletes the redundant date paragraph.  The meta line is skipped
+    when :nochangelog: is set (L12 hides version/date/time).
+    """
     lines = content.split('\n')
     # Find the last header attribute line (":key: value")
     last_attr = -1
@@ -813,19 +885,95 @@ def inject_cover_version(content):
             last_attr = i
     if last_attr == -1:
         return content
+
+    m_logo = re.search(r'^:cover-logo:\s*(\S+)', content, re.MULTILINE)
+    m_covertext = re.search(r'^:cover-text:\s*(.+?)\s*$', content, re.MULTILINE)
+    m_version = re.search(r'^:version:\s*(\S+)', content, re.MULTILINE)
+    m_date = re.search(r'^:date:\s*(.+?)\s*$', content, re.MULTILINE)
+    nochangelog = re.search(r'^:nochangelog:', content, re.MULTILINE)
+    notime = re.search(r'^:notime:', content, re.MULTILINE)
+
+    logo = m_logo.group(1) if m_logo else 'common-assets/huawei-logo-cover.png'
+    cover_text = (m_covertext.group(1) if m_covertext
+                  else 'Huawei Technologies CO., LTD')
+
+    block = ['image::' + logo + '[]', '', cover_text, '']
+    if m_version and not nochangelog:
+        if m_date:
+            date_str = m_date.group(1)
+            _, time_str = _cover_datetime(lang)
+        else:
+            date_str, time_str = _cover_datetime(lang)
+        meta = '**v' + m_version.group(1) + '** — ' + date_str
+        if not notime:
+            meta += ' ' + time_str
+        block.append(meta)
+        block.append('')
+
     # Insert as the first body content (after the blank line following attrs)
     insert_at = last_attr + 1
     while insert_at < len(lines) and lines[insert_at].strip() == '':
         insert_at += 1
-    lines.insert(insert_at, line)
-    lines.insert(insert_at + 1, '')
+    lines[insert_at:insert_at] = block
     return '\n'.join(lines)
 
 
-def process_adoc(content, template):
-    """Main entry: transform .adoc content for DOCX generation."""
+def number_block_titles(content, lang):
+    """Number block titles to match the PDF caption systems.
+
+    PDF caption systems (converter + huawei-images.sty):
+      - .Title above [.hutable] table -> "Table N: Title"   (\\caption)
+      - .Title above a diagram block  -> "Diagram N: Title" (\\diagramcap)
+      - .Title above image::          -> "Figure N: Title"  (\\imagecap)
+    The symbol part is emitted bold (PDF: \\textbf{label N:} or
+    captionsetup labelfont=bf); the description stays plain.
+    Counters are per category, document-wide.
+    """
+    labels = LABELS.get(lang, LABELS['en'])
+    counters = {'table': 0, 'diagram': 0, 'figure': 0}
+
+    lines = content.split('\n')
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        # Block title: ".Title text".  Skip literal-block delimiters (....)
+        # and lines starting with ".." (not block titles).
+        if line.startswith('.') and not line.startswith('..'):
+            if re.match(r'^\.+$', line.strip()):
+                i += 1
+                continue
+            m = re.match(r'^\.(\S.*)$', line)
+            if m:
+                # Classify by the next non-blank line
+                j = i + 1
+                while j < len(lines) and not lines[j].strip():
+                    j += 1
+                if j < len(lines):
+                    nxt = lines[j].strip()
+                    kind = None
+                    if nxt.startswith('[.hutable]') or nxt.startswith('|==='):
+                        kind = 'table'
+                    elif re.match(r'^\[(plantuml|graphviz|mermaid)\b', nxt):
+                        kind = 'diagram'
+                    elif nxt.startswith('image::'):
+                        kind = 'figure'
+                    if kind:
+                        counters[kind] += 1
+                        symbol = ('**' + labels[kind] + ' '
+                                  + str(counters[kind]) + ':**')
+                        lines[i] = '.' + symbol + ' ' + m.group(1)
+                        i = j + 1
+                        continue
+        i += 1
+    return '\n'.join(lines)
+
+
+def process_adoc(content, template, target='docx'):
+    """Main entry: transform .adoc content for DOCX/MD/HTML generation."""
     global _testcase_counter
+    global _TARGET
     _testcase_counter = 0
+    _TARGET = target
 
     lang = detect_lang(content)
 
@@ -840,7 +988,10 @@ def process_adoc(content, template):
     # 3. Convert block-level roles
     content = convert_block_roles(content, lang)
 
-    # 4. Convert multi-line inline roles (general-objective spans multiple lines)
+    # 4. Number block titles (Table/Diagram/Figure N: — PDF caption systems)
+    content = number_block_titles(content, lang)
+
+    # 5. Convert multi-line inline roles (general-objective spans multiple lines)
     content = re.sub(
         r'\[\.general-objective\]#([^#]*)#',
         r'**General Objective:** \1',
@@ -848,13 +999,13 @@ def process_adoc(content, template):
         flags=re.DOTALL,
     )
 
-    # 5. Convert inline roles (line by line)
+    # 6. Convert inline roles (line by line)
     lines = content.split('\n')
     lines = [convert_roles(line, lang) for line in lines]
     content = '\n'.join(lines)
 
-    # 6. Inject cover version line (approximates PDF cover version display)
-    content = inject_cover_version(content)
+    # 7. Inject cover block (logo, cover text, meta line — PDF cover)
+    content = inject_cover_block(content, lang)
 
     return content
 
@@ -865,12 +1016,18 @@ def process_adoc(content, template):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Pre-process .adoc for DOCX generation',
+        description='Pre-process .adoc for DOCX/MD/HTML generation',
     )
     parser.add_argument(
         '--template', required=True,
         choices=['poc', 'testbook', 'guide', 'technical'],
         help='Template name',
+    )
+    parser.add_argument(
+        '--target', default='docx',
+        choices=['docx', 'md', 'html'],
+        help='Target format (docx emits testcase markers for docx_fix; '
+             'md/html skip them — no post-processor removes them there)',
     )
     parser.add_argument('input', help='Input .adoc file')
     parser.add_argument('-o', '--output', required=True, help='Output .adoc file')
@@ -879,7 +1036,7 @@ def main():
     with open(args.input, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    processed = process_adoc(content, args.template)
+    processed = process_adoc(content, args.template, args.target)
 
     with open(args.output, 'w', encoding='utf-8') as f:
         f.write(processed)

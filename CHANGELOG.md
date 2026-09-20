@@ -4,6 +4,68 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.4.4 (2026-09-20)
+
+### DOCX cover, testcase wrapper, caption ordering + MD/HTML pipeline fix
+
+Continues the DOCX-to-PDF fidelity work (L18) for all four templates,
+and extends the pre-processor to the Markdown and HTML pipelines.
+
+#### DOCX cover now matches the PDF (huawei-cover.sty)
+
+- Logo inserted under the title (3.6cm wide, centered, aspect kept) —
+  was missing entirely.
+- Cover text ("Huawei Technologies CO., LTD" or the `:cover-text:`
+  attribute) rendered at 16pt centered; authors at 12pt centered.
+- Meta line `vX — date time` (bold version, L5; `:notime:` hides the
+  time; skipped entirely with `:nochangelog:` per L12). Time zone
+  defaults to America/Sao_Paulo (L4).
+- Pandoc's redundant ISO-date paragraph deleted; cover element order
+  rearranged to the PDF's: title → logo → cover text → authors → meta.
+
+#### Testcase blocks get the PDF's visual wrapper (testbook.cls)
+
+- Pre-processor emits TESTCASE-START/END markers; docx_fix deletes them
+  and draws a 3pt red left border (C7000B) on every paragraph in the
+  range — the PDF tcolorbox's leftrule. Paragraph borders degrade
+  gracefully across page breaks, like the breakable tcolorbox.
+- Field labels (Objective, Test Scope, Prerequisites, Procedure,
+  Expected Result, Test Result, Remarks — language-aware) render as
+  full-width red bars: white bold on C7000B shading.
+- Steps carry explicit red bold numbers (PDF: red bold "N.").
+- Caption format fixed to the PDF's: `Testcase N: title` with only the
+  symbol bold (was "Test Case N:" fully bold — wrong label and weight).
+
+#### Caption ordering system (all secondary formats)
+
+- Block titles above tables/diagrams/images are numbered per category,
+  matching the PDF caption systems: Table N (converter `\caption`),
+  Diagram N (`\diagramcap`), Figure N (`\imagecap`) — language-aware
+  (Tabela/Diagrama/Figura), bold symbol + plain description.
+- docx_fix styles captions: Table/Figure 9pt (`\small` via
+  captionsetup), Diagram/Testcase centered body size.
+
+#### PDF-side fix: PT diagram label
+
+- `\diagramcap` hardcoded English "Diagram" — PT PDFs showed
+  "Diagram 1:". New `\lg@diagram` label (huawei-lang.sty) makes it
+  language-aware: PT now shows "Diagrama 1:".
+
+#### MD/HTML pipelines now pre-processed (was: raw LaTeX leaks)
+
+- The DOCX pre-processor now feeds the Markdown and HTML pipelines
+  (`--target md|html` skips the DOCX-only testcase markers).
+- Markdown: testbook samples leaked ~130 raw LaTeX commands; POC
+  samples fell back to the lossy LaTeX pipeline (signatures content
+  lost). Both now convert cleanly — 0 leaks, 0 fallbacks, changelog
+  renders as a language-aware section (L12), diagrams render via
+  asciidoctor-diagram and embed as base64 data URIs.
+- HTML: testbook samples leaked ~136 raw LaTeX commands — now clean.
+- `:nochangelog:` now suppresses the changelog block in secondary
+  formats too (L12 parity with the PDF).
+- guide/technical templates gain the changelog section + caption
+  numbering in DOCX/MD/HTML (pre-processor runs for all templates).
+
 ## v6.4.3 (2026-09-20)
 
 ### Testbook/POC DOCX fidelity: TOC, page breaks, tables, images

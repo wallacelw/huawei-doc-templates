@@ -788,6 +788,254 @@ def _add_result_badge_styles(root, W_NS):
             elem.set(f"{{{W_NS}}}val", "16")  # 8pt
 
 
+# Testcase field labels (en/pt) — these paragraphs get the red header
+# bar look (PDF testbook.cls: \colorbox{huaweired} with white bold label)
+FIELD_LABELS = {
+    'Objective', 'Test Scope', 'Prerequisites', 'Procedure',
+    'Expected Result', 'Test Result', 'Remarks',
+    'Objetivo', 'Escopo do Teste', 'Pré-requisitos', 'Procedimento',
+    'Resultado Esperado', 'Resultado do Teste', 'Observações',
+}
+
+
+def _resize_drawing(paragraph, qn, width_cm):
+    """Scale the first drawing in *paragraph* to *width_cm*, keeping aspect."""
+    emu_per_cm = 360000
+    target_cx = int(width_cm * emu_per_cm)
+    drawing = paragraph._p.find('.//' + qn('w:drawing'))
+    if drawing is None:
+        return
+    # wp:extent lives inside wp:inline/wp:anchor, not directly under w:drawing
+    extent = drawing.find('.//' + qn('wp:extent'))
+    if extent is None:
+        return
+    try:
+        cx = int(extent.get('cx', '0'))
+        cy = int(extent.get('cy', '0'))
+    except (TypeError, ValueError):
+        return
+    if cx <= 0 or cy <= 0:
+        return
+    new_cy = int(cy * target_cx / cx)
+    extent.set('cx', str(target_cx))
+    extent.set('cy', str(new_cy))
+    # Keep the inner shape transform (a:ext) in sync with the outer extent
+    for ext in drawing.findall('.//' + qn('a:ext')):
+        try:
+            if int(ext.get('cx', '0')) == cx:
+                ext.set('cx', str(target_cx))
+                ext.set('cy', str(new_cy))
+        except (TypeError, ValueError):
+            continue
+
+
+def _assemble_cover(doc, qn):
+    """Reorder + style the cover region to match the PDF (huawei-cover.sty).
+
+    Pandoc order: Title, Author(s), Date, [logo, cover text, meta]...
+    PDF order:    Title, logo (3.6cm), cover text, Author(s), meta.
+    The date paragraph is deleted — the meta line carries the date
+    (docs with :nochangelog: hide it entirely, per L12).
+    """
+    paras = list(doc.paragraphs)
+    title_p = next((p for p in paras if p.style.style_id == 'Title'), None)
+    if title_p is None:
+        return
+
+    def is_boundary(p):
+        sid = p.style.style_id or ''
+        return sid.startswith('Heading') or sid.startswith('TOC')
+
+    # Logo = first paragraph with a drawing in the cover region
+    logo_p = None
+    for p in paras:
+        if p is title_p:
+            continue
+        if is_boundary(p):
+            break
+        if p._p.find('.//' + qn('w:drawing')) is not None:
+            logo_p = p
+            break
+    if logo_p is None:
+        return  # pre-processor did not inject a cover block
+
+    idx = paras.index(logo_p)
+    cover_text_p = paras[idx + 1] if idx + 1 < len(paras) else None
+
+    # Meta line ("vX — date time") and date paragraphs in the cover region
+    meta_p = None
+    date_ps = []
+    for p in paras:
+        if p is title_p:
+            continue
+        if is_boundary(p):
+            break
+        t = p.text.strip()
+        if re.match(r'^v\d+\.\d+\.\d+', t):
+            meta_p = p
+        elif re.match(r'^\d{4}-\d{2}-\d{2}$', t):
+            date_ps.append(p)
+
+    # Subtitle (docbook splits 'Title: Subtitle') — merge back into the
+    # title, matching the PDF which uses the full doctitle as one line.
+    subtitle_p = None
+    for p in paras:
+        if p is title_p:
+            continue
+        if p is logo_p or is_boundary(p):
+            break
+        if (p.style.style_id or '') == 'Subtitle':
+            subtitle_p = p
+            break
+    if subtitle_p is not None:
+        sub_text = subtitle_p.text
+        if sub_text:
+            title_p.add_run(': ' + sub_text)
+        subtitle_p._p.getparent().remove(subtitle_p._p)
+
+    # Author paragraphs: between title and logo in pandoc order
+    author_ps = []
+    for p in paras:
+        if p is title_p:
+            continue
+        if p is logo_p or is_boundary(p):
+            break
+        if p in date_ps or p is subtitle_p:
+            continue
+        if p.text.strip():
+            author_ps.append(p)
+
+    # Delete the redundant date paragraph(s)
+    for p in date_ps:
+        p._p.getparent().remove(p._p)
+
+    # Chain-reorder: title -> logo -> cover text -> authors -> meta.
+    # Pandoc places the TOC before body content, so without this the
+    # meta line (and authors) would land on the wrong page.
+    anchor = title_p._element
+    chain = [logo_p]
+    if cover_text_p is not None:
+        chain.append(cover_text_p)
+    chain.extend(author_ps)
+    if meta_p is not None:
+        chain.append(meta_p)
+    for el in chain:
+        anchor.addnext(el._element)
+        anchor = el._element
+
+    # Styling (PDF huawei-cover.sty: 3.6cm logo, 16pt cover text,
+    # 12pt authors, 12pt meta with bold version run)
+    logo_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _resize_drawing(logo_p, qn, width_cm=3.6)
+    if cover_text_p is not None:
+        cover_text_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in cover_text_p.runs:
+            run.font.size = Pt(16)
+    for p in author_ps:
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in p.runs:
+            run.font.size = Pt(12)
+    if meta_p is not None:
+        meta_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in meta_p.runs:
+            run.font.size = Pt(12)
+
+
+def _style_testcase_blocks(doc, qn):
+    """Draw the PDF testcase tcolorbox: red left rule around each block.
+
+    The pre-processor emits TESTCASE-START/TESTCASE-END marker
+    paragraphs.  Markers are deleted; every paragraph between them gets
+    a 3pt red left border (PDF testbook.cls: tcolorbox leftrule=3pt,
+    colframe=huaweired).  Field label paragraphs get the red header bar
+    look (white bold on C7000B), and step-number runs turn red
+    (PDF: \\textcolor{huaweired}{\\bfseries N.}).
+    """
+    paras = list(doc.paragraphs)
+
+    # Pair START/END markers
+    ranges = []
+    start_p = None
+    for p in paras:
+        t = p.text.strip()
+        if t == 'TESTCASE-START':
+            start_p = p
+        elif t == 'TESTCASE-END' and start_p is not None:
+            ranges.append((start_p, p))
+            start_p = None
+    if not ranges:
+        return
+
+    # pPr children that must follow pBdr (OOXML schema order)
+    after_pbdr = (
+        'w:shd', 'w:tabs', 'w:suppressAutoHyphens', 'w:kinsoku',
+        'w:wordWrap', 'w:overflowPunct', 'w:topLinePunct',
+        'w:autoSpaceDE', 'w:autoSpaceDN', 'w:bidi', 'w:adjustRightInd',
+        'w:snapToGrid', 'w:spacing', 'w:ind', 'w:contextualSpacing',
+        'w:mirrorIndents', 'w:suppressOverlap', 'w:jc',
+        'w:textDirection', 'w:textAlignment', 'w:textboxTightWrap',
+        'w:outlineLvl', 'w:divId', 'w:cnfStyle', 'w:rPr', 'w:sectPr',
+        'w:pPrChange',
+    )
+
+    def add_left_border(p):
+        pPr = p._p.get_or_add_pPr()
+        pBdr = pPr.find(qn('w:pBdr'))
+        if pBdr is None:
+            pBdr = OxmlElement('w:pBdr')
+            anchor = None
+            for tag in after_pbdr:
+                el = pPr.find(qn(tag))
+                if el is not None:
+                    anchor = el
+                    break
+            if anchor is not None:
+                anchor.addprevious(pBdr)
+            else:
+                pPr.append(pBdr)
+        left = pBdr.find(qn('w:left'))
+        if left is None:
+            left = etree.SubElement(pBdr, qn('w:left'))
+        left.set(qn('w:val'), 'single')
+        left.set(qn('w:sz'), '24')      # 3pt — PDF leftrule=3pt
+        left.set(qn('w:space'), '4')
+        left.set(qn('w:color'), 'C7000B')
+
+    def add_shading(p, fill):
+        pPr = p._p.get_or_add_pPr()
+        shd = pPr.find(qn('w:shd'))
+        if shd is None:
+            shd = OxmlElement('w:shd')
+            pBdr = pPr.find(qn('w:pBdr'))
+            if pBdr is not None:
+                pBdr.addnext(shd)
+            else:
+                pPr.append(shd)
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), fill)
+
+    red = RGBColor(0xC7, 0x00, 0x0B)
+    white = RGBColor(0xFF, 0xFF, 0xFF)
+    for start_p, end_p in ranges:
+        s = paras.index(start_p)
+        e = paras.index(end_p)
+        for p in paras[s + 1:e]:
+            add_left_border(p)
+            t = p.text.strip()
+            if t in FIELD_LABELS:
+                add_shading(p, 'C7000B')
+                for run in p.runs:
+                    run.font.bold = True
+                    run.font.color.rgb = white
+            elif p.runs and re.match(r'^\d+\.$', p.runs[0].text.strip()):
+                # Red bold step number (PDF: red bold "N.")
+                p.runs[0].font.color.rgb = red
+        # Remove the markers
+        start_p._p.getparent().remove(start_p._p)
+        end_p._p.getparent().remove(end_p._p)
+
+
 def _apply_content_styling(docx_path):
     """Apply content styling that mirrors the PDF.
 
@@ -842,29 +1090,37 @@ def _apply_content_styling(docx_path):
     for table in doc.tables:
         _style_table(table, qn)
 
-    # --- Testcase captions: center (PDF: centered bold caption) ---
-    tc_pat = _re.compile(r'^(Test Case|Caso de Teste) \d+:')
+    # --- Captions: match the PDF caption systems ---
+    # Table/Tabela: \small (9pt), left-aligned above the table (LaTeX
+    #   \caption + captionsetup font=small, labelfont=bf).
+    # Figure/Figura: \small, centered (\imagecap + captionsetup[figure]).
+    # Diagram/Diagrama: body size, centered (\diagramcap).
+    # Testcase/Caso de Teste: body size, centered (testbook.cls).
+    # The bold symbol run comes from the **Table N:** markup.
+    cap_pat = _re.compile(
+        r'^(Table|Tabela|Figure|Figura|Diagram|Diagrama'
+        r'|Testcase|Caso de Teste) \d+:')
     for paragraph in doc.paragraphs:
-        if tc_pat.match(paragraph.text.strip()):
+        m = cap_pat.match(paragraph.text.strip())
+        if not m:
+            continue
+        kind = m.group(1)
+        if kind in ('Table', 'Tabela'):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            for run in paragraph.runs:
+                run.font.size = Pt(9)
+        elif kind in ('Figure', 'Figura'):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            for run in paragraph.runs:
+                run.font.size = Pt(9)
+        else:
             paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    # --- Cover version line: move under the title, centered gray ---
-    title_p = None
-    version_p = None
-    for paragraph in doc.paragraphs:
-        if title_p is None and paragraph.style.style_id == 'Title':
-            title_p = paragraph
-            continue
-        if paragraph.text.strip().startswith('Version '):
-            version_p = paragraph
-            break
-    if version_p is not None and title_p is not None:
-        version_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        for run in version_p.runs:
-            run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
-            run.font.size = Pt(12)
-        # Place directly under the title (before the TOC), like the PDF cover
-        title_p._element.addnext(version_p._element)
+    # --- Testcase blocks: red left rule + red field bars (PDF tcolorbox) ---
+    _style_testcase_blocks(doc, qn)
+
+    # --- Cover: logo + cover text + meta line (PDF huawei-cover.sty) ---
+    _assemble_cover(doc, qn)
 
     doc.save(docx_path)
 

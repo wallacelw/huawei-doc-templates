@@ -369,20 +369,19 @@ generate_docx() {
     fi
     echo "  Generating DOCX..."
     if [[ -n "$ADOC_FILE" ]]; then
-        # Pre-process .adoc for DOCX (convert passthrough blocks + custom roles)
-        # Only for templates that have a pre-processor (poc, testbook)
+        # Pre-process .adoc for DOCX (passthrough blocks, custom roles,
+        # caption numbering, cover block) — runs for all templates;
+        # falls back to the original .adoc on failure
         local tmp_adoc=""
         local docx_adoc="$ADOC_FILE"
-        if [[ "$TEMPLATE" == "poc" || "$TEMPLATE" == "testbook" ]]; then
-            tmp_adoc=$(mktemp --suffix=.adoc)
-            if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
-              --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
-                docx_adoc="$tmp_adoc"
-            else
-                echo "  ↳ DOCX pre-processing failed, using original .adoc"
-                rm -f "$tmp_adoc"
-                tmp_adoc=""
-            fi
+        tmp_adoc=$(mktemp --suffix=.adoc)
+        if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
+          --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+            docx_adoc="$tmp_adoc"
+        else
+            echo "  ↳ DOCX pre-processing failed, using original .adoc"
+            rm -f "$tmp_adoc"
+            tmp_adoc=""
         fi
         # Diagram support (same options as build-adoc.sh)
         if ! command -v plantuml-native >/dev/null 2>&1; then
@@ -450,27 +449,62 @@ generate_md() {
     fi
     echo "  Generating Markdown..."
     if [[ -n "$ADOC_FILE" ]]; then
-        # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
-        # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
-        local tmp_dbk
-        tmp_dbk=$(mktemp --suffix=.dbk)
-        if asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null && \
-           pandoc -f docbook -t gfm "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
-            rm -f "$tmp_dbk"
+        # Pre-process .adoc (passthrough blocks, captions, cover block);
+        # --target md skips the DOCX-only testcase markers
+        local tmp_adoc=""
+        local md_adoc="$ADOC_FILE"
+        tmp_adoc=$(mktemp --suffix=.adoc)
+        if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
+          --target md --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+            md_adoc="$tmp_adoc"
         else
-            rm -f "$tmp_dbk"
+            echo "  ↳ MD pre-processing failed, using original .adoc"
+            rm -f "$tmp_adoc"
+            tmp_adoc=""
+        fi
+        # Diagram support (same options as the DOCX path)
+        if ! command -v plantuml-native >/dev/null 2>&1; then
+            if [ -f "/usr/share/plantuml/plantuml.jar" ]; then
+                export DIAGRAM_PLANTUML_CLASSPATH="/usr/share/plantuml/plantuml.jar"
+            fi
+        fi
+        local diagram_opts=""
+        if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+            diagram_opts="-r asciidoctor-diagram"
+        fi
+        # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
+        # Falls back to LaTeX pipeline if docbook fails
+        # tmp_dir holds the .dbk plus any diagram PNGs generated next to it
+        local tmp_dir
+        tmp_dir=$(mktemp -d)
+        local tmp_dbk="$tmp_dir/doc.dbk"
+        if asciidoctor -b docbook $diagram_opts "$md_adoc" -o "$tmp_dbk" 2>/dev/null && \
+           pandoc -f docbook -t gfm \
+             --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}:${tmp_dir}" \
+             "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
+            :
+        else
             echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
             generate_pandoc_format "Markdown" markdown md
         fi
+        # Post-process: embed images as base64 data URIs (self-contained MD).
+        # Runs before tmp_dir cleanup so diagram PNGs resolve too.
+        if [ -f "${PROJECT_DIR}/$out" ]; then
+            python3 "${REPO_ROOT}/templates/_base/embed-images.py" \
+                "${PROJECT_DIR}/$out" \
+                --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets:${tmp_dir}" 2>&1 | sed 's/^/  /'
+        fi
+        rm -rf "$tmp_dir"
+        rm -f "$tmp_adoc"
     else
         # Legacy .tex pipeline
         generate_pandoc_format "Markdown" markdown md
-    fi
-    # Post-process: embed images as base64 data URIs (self-contained MD)
-    if [ -f "${PROJECT_DIR}/$out" ]; then
-        python3 "${REPO_ROOT}/templates/_base/embed-images.py" \
-            "${PROJECT_DIR}/$out" \
-            --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" 2>&1 | sed 's/^/  /'
+        # Post-process: embed images as base64 data URIs (self-contained MD)
+        if [ -f "${PROJECT_DIR}/$out" ]; then
+            python3 "${REPO_ROOT}/templates/_base/embed-images.py" \
+                "${PROJECT_DIR}/$out" \
+                --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" 2>&1 | sed 's/^/  /'
+        fi
     fi
     local size=""
     if [ -f "${PROJECT_DIR}/$out" ]; then
@@ -492,16 +526,31 @@ generate_html() {
     fi
     echo "  Generating HTML..."
     if [[ -n "$ADOC_FILE" ]]; then
+        # Pre-process .adoc (passthrough blocks, captions, cover block);
+        # --target html skips the DOCX-only testcase markers
+        local tmp_adoc=""
+        local html_adoc="$ADOC_FILE"
+        tmp_adoc=$(mktemp --suffix=.adoc)
+        if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
+          --target html --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+            html_adoc="$tmp_adoc"
+        else
+            echo "  ↳ HTML pre-processing failed, using original .adoc"
+            rm -f "$tmp_adoc"
+            tmp_adoc=""
+        fi
         # AsciiDoc pipeline: asciidoctor directly
         asciidoctor -b html5 \
             -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
             -a docinfodir="$REPO_ROOT/templates/_base" \
             -a docinfo1 \
             -r asciidoctor-diagram \
-            "$ADOC_FILE" -o "${PROJECT_DIR}/$out" 2>&1 || {
+            "$html_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
             RESULTS_FAIL+=("HTML:asciidoctor failed")
+            rm -f "$tmp_adoc"
             return
         }
+        rm -f "$tmp_adoc"
     else
         # Legacy .tex pipeline
         generate_pandoc_format "HTML" html5 html --template="$HTML_TMPL" -s --embed-resources

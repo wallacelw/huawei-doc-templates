@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.4.3
+:version: 6.4.4
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.4.4}{2026-09-20}{\item DOCX covers now show the logo, cover text, and version/date/time meta line like the PDF. Test case blocks in DOCX get the PDF's visual wrapper: red left rule, red field header bars, and red step numbers. Captions follow the PDF ordering system in DOCX, MD, and HTML (Table/Diagram/Figure/Testcase N: with bold symbol). Portuguese PDFs now label diagrams "Diagrama N:" (was hardcoded English "Diagram"). Markdown and HTML output no longer leaks raw LaTeX from passthrough blocks — the DOCX pre-processor now feeds those pipelines too.}
   \changelogentry{6.4.3}{2026-09-20}{\item Testbook and POC DOCX output now matches the PDF much more closely: native table of contents (language-aware, auto-populated), each section starts on a new page, embedded images and diagrams (PlantUML/Graphviz rendered), white-on-red table headers, cover version line under the title, centered test case captions, and plain black rules for signature grids.}
   \changelogentry{6.4.2}{2026-09-20}{\item DOCX output for POC and testbook templates now includes all passthrough content (stakeholders, closing record, signatures, test cases, test summary, changelog) via a new pre-processor. Fixed dropped Test Scope fields in testbook DOCX output.}
   \changelogentry{6.4.0}{2026-09-20}{\item Fixed changelog dates — replaced \inlinecode{\textbackslash today} with historical release dates. Eliminated zero-width-space missing-glyph warnings from typographic substitutions.}
