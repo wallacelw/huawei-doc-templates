@@ -1416,7 +1416,7 @@ def _fix_toc_styles(root, W_NS):
             tab = etree.SubElement(tabs, f"{{{W_NS}}}tab")
             tab.set(f"{{{W_NS}}}val", "right")
             tab.set(f"{{{W_NS}}}leader", "dot")
-            tab.set(f"{{{W_NS}}}pos", "9638")  # content text width in twips (matches H1 tab stop)
+            tab.set(f"{{{W_NS}}}pos", "9638")  # content text width in twips (A4 minus margins)
             etree.SubElement(pPr, f"{{{W_NS}}}ind").set(f"{{{W_NS}}}left", indent)
             sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
             sp.set(f"{{{W_NS}}}after", "40")  # 2pt

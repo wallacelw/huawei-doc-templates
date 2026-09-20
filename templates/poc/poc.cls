@@ -29,7 +29,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/20 Huawei POC template v6.8.2]
+\ProvidesClass{poc}[2026/09/20 Huawei POC template v6.8.3]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

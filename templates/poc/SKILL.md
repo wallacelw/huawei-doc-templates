@@ -442,10 +442,10 @@ multi-format output options.
 ### Multi-format output
 
 AsciiDoc → LaTeX → PDF is the primary output and the visual reference
-(AGENTS.md L18). DOCX, Markdown, and HTML are generated via a
+(AGENTS.md L18). DOCX and Markdown are generated via a
 pre-processor (`adoc_docx_preprocessor.py`) then `asciidoctor -b docbook`
 → `pandoc -f docbook`. DOCX is post-processed by `docx_fix.py --fix`;
-HTML is generated via `asciidoctor -b html5`.
+HTML is generated via the pre-processor → `asciidoctor -b html5`.
 
 Use the Makefile for convenience:
 

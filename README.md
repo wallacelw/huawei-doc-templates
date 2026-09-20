@@ -213,14 +213,14 @@ make html           # HTML only (guide pt + en + setup-guide)
 make clean-formats  # remove generated multi-format files
 ```
 
-DOCX, Markdown, and HTML are generated via a pre-processor
-(`adoc_docx_preprocessor.py --template <name> --target docx|md|html`)
+DOCX and Markdown are generated via a pre-processor
+(`adoc_docx_preprocessor.py --template <name> --target docx|md`)
 that converts Huawei-specific passthrough blocks and roles to portable
 AsciiDoc, then `asciidoctor -b docbook` → `pandoc -f docbook`. DOCX is
 post-processed by `docx_fix.py --fix` (via per-template wrappers that
 inject `--template` and `--lang`); MD embeds images as base64 via
-`embed-images.py`; HTML is generated via `asciidoctor -b html5` with
-`huawei.css`.
+`embed-images.py`. HTML is generated via the pre-processor
+(`--target html`) → `asciidoctor -b html5` with `huawei.css`.
 
 Generated outputs are gitignored (build artifacts). Only the converter, CSS,
 reference DOCX, HTML template, and Python script are committed.

@@ -4,6 +4,17 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.8.3 (2026-09-20)
+
+### Docs accuracy fix
+
+- README, AGENTS, and all 4 SKILL.md: the multi-format pipeline
+  descriptions now correctly separate DOCX/Markdown (pre-processor →
+  docbook → pandoc) from HTML (pre-processor → asciidoctor html5) —
+  the v6.8.2 wording implied HTML also went through docbook/pandoc.
+- docx_fix.py: dropped a stale "(matches H1 tab stop)" comment
+  parenthetical (no H1 tab stop exists).
+
 ## v6.8.2 (2026-09-20)
 
 ### Documentation sync and cleanup
