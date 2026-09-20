@@ -4,6 +4,28 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.4.7 (2026-09-20)
+
+### DOCX fix: H1 section titles match the PDF heading design
+
+The PDF renders H1 (section) titles as a **big 56pt number on the left,
+20pt bold title pushed to the right edge, red rule below**
+(huawei-titles.sty: `\fontsize{56}{56}` number, `\hfill`, red
+`\titlerule[1.5pt]`). The DOCX rendered everything left-aligned with a
+body-size number.
+
+#### Fix (docx_fix.py, shared — applies to all templates)
+
+- **Right tab stop** added to the Heading1 style at the text width
+  (computed from the document's section properties). Pandoc already
+  emits headings as `SectionNumber` run + tab + title run, so the tab
+  now acts as the LaTeX `\hfill` — the title lands on the right edge.
+- **SectionNumber character style** set to 56pt (was inherited body
+  size) — the big section number matches the PDF.
+- Already in place and verified: red bottom rule (1.5pt C7000B),
+  20pt bold title, 30pt spacing after, page break before each H1.
+- H2–H4 verified matching the PDF (18/16/14pt regular, left-aligned).
+
 ## v6.4.6 (2026-09-20)
 
 ### DOCX fix: code blocks no longer break the testcase red rule

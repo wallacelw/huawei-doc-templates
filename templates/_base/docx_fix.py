@@ -22,7 +22,7 @@ from docx.shared import Pt, Cm, Mm, RGBColor, Emu
 from docx.oxml import parse_xml, OxmlElement
 from docx.oxml.ns import nsdecls, qn
 from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from lxml import etree
 
 
@@ -1106,10 +1106,23 @@ def _apply_content_styling(docx_path):
         update_fields = etree.SubElement(settings, qn('w:updateFields'))
         update_fields.set(qn('w:val'), 'true')
 
-    # --- Heading 1 starts on a new page (matches PDF \clearpage) ---
+    # --- Heading 1: PDF style — big number left, title right, red rule ---
+    # PDF (huawei-titles.sty): 56pt section number left-aligned, \hfill
+    # pushes the 20pt bold title to the right edge, red titlerule below
+    # (the style's bottom border provides the rule).  Pandoc emits the
+    # number as a SectionNumber run + tab + title run — a right tab stop
+    # at the text width makes the tab act as the \hfill.
+    section = doc.sections[0]
+    text_width = section.page_width - section.left_margin - section.right_margin
     for style in doc.styles:
         if style.style_id == 'Heading1':
             style.paragraph_format.page_break_before = True
+            style.paragraph_format.tab_stops.add_tab_stop(
+                text_width, WD_TAB_ALIGNMENT.RIGHT)
+            break
+    for style in doc.styles:
+        if style.style_id == 'SectionNumber':
+            style.font.size = Pt(56)
             break
 
     # --- Badge styling: [PASS]/[FAIL]/... -> character style ---
