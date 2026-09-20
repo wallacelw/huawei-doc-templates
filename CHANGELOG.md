@@ -4,6 +4,46 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.5.1 (2026-09-20)
+
+### Pre-processor content-corruption fixes; tests run the real pipeline
+
+One coherent bug-fix unit: the DOCX/MD/HTML pre-processor
+(`adoc_docx_preprocessor.py`) corrupted or dropped passthrough content in
+several ways, and the test suite validated a different pipeline than the
+one users run (`scripts/build.sh`).
+
+#### Fixed
+
+- Table corruption from unescaped pipes in passthrough content — a literal
+  `|` inside changelog, signature, stakeholder, closing-record, or
+  test-summary cells split the AsciiDoc table cell. All cell content is
+  now pipe-escaped (`\|`), already-escaped pipes left intact.
+- `[.badge]#text#` content discarded (always "[NEW]") — the text is now
+  preserved as a flat red badge matching the PDF `\badge{text}`
+  (DOCX via a `[BADGE:text]` sentinel resolved by docx_fix to the flat
+  red `badge` character style; MD/HTML as `**[text]**`).
+- Multi-item changelog entries joined with a literal " + " — now a bullet
+  list per entry (AsciiDoc `a|` block cell), matching the PDF itemize.
+- POC changelog passthrough dropped in DOCX/MD/HTML — `changelog` handler
+  added to `POC_HANDLERS`.
+- `:noanswers:` ignored — test results/remarks now hidden like the PDF
+  (testbook.cls `noanswers` option parity).
+- `\texttt`/`$\to$`/LaTeX quotes leaking from changelog entries —
+  converted to `` `text` ``, →, and Unicode curly quotes.
+- Single-signature rows crashing the preprocessor (IndexError) — a
+  1-cell row now emits an empty second cell, keeping the 2-column grid.
+
+#### Tests
+
+- `round-trip.sh` and `test-docx-fix.sh` now run the real pipeline
+  (preprocessor wired in, matching build.sh).
+- Vacuous raw-LaTeX exclusion list removed — any raw LaTeX outside code
+  blocks is now a hard failure.
+- New `tests/test-preprocessor.sh` unit tests (pipe escaping, badge
+  contract, changelog bullets, `:noanswers:`, signatures edge cases,
+  target-aware testcase markers).
+
 ## v6.5.0 (2026-09-20)
 
 ### Evidence bullets, native roman numbering, badge assets, signature breaks

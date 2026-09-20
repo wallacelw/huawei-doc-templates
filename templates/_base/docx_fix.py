@@ -744,6 +744,12 @@ BADGE_MARKERS = {
     "[UNTESTED]": "BadgeUntested",
 }
 
+# Badge text sentinel from the pre-processor: **[BADGE:text]** arrives as
+# a bold run "[BADGE:text]".  docx_fix restores the text and applies the
+# flat red "badge" character style (PDF \badge replica: red bg, white
+# bold 8pt, auto width).
+BADGE_SENTINEL_RE = re.compile(r'^\[BADGE:(.*)\]$')
+
 
 def _add_result_badge_styles(root, W_NS):
     """Add individual result badge character styles (green/red/orange/gray)."""
@@ -1142,10 +1148,19 @@ def _apply_content_styling(docx_path):
     def _replace_badge_runs(paragraphs):
         for paragraph in paragraphs:
             for run in paragraph.runs:
-                marker = run.text.strip()
-                if marker not in BADGE_MARKERS:
+                text = run.text.strip()
+                # **[BADGE:text]** sentinel → restore text, flat red badge
+                m = BADGE_SENTINEL_RE.match(text)
+                if m:
+                    run.text = m.group(1)
+                    for st in doc.styles:
+                        if st.style_id == 'badge':
+                            run.style = st
+                            break
                     continue
-                style_id = BADGE_MARKERS[marker]
+                if text not in BADGE_MARKERS:
+                    continue
+                style_id = BADGE_MARKERS[text]
                 label = style_id.replace('Badge', '').upper()
                 png = os.path.join(_badge_dir, 'badge-{}.png'.format(label))
                 if os.path.isfile(png):

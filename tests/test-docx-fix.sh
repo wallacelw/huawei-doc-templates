@@ -99,11 +99,18 @@ run_template_tests() {
   # ── Generate DOCX from en sample ───────────────────────────────────────
   echo "Generating DOCX..."
   if [[ -f "$ADOC_FILE" ]]; then
+    # Pre-process .adoc (same pipeline as scripts/build.sh)
+    local pre_adoc="$TMPDIR_FIX/${TEMPLATE_NAME}-pre.adoc"
+    if ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
+          --template "$TEMPLATE_NAME" "$ADOC_FILE" -o "$pre_adoc" 2>/dev/null; then
+      fail "$TEMPLATE_NAME: pre-processor failed"
+      return
+    fi
     # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
     # Fallback: pandoc -f latex+raw_tex from generated .tex
     local tmp_dbk
     tmp_dbk=$(mktemp --suffix=.dbk)
-    if asciidoctor -b docbook "$ADOC_FILE" -o "$tmp_dbk" 2>/dev/null && \
+    if asciidoctor -b docbook "$pre_adoc" -o "$tmp_dbk" 2>/dev/null && \
        pandoc -f docbook \
        --reference-doc="$REF_DOCX" --number-sections \
        --resource-path="$SAMPLE_DIR:$REPO_ROOT/templates/${TEMPLATE_NAME}:$COMMON_ASSETS" \
@@ -246,6 +253,20 @@ PYEOF
     fi
   else
     fail "$TEMPLATE_NAME: No footer XML found"
+  fi
+
+  # No TESTCASE markers leaked into the DOCX (docx_fix must remove them)
+  if grep -q 'TESTCASE-START\|TESTCASE-END' "$UNZIP_DIR/word/document.xml"; then
+    fail "$TEMPLATE_NAME: TESTCASE markers leaked into DOCX"
+  else
+    pass "$TEMPLATE_NAME: No TESTCASE markers in DOCX"
+  fi
+
+  # No BADGE sentinels leaked (docx_fix must resolve them to styled text)
+  if grep -q '\[BADGE:' "$UNZIP_DIR/word/document.xml"; then
+    fail "$TEMPLATE_NAME: BADGE sentinel leaked into DOCX"
+  else
+    pass "$TEMPLATE_NAME: No BADGE sentinels in DOCX"
   fi
 
   # ── Loud-failure assertions ────────────────────────────────────────────

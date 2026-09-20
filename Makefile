@@ -157,6 +157,7 @@ watch: ## Watch .adoc and recompile PDF on save (make watch DIR=documents/guide-
 
 test: ## Run all tests (filter units, round-trip, DOCX fix, version sync, converter)
 	./tests/test-filter.sh
+	./tests/test-preprocessor.sh
 	./tests/round-trip.sh
 	./tests/test-docx-fix.sh
 	./tests/test-sync.sh

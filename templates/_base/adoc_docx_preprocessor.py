@@ -110,9 +110,27 @@ def clean_ws(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 
+def _esc_cell(text):
+    r"""Escape unescaped pipes for AsciiDoc table cells.
+
+    A literal '|' in cell content would split the cell; an already
+    escaped '\|' is left intact.
+    """
+    return re.sub(r'(?<!\\)\|', r'\\|', text)
+
+
 # ---------------------------------------------------------------------------
 # Inline LaTeX → AsciiDoc
 # ---------------------------------------------------------------------------
+
+def _badge_text(text):
+    r"""Format badge text per target (PDF: \badge{text} keeps the text)."""
+    text = text.strip()
+    if _TARGET == 'docx':
+        # Sentinel consumed by docx_fix -> flat red badge with the text
+        return '**[BADGE:' + text + ']**'
+    return '**[' + text + ']**'
+
 
 def convert_inline_latex(text, lang='en'):
     """Convert inline LaTeX commands to AsciiDoc inline formatting."""
@@ -120,6 +138,7 @@ def convert_inline_latex(text, lang='en'):
 
     # Order matters: escape sequences first, then commands
     text = text.replace(r'\textbackslash', '\\')
+    text = text.replace(r'\textasciitilde', '~')
     text = text.replace(r'\_', '_')
     text = text.replace(r'\&', '&')
     text = text.replace(r'\%', '%')
@@ -128,11 +147,16 @@ def convert_inline_latex(text, lang='en'):
 
     # Math symbols
     text = text.replace(r'$\rightarrow$', '\u2192')   # →
+    text = text.replace(r'$\to$', '\u2192')             # → (short form)
     text = text.replace(r'$\geq$', '\u2265')           # ≥
     text = text.replace(r'$\leq$', '\u2264')           # ≤
     text = text.replace(r'$>$', '>')
     text = text.replace(r'$<$', '<')
     text = text.replace(r'$\neq$', '\u2260')           # ≠
+    text = text.replace(r'$\times$', '\u00d7')         # ×
+    # LaTeX typographic quotes → Unicode
+    text = text.replace('``', '\u201c')                 # “
+    text = text.replace("''", '\u201d')                 # ”
 
     # POC classification labels
     text = text.replace(r'\pochomologated', labels['homologated'])
@@ -146,6 +170,9 @@ def convert_inline_latex(text, lang='en'):
         text,
     )
 
+    # \badge{text} → target-aware badge (same contract as [.badge]#text#)
+    text = _replace_cmd(text, 'badge', _badge_text)
+
     # \textbf{text} → **text**  (handle nested braces)
     text = _replace_cmd(text, 'textbf', lambda arg: '**' + arg + '**')
     # \inlinecode{text} → `text`
@@ -157,6 +184,8 @@ def convert_inline_latex(text, lang='en'):
             return '`pass:[' + arg + ']`'
         return '`' + arg + '`'
     text = _replace_cmd(text, 'inlinecode', _inlinecode_replacer)
+    # \texttt{text} → `text` (same protection as \inlinecode)
+    text = _replace_cmd(text, 'texttt', _inlinecode_replacer)
     # \param{text} → *text*
     text = _replace_cmd(text, 'param', lambda arg: '*' + arg + '*')
     # \note{text} → *text*
@@ -227,7 +256,7 @@ def convert_stakeholders(content, lang):
             continue
         m = re.match(r'\\stakeholderorg\{([^}]*)\}', line)
         if m:
-            org = convert_inline_latex(m.group(1), lang)
+            org = _esc_cell(convert_inline_latex(m.group(1), lang))
             lines.append('4+| *' + org + '*')
             continue
         m = re.match(
@@ -235,7 +264,8 @@ def convert_stakeholders(content, lang):
             line,
         )
         if m:
-            vals = [convert_inline_latex(m.group(i), lang) for i in range(1, 5)]
+            vals = [_esc_cell(convert_inline_latex(m.group(i), lang))
+                    for i in range(1, 5)]
             lines.append('| ' + ' | '.join(vals))
             continue
     lines.append('|===')
@@ -252,8 +282,8 @@ def convert_closingrecord(content, lang):
         r = find_cmd_2args(line, 'closingrow')
         if r is not None:
             label, value, _, _ = r
-            label = convert_inline_latex(label, lang)
-            value = convert_inline_latex(value, lang)
+            label = _esc_cell(convert_inline_latex(label, lang))
+            value = _esc_cell(convert_inline_latex(value, lang))
             lines.append('| ' + label + ' | ' + value)
     lines.append('|===')
     return '\n'.join(lines)
@@ -288,10 +318,10 @@ def convert_signatures(content, lang):
                         break
                 if len(args) < 4:
                     continue
-                name = convert_inline_latex(args[0], lang)
-                title = convert_inline_latex(args[1], lang)
-                email = convert_inline_latex(args[2], lang)
-                address = convert_inline_latex(args[3], lang)
+                name = _esc_cell(convert_inline_latex(args[0], lang))
+                title = _esc_cell(convert_inline_latex(args[1], lang))
+                email = _esc_cell(convert_inline_latex(args[2], lang))
+                address = _esc_cell(convert_inline_latex(args[3], lang))
                 cell = (
                     labels['sincerely'] + ' +\n'
                     + name + ' +\n' + title + ' +\n'
@@ -299,7 +329,11 @@ def convert_signatures(content, lang):
                 )
                 cells.append(cell)
         if cells:
-            lines.append('| ' + cells[0] + '\n| ' + cells[1])
+            for cell in cells:
+                lines.append('| ' + cell)
+            if len(cells) == 1:
+                # Keep the 2-column grid (PDF: empty signature cell)
+                lines.append('|')
     lines.append('|===')
     return '\n'.join(lines)
 
@@ -388,28 +422,30 @@ def _process_testcase_inner(inner, lang, labels, out):
                 pos = after
                 continue
 
-        # \testresult{...}
+        # \testresult{...} — hidden by :noanswers: (PDF: testbook.cls
+        # noanswers option hides Test Result and Remarks entirely)
         if inner.startswith(r'\testresult{', pos):
             r = find_cmd(inner, 'testresult', pos)
             if r:
                 arg, _, after = r
-                badge = convert_inline_latex(arg.strip(), lang)
-                out.append('**' + labels['result'] + '**')
-                out.append('')
-                out.append(badge)
-                out.append('')
+                if not _NOANSWERS:
+                    out.append('**' + labels['result'] + '**')
+                    out.append('')
+                    out.append(convert_inline_latex(arg.strip(), lang))
+                    out.append('')
                 pos = after
                 continue
 
-        # \testremarks{text}
+        # \testremarks{text} — hidden by :noanswers: (see \testresult)
         if inner.startswith(r'\testremarks{', pos):
             r = find_cmd(inner, 'testremarks', pos)
             if r:
                 arg, _, after = r
-                out.append('**' + labels['remarks'] + '**')
-                out.append('')
-                out.append(convert_inline_latex(arg.strip(), lang))
-                out.append('')
+                if not _NOANSWERS:
+                    out.append('**' + labels['remarks'] + '**')
+                    out.append('')
+                    out.append(convert_inline_latex(arg.strip(), lang))
+                    out.append('')
                 pos = after
                 continue
 
@@ -607,9 +643,9 @@ def convert_testsummary(content, lang):
                     break
             if len(args) < 3:
                 continue
-            tc_id = convert_inline_latex(args[0].strip(), lang)
-            title = convert_inline_latex(args[1].strip(), lang)
-            badge = convert_inline_latex(args[2].strip(), lang)
+            tc_id = _esc_cell(convert_inline_latex(args[0].strip(), lang))
+            title = _esc_cell(convert_inline_latex(args[1].strip(), lang))
+            badge = _esc_cell(convert_inline_latex(args[2].strip(), lang))
             lines.append('| ' + tc_id + ' | ' + title + ' | ' + badge)
     lines.append('|===')
     return '\n'.join(lines)
@@ -643,14 +679,18 @@ def convert_changelog(content, lang):
         if len(args) < 3:
             pos = ce_pos + 1
             continue
-        version = convert_inline_latex(args[0].strip(), lang)
-        date = convert_inline_latex(args[1].strip(), lang)
+        version = _esc_cell(convert_inline_latex(args[0].strip(), lang))
+        date = _esc_cell(convert_inline_latex(args[1].strip(), lang))
         items_raw = args[2]
         # Split on \item
         items = re.split(r'\\item\s*', items_raw)
-        items = [convert_inline_latex(it.strip(), lang) for it in items if it.strip()]
-        changes = ' + '.join(items)
-        lines.append('| ' + version + ' | ' + date + ' | ' + changes)
+        items = [_esc_cell(convert_inline_latex(it.strip(), lang))
+                 for it in items if it.strip()]
+        # a| cell: AsciiDoc cell with block content — each \item becomes
+        # a bullet, matching the PDF (itemize inside the table cell).
+        lines.append('| ' + version + ' | ' + date + ' a|')
+        for it in items:
+            lines.append('* ' + it)
         pos = p
     lines.append('|===')
     return '\n'.join(lines)
@@ -680,8 +720,9 @@ def convert_roles(line, lang):
             line,
         )
 
-    # [.badge]#New# → **[NEW]**
-    line = re.sub(r'\[\.badge\]#([^#]*)#', '**[NEW]**', line)
+    # [.badge]#text# → target-aware badge (text preserved — PDF \badge{text})
+    line = re.sub(
+        r'\[\.badge\]#([^#]*)#', lambda m: _badge_text(m.group(1)), line)
 
     # [.general-objective]#text# — handled at content level (multi-line)
 
@@ -755,11 +796,16 @@ def convert_inline_passthroughs(text, lang):
 # no post-processor, so markers are skipped there.
 _TARGET = 'docx'
 
+# :noanswers: header attribute — hides Test Result and Remarks fields
+# (PDF: testbook.cls noanswers class option).
+_NOANSWERS = False
+
 # Map LaTeX environment names to handler functions
 POC_HANDLERS = {
     'stakeholders': convert_stakeholders,
     'closingrecord': convert_closingrecord,
     'signatures': convert_signatures,
+    'changelog': convert_changelog,
 }
 
 TESTBOOK_HANDLERS = {
@@ -962,8 +1008,10 @@ def process_adoc(content, template, target='docx'):
     """Main entry: transform .adoc content for DOCX/MD/HTML generation."""
     global _testcase_counter
     global _TARGET
+    global _NOANSWERS
     _testcase_counter = 0
     _TARGET = target
+    _NOANSWERS = bool(re.search(r'^:noanswers:', content, re.MULTILINE))
 
     lang = detect_lang(content)
 

@@ -32,63 +32,41 @@ get_template_paths() {
 RT_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/rt-roundtrip.XXXXXX")"
 trap 'rm -rf "$RT_TMPDIR"' EXIT
 
-# ── Raw LaTeX exclusion patterns (single source of truth) ──────────────────
-# Known intentional LaTeX passthrough patterns (L22: changelog, testcase, etc.)
-# These are LaTeX commands that appear in passthrough blocks by design.
-# Common LaTeX (\textbf, \item, \today, \lg@) is NOT excluded — leaks are bugs.
-# Defined once here; the MD/DOCX/HTML raw-LaTeX checks below all read them
-# from the RAW_LATEX_EXCLUDED_BLOB env var (newline-joined, exported).
-readonly RAW_LATEX_EXCLUDED=(
-  '\\begin\{changelog\}'
-  '\\end\{changelog\}'
-  '\\changelogentry'
-  '\\textbackslash'
-  '\\begin\{testcase\}'
-  '\\end\{testcase\}'
-  '\\begin\{testsummary\}'
-  '\\end\{testsummary\}'
-  '\\testsummaryrow'
-  '\\testresultbadge'
-  '\\teststep'
-  '\\testobjective'
-  '\\begin\{testprerequisites\}'
-  '\\end\{testprerequisites\}'
-  '\\begin\{testprocedure\}'
-  '\\end\{testprocedure\}'
-  '\\begin\{testexpected\}'
-  '\\end\{testexpected\}'
-  '\\begin\{code\}'
-  '\\end\{code\}'
-  '\\inlinecode'
-  '\\begin\{stakeholders\}'
-  '\\end\{stakeholders\}'
-  '\\stakeholderrow'
-  '\\stakeholderorg'
-  '\\begin\{closingrecord\}'
-  '\\end\{closingrecord\}'
-  '\\closingrow'
-  '\\begin\{signatures\}'
-  '\\end\{signatures\}'
-  '\\signaturecell'
-  '\\pocresult'
-  '\\checkbox'
-  '\\begin\{activities\}'
-  '\\end\{activities\}'
-  '\\begin\{evidence\}'
-  '\\end\{evidence\}'
-  '\\begin\{objectiveblock\}'
-  '\\end\{objectiveblock\}'
-  '\\setreportversion'
-  '\\setreportdate'
-  '\\setreportscenario'
-)
-readonly RAW_LATEX_EXCLUDED_BLOB="$(printf '%s\n' "${RAW_LATEX_EXCLUDED[@]}")"
-export RAW_LATEX_EXCLUDED_BLOB
+# ── Raw LaTeX policy ────────────────────────────────────────────────────────
+# Since v6.5.1 the pre-processor (adoc_docx_preprocessor.py) converts all
+# passthrough content before these outputs are generated, so ANY raw LaTeX
+# outside code blocks is a bug.  The old exclusion list (which masked leaks
+# of the pre-v6.4 pipeline) was removed — no patterns are excluded.
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 # Safe grep -c: returns "0" even when no matches (grep exits 1).
 count() { local n; n=$(grep -c "$1" "$2" 2>/dev/null || true); echo "${n:-0}"; }
+
+# Count occurrences of a pattern in MD outside fenced code blocks (```).
+# Needed because the real pipeline produces MD where:
+# - code blocks contain lines that look like headings (bash `#` comments)
+# - pandoc falls back to raw HTML blocks (<img>, <table>) for content
+#   that GFM pipe syntax cannot express (figures, tables with lists)
+count_md() {
+  local md_file=$1 pattern=$2
+  python3 - "$md_file" "$pattern" << 'PYEOF'
+import sys, re
+md_file, pattern = sys.argv[1], sys.argv[2]
+pat = re.compile(pattern)
+n = 0
+in_fenced = False
+with open(md_file) as f:
+    for line in f:
+        if line.startswith("```"):
+            in_fenced = not in_fenced
+            continue
+        if in_fenced:
+            continue
+        n += len(pat.findall(line))
+print(n)
+PYEOF
+}
 
 # Count occurrences (works on single-line XML files).
 # grep -o prints one line per match; wc -l counts them.
@@ -141,6 +119,9 @@ check_tol3() {
 # - code_paras: total SourceCode-styled paragraphs (lines of code)
 # - code_blocks: contiguous runs of SourceCode paragraphs (code blocks)
 # - callouts: tables with callout-colored left borders
+# - imgs: content images only — badge pill PNGs (≤2cm wide, docx_fix's
+#   DOCX-only text replicas for [PASS]-family markers) are excluded so
+#   the count is comparable with MD/HTML, where badges are text.
 count_docx() {
   local docx_path=$1 tmpdir=$2
   rm -rf "$tmpdir"
@@ -156,7 +137,10 @@ count_docx() {
 import xml.etree.ElementTree as ET, sys
 doc_xml = sys.argv[1]
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+WP = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
 callout_colors = {"C7000B", "ED6D00", "62B230", "30B5C5"}
+# Badge pills are ≤2cm wide (720000 EMU); content images are larger.
+BADGE_MAX_CX = 1000000
 
 tree = ET.parse(doc_xml)
 root = tree.getroot()
@@ -180,9 +164,11 @@ for p in root.iter(f"{{{W}}}p"):
             code_blocks += 1
     else:
         in_code = False
-    # Images: <w:drawing> inside paragraph
-    if p.find(f".//{{{W}}}drawing") is not None:
-        imgs += 1
+    # Images: <w:drawing> in paragraph, excluding small badge pill PNGs
+    for drawing in p.findall(f".//{{{W}}}drawing"):
+        extent = drawing.find(f".//{{{WP}}}extent")
+        if extent is None or int(extent.get("cx", "0")) > BADGE_MAX_CX:
+            imgs += 1
 
 for tbl in root.findall(f".//{{{W}}}tbl"):
     tables += 1
@@ -204,19 +190,11 @@ PYEOF
 count_raw_latex_md() {
   local md_file=$1
   python3 - "$md_file" << 'PYEOF'
-import os, sys, re
+import sys, re
 
 md_file = sys.argv[1]
 with open(md_file) as f:
     lines = f.readlines()
-
-# Intentional LaTeX passthrough patterns — single source of truth defined in
-# RAW_LATEX_EXCLUDED at the top of this script (read via env var).
-EXCLUDED = os.environ["RAW_LATEX_EXCLUDED_BLOB"].splitlines()
-excluded_re = re.compile("|".join(EXCLUDED))
-
-def is_excluded(text):
-    return bool(excluded_re.search(text))
 
 raw_count = 0
 in_fenced = False
@@ -230,9 +208,6 @@ for line in lines:
         continue
     # Skip indented code blocks (4+ spaces or tab)
     if line.startswith("    ") or line.startswith("\t"):
-        continue
-    # Skip known intentional LaTeX passthrough patterns
-    if is_excluded(line):
         continue
     # Check for raw LaTeX markers
     if "{=latex}" in line:
@@ -261,18 +236,10 @@ count_raw_latex_docx() {
     return
   fi
   python3 - "$doc_xml" << 'PYEOF'
-import xml.etree.ElementTree as ET, os, sys, re
+import xml.etree.ElementTree as ET, sys, re
 
 doc_xml = sys.argv[1]
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-
-# Intentional LaTeX passthrough patterns — single source of truth defined in
-# RAW_LATEX_EXCLUDED at the top of this script (read via env var).
-EXCLUDED = os.environ["RAW_LATEX_EXCLUDED_BLOB"].splitlines()
-excluded_re = re.compile("|".join(EXCLUDED))
-
-def is_excluded(text):
-    return bool(excluded_re.search(text))
 
 tree = ET.parse(doc_xml)
 root = tree.getroot()
@@ -306,9 +273,6 @@ for p in root.iter(f"{{{W}}}p"):
                     text_parts.append(t.text)
 
     full_text = "".join(text_parts)
-    # Skip known intentional LaTeX passthrough patterns
-    if is_excluded(full_text):
-        continue
     if "\\begin{" in full_text:
         raw_count += 1
     if re.search(r"\\set[a-z]", full_text):
@@ -362,11 +326,26 @@ for entry in "${SAMPLES[@]}"; do
   # ── Resolve template-specific paths ────────────────────────────────────
   get_template_paths "$sample"
 
+  # ── Pre-process for each target (same pipeline as scripts/build.sh) ────
+  pre_md="$RT_TMPDIR/${basename}-pre-md.adoc"
+  pre_docx="$RT_TMPDIR/${basename}-pre-docx.adoc"
+  pre_html="$RT_TMPDIR/${basename}-pre-html.adoc"
+  if ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
+        --target md --template "$TEMPLATE_NAME" "$src_file" -o "$pre_md" 2>/dev/null || \
+     ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
+        --target docx --template "$TEMPLATE_NAME" "$src_file" -o "$pre_docx" 2>/dev/null || \
+     ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
+        --target html --template "$TEMPLATE_NAME" "$src_file" -o "$pre_html" 2>/dev/null; then
+    echo "  FAIL: pre-processor failed for $name"
+    FAIL=$((FAIL + 1))
+    continue
+  fi
+
   # ── Generate Markdown ──────────────────────────────────────────────────
   # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
   # Fallback: pandoc -f latex+raw_tex from generated .tex
   tmp_dbk=$(mktemp --suffix=.dbk)
-  if asciidoctor -b docbook "$src_file" -o "$tmp_dbk" 2>/dev/null && \
+  if asciidoctor -b docbook "$pre_md" -o "$tmp_dbk" 2>/dev/null && \
      pandoc -f docbook -t gfm "$tmp_dbk" -o "$RT_TMPDIR/rt.md" 2>/dev/null; then
     : # success
   else
@@ -375,7 +354,12 @@ for entry in "${SAMPLES[@]}"; do
   rm -f "$tmp_dbk"
 
   # ── Generate HTML ──────────────────────────────────────────────────────
-  asciidoctor -b html5 -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" "$src_file" -o "$RT_TMPDIR/rt.html" 2>/dev/null
+  asciidoctor -b html5 \
+    -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
+    -a docinfodir="$REPO_ROOT/templates/_base" \
+    -a docinfo1 \
+    -r asciidoctor-diagram \
+    "$pre_html" -o "$RT_TMPDIR/rt.html" 2>/dev/null
 
   # ── Generate DOCX ──────────────────────────────────────────────────────
   docx_outdir="$RT_TMPDIR/docx_out"
@@ -385,7 +369,7 @@ for entry in "${SAMPLES[@]}"; do
     # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
     # Fallback: pandoc -f latex+raw_tex from generated .tex
     tmp_dbk=$(mktemp --suffix=.dbk)
-    if asciidoctor -b docbook "$src_file" -o "$tmp_dbk" 2>/dev/null && \
+    if asciidoctor -b docbook "$pre_docx" -o "$tmp_dbk" 2>/dev/null && \
        pandoc -f docbook \
        --reference-doc="$REF_DOCX" --number-sections \
        --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
@@ -404,33 +388,44 @@ for entry in "${SAMPLES[@]}"; do
   fi
 
   # ── Count MD ───────────────────────────────────────────────────────────
-  md_h1=$(count '^# ' "$RT_TMPDIR/rt.md")
-  md_h2=$(count '^## ' "$RT_TMPDIR/rt.md")
-  md_img=$(count '!\[' "$RT_TMPDIR/rt.md")
+  # Fenced-code-aware: bash `#` comments inside code blocks must not
+  # count as headings; pandoc's raw-HTML fallbacks (<img>, <table>) must
+  # count as images/tables.
+  md_h1=$(count_md "$RT_TMPDIR/rt.md" '^# ')
+  md_h2=$(count_md "$RT_TMPDIR/rt.md" '^## ')
+  md_img=$(count_md "$RT_TMPDIR/rt.md" '!\[|<img')
   # Code blocks: count fenced code blocks only (``` open+close, divide by 2).
   # Indented code blocks in Pandoc MD are ambiguous with list-item indentation,
   # so we count only fenced blocks for reliable cross-format comparison.
   md_code_markers=$(count '^```' "$RT_TMPDIR/rt.md")
   md_code=$((md_code_markers / 2))
-  # Tables: count pipe-table separator lines (|---|) and grid-table
-  # separator lines (indented ---). Pandoc renders tables inside
-  # definition lists as grid tables (dashes, not pipes).
+  # Tables: count pipe-table separator lines (only |-: chars — a data
+  # row containing "---" in a cell must not count), grid-table separator
+  # lines (indented ---), and raw-HTML <table> blocks (pandoc emits HTML
+  # tables when a cell holds block content, e.g. changelog bullet lists
+  # — GFM pipe tables are inline-only).
   # Grid tables may have 2 separator lines (header + footer), so count
   # only the first separator of each contiguous group.
-  md_tables=$(count '^|.*---' "$RT_TMPDIR/rt.md")
+  md_tables=$(count_md "$RT_TMPDIR/rt.md" '^\|[-| :]+$')
   md_grid_tables=$(awk '/^[[:space:]]+---/ {if(!p) c++; p=1} !/^[[:space:]]+---/ {p=0} END{print c+0}' "$RT_TMPDIR/rt.md")
-  md_tables=$((md_tables + md_grid_tables))
-  # Callouts: blockquote blocks starting with callout keywords
-  md_callouts=$(grep -cE '^> \*\*(Warning|Tip|Info|Note|Important|Aviso|Dica)' "$RT_TMPDIR/rt.md" 2>/dev/null || true)
-  md_callouts="${md_callouts:-0}"
+  md_html_tables=$(count_md "$RT_TMPDIR/rt.md" '<table')
+  md_tables=$((md_tables + md_grid_tables + md_html_tables))
+  # Callouts: pandoc renders docbook admonitions as raw HTML divs
+  # (class="note|warning|tip|...").  DOCX cannot count them — pandoc
+  # drops the admonition label and keeps only the body text.
+  md_callouts=$(count_md "$RT_TMPDIR/rt.md" '<div class="(note|warning|tip|caution|important)"')
 
   # ── Count HTML ─────────────────────────────────────────────────────────
   html_h1=$(count '<h1' "$RT_TMPDIR/rt.html")
   html_h2=$(count '<h2' "$RT_TMPDIR/rt.html")
   html_img=$(count '<img' "$RT_TMPDIR/rt.html")
   html_code=$(count '<pre><code' "$RT_TMPDIR/rt.html")
-  html_tables=$(count_occ '<table' "$RT_TMPDIR/rt.html")
-  html_callouts=$(count_occ 'class="callout ' "$RT_TMPDIR/rt.html")
+  # Real tables only: asciidoctor also renders admonitions (NOTE/TIP/
+  # WARNING) as bare <table> layout grids — those are counted as callouts
+  # below, not as tables.
+  html_tables=$(count '<table class="tableblock' "$RT_TMPDIR/rt.html")
+  # Callouts: asciidoctor admonition blocks
+  html_callouts=$(count_occ 'class="admonitionblock ' "$RT_TMPDIR/rt.html")
 
   # ── Count DOCX ─────────────────────────────────────────────────────────
   docx_tmpdir="$RT_TMPDIR/docx_unzip"
@@ -491,9 +486,10 @@ for entry in "${SAMPLES[@]}"; do
   docx_tc=$docx_tables
   # HTML renders callouts as divs with classes, MD as blockquotes — divergence
   # Default ±5: most documents have moderate callout/table divergence
+  # guide: DOCX cannot count admonitions (pandoc drops the NOTE/TIP/
+  # WARNING labels, keeping only body text) — ~9 callouts diverge (max_diff=9)
   tc_tol=5
-  # guide: HTML renders objectives as callout divs, MD doesn't (max_diff=8)
-  if [[ "$name" == *"guide"* ]]; then tc_tol=8; fi
+  if [[ "$name" == *"guide"* ]]; then tc_tol=9; fi
   # setup-guide: many callouts where MD blockquote keyword matching undercounts (max_diff=32)
   if [ "$name" = "setup-guide" ]; then tc_tol=32; fi
   # testbook uses definition lists for testcases (v4.0+), which render
@@ -531,16 +527,8 @@ for entry in "${SAMPLES[@]}"; do
 
   # HTML: no \begin{ outside <pre><code> blocks, no class="latex"
   raw_html=$(python3 - "$RT_TMPDIR/rt.html" << 'PYEOF'
-import os, sys, re
+import sys, re
 from html.parser import HTMLParser
-
-# Intentional LaTeX passthrough patterns — single source of truth defined in
-# RAW_LATEX_EXCLUDED at the top of this script (read via env var).
-EXCLUDED = os.environ["RAW_LATEX_EXCLUDED_BLOB"].splitlines()
-excluded_re = re.compile("|".join(EXCLUDED))
-
-def is_excluded(text):
-    return bool(excluded_re.search(text))
 
 class RawLatexChecker(HTMLParser):
     def __init__(self):
@@ -569,9 +557,6 @@ class RawLatexChecker(HTMLParser):
     def handle_data(self, data):
         # Only check text outside <pre><code>
         if self.in_pre == 0 and self.in_code == 0:
-            # Skip known intentional LaTeX passthrough patterns
-            if is_excluded(data):
-                return
             if "\\begin{" in data:
                 self.raw_count += 1
             if re.search(r"\\set[a-z]", data):

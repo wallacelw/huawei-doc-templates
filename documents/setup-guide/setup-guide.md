@@ -5,7 +5,7 @@ alt="huawei logo cover" />
 
 Huawei Technologies CO., LTD
 
-**v6.4.7** — September 20, 2026 01:04
+**v6.5.1** — September 20, 2026 13:23
 
 # Provision a Flexus X Instance on Huawei Cloud
 
@@ -986,7 +986,7 @@ or run `latexmk main.tex` from the project’s `src/` directory. Run
 
 3.  The skill will ask for:
 
-    - **Title** — e.g. \`\`Provisioning an OBS Bucket''
+    - **Title** — e.g. “Provisioning an OBS Bucket”
 
     - **Language** — Portuguese or English
 
@@ -998,7 +998,7 @@ or run `latexmk main.tex` from the project’s `src/` directory. Run
     the correct `TEXINPUTS`, compiles the document, and reports the page
     count.
 
-    **\[NEW\]**
+    **\[Ready\]**
 
 <div class="note">
 
@@ -1282,69 +1282,743 @@ secondary text:
 
 # Changelog
 
-| Version                                                                                                                                                                                                                                                                                                                                                            | Date                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 6.4.7                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Section titles in DOCX now match the PDF heading design: the big section number (56pt) sits on the left, the title text is pushed to the right edge (a right tab stop mimics the LaTeX \\ hfill), and the red rule runs below — previously the title sat left-aligned next to a small number. Applies to all templates.                                                                                                                                                                                                                               |
-| 6.4.6                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Code blocks inside test cases no longer break the red left rule in DOCX — the code style’s left indent (which jogged the rule) is reset inside test case blocks, and code blocks now show the PDF’s code box (gray background with thin border on top, bottom, and right, red rule continuing on the left).                                                                                                                                                                                                                                           |
-| 6.4.5                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | DOCX polish pass: all captions centered (matching the PDF), vertical spacing between blocks matched to the LaTeX rhythm (medskip/smallskip around captions, field bars, and steps), and test steps now render as separate paragraphs each with the red bold number (previously merged into one paragraph).                                                                                                                                                                                                                                            |
-| 6.4.4                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | DOCX covers now show the logo, cover text, and version/date/time meta line like the PDF. Test case blocks in DOCX get the PDF’s visual wrapper: red left rule, red field header bars, and red step numbers. Captions follow the PDF ordering system in DOCX, MD, and HTML (Table/Diagram/Figure/Testcase N: with bold symbol). Portuguese PDFs now label diagrams "Diagrama N:" (was hardcoded English "Diagram"). Markdown and HTML output no longer leaks raw LaTeX from passthrough blocks — the DOCX pre-processor now feeds those pipelines too. |
-| 6.4.3                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Testbook and POC DOCX output now matches the PDF much more closely: native table of contents (language-aware, auto-populated), each section starts on a new page, embedded images and diagrams (PlantUML/Graphviz rendered), white-on-red table headers, cover version line under the title, centered test case captions, and plain black rules for signature grids.                                                                                                                                                                                  |
-| 6.4.2                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | DOCX output for POC and testbook templates now includes all passthrough content (stakeholders, closing record, signatures, test cases, test summary, changelog) via a new pre-processor. Fixed dropped Test Scope fields in testbook DOCX output.                                                                                                                                                                                                                                                                                                     |
-| 6.4.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Fixed changelog dates — replaced `\ today` with historical release dates. Eliminated zero-width-space missing-glyph warnings from typographic substitutions.                                                                                                                                                                                                                                                                                                                                                                                          |
-| 5.1.1                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Synced callout colors in DOCX/HTML/MD output to match brand palette. Added color palette demo.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 5.1.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Adopted brand guidelines auxiliary color palette and monochrome scale. Aligned callout colors to brand specifications.                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 5.0.3                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Removed non-standard `\ badge` tags from testcases for consistency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 5.0.2                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Long commands in test steps now render as code blocks instead of inline code.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 5.0.1                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Testcase caption centered above the block.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| 5.0.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Major refactoring: extracted shared modules (huawei-titles, huawei-toc, huawei-cover), renamed `\ lg@guidetitle` to `\ lg@doctitle`, unified title API with `\ setdoctitle`, decomposed `docx_fix.py` (680\$\to\$84 lines), added testbook unit tests, fixed build system error handling.                                                                                                                                                                                                                                                             |
-| 4.7.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Testcase headings now formatted as captions (like figures/tables): bold `Testcase N:'' followed by description. Changed label from`Test Case'' to \`\`Testcase''.                                                                                                                                                                                                                                                                                                                                                                                     |
-| 4.6.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Section restructure: Introduction, Test Cases (with category subsections), Conclusion. Testcases auto-numbered like figures/tables. Changed testcase from subsection to subsubsection.                                                                                                                                                                                                                                                                                                                                                                |
-| 4.5.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Unified field APIs: `testprerequisites` and `testexpected` changed from commands to environments, matching `testprocedure`. All three now use `\ teststep` for auto-numbered items with red bold numbers. Uniform code, same visual style.                                                                                                                                                                                                                                                                                                            |
-| 4.4.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Code review fixes: removed dead labels, badge now uses Huawei brand colors (tipbg/tipfg, huaweired, warningbg/warningfg), Lua filter preserves formatting in DOCX/MD/HTML via parse_latex_blocks, testprocedure handler preserves non-step content (images, code, callouts).                                                                                                                                                                                                                                                                          |
-| 4.3.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Added `testlist` environment for numbered lists with red bold numbers in testcase fields. Fixed alignment: zeroed `\ parindent` inside testcase, indented procedure step numbering to align with `testlist` items.                                                                                                                                                                                                                                                                                                                                    |
-| 4.2.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Changed teststeps from tabular table to auto-numbered paragraphs. `\ teststep` now takes 1 arg (action only, numbering automatic). Removed `teststeps` environment. Images, code blocks, and callouts can be placed freely between steps inside `testprocedure`.                                                                                                                                                                                                                                                                                      |
-| 4.1.0                                                                                                                                                                                                                                                                                                                                                              | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Testcase field redesign: full-width red mini header bars for each field. Changed `testprocedure` from command to environment wrapping 2-column teststeps (Step                                                                                                                                                                                                                                                                                                                                                                                        |
-| Action). Reordered fields: Test Result before Remarks. Updated Lua filter and round-trip test for grid table counting.                                                                                                                                                                                                                                             | 4.0.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Redesigned testbook `testcase` environment: replaced 2-column tabular with breakable tcolorbox (red left-rule, stacked paragraph fields). Images, code blocks, callouts, and nested tables now render correctly and break across pages. Added `longhutable` environment for page-breaking tables. Updated Lua filter to produce definition lists for DOCX/MD/HTML. | 3.9.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Added testsummary environment, teststeps environment, and `\ testresultbadge` command to testbook template. Fixed testcase layout (full-width tabular with proper text alignment).                                                                                                                                                                                 | 3.8.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| End-to-end quality review: fixed testbook PDF metadata title, removed stray user DOCX from template dir, fixed round-trip.sh variable typo, updated stale references in AGENTS.md and README.md, committed testbook sample PDFs, set TZ for pandoc cover time consistency, widened pandoc version range.                                                           | 3.8.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Removed Tips and Tricks chapter (tmux configuration) — required VS Code-specific keybindings that don’t generalize across terminal setups.                                                                                                                                                                                                                         | 3.7.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Added `testbook` template for POC/acceptance test case documents with `testcase` environment and `[noanswers]` option.                                                                                                                                                                                                                                             | 3.6.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Added `\ setdocauthors` command and `[noauthors]` class option to both templates. Authors are displayed on the cover page (optional --- hidden if not set or if `[noauthors]` is passed). Demonstrated in all 4 samples.                                                                                                                                           | 3.5.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Reorganized project structure: moved `build.sh`, `install.sh`, and `uninstall.sh` from repo root to `scripts/` directory. Updated all references in Makefile, README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use `main/scripts/install.sh`.                                                                                                      | 3.4.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-09-11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `install.sh`: opencode skills and VS Code LaTeX Workshop are now optional prompts (default yes). Removed LTeX extension (was failing to install). One-liner detects existing installation and prompts to update with version display (`v3.3.6 $\to$ v3.3.7`). Uses absolute paths to prevent nested clones. + `uninstall.sh`: Added one-liner support (\`curl      | bash\`). Added `` `Remove 100%'' nuclear option (option 4) to interactive menu. Added `--repo `` flag. + Updated Chapter 6 with optional component prompts and update detection. Updated Chapter 7 with one-liner update/uninstall and full menu documentation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 3.3.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-11                                                                                                                                                                                                                                                                                                                                                         | Moved pre-compiled setup guide to `setup-guide/` folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users can read these before cloning to understand the installation process. + Updated Makefile `setup-guide` target to generate and copy all four formats. + Updated README with pre-compiled setup guide section and format comparison table. + Updated .gitignore to track all four formats in `setup-guide/`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 3.2.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-11                                                                                                                                                                                                                                                                                                                                                         | Renamed Chapter 7 from `Clean Up'' to`Operations and Maintenance''. Added subsections for updating and uninstalling both the MaaS Gateway and the document templates. Added cloud resource cleanup as an optional subsection.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 3.2.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-11                                                                                                                                                                                                                                                                                                                                                         | Added `uninstall.sh` script with interactive menu, `--all`, `--yes`, and `--dry-run` flags. Removes opencode skills, .sty modules, HarmonyOS Sans font, /etc/LatexMk fix, and VS Code settings. + Fixed `install.sh`: show apt-get output (was hidden), suppressed fvextra build noise, fix font detection (`fc-list : family`), fix test compilation paths (`src/` subdirectory), fix LTeX extension success/failure reporting. + Updated Chapter 7 with uninstall instructions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 3.1.2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-11                                                                                                                                                                                                                                                                                                                                                         | Added output format guide to README.md: comparison table of PDF, Markdown, DOCX, and HTML with purpose, copy-paste quality, and limitations. Recommends Markdown for copy-paste.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 3.1.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-11                                                                                                                                                                                                                                                                                                                                                         | Updated MaaS Gateway chapter to v1.10.9: non-interactive mode (`-y`) now suppresses all prompts (prerequisites, tool selection, skill install). + Changed project clone path from `\textasciitilde` (root home) to `/home` as default working directory. + Added project standards to AGENTS.md: workflow, end-to-end validation, code style, git conventions, when unsure.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 3.1.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-11                                                                                                                                                                                                                                                                                                                                                         | Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via slider, flavor `x1.4u.16g`) --- more cost-efficient and robust. Updated creation steps to match Flexus X console order: billing mode first, vCPU/RAM slider (no flavor dropdown), Cloud Eye monitoring (recommended), then instance name and key pair login. Replaced screenshots with Flexus X console images. + Rewrote Chapter 3: switched from `connect.exe` to `ncat` (from Nmap) as the SSH ProxyCommand. Added explanation of HTTP CONNECT method, why port 4444 works, why ncat is chosen, ncat installation with antivirus exclusions, flag reference table, and improved keepalive settings. + Restructured chapters: moved SSH config and VS Code connection to new Chapter 4 (Install VS Code and Connect via Remote-SSH). Chapters 5—​7 renumbered. + Added verification checklist tables to all 7 chapters. + Added mandatory reboot warning in Chapter 2 (SSH port change). Added troubleshooting subsection in Chapter 4 with common SSH connection issues and ncat debugging commands. | 3.0.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-10                                                                                                                                                                                                                                                                                                                                                         | Minor fixes: test-filter.sh auto-discovery, build.sh help text, Makefile aggregate descriptions, 5-section comment correction, CHANGELOG version gap note, callout-in-code fix, CI font auto-discovery, dofile path comment, test-sync.sh header.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 3.0.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-09-09                                                                                                                                                                                                                                                                                                                                                         | Modular pipeline refactoring: shared Lua filter factory, shared DOCX fix logic, build system auto-discovery, unified format pipeline, GitHub Actions CI.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 2.16.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 2026-09-05                                                                                                                                                                                                                                                                                                                                                         | Updated to match template v2.16.0 — Lua filter fixes, build system updates, and technical template parity improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 2.13.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 2026-08-24                                                                                                                                                                                                                                                                                                                                                         | Foundation refactoring Phase 4: make DOCX \texttt{--fix} post-processing robust. Replaced all silent-skip guards in \texttt{create-reference-docx.py} with loud \texttt{RuntimeError} assertions for expected XML elements (Heading1-4, Title, VerbatimChar, Normal, docDefaults, numbering indentation). Added pandoc version pin (3.1.0—​3.2.0) to catch output-structure regressions on upgrade. Extended \texttt{test-docx-fix.sh} with version check and 4 loud-failure tests (missing style \$\to\$ non-zero exit).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 2.12.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 2026-08-24                                                                                                                                                                                                                                                                                                                                                         | Foundation refactoring Phase 3: introduce \texttt{parse_preamble()} in the Lua filter, extracting all class options (\texttt{portuguese}, \texttt{indentbody}, \texttt{notime}, \texttt{nochangelog}) and all \texttt{\\ set\*} command values into a single preamble state object. Fixes 6 L18 divergences at root cause: English TOC label (`Table of Contents'' $\to$`Contents''), \texttt{\[notime\]} now gates time in DOCX/HTML, \texttt{\[nochangelog\]} now suppresses changelog in non-PDF formats, \texttt{\\ setcoverlogo} honored instead of hardcoded, \texttt{\\ setheaderlogo} warns if set in non-PDF, \texttt{\\ note} renders as italic in all formats (matching PDF). Any future preamble command or class option now flows through automatically.                                                                                                                                                                                                                                                                                                | 2.11.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 2026-08-24                                                                                                                                                                                                                                                                                                                                                         | Foundation refactoring Phase 2: extend test matrix to cover all 3 output formats \$\times\$ 3 documents (9 cells). \texttt{round-trip.sh} now generates DOCX, counts structures in \texttt{word/document.xml}, and checks cross-format consistency (headings, images, code blocks, tables, callouts, 0 raw LaTeX across MD+DOCX+HTML). Added \texttt{test-docx-fix.sh} smoke test asserting H1 red border, heading colors, list indentation, and footer PAGE field in patched \texttt{styles.xml}.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 2.10.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 2026-08-24                                                                                                                                                                                                                                                                                                                                                         | Foundation refactoring Phase 1: sync cls version to project tag, fix stale doc references (L16 output count, L-range, setup-guide feature claim), add test-sync.sh for version consistency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 2.9.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-23                                                                                                                                                                                                                                                                                                                                                         | HTML and Markdown outputs now embed images as base64 data URIs. HTML uses pandoc \texttt{--embed-resources}, MD uses post-processing with \texttt{embed-images.py}. Outputs are self-contained — no external image files needed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 2.9.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-23                                                                                                                                                                                                                                                                                                                                                         | DOCX: fix content width (8504→9638tw, margins are 2cm not 3cm). Add footer page numbers. Style TOC heading (22pt bold + rule). Add hutable table width + fixed layout.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2.8.3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-23                                                                                                                                                                                                                                                                                                                                                         | DOCX fix: callout tables now have explicit width (8504tw) and fixed layout. Changelog section heading now uses custom H1 format (56pt number, red border, right tab) instead of pandoc’s default.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 2.8.2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-23                                                                                                                                                                                                                                                                                                                                                         | DOCX H1 heading: reverted table approach to paragraph with tab stop + red bottom border. Table broke navigation pane and TOC field. Paragraph preserves Heading1 style for navigation while matching PDF layout (number left, title right, red rule below).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 2.8.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-23                                                                                                                                                                                                                                                                                                                                                         | DOCX heading fix: text color reverted to black (was incorrectly changed to Huawei red in v2.8.0). H1 now uses a two-column table (number left, title right) with red bottom rule. H2-H4 use simple inline format (number + title, no right tab stop).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2.8.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-23                                                                                                                                                                                                                                                                                                                                                         | DOCX output: match PDF styling --- heading colors (Huawei red), H1 number size (56pt), callout borders (left-only) and padding, changelog formatting (rules, bold version, italic date), caption style (9pt bold), badge style (8pt bold white on red), list indentation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 2.7.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-17                                                                                                                                                                                                                                                                                                                                                         | Rename project repository to all lowercase (\texttt{huawei-doc-templates}).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 2.7.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-12                                                                                                                                                                                                                                                                                                                                                         | The \texttt{changelog} environment now emits its own section heading; \texttt{\[nochangelog\]} suppresses the heading and entries in one switch.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 2.6.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-12                                                                                                                                                                                                                                                                                                                                                         | Fix \texttt{hutable} centering and row-color fill (switched to \texttt{\\ hline} for \texttt{colortbl} compatibility).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2.6.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-12                                                                                                                                                                                                                                                                                                                                                         | Switched verification table to the new \texttt{hutable} full-grid style. + Floats now default to \texttt{\[H\]} placement (in-source order).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 2.5.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-10                                                                                                                                                                                                                                                                                                                                                         | H1 section title size reduced from 27pt to 20pt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 2.5.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-10                                                                                                                                                                                                                                                                                                                                                         | Default image size increased: width 65% \$\to\$ 90% of text width, height 40% \$\to\$ 50% of text height.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 2.4.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-10                                                                                                                                                                                                                                                                                                                                                         | Enlarged H1 section title (18pt \$\to\$ 27pt, 50% bigger). + \texttt{nochangelog} option now hides version, date, and time on the cover page.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 2.3.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-09                                                                                                                                                                                                                                                                                                                                                         | Rolled back \texttt{/ActualText} markers — broke code block rendering.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2.3.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-09                                                                                                                                                                                                                                                                                                                                                         | Added key-value sizing options to `\ image` and `\ imagecap` — `width` and `height` can now be set independently.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 2.2.4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-09                                                                                                                                                                                                                                                                                                                                                         | Fixed PDF copy-paste of URLs in code blocks — disabled Cascadia Code programming ligatures (\texttt{calt}) that corrupted \texttt{//} into \texttt{))} on copy.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 2.2.3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-09                                                                                                                                                                                                                                                                                                                                                         | Fixed italic font rendering — HarmonyOS Sans and Cascadia Code have no italic variants; enabled synthetic slant (\texttt{AutoFakeSlant}).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 2.2.2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-08                                                                                                                                                                                                                                                                                                                                                         | Fixed chapter reference in prerequisite (Chapter 3 \$\to\$ Chapter 4).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2.2.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-08                                                                                                                                                                                                                                                                                                                                                         | Changed table and figure caption labels to black (was Huawei red).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 2.2.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-08                                                                                                                                                                                                                                                                                                                                                         | Added Huawei-branded table styling: red header bar, alternating row colors, and bordered cells.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 2.1.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-06                                                                                                                                                                                                                                                                                                                                                         | Updated ECS flavor to `ac8.xlarge.2` (4 vCPU, 8 GB RAM). + Updated OS image to Ubuntu 24.04 Server 64bit. + Increased disk size to 100 GB. + Recommended pay-per-use billing mode. + EIP auto-assigned: pay by traffic, 1000 Mbit/s, release with ECS. + Key pair authentication (created in Huawei Cloud); root password can be set later as a second access method. + Security group `sg-xgate` now created **before** the ECS instance. + Replaced SSH port 22 with port 4444 (Huawei proxy blocks port 22). + Restricted SSH access to three specific Huawei internal IPs (`119.8.89.193`, `119.8.89.3`, `119.8.193.3`). + Added `Port 4444` to SSH config examples.                                                                                                                                                                                                                                                                                                                                                                                             | 2.0.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| 2026-08-05                                                                                                                                                                                                                                                                                                                                                         | Replaced OpenCode with oh-my-coding-maas-gateway as the default coding environment. + Added changelog and versioning support to the template (`\ setdocversion`, `\ setdocdate`, `changelog` environment). + Renamed `info` environment to `infobox` to avoid package name collisions. + Fixed external file code block implementation (`\ codefile`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 1.0.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Version</th>
+<th style="text-align: left;">Date</th>
+<th style="text-align: left;">Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><p>6.5.1</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fixed DOCX/MD/HTML output: tables are no longer corrupted when
+changelog, signature, or summary content contains a pipe character
+(“|”). Badge text is now preserved in DOCX/MD/HTML — a “Ready” badge
+renders “Ready” instead of “[NEW]”. Multi-item changelog entries render
+as bullet lists instead of being joined with a literal “+”. POC
+documents now include the changelog in DOCX/MD/HTML. The :noanswers:
+attribute now hides test results and remarks in DOCX/MD/HTML, matching
+the PDF. Inline LaTeX (monospace text, arrows, LaTeX quotes) no longer
+leaks from changelog entries. The test suite now exercises the real
+build pipeline (pre-processor wired into round-trip and DOCX tests),
+with new pre-processor unit tests.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>6.5.0</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Evidence checklist simplified to plain bullets in both PDF and
+DOCX (checkbox markers removed for compatibility). Planned Activities
+list in DOCX now uses Word’s native lower-roman numbering (i., ii.,
+iii.) matching the PDF. Badges in DOCX replaced with exact-replica PNG
+pill images (rounded, colored frame and background, bold text) matching
+the PDF \ huaweibadge look — assets committed to the repo. Signature
+blocks in DOCX no longer show literal + symbols (proper hard line
+breaks).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>6.4.7</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Section titles in DOCX now match the PDF heading design: the big
+section number (56pt) sits on the left, the title text is pushed to the
+right edge (a right tab stop mimics the LaTeX \ hfill), and the red rule
+runs below — previously the title sat left-aligned next to a small
+number. Applies to all templates.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>6.4.6</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Code blocks inside test cases no longer break the red left rule
+in DOCX — the code style’s left indent (which jogged the rule) is reset
+inside test case blocks, and code blocks now show the PDF’s code box
+(gray background with thin border on top, bottom, and right, red rule
+continuing on the left).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>6.4.5</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX polish pass: all captions centered (matching the PDF),
+vertical spacing between blocks matched to the LaTeX rhythm
+(medskip/smallskip around captions, field bars, and steps), and test
+steps now render as separate paragraphs each with the red bold number
+(previously merged into one paragraph).</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>6.4.4</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX covers now show the logo, cover text, and version/date/time
+meta line like the PDF. Test case blocks in DOCX get the PDF’s visual
+wrapper: red left rule, red field header bars, and red step numbers.
+Captions follow the PDF ordering system in DOCX, MD, and HTML
+(Table/Diagram/Figure/Testcase N: with bold symbol). Portuguese PDFs now
+label diagrams "Diagrama N:" (was hardcoded English "Diagram"). Markdown
+and HTML output no longer leaks raw LaTeX from passthrough blocks — the
+DOCX pre-processor now feeds those pipelines too.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>6.4.3</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Testbook and POC DOCX output now matches the PDF much more
+closely: native table of contents (language-aware, auto-populated), each
+section starts on a new page, embedded images and diagrams
+(PlantUML/Graphviz rendered), white-on-red table headers, cover version
+line under the title, centered test case captions, and plain black rules
+for signature grids.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>6.4.2</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX output for POC and testbook templates now includes all
+passthrough content (stakeholders, closing record, signatures, test
+cases, test summary, changelog) via a new pre-processor. Fixed dropped
+Test Scope fields in testbook DOCX output.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>6.4.0</p></td>
+<td style="text-align: left;"><p>2026-09-20</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fixed changelog dates — replaced <code>\ today</code> with
+historical release dates. Eliminated zero-width-space missing-glyph
+warnings from typographic substitutions.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>5.1.1</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Synced callout colors in DOCX/HTML/MD output to match brand
+palette. Added color palette demo.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>5.1.0</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Adopted brand guidelines auxiliary color palette and monochrome
+scale. Aligned callout colors to brand specifications.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>5.0.3</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Removed non-standard <code>\ badge</code> tags from testcases for
+consistency.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>5.0.2</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Long commands in test steps now render as code blocks instead of
+inline code.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>5.0.1</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Testcase caption centered above the block.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>5.0.0</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Major refactoring: extracted shared modules (huawei-titles,
+huawei-toc, huawei-cover), renamed <code>\ lg@guidetitle</code> to
+<code>\ lg@doctitle</code>, unified title API with
+<code>\ setdoctitle</code>, decomposed <code>docx_fix.py</code> (680→84
+lines), added testbook unit tests, fixed build system error
+handling.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>4.7.0</p></td>
+<td style="text-align: left;"><p>2026-09-14</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Testcase headings now formatted as captions (like
+figures/tables): bold “Testcase N:” followed by description. Changed
+label from “Test Case” to “Testcase”.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>4.6.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Section restructure: Introduction, Test Cases (with category
+subsections), Conclusion. Testcases auto-numbered like figures/tables.
+Changed testcase from subsection to subsubsection.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>4.5.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Unified field APIs: <code>testprerequisites</code> and
+<code>testexpected</code> changed from commands to environments,
+matching <code>testprocedure</code>. All three now use
+<code>\ teststep</code> for auto-numbered items with red bold numbers.
+Uniform code, same visual style.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>4.4.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Code review fixes: removed dead labels, badge now uses Huawei
+brand colors (tipbg/tipfg, huaweired, warningbg/warningfg), Lua filter
+preserves formatting in DOCX/MD/HTML via parse_latex_blocks,
+testprocedure handler preserves non-step content (images, code,
+callouts).</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>4.3.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added <code>testlist</code> environment for numbered lists with
+red bold numbers in testcase fields. Fixed alignment: zeroed
+<code>\ parindent</code> inside testcase, indented procedure step
+numbering to align with <code>testlist</code> items.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>4.2.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Changed teststeps from tabular table to auto-numbered paragraphs.
+<code>\ teststep</code> now takes 1 arg (action only, numbering
+automatic). Removed <code>teststeps</code> environment. Images, code
+blocks, and callouts can be placed freely between steps inside
+<code>testprocedure</code>.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>4.1.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Testcase field redesign: full-width red mini header bars for each
+field. Changed <code>testprocedure</code> from command to environment
+wrapping 2-column teststeps (Step | Action). Reordered fields: Test
+Result before Remarks. Updated Lua filter and round-trip test for grid
+table counting.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>4.0.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Redesigned testbook <code>testcase</code> environment: replaced
+2-column tabular with breakable tcolorbox (red left-rule, stacked
+paragraph fields). Images, code blocks, callouts, and nested tables now
+render correctly and break across pages. Added <code>longhutable</code>
+environment for page-breaking tables. Updated Lua filter to produce
+definition lists for DOCX/MD/HTML.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.9.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added testsummary environment, teststeps environment, and
+<code>\ testresultbadge</code> command to testbook template. Fixed
+testcase layout (full-width tabular with proper text
+alignment).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.8.1</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>End-to-end quality review: fixed testbook PDF metadata title,
+removed stray user DOCX from template dir, fixed round-trip.sh variable
+typo, updated stale references in AGENTS.md and README.md, committed
+testbook sample PDFs, set TZ for pandoc cover time consistency, widened
+pandoc version range.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.8.0</p></td>
+<td style="text-align: left;"><p>2026-09-13</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Removed Tips and Tricks chapter (tmux configuration) — required
+VS Code-specific keybindings that don’t generalize across terminal
+setups.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.7.0</p></td>
+<td style="text-align: left;"><p>2026-09-12</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added <code>testbook</code> template for POC/acceptance test case
+documents with <code>testcase</code> environment and
+<code>[noanswers]</code> option.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.6.0</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added <code>\ setdocauthors</code> command and
+<code>[noauthors]</code> class option to both templates. Authors are
+displayed on the cover page (optional --- hidden if not set or if
+<code>[noauthors]</code> is passed). Demonstrated in all 4
+samples.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.5.0</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Reorganized project structure: moved <code>build.sh</code>,
+<code>install.sh</code>, and <code>uninstall.sh</code> from repo root to
+<code>scripts/</code> directory. Updated all references in Makefile,
+README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use
+<code>main/scripts/install.sh</code>.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.4.0</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p><code>install.sh</code>: opencode skills and VS Code LaTeX
+Workshop are now optional prompts (default yes). Removed LTeX extension
+(was failing to install). One-liner detects existing installation and
+prompts to update with version display (<code>v3.3.6 → v3.3.7</code>).
+Uses absolute paths to prevent nested clones.</p></li>
+<li><p><code>uninstall.sh</code>: Added one-liner support
+(<code>curl | bash</code>). Added “Remove 100%” nuclear option (option
+4) to interactive menu. Added <code>--repo</code> flag.</p></li>
+<li><p>Updated Chapter 6 with optional component prompts and update
+detection. Updated Chapter 7 with one-liner update/uninstall and full
+menu documentation.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.3.0</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Moved pre-compiled setup guide to <code>setup-guide/</code>
+folder in repo root with all four formats (PDF, MD, DOCX, HTML). Users
+can read these before cloning to understand the installation
+process.</p></li>
+<li><p>Updated Makefile <code>setup-guide</code> target to generate and
+copy all four formats.</p></li>
+<li><p>Updated README with pre-compiled setup guide section and format
+comparison table.</p></li>
+<li><p>Updated .gitignore to track all four formats in
+<code>setup-guide/</code>.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.2.1</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Renamed Chapter 7 from “Clean Up” to “Operations and
+Maintenance”. Added subsections for updating and uninstalling both the
+MaaS Gateway and the document templates. Added cloud resource cleanup as
+an optional subsection.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.2.0</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added <code>uninstall.sh</code> script with interactive menu,
+<code>--all</code>, <code>--yes</code>, and <code>--dry-run</code>
+flags. Removes opencode skills, .sty modules, HarmonyOS Sans font,
+/etc/LatexMk fix, and VS Code settings.</p></li>
+<li><p>Fixed <code>install.sh</code>: show apt-get output (was hidden),
+suppressed fvextra build noise, fix font detection
+(<code>fc-list : family</code>), fix test compilation paths
+(<code>src/</code> subdirectory), fix LTeX extension success/failure
+reporting.</p></li>
+<li><p>Updated Chapter 7 with uninstall instructions.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.1.2</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added output format guide to README.md: comparison table of PDF,
+Markdown, DOCX, and HTML with purpose, copy-paste quality, and
+limitations. Recommends Markdown for copy-paste.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.1.1</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Updated MaaS Gateway chapter to v1.10.9: non-interactive mode
+(<code>-y</code>) now suppresses all prompts (prerequisites, tool
+selection, skill install).</p></li>
+<li><p>Changed project clone path from <code>~</code> (root home) to
+<code>/home</code> as default working directory.</p></li>
+<li><p>Added project standards to AGENTS.md: workflow, end-to-end
+validation, code style, git conventions, when unsure.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.1.0</p></td>
+<td style="text-align: left;"><p>2026-09-11</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Switched from ECS to Flexus X instance (4 vCPU, 16 GB RAM via
+slider, flavor <code>x1.4u.16g</code>) --- more cost-efficient and
+robust. Updated creation steps to match Flexus X console order: billing
+mode first, vCPU/RAM slider (no flavor dropdown), Cloud Eye monitoring
+(recommended), then instance name and key pair login. Replaced
+screenshots with Flexus X console images.</p></li>
+<li><p>Rewrote Chapter 3: switched from <code>connect.exe</code> to
+<code>ncat</code> (from Nmap) as the SSH ProxyCommand. Added explanation
+of HTTP CONNECT method, why port 4444 works, why ncat is chosen, ncat
+installation with antivirus exclusions, flag reference table, and
+improved keepalive settings.</p></li>
+<li><p>Restructured chapters: moved SSH config and VS Code connection to
+new Chapter 4 (Install VS Code and Connect via Remote-SSH). Chapters 5—​7
+renumbered.</p></li>
+<li><p>Added verification checklist tables to all 7 chapters.</p></li>
+<li><p>Added mandatory reboot warning in Chapter 2 (SSH port change).
+Added troubleshooting subsection in Chapter 4 with common SSH connection
+issues and ncat debugging commands.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>3.0.1</p></td>
+<td style="text-align: left;"><p>2026-09-10</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Minor fixes: test-filter.sh auto-discovery, build.sh help text,
+Makefile aggregate descriptions, 5-section comment correction, CHANGELOG
+version gap note, callout-in-code fix, CI font auto-discovery, dofile
+path comment, test-sync.sh header.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>3.0.0</p></td>
+<td style="text-align: left;"><p>2026-09-09</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Modular pipeline refactoring: shared Lua filter factory, shared
+DOCX fix logic, build system auto-discovery, unified format pipeline,
+GitHub Actions CI.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.16.0</p></td>
+<td style="text-align: left;"><p>2026-09-05</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Updated to match template v2.16.0 — Lua filter fixes, build
+system updates, and technical template parity improvements.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.13.0</p></td>
+<td style="text-align: left;"><p>2026-08-24</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Foundation refactoring Phase 4: make DOCX <code>--fix</code>
+post-processing robust. Replaced all silent-skip guards in
+<code>create-reference-docx.py</code> with loud
+<code>RuntimeError</code> assertions for expected XML elements
+(Heading1-4, Title, VerbatimChar, Normal, docDefaults, numbering
+indentation). Added pandoc version pin (3.1.0—​3.2.0) to catch
+output-structure regressions on upgrade. Extended
+<code>test-docx-fix.sh</code> with version check and 4 loud-failure
+tests (missing style → non-zero exit).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.12.0</p></td>
+<td style="text-align: left;"><p>2026-08-24</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Foundation refactoring Phase 3: introduce
+<code>parse_preamble()</code> in the Lua filter, extracting all class
+options (<code>portuguese</code>, <code>indentbody</code>,
+<code>notime</code>, <code>nochangelog</code>) and all
+<code>\ set*</code> command values into a single preamble state object.
+Fixes 6 L18 divergences at root cause: English TOC label (“Table of
+Contents” → “Contents”), <code>[notime]</code> now gates time in
+DOCX/HTML, <code>[nochangelog]</code> now suppresses changelog in
+non-PDF formats, <code>\ setcoverlogo</code> honored instead of
+hardcoded, <code>\ setheaderlogo</code> warns if set in non-PDF,
+<code>\ note</code> renders as italic in all formats (matching PDF). Any
+future preamble command or class option now flows through
+automatically.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.11.0</p></td>
+<td style="text-align: left;"><p>2026-08-24</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Foundation refactoring Phase 2: extend test matrix to cover all 3
+output formats × 3 documents (9 cells). <code>round-trip.sh</code> now
+generates DOCX, counts structures in <code>word/document.xml</code>, and
+checks cross-format consistency (headings, images, code blocks, tables,
+callouts, 0 raw LaTeX across MD+DOCX+HTML). Added
+<code>test-docx-fix.sh</code> smoke test asserting H1 red border,
+heading colors, list indentation, and footer PAGE field in patched
+<code>styles.xml</code>.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.10.0</p></td>
+<td style="text-align: left;"><p>2026-08-24</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Foundation refactoring Phase 1: sync cls version to project tag,
+fix stale doc references (L16 output count, L-range, setup-guide feature
+claim), add test-sync.sh for version consistency checking.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.9.1</p></td>
+<td style="text-align: left;"><p>2026-08-23</p></td>
+<td style="text-align: left;"><ul>
+<li><p>HTML and Markdown outputs now embed images as base64 data URIs.
+HTML uses pandoc <code>--embed-resources</code>, MD uses post-processing
+with <code>embed-images.py</code>. Outputs are self-contained — no
+external image files needed.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.9.0</p></td>
+<td style="text-align: left;"><p>2026-08-23</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX: fix content width (8504→9638tw, margins are 2cm not 3cm).
+Add footer page numbers. Style TOC heading (22pt bold + rule). Add
+hutable table width + fixed layout.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.8.3</p></td>
+<td style="text-align: left;"><p>2026-08-23</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX fix: callout tables now have explicit width (8504tw) and
+fixed layout. Changelog section heading now uses custom H1 format (56pt
+number, red border, right tab) instead of pandoc’s default.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.8.2</p></td>
+<td style="text-align: left;"><p>2026-08-23</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX H1 heading: reverted table approach to paragraph with tab
+stop + red bottom border. Table broke navigation pane and TOC field.
+Paragraph preserves Heading1 style for navigation while matching PDF
+layout (number left, title right, red rule below).</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.8.1</p></td>
+<td style="text-align: left;"><p>2026-08-23</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX heading fix: text color reverted to black (was incorrectly
+changed to Huawei red in v2.8.0). H1 now uses a two-column table (number
+left, title right) with red bottom rule. H2-H4 use simple inline format
+(number + title, no right tab stop).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.8.0</p></td>
+<td style="text-align: left;"><p>2026-08-23</p></td>
+<td style="text-align: left;"><ul>
+<li><p>DOCX output: match PDF styling --- heading colors (Huawei red),
+H1 number size (56pt), callout borders (left-only) and padding,
+changelog formatting (rules, bold version, italic date), caption style
+(9pt bold), badge style (8pt bold white on red), list
+indentation.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.7.1</p></td>
+<td style="text-align: left;"><p>2026-08-17</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Rename project repository to all lowercase
+(<code>huawei-doc-templates</code>).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.7.0</p></td>
+<td style="text-align: left;"><p>2026-08-12</p></td>
+<td style="text-align: left;"><ul>
+<li><p>The <code>changelog</code> environment now emits its own section
+heading; <code>[nochangelog]</code> suppresses the heading and entries
+in one switch.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.6.1</p></td>
+<td style="text-align: left;"><p>2026-08-12</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fix <code>hutable</code> centering and row-color fill (switched
+to <code>\ hline</code> for <code>colortbl</code>
+compatibility).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.6.0</p></td>
+<td style="text-align: left;"><p>2026-08-12</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Switched verification table to the new <code>hutable</code>
+full-grid style.</p></li>
+<li><p>Floats now default to <code>[H]</code> placement (in-source
+order).</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.5.1</p></td>
+<td style="text-align: left;"><p>2026-08-10</p></td>
+<td style="text-align: left;"><ul>
+<li><p>H1 section title size reduced from 27pt to 20pt.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.5.0</p></td>
+<td style="text-align: left;"><p>2026-08-10</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Default image size increased: width 65% → 90% of text width,
+height 40% → 50% of text height.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.4.0</p></td>
+<td style="text-align: left;"><p>2026-08-10</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Enlarged H1 section title (18pt → 27pt, 50% bigger).</p></li>
+<li><p><code>nochangelog</code> option now hides version, date, and time
+on the cover page.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.3.1</p></td>
+<td style="text-align: left;"><p>2026-08-09</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Rolled back <code>/ActualText</code> markers — broke code block
+rendering.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.3.0</p></td>
+<td style="text-align: left;"><p>2026-08-09</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added key-value sizing options to <code>\ image</code> and
+<code>\ imagecap</code> — <code>width</code> and <code>height</code> can
+now be set independently.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.2.4</p></td>
+<td style="text-align: left;"><p>2026-08-09</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fixed PDF copy-paste of URLs in code blocks — disabled Cascadia
+Code programming ligatures (<code>calt</code>) that corrupted
+<code>//</code> into <code>))</code> on copy.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.2.3</p></td>
+<td style="text-align: left;"><p>2026-08-09</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fixed italic font rendering — HarmonyOS Sans and Cascadia Code
+have no italic variants; enabled synthetic slant
+(<code>AutoFakeSlant</code>).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.2.2</p></td>
+<td style="text-align: left;"><p>2026-08-08</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fixed chapter reference in prerequisite (Chapter 3 → Chapter
+4).</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.2.1</p></td>
+<td style="text-align: left;"><p>2026-08-08</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Changed table and figure caption labels to black (was Huawei
+red).</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.2.0</p></td>
+<td style="text-align: left;"><p>2026-08-08</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Added Huawei-branded table styling: red header bar, alternating
+row colors, and bordered cells.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>2.1.0</p></td>
+<td style="text-align: left;"><p>2026-08-06</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Updated ECS flavor to <code>ac8.xlarge.2</code> (4 vCPU, 8 GB
+RAM).</p></li>
+<li><p>Updated OS image to Ubuntu 24.04 Server 64bit.</p></li>
+<li><p>Increased disk size to 100 GB.</p></li>
+<li><p>Recommended pay-per-use billing mode.</p></li>
+<li><p>EIP auto-assigned: pay by traffic, 1000 Mbit/s, release with
+ECS.</p></li>
+<li><p>Key pair authentication (created in Huawei Cloud); root password
+can be set later as a second access method.</p></li>
+<li><p>Security group <code>sg-xgate</code> now created
+<strong>before</strong> the ECS instance.</p></li>
+<li><p>Replaced SSH port 22 with port 4444 (Huawei proxy blocks port
+22).</p></li>
+<li><p>Restricted SSH access to three specific Huawei internal IPs
+(<code>119.8.89.193</code>, <code>119.8.89.3</code>,
+<code>119.8.193.3</code>).</p></li>
+<li><p>Added <code>Port 4444</code> to SSH config examples.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><p>2.0.0</p></td>
+<td style="text-align: left;"><p>2026-08-05</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Replaced OpenCode with oh-my-coding-maas-gateway as the default
+coding environment.</p></li>
+<li><p>Added changelog and versioning support to the template
+(<code>\ setdocversion</code>, <code>\ setdocdate</code>,
+<code>changelog</code> environment).</p></li>
+<li><p>Renamed <code>info</code> environment to <code>infobox</code> to
+avoid package name collisions.</p></li>
+<li><p>Fixed external file code block implementation
+(<code>\ codefile</code>).</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>1.0.0</p></td>
+<td style="text-align: left;"><p>2026-08-05</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Initial version.</p></li>
+<li><p>Added ECS provisioning on Huawei Cloud.</p></li>
+<li><p>Added SSH with proxy configuration for VS Code
+Remote-SSH.</p></li>
+<li><p>Replaced OpenCode with oh-my-coding-maas-gateway (LiteLLM proxy
+with load balancing, virtual keys, and Grafana observability).</p></li>
+<li><p>Added Huawei document templates project setup.</p></li>
+<li><p>Added changelog and versioning support to the template.</p></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
