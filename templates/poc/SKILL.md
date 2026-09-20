@@ -442,8 +442,10 @@ multi-format output options.
 ### Multi-format output
 
 AsciiDoc → LaTeX → PDF is the primary output and the visual reference
-(AGENTS.md L18). HTML is generated directly from AsciiDoc. DOCX and
-Markdown are generated via `asciidoctor -b docbook` → `pandoc -f docbook`.
+(AGENTS.md L18). DOCX, Markdown, and HTML are generated via a
+pre-processor (`adoc_docx_preprocessor.py`) then `asciidoctor -b docbook`
+→ `pandoc -f docbook`. DOCX is post-processed by `docx_fix.py --fix`;
+HTML is generated via `asciidoctor -b html5`.
 
 Use the Makefile for convenience:
 
@@ -457,15 +459,18 @@ make all-formats     # MD + DOCX + HTML for all samples + setup-guide
 Or run the commands directly:
 
 ```bash
-# HTML (direct from asciidoctor)
-asciidoctor -b html5 -a stylesheet=templates/_base/huawei.css src/main.adoc -o output.html
+# Markdown (pre-process → docbook → pandoc)
+python3 templates/_base/adoc_docx_preprocessor.py --template poc --target md src/main.adoc -o /tmp/pre.adoc
+asciidoctor -b docbook /tmp/pre.adoc -o /tmp/doc.dbk && pandoc -f docbook -t gfm /tmp/doc.dbk -o output.md
 
-# Markdown (via asciidoctor -b docbook → pandoc)
-asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook -t gfm /tmp/doc.dbk -o output.md
+# DOCX (pre-process → docbook → pandoc → fix)
+python3 templates/_base/adoc_docx_preprocessor.py --template poc --target docx src/main.adoc -o /tmp/pre.adoc
+asciidoctor -b docbook /tmp/pre.adoc -o /tmp/doc.dbk && pandoc -f docbook --reference-doc=templates/poc/poc-reference.docx /tmp/doc.dbk -o output.docx
+python3 templates/poc/create-poc-reference-docx.py --fix --template poc output.docx
 
-# DOCX (via asciidoctor -b docbook → pandoc)
-asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook \
-  --reference-doc=templates/poc/poc-reference.docx /tmp/doc.dbk -o output.docx
+# HTML (pre-process → asciidoctor html5)
+python3 templates/_base/adoc_docx_preprocessor.py --template poc --target html src/main.adoc -o /tmp/pre.adoc
+asciidoctor -b html5 -a stylesheet=templates/_base/huawei.css /tmp/pre.adoc -o output.html
 ```
 
 ---
@@ -567,7 +572,7 @@ Description of what was done.
 [.result-pass]#Pass#
 ```
 
-#### 5. Evidence checklist (checkboxes)
+#### 5. Evidence checklist
 
 Unordered list with plain bullets.
 

@@ -4,6 +4,48 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.8.2 (2026-09-20)
+
+### Documentation sync and cleanup
+
+Final phase of the 5-phase remediation plan. Docs sync + TOC fix +
+signature bolding + dead code removal + accumulated deferred LOWs.
+
+#### Docs
+
+- README.md, AGENTS.md, and all four SKILL.md "Multi-format output"
+  sections now describe the real pipeline (pre-processor
+  `adoc_docx_preprocessor.py --template --target` → `asciidoctor -b
+  docbook` → `pandoc -f docbook` → `docx_fix.py --fix --template --lang`)
+  instead of the stale pre-v6.4 "asciidoctor → pandoc" chain.
+- AGENTS.md core-components list now includes the pre-processor.
+
+#### Changed
+
+- DOCX TOC title ("Contents"/"Sumário") is now right-aligned like the
+  PDF (huawei-toc.sty) — was targeting the dead `TOCTitle` style; now
+  targets `TOCHeading` (the style pandoc actually emits). Dot-leader
+  tab corrected from 9000 to 9638 twips (content text width).
+- Signature names render **bold** in DOCX/MD/HTML (PDF `\textbf{#1}`).
+- `--template=VALUE` and `--lang=VALUE` equals form accepted (B-L3).
+
+#### Removed
+
+- Dead `_add_caption_style` function + call (caption styling is done
+  directly in `_apply_content_styling`; the style was never applied).
+- Dead `TOCTitle` style creation in `regenerate_reference`.
+- Dead `.badge` / `.badge-pass` / `.badge-fail` / `.badge-blocked` /
+  `.badge-untested` CSS in `huawei.css` (badges are pre-processed to
+  bold text before HTML since v6.5.1).
+
+#### Fixed
+
+- Stale comments corrected: `[PASS]` → `[Pass]` (badge contract changed
+  in v6.7.0); round-trip.sh badge-pill comment matches the actual
+  `BADGE_MAX_CX` threshold; test-docx-fix.sh header reworded.
+- `poc/SKILL.md` evidence-checklist heading no longer says "(checkboxes)"
+  (removed in v6.5.0).
+
 ## v6.8.1 (2026-09-20)
 
 ### Quality-pass fixes for v6.8.0

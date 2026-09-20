@@ -79,15 +79,6 @@ code {
   padding: 0.1em 0.3em;
   border-radius: 2px;
 }
-.badge {
-  display: inline-block;
-  background: var(--huaweired);
-  color: var(--huaweiwhite);
-  font-size: 0.75em;
-  font-weight: bold;
-  padding: 0.15em 0.5em;
-  border-radius: 3px;
-}
 
 /* ── Callout Boxes (Admonitions) ──────────────────────────────── */
 .admonitionblock { margin: 0.8em 0; border-radius: 0; }
@@ -196,14 +187,6 @@ pre code { background: none; padding: 0; border-radius: 0; font-size: inherit; }
 }
 .testfield { background: var(--codebg); padding: 0.3em 0.6em; margin: 0.2em 0; }
 .testfield .label { font-weight: bold; color: var(--huaweired); }
-.badge-pass    { background: var(--huaweigreen);  color: var(--huaweiwhite); }
-.badge-fail    { background: var(--huaweired);     color: var(--huaweiwhite); }
-.badge-blocked { background: var(--huaweiorange);  color: var(--huaweiwhite); }
-.badge-untested{ background: var(--huaweigray50);  color: var(--huaweiwhite); }
-.badge-pass, .badge-fail, .badge-blocked, .badge-untested {
-  display: inline-block; font-size: 0.75em; font-weight: bold;
-  padding: 0.15em 0.5em; border-radius: 10px;
-}
 
 /* ── Objectives ───────────────────────────────────────────────── */
 .objectives { border-bottom: 1.5pt solid var(--ruleblack); padding-bottom: 0.5em; margin-bottom: 0.8em; }

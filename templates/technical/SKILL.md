@@ -241,9 +241,10 @@ make project DIR=documents/<project-name>   # from repo root (recommended)
 
 ### Multi-format output
 
-AsciiDoc → LaTeX → PDF is the primary output. HTML is generated directly
-from AsciiDoc. DOCX and Markdown are generated via `asciidoctor -b docbook` →
-`pandoc -f docbook`.
+AsciiDoc → LaTeX → PDF is the primary output. DOCX, Markdown, and HTML
+are generated via a pre-processor (`adoc_docx_preprocessor.py`) then
+`asciidoctor -b docbook` → `pandoc -f docbook`. DOCX is post-processed
+by `docx_fix.py --fix`; HTML is generated via `asciidoctor -b html5`.
 
 Use the Makefile for convenience:
 
@@ -257,15 +258,18 @@ make all-formats     # MD + DOCX + HTML for all samples + setup-guide
 Or run the commands directly:
 
 ```bash
-# HTML (direct from asciidoctor)
-asciidoctor -b html5 -a stylesheet=templates/_base/huawei.css src/main.adoc -o output.html
+# Markdown (pre-process → docbook → pandoc)
+python3 templates/_base/adoc_docx_preprocessor.py --template technical --target md src/main.adoc -o /tmp/pre.adoc
+asciidoctor -b docbook /tmp/pre.adoc -o /tmp/doc.dbk && pandoc -f docbook -t gfm /tmp/doc.dbk -o output.md
 
-# Markdown (via asciidoctor -b docbook → pandoc)
-asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook -t gfm /tmp/doc.dbk -o output.md
+# DOCX (pre-process → docbook → pandoc → fix)
+python3 templates/_base/adoc_docx_preprocessor.py --template technical --target docx src/main.adoc -o /tmp/pre.adoc
+asciidoctor -b docbook /tmp/pre.adoc -o /tmp/doc.dbk && pandoc -f docbook --reference-doc=templates/technical/technical-reference.docx /tmp/doc.dbk -o output.docx
+python3 templates/technical/create-technical-reference-docx.py --fix --template technical output.docx
 
-# DOCX (via asciidoctor -b docbook → pandoc)
-asciidoctor -b docbook src/main.adoc -o /tmp/doc.dbk && pandoc -f docbook \
-  --reference-doc=templates/technical/technical-reference.docx /tmp/doc.dbk -o output.docx
+# HTML (pre-process → asciidoctor html5)
+python3 templates/_base/adoc_docx_preprocessor.py --template technical --target html src/main.adoc -o /tmp/pre.adoc
+asciidoctor -b html5 -a stylesheet=templates/_base/huawei.css /tmp/pre.adoc -o output.html
 ```
 
 ---

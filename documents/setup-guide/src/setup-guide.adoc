@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.8.1
+:version: 6.8.2
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.8.2}{2026-09-20}{\item Documentation and cleanup: README, AGENTS, and all four SKILL.md files now describe the real multi-format pipeline (pre-processor + docx\_fix --fix + --lang flag) instead of the pre-v6.4 asciidoctor-to-pandoc chain. DOCX TOC title is now right-aligned like the PDF (was targeting a dead style). Signature names render bold like the PDF. Dead code removed (unused Caption style, dead TOCTitle style, dead HTML badge CSS). The --template and --lang flags accept the equals form (--template=guide). Various stale comments corrected.}
   \changelogentry{6.8.1}{2026-09-20}{\item Quality-pass fixes for v6.8.0: non-technical covers no longer show a stray Date paragraph (regression from the meta-scan change); the technical cover table is no longer hijacked from the body when :nochangelog: is set (boundary check on the cover-table detection); the Version/Date/Scenario table now renders unconditionally like the PDF (was gated by :nochangelog:); empty cover tables are skipped when no report values are set; corrected the cover-element-order wording in the v6.8.0 changelog.}
   \changelogentry{6.8.0}{2026-09-20}{\item Technical report covers now match the PDF in DOCX/MD/HTML: the title uses the PDF's 24pt size (was 36pt), the report type label appears below the title (the DOCX cover keeps the established title-first order; the PDF has label-then-title), and the Version/Date/Scenario table is rendered with the PDF's red label column. The cover meta line now shows the report version and its set date (was the document version and the build date). Authors, when set, appear as a table row like the PDF.}
   \changelogentry{6.7.0}{2026-09-20}{\item Badge and language fidelity: DOCX badge pills now render black text like the PDF (was frame-colored), use the correct label case (Pass, not PASS), include the Portuguese POC labels (Atendido, Parcial, Falha, Ignorado), and render at native width per template (testbook badge text no longer shrinks). Portuguese signature greetings now match the PDF (At.te,), the POC classification label matches the full PDF wording, and the secondary-format table headers (stakeholders, closing record, test summary, changelog) are now language-aware. DOCX footers show Página in Portuguese documents. Cover dates no longer zero-pad the day.}

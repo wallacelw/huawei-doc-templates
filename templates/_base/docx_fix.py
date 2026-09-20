@@ -524,7 +524,7 @@ def _fix_callout_spacing(root, W_NS):
         'CoverLogo': 'center',
         'CoverText': 'center',
         'CoverMeta': 'center',
-        'TOCTitle': 'right',
+        'TOCHeading': 'right',
         'ImageBlock': 'center',
     }
     for sid, jc_val in style_jc.items():
@@ -657,56 +657,6 @@ def _fix_doc_defaults(root, W_NS):
     spacing.set(f"{{{W_NS}}}after", "80")
     spacing.set(f"{{{W_NS}}}line", "280")
     spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
-
-
-def _add_caption_style(root, W_NS):
-    """Add/fix Caption style for figure/table captions.
-
-    PDF: \\small (9pt), bold label, centered — ensure properties even if style exists.
-    """
-    caption_style = None
-    for s in root.findall(f"{{{W_NS}}}style"):
-        if s.get(f"{{{W_NS}}}styleId") == "Caption":
-            caption_style = s
-            break
-    if caption_style is None:
-        caption_style = etree.SubElement(root, f"{{{W_NS}}}style")
-        caption_style.set(f"{{{W_NS}}}type", "paragraph")
-        caption_style.set(f"{{{W_NS}}}styleId", "Caption")
-        etree.SubElement(caption_style, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "caption")
-        etree.SubElement(caption_style, f"{{{W_NS}}}basedOn").set(f"{{{W_NS}}}val", "Normal")
-        etree.SubElement(caption_style, f"{{{W_NS}}}next").set(f"{{{W_NS}}}val", "Caption")
-        etree.SubElement(caption_style, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", "35")
-        etree.SubElement(caption_style, f"{{{W_NS}}}qFormat")
-    # Ensure pPr with spacing + centered
-    pPr = caption_style.find(f"{{{W_NS}}}pPr")
-    if pPr is None:
-        pPr = etree.SubElement(caption_style, f"{{{W_NS}}}pPr")
-    sp = pPr.find(f"{{{W_NS}}}spacing")
-    if sp is None:
-        sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
-    sp.set(f"{{{W_NS}}}before", "120")
-    sp.set(f"{{{W_NS}}}after", "120")
-    jc = pPr.find(f"{{{W_NS}}}jc")
-    if jc is None:
-        jc = etree.SubElement(pPr, f"{{{W_NS}}}jc")
-    jc.set(f"{{{W_NS}}}val", "center")
-    # Ensure rPr with bold + 9pt + HarmonyOS Sans
-    rPr = caption_style.find(f"{{{W_NS}}}rPr")
-    if rPr is None:
-        rPr = etree.SubElement(caption_style, f"{{{W_NS}}}rPr")
-    rf = rPr.find(f"{{{W_NS}}}rFonts")
-    if rf is None:
-        rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
-    rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
-    rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
-    if rPr.find(f"{{{W_NS}}}b") is None:
-        etree.SubElement(rPr, f"{{{W_NS}}}b")
-    for tag in ['sz', 'szCs']:
-        elem = rPr.find(f"{{{W_NS}}}{tag}")
-        if elem is None:
-            elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
-        elem.set(f"{{{W_NS}}}val", "18")  # 9pt (matches PDF \small)
 
 
 def _add_badge_style(root, W_NS):
@@ -1242,7 +1192,7 @@ def _strip_testcase_markers(docx_path):
 def _apply_content_styling(docx_path):
     """Apply content styling that mirrors the PDF.
 
-    - Badge character styles for [PASS]/[FAIL]/... markers
+    - Badge character styles for [Pass]/[Fail]/... markers
     - Hutable table styling (red header row, alternating rows, red grid)
     - Page break before each Heading 1 (PDF: \\clearpage before \\section)
     - Centered testcase captions (PDF renders them as centered captions)
@@ -1466,7 +1416,7 @@ def _fix_toc_styles(root, W_NS):
             tab = etree.SubElement(tabs, f"{{{W_NS}}}tab")
             tab.set(f"{{{W_NS}}}val", "right")
             tab.set(f"{{{W_NS}}}leader", "dot")
-            tab.set(f"{{{W_NS}}}pos", "9000")
+            tab.set(f"{{{W_NS}}}pos", "9638")  # content text width in twips (matches H1 tab stop)
             etree.SubElement(pPr, f"{{{W_NS}}}ind").set(f"{{{W_NS}}}left", indent)
             sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
             sp.set(f"{{{W_NS}}}after", "40")  # 2pt
@@ -1513,10 +1463,14 @@ def _fix_toc_styles(root, W_NS):
     if szCs is None:
         szCs = etree.SubElement(rPr, f"{{{W_NS}}}szCs")
     szCs.set(f"{{{W_NS}}}val", "44")
-    # Bottom border (0.5pt black rule)
+    # Bottom border (0.5pt black rule) + right alignment (PDF huawei-toc.sty)
     pPr = toc_heading.find(f"{{{W_NS}}}pPr")
     if pPr is None:
         pPr = etree.SubElement(toc_heading, f"{{{W_NS}}}pPr")
+    jc = pPr.find(f"{{{W_NS}}}jc")
+    if jc is None:
+        jc = etree.SubElement(pPr, f"{{{W_NS}}}jc")
+    jc.set(f"{{{W_NS}}}val", "right")
     pBdr = pPr.find(f"{{{W_NS}}}pBdr")
     if pBdr is None:
         pBdr = etree.SubElement(pPr, f"{{{W_NS}}}pBdr")
@@ -1621,7 +1575,6 @@ def fix_generated_docx(docx_path):
         _fix_font_fallbacks(root, W_NS)
         _fix_normal_style(root, W_NS)
         _fix_doc_defaults(root, W_NS)
-        _add_caption_style(root, W_NS)
         _add_badge_style(root, W_NS)
         _add_result_badge_styles(root, W_NS)
         _fix_toc_styles(root, W_NS)
@@ -1743,14 +1696,6 @@ def regenerate_reference(docx_path):
     pf.space_before = Pt(5)
     pf.space_after = Pt(10)
     set_run_font(style, "HarmonyOS Sans", 12, color_hex="595959")
-
-    # ── TOCTitle (paragraph style) ───────────────────────────────────
-    style = add_or_get_paragraph_style(doc, "TOCTitle")
-    style.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    pf = style.paragraph_format
-    pf.space_before = Pt(0)
-    pf.space_after = Pt(10)
-    set_run_font(style, "HarmonyOS Sans", 22, color_hex="1F2328", bold=True)
 
     # ── ImageBlock (paragraph style) ─────────────────────────────────
     style = add_or_get_paragraph_style(doc, "ImageBlock")
@@ -1890,6 +1835,24 @@ def main(argv=None, reference_name=None):
     args = []
     i = 0
     while i < len(argv):
+        # Accept --template=VALUE and --lang=VALUE (equals form)
+        if argv[i].startswith('--template='):
+            tmpl = argv[i].split('=', 1)[1]
+            if tmpl not in ('poc', 'testbook', 'guide', 'technical'):
+                print(f"error: unknown template: {tmpl} "
+                      "(expected poc|testbook|guide|technical)")
+                sys.exit(1)
+            _TEMPLATE = tmpl
+            i += 1
+            continue
+        if argv[i].startswith('--lang='):
+            lang_val = argv[i].split('=', 1)[1]
+            if lang_val not in ('en', 'pt'):
+                print(f"error: unknown lang: {lang_val} (expected en|pt)")
+                sys.exit(1)
+            _LANG = lang_val
+            i += 1
+            continue
         if argv[i] == '--template':
             if i + 1 >= len(argv):
                 print("error: --template requires a value "

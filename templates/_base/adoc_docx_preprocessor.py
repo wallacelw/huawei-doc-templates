@@ -340,7 +340,7 @@ def convert_signatures(content, lang):
                 address = _esc_cell(convert_inline_latex(args[3], lang))
                 cell = (
                     labels['sincerely'] + ' +\n'
-                    + name + ' +\n' + title + ' +\n'
+                    + '**' + name + '**' + ' +\n' + title + ' +\n'
                     + 'E-mail: `' + email + '` +\n' + address
                 )
                 cells.append(cell)

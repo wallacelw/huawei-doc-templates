@@ -88,15 +88,6 @@ code {
   padding: 0.1em 0.3em;
   border-radius: 2px;
 }
-.badge {
-  display: inline-block;
-  background: var(--huaweired);
-  color: var(--huaweiwhite);
-  font-size: 0.75em;
-  font-weight: bold;
-  padding: 0.15em 0.5em;
-  border-radius: 3px;
-}
 
 /* ── Callout Boxes (Admonitions) ──────────────────────────────── */
 .admonitionblock { margin: 0.8em 0; border-radius: 0; }
@@ -205,14 +196,6 @@ pre code { background: none; padding: 0; border-radius: 0; font-size: inherit; }
 }
 .testfield { background: var(--codebg); padding: 0.3em 0.6em; margin: 0.2em 0; }
 .testfield .label { font-weight: bold; color: var(--huaweired); }
-.badge-pass    { background: var(--huaweigreen);  color: var(--huaweiwhite); }
-.badge-fail    { background: var(--huaweired);     color: var(--huaweiwhite); }
-.badge-blocked { background: var(--huaweiorange);  color: var(--huaweiwhite); }
-.badge-untested{ background: var(--huaweigray50);  color: var(--huaweiwhite); }
-.badge-pass, .badge-fail, .badge-blocked, .badge-untested {
-  display: inline-block; font-size: 0.75em; font-weight: bold;
-  padding: 0.15em 0.5em; border-radius: 10px;
-}
 
 /* ── Objectives ───────────────────────────────────────────────── */
 .objectives { border-bottom: 1.5pt solid var(--ruleblack); padding-bottom: 0.5em; margin-bottom: 0.8em; }
@@ -364,7 +347,7 @@ pre:hover .copy-btn {
 <p>Huawei Technologies CO., LTD</p>
 </div>
 <div class="paragraph">
-<p><strong>v6.8.1</strong> — September 20, 2026 20:01</p>
+<p><strong>v6.8.2</strong> — September 20, 2026 20:36</p>
 </div>
 </div>
 </div>
@@ -2750,6 +2733,17 @@ secondary text:</p>
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6.8.2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2026-09-20</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Documentation and cleanup: README, AGENTS, and all four SKILL.md files now describe the real multi-format pipeline (pre-processor + docx_fix --fix + --lang flag) instead of the pre-v6.4 asciidoctor-to-pandoc chain. DOCX TOC title is now right-aligned like the PDF (was targeting a dead style). Signature names render bold like the PDF. Dead code removed (unused Caption style, dead TOCTitle style, dead HTML badge CSS). The --template and --lang flags accept the equals form (--template=guide). Various stale comments corrected.</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">6.8.1</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">2026-09-20</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
@@ -3660,7 +3654,7 @@ with load balancing, virtual keys, and Grafana observability).</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-09-21 07:01:49 +0800
+Last updated 2026-09-21 07:36:23 +0800
 </div>
 </div>
 </body>

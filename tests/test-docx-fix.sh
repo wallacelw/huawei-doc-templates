@@ -2,7 +2,7 @@
 # test-docx-fix.sh — Smoke test for DOCX post-processing for all templates
 # Verifies that the --fix pipeline produces correct heading styles,
 # list indentation, and footer page numbers in the generated DOCX.
-# Also verifies pandoc version pin and loud-failure assertions.
+# Also verifies pandoc tested-range check and loud-failure assertions.
 # Tests all templates (guide, technical, testbook, poc).
 set -euo pipefail
 

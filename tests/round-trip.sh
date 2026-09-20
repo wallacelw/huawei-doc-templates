@@ -119,8 +119,9 @@ check_tol3() {
 # - code_paras: total SourceCode-styled paragraphs (lines of code)
 # - code_blocks: contiguous runs of SourceCode paragraphs (code blocks)
 # - callouts: tables with callout-colored left borders
-# - imgs: content images only — badge pill PNGs (≤2cm wide, docx_fix's
-#   DOCX-only text replicas for [PASS]-family markers) are excluded so
+# - imgs: content images only — badge pill PNGs (≤2cm wide; the
+#   exclusion threshold BADGE_MAX_CX=1000000 EMU has headroom above the
+#   largest pill at 720000) for [Pass]-family markers are excluded so
 #   the count is comparable with MD/HTML, where badges are text.
 count_docx() {
   local docx_path=$1 tmpdir=$2
