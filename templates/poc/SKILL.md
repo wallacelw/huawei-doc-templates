@@ -20,7 +20,7 @@ Activities, Schedule, Responsibility Matrix), and **Conclusion** (Expected
 Results, Actual Results, Comments, Conclusion, Signatures). The template
 provides 7 POC-specific environments: stakeholders table, objective block,
 result badges (Pass/Partial/Fail/Skip), activities list (roman numerals),
-evidence checklist (checkboxes), closing record, and signatures. Content
+evidence checklist (plain bullets), closing record, and signatures. Content
 defaults to English; set `:lang: pt` for Portuguese labels. Do **not** use
 this for general AsciiDoc documents — the formatting is hard-coded to the
 Huawei house style (AGENTS.md L9).
@@ -181,7 +181,7 @@ Ordered:
 . Step 2
 ```
 
-POC-specific list roles `[.evidence]` (checkbox bullets) and
+POC-specific list roles `[.evidence]` (plain bullets) and
 `[.activities]` (roman numerals) are documented in Template-Specific
 Features.
 
@@ -569,7 +569,7 @@ Description of what was done.
 
 #### 5. Evidence checklist (checkboxes)
 
-Unordered list with checkbox bullets.
+Unordered list with plain bullets.
 
 ```asciidoc
 [.evidence]

@@ -1125,22 +1125,46 @@ def _apply_content_styling(docx_path):
             style.font.size = Pt(56)
             break
 
-    # --- Badge styling: [PASS]/[FAIL]/... -> character style ---
-    def style_badge_runs(paragraphs):
+    # --- Badge styling: [PASS]/[FAIL]/... → inline PNG images ---
+    # Replaces the flat character-styled text with rounded pill PNGs
+    # that replicate the PDF \huaweibadge look (arc=2pt, colored bg +
+    # 0.8pt frame, bold text).  Falls back to character styles if a
+    # PNG asset is missing.
+    import os
+    _badge_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'badge-assets')
+    # POC result badges use the 2cm \huaweibadge default; testbook's
+    # \testresultbadge uses 1.5cm.  NEW is a flat red box (auto width
+    # via fixed height).
+    _badge_w = Cm(2.0) if 'poc' in docx_path else Cm(1.5)
+    _new_h = Cm(0.55)
+
+    def _replace_badge_runs(paragraphs):
         for paragraph in paragraphs:
             for run in paragraph.runs:
                 marker = run.text.strip()
-                if marker in BADGE_MARKERS:
+                if marker not in BADGE_MARKERS:
+                    continue
+                style_id = BADGE_MARKERS[marker]
+                label = style_id.replace('Badge', '').upper()
+                png = os.path.join(_badge_dir, 'badge-{}.png'.format(label))
+                if os.path.isfile(png):
+                    run.text = ''
+                    if label == 'NEW':
+                        run.add_picture(png, height=_new_h)
+                    else:
+                        run.add_picture(png, width=_badge_w)
+                else:
                     try:
-                        run.style = doc.styles[BADGE_MARKERS[marker]]
+                        run.style = doc.styles[style_id]
                     except KeyError:
                         pass
 
-    style_badge_runs(doc.paragraphs)
+    _replace_badge_runs(doc.paragraphs)
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
-                style_badge_runs(cell.paragraphs)
+                _replace_badge_runs(cell.paragraphs)
 
     # --- Table styling (hutable vs plain grid) ---
     for table in doc.tables:

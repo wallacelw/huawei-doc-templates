@@ -435,23 +435,16 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   end
 
   # --- UNORDERED LIST → \begin{itemize} ---
-  # Special role: [.evidence] → checkbox list with \square bullets
+  # [.evidence] renders as a standard bullet list (checkbox markers
+  # removed in v6.5.0 — plain bullets for compatibility, matching the
+  # DOCX output).
   def convert_ulist(node)
-    if node.role == 'evidence'
-      items = node.items.map do |item|
-        text = process_text(item.text)
-        nested = item.blocks.any? ? "\n#{item.content}" : ''
-        "\\item[\\fbox{\\,}] #{text}#{nested}"
-      end
-      "\\begin{itemize}[leftmargin=2.5em, itemsep=0.3em]\n#{items.join("\n")}\n\\end{itemize}"
-    else
-      items = node.items.map do |item|
-        text = process_text(item.text)
-        nested = item.blocks.any? ? "\n#{item.content}" : ''
-        "\\item #{text}#{nested}"
-      end
-      "\\begin{itemize}\n#{items.join("\n")}\n\\end{itemize}"
+    items = node.items.map do |item|
+      text = process_text(item.text)
+      nested = item.blocks.any? ? "\n#{item.content}" : ''
+      "\\item #{text}#{nested}"
     end
+    "\\begin{itemize}\n#{items.join("\n")}\n\\end{itemize}"
   end
 
   # --- ORDERED LIST → \begin{enumerate} ---

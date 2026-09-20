@@ -293,9 +293,9 @@ def convert_signatures(content, lang):
                 email = convert_inline_latex(args[2], lang)
                 address = convert_inline_latex(args[3], lang)
                 cell = (
-                    labels['sincerely'] + '\n+\n'
-                    + name + '\n+\n' + title + '\n+\n'
-                    + 'E-mail: `' + email + '`\n+\n' + address
+                    labels['sincerely'] + ' +\n'
+                    + name + ' +\n' + title + ' +\n'
+                    + 'E-mail: `' + email + '` +\n' + address
                 )
                 cells.append(cell)
         if cells:
@@ -693,35 +693,21 @@ def convert_roles(line, lang):
 
 def convert_block_roles(content, lang):
     """Convert block-level custom roles."""
-    # [.evidence] → checkbox bullets
-    content = re.sub(
-        r'\[\.evidence\]\n((?:\* .+\n?)+)',
-        lambda m: _convert_evidence_list(m.group(1), lang),
-        content,
-    )
+    # [.evidence] → plain bullet list (checkbox markers removed in
+    # v6.5.0 — the PDF now renders standard bullets too).
+    content = re.sub(r'\[\.evidence\]\n', '', content)
 
-    # [.activities] → keep as numbered list (roman numerals not supported in docbook)
-    # Just remove the role — the numbered list renders fine
-    content = re.sub(r'\[\.activities\]\n', '', content)
+    # [.activities] → native lower-roman numbering.  AsciiDoc's
+    # [lowerroman] list style makes asciidoctor emit docbook
+    # numeration="lowerroman" → pandoc → Word native lower-roman
+    # numbering (no manual text markers needed).
+    content = re.sub(r'\[\.activities\]\n', '[lowerroman]\n', content)
 
     # [.objective] → keep content (tcolorbox approximated as plain text in DOCX)
     content = re.sub(r'\[\.objective\]\n', '', content)
 
     return content
 
-
-def _convert_evidence_list(list_text, lang):
-    """Add checkbox markers to evidence list items."""
-    lines = []
-    for line in list_text.strip().split('\n'):
-        line = re.sub(r'^\* ', '* \u2610 ', line)
-        lines.append(line)
-    return '\n'.join(lines) + '\n'
-
-
-# ---------------------------------------------------------------------------
-# Inline passthrough converter (pass:[...])
-# ---------------------------------------------------------------------------
 
 def convert_inline_passthroughs(text, lang):
     """Convert pass:[latex] inline passthroughs to AsciiDoc."""

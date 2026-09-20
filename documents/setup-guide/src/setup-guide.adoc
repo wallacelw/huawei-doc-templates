@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.4.7
+:version: 6.5.0
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.5.0}{2026-09-20}{\item Evidence checklist simplified to plain bullets in both PDF and DOCX (checkbox markers removed for compatibility). Planned Activities list in DOCX now uses Word's native lower-roman numbering (i., ii., iii.) matching the PDF. Badges in DOCX replaced with exact-replica PNG pill images (rounded, colored frame and background, bold text) matching the PDF \textbackslash huaweibadge look — assets committed to the repo. Signature blocks in DOCX no longer show literal + symbols (proper hard line breaks).}
   \changelogentry{6.4.7}{2026-09-20}{\item Section titles in DOCX now match the PDF heading design: the big section number (56pt) sits on the left, the title text is pushed to the right edge (a right tab stop mimics the LaTeX \textbackslash hfill), and the red rule runs below — previously the title sat left-aligned next to a small number. Applies to all templates.}
   \changelogentry{6.4.6}{2026-09-20}{\item Code blocks inside test cases no longer break the red left rule in DOCX — the code style's left indent (which jogged the rule) is reset inside test case blocks, and code blocks now show the PDF's code box (gray background with thin border on top, bottom, and right, red rule continuing on the left).}
   \changelogentry{6.4.5}{2026-09-20}{\item DOCX polish pass: all captions centered (matching the PDF), vertical spacing between blocks matched to the LaTeX rhythm (medskip/smallskip around captions, field bars, and steps), and test steps now render as separate paragraphs each with the red bold number (previously merged into one paragraph).}
