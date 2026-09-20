@@ -4,6 +4,34 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.5.2 (2026-09-20)
+
+### Quality-pass fixes for v6.5.1
+
+Fresh-oracle review of v6.5.1 returned "approved with fixes" — this release
+lands the 5 MEDIUM findings.
+
+#### Fixed
+
+- Paired-quote conversion: the LaTeX quote conversion in the pre-processor
+  blindly replaced every `''` with `”`, corrupting code arguments (an SQL
+  empty string `\inlinecode{WHERE name = ''}` became
+  `` `WHERE name = ”` ``). Now only paired ``...''`` sequences convert;
+  quote characters inside code arguments stay literal.
+- Signatures `\&` split: `convert_signatures` split rows on every `&`,
+  truncating cells containing escaped ampersands ("AT\&T" in an address).
+  Now splits on unescaped `&` only (`\&` is a literal ampersand).
+
+#### Tests
+
+- `round-trip.sh` HTML generation guards the asciidoctor-diagram
+  dependency (same `gem list` check as build.sh) and fails loudly when
+  HTML generation produces no output, instead of silently reading 0 for
+  all HTML counts.
+- Pre-processor unit tests now cover pipe escaping in all five table
+  handlers (changelog, stakeholders, closing record, signatures, test
+  summary), plus the paired-quote and escaped-ampersand regressions.
+
 ## v6.5.1 (2026-09-20)
 
 ### Pre-processor content-corruption fixes; tests run the real pipeline
@@ -38,8 +66,8 @@ one users run (`scripts/build.sh`).
 
 - `round-trip.sh` and `test-docx-fix.sh` now run the real pipeline
   (preprocessor wired in, matching build.sh).
-- Vacuous raw-LaTeX exclusion list removed — any raw LaTeX outside code
-  blocks is now a hard failure.
+- Vacuous raw-LaTeX exclusion list removed — raw LaTeX markers (`\begin{`,
+  `\set*`, `{=latex}`) outside code blocks are now hard failures.
 - New `tests/test-preprocessor.sh` unit tests (pipe escaping, badge
   contract, changelog bullets, `:noanswers:`, signatures edge cases,
   target-aware testcase markers).

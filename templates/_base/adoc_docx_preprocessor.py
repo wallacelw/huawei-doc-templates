@@ -154,9 +154,9 @@ def convert_inline_latex(text, lang='en'):
     text = text.replace(r'$<$', '<')
     text = text.replace(r'$\neq$', '\u2260')           # ≠
     text = text.replace(r'$\times$', '\u00d7')         # ×
-    # LaTeX typographic quotes → Unicode
-    text = text.replace('``', '\u201c')                 # “
-    text = text.replace("''", '\u201d')                 # ”
+    # LaTeX typographic quotes → Unicode (paired only — '' inside code
+    # args, e.g. SQL empty strings, must stay literal)
+    text = re.sub(r"``([^`']+?)''", '\u201c\\1\u201d', text)
 
     # POC classification labels
     text = text.replace(r'\pochomologated', labels['homologated'])
@@ -297,8 +297,8 @@ def convert_signatures(content, lang):
         line = line.strip()
         if not line or line.startswith(r'\begin') or line.startswith(r'\end'):
             continue
-        # Split on & to get signature cells
-        parts = line.split('&')
+        # Split on unescaped & only (\& is a literal ampersand)
+        parts = re.split(r'(?<!\\)&', line)
         cells = []
         for part in parts:
             part = part.strip()

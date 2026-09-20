@@ -354,12 +354,22 @@ for entry in "${SAMPLES[@]}"; do
   rm -f "$tmp_dbk"
 
   # ── Generate HTML ──────────────────────────────────────────────────────
+  # Diagram extension optional (same guard as scripts/build.sh)
+  diagram_opts=""
+  if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+    diagram_opts="-r asciidoctor-diagram"
+  fi
   asciidoctor -b html5 \
     -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
     -a docinfodir="$REPO_ROOT/templates/_base" \
     -a docinfo1 \
-    -r asciidoctor-diagram \
+    $diagram_opts \
     "$pre_html" -o "$RT_TMPDIR/rt.html" 2>/dev/null
+  if [ ! -f "$RT_TMPDIR/rt.html" ]; then
+    echo "  FAIL: HTML generation failed for $name"
+    FAIL=$((FAIL + 1))
+    continue
+  fi
 
   # ── Generate DOCX ──────────────────────────────────────────────────────
   docx_outdir="$RT_TMPDIR/docx_out"
@@ -471,16 +481,14 @@ for entry in "${SAMPLES[@]}"; do
   check_tol "Code blocks HTML vs DOCX" "$html_code" "$docx_code_blocks" "$code_tol"
 
   # Tables + callouts combined comparison.
-  # In DOCX, callouts are rendered as tables with colored left borders,
-  # so docx_tables already includes callouts. We compare:
+  # We compare:
   #   MD:   md_tables + md_callouts
   #   HTML: html_tables + html_callouts
-  #   DOCX: docx_tables  (includes callout tables)
-  # Known divergence: HTML objectives are rendered as callout infobox divs but
-  # MD objectives are plain blockquotes (not counted as callouts above).
-  # \note is rendered as italic text (not a callout) in all formats.
-  # Setup-guide has many callouts where MD blockquote keyword matching
-  # undercounts vs HTML class/DOCX border counting (inherent difference).
+  #   DOCX: docx_tables
+  # DOCX cannot count admonitions: pandoc drops the NOTE/TIP/WARNING
+  # labels and keeps only the body text, so no callout structure survives
+  # into the DOCX.  That divergence is why the guide tolerance is 9
+  # (its ~9 admonitions count in MD/HTML but not in DOCX).
   md_tc=$((md_tables + md_callouts))
   html_tc=$((html_tables + html_callouts))
   docx_tc=$docx_tables

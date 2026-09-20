@@ -61,6 +61,30 @@ out = process(HEADER + changelog(
 check("no double-escape: \\| kept", "escaped \\| pipe" in out)
 check("no double-escape: no \\\\|", "\\\\|" not in out)
 
+# Pipe escaping in the other table handlers (stakeholders, closing
+# record, signatures, test summary) — every cell goes through _esc_cell
+out = process(HEADER + "++++\n\\begin{stakeholders}\n"
+              "\\stakeholderorg{Alpha | Beta}\n"
+              "\\end{stakeholders}\n++++\n", 'poc', 'md')
+check("pipe escape: stakeholders org cell", "Alpha \\| Beta" in out)
+
+out = process(HEADER + "++++\n\\begin{closingrecord}\n"
+              "\\closingrow{Item | X}{Value}\n"
+              "\\end{closingrecord}\n++++\n", 'poc', 'md')
+check("pipe escape: closing record label cell", "Item \\| X" in out)
+
+out = process(HEADER + "++++\n\\begin{signatures}\n"
+              "\\signaturecell{Alice | Bob}{Dev}{a@x}{City}\n"
+              "\\end{signatures}\n++++\n", 'poc', 'md')
+check("pipe escape: signatures name cell", "Alice \\| Bob" in out)
+
+out = process(HEADER + "++++\n\\begin{testsummary}\n"
+              "\\testsummaryrow{TC-01}{Title | Sub}"
+              "{\\testresultbadge{Pass}}\n"
+              "\\end{testsummary}\n++++\n", 'testbook', 'md')
+check("pipe escape: test summary title cell", "Title \\| Sub" in out)
+check("pipe escape: test summary badge", "**[PASS]**" in out)
+
 print("=== Badge contract ===")
 
 # 3. [.badge]#text# — docx target emits the docx_fix sentinel
@@ -137,6 +161,13 @@ out = process(HEADER + changelog(
     "{\\item Use ``make'' today}"), 'guide', 'md')
 check("latex quotes: “make”", "\u201cmake\u201d" in out)
 
+# Paired-quote conversion must not corrupt '' inside code args
+# (SQL empty string stays literal)
+out = process(HEADER + changelog(
+    "  \\changelogentry{1.0.0}{2026-01-01}"
+    "{\\item Use \\inlinecode{WHERE x = ''} now}"), 'guide', 'md')
+check("quotes: '' literal inside code arg", "`WHERE x = ''`" in out)
+
 print("=== Signatures ===")
 
 # 13. Single-cell row: no IndexError, empty second cell keeps the grid
@@ -164,6 +195,12 @@ SIG2 = ("++++\n\\begin{signatures}\n"
 out = process(HEADER + SIG2, 'poc', 'md')
 check("signatures 2-cell row: both present",
       "Alice" in out and "Bob" in out)
+
+# Escaped ampersand in a cell must not split the cell (\& is literal)
+out = process(HEADER + "++++\n\\begin{signatures}\n"
+              "\\signaturecell{Alice}{R\\&D Lead}{a@x}{City}\n"
+              "\\end{signatures}\n++++\n", 'poc', 'md')
+check("signatures: \\& not a cell separator", "R&D Lead" in out)
 
 print("=== Target-aware testcase markers ===")
 
