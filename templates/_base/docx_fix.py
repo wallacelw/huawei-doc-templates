@@ -916,21 +916,26 @@ def _assemble_cover(doc, qn, docx_path):
     idx = paras.index(logo_p)
     cover_text_p = paras[idx + 1] if idx + 1 < len(paras) else None
 
-    # Meta line ("vX — date time") — scan only paragraphs AFTER the logo
-    # (pandoc places authors before the logo; scanning from the top would
-    # match author names like "Victor").  Pattern ^v\S+ matches both
-    # v1.0.0 and vHCS 8.5.1.
+    # Date paragraphs: scan the full cover region (pandoc emits Date
+    # before the logo, in the metadata block).
+    # Meta line ("vX — date time"): scan only paragraphs AFTER the logo
+    # (author names before the logo could false-match ^v\S+; the meta is
+    # injected after the logo).  Pattern ^v\S+ matches both v1.0.0 and
+    # vHCS 8.5.1.
     meta_p = None
     date_ps = []
-    logo_idx = paras.index(logo_p)
-    for p in paras[logo_idx:]:
+    for p in paras:
+        if p is title_p:
+            continue
         if is_boundary(p):
             break
-        t = p.text.strip()
-        if re.match(r'^v\S+', t):
-            meta_p = p
-        elif re.match(r'^\d{4}-\d{2}-\d{2}$', t):
+        if re.match(r'^\d{4}-\d{2}-\d{2}$', p.text.strip()):
             date_ps.append(p)
+    for p in paras[idx:]:
+        if is_boundary(p):
+            break
+        if re.match(r'^v\S+', p.text.strip()):
+            meta_p = p
 
     # Subtitle (docbook splits 'Title: Subtitle') — merge back into the
     # title, matching the PDF which uses the full doctitle as one line.
@@ -969,13 +974,27 @@ def _assemble_cover(doc, qn, docx_path):
     # first boundary paragraph in document order.
     cover_table = None
     if _is_technical:
-        body = doc.element.body
+        body_children = list(doc.element.body)
+        logo_el_idx = body_children.index(logo_p._p)
         for tbl in doc.tables:
-            # Position the table's _tbl relative to logo_p._p
-            tbl_idx = list(body).index(tbl._tbl)
-            logo_idx_el = list(body).index(logo_p._p)
-            if tbl_idx > logo_idx_el:
-                # Check no boundary paragraph between logo and table
+            tbl_idx = body_children.index(tbl._tbl)
+            if tbl_idx <= logo_el_idx:
+                continue
+            # Only accept a table before the first boundary paragraph
+            # (Heading/TOC) — a body table must never be hijacked into
+            # the cover.
+            intervening = False
+            for el in body_children[logo_el_idx + 1:tbl_idx]:
+                if el.tag == qn('w:p'):
+                    pPr = el.find(qn('w:pPr'))
+                    if pPr is not None:
+                        pStyle = pPr.find(qn('w:pStyle'))
+                        if pStyle is not None:
+                            sid = pStyle.get(qn('w:val'), '')
+                            if sid.startswith('Heading') or sid.startswith('TOC'):
+                                intervening = True
+                                break
+            if not intervening:
                 cover_table = tbl
                 break
 
@@ -987,19 +1006,14 @@ def _assemble_cover(doc, qn, docx_path):
     if cover_text_p is not None:
         chain.append(cover_text_p)
     if _is_technical and cover_table is not None:
-        chain.append(cover_table)   # lxml element, not a paragraph
+        chain.append(cover_table)
     if not _is_technical:
         chain.extend(author_ps)
     if meta_p is not None:
         chain.append(meta_p)
     for el in chain:
-        if hasattr(el, '_element'):
-            anchor.addnext(el._element)
-            anchor = el._element
-        else:
-            # Raw lxml element (e.g. a table's _tbl)
-            anchor.addnext(el)
-            anchor = el
+        anchor.addnext(el._element)
+        anchor = el._element
 
     # Technical: delete pandoc author paragraphs (authors live in the
     # version table, added by the preprocessor).

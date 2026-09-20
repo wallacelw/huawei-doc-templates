@@ -966,9 +966,10 @@ def inject_cover_block(content, lang, template):
 
     Pandoc already renders title, authors, and date; docx_fix reorders
     (title → logo → cover text/label [+ table] → authors → meta) and
-    deletes the redundant date paragraph.  The meta line and version
-    table are skipped when :nochangelog: is set (L12 hides version/date/
-    time).
+    deletes the redundant date paragraph.  The meta line is skipped
+    when :nochangelog: is set (L12 hides version/date/time); the
+    technical version table is NOT gated (PDF renders it outside
+    \\if@changelog).
     """
     lines = content.split('\n')
     # Find the last header attribute line (":key: value")
@@ -998,24 +999,24 @@ def inject_cover_block(content, lang, template):
         block.append(type_label)
         block.append('')
 
-        # Version/Date/Scenario table (PDF: red label column).  Gated by
-        # :nochangelog: (L12 — the PDF's \if@changelog hides covermeta
-        # and the version table alike).
-        if not nochangelog:
-            table_lines = ['[cols="1,1"]', '|===']
-            if _REPORT_VERSION:
-                table_lines.append('| *Version* | ' + _REPORT_VERSION)
-            if _REPORT_DATE:
-                table_lines.append('| *Date* | ' + _REPORT_DATE)
-            if _REPORT_SCENARIO:
-                table_lines.append('| *Scenario* | ' + _REPORT_SCENARIO)
-            if m_authors and not noauthors:
-                table_lines.append('| *Author* | ' + m_authors.group(1))
+        # Version/Date/Scenario table (PDF technical.cls:191-209 — NOT
+        # gated by :nochangelog:; only covermeta is).  Skip when no rows.
+        table_lines = ['[cols="1,1"]', '|===']
+        if _REPORT_VERSION:
+            table_lines.append('| *Version* | ' + _REPORT_VERSION)
+        if _REPORT_DATE:
+            table_lines.append('| *Date* | ' + _REPORT_DATE)
+        if _REPORT_SCENARIO:
+            table_lines.append('| *Scenario* | ' + _REPORT_SCENARIO)
+        if m_authors and not noauthors:
+            table_lines.append('| *Author* | ' + m_authors.group(1))
+        if len(table_lines) > 2:   # at least one row (empty-table guard)
             table_lines.append('|===')
             block.extend(table_lines)
             block.append('')
 
         # Meta line uses the REPORT version/date (not :version:).
+        # Gated by :nochangelog: (PDF covermeta — L12).
         if not nochangelog:
             meta_ver = _REPORT_VERSION or (m_version.group(1) if m_version else None)
             if meta_ver:

@@ -364,7 +364,7 @@ pre:hover .copy-btn {
 <p>Huawei Technologies CO., LTD</p>
 </div>
 <div class="paragraph">
-<p><strong>v6.8.0</strong> — September 20, 2026 19:26</p>
+<p><strong>v6.8.1</strong> — September 20, 2026 20:01</p>
 </div>
 </div>
 </div>
@@ -2750,12 +2750,23 @@ secondary text:</p>
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6.8.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2026-09-20</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Quality-pass fixes for v6.8.0: non-technical covers no longer show a stray Date paragraph (regression from the meta-scan change); the technical cover table is no longer hijacked from the body when :nochangelog: is set (boundary check on the cover-table detection); the Version/Date/Scenario table now renders unconditionally like the PDF (was gated by :nochangelog:); empty cover tables are skipped when no report values are set; corrected the cover-element-order wording in the v6.8.0 changelog.</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">6.8.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">2026-09-20</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
 <ul>
 <li>
-<p>Technical report covers now match the PDF in DOCX/MD/HTML: the title uses the PDF&#8217;s 24pt size (was 36pt), the report type label appears above it, and the Version/Date/Scenario table is rendered with the PDF&#8217;s red label column. The cover meta line now shows the report version and its set date (was the document version and the build date). Authors, when set, appear as a table row like the PDF.</p>
+<p>Technical report covers now match the PDF in DOCX/MD/HTML: the title uses the PDF&#8217;s 24pt size (was 36pt), the report type label appears below the title (the DOCX cover keeps the established title-first order; the PDF has label-then-title), and the Version/Date/Scenario table is rendered with the PDF&#8217;s red label column. The cover meta line now shows the report version and its set date (was the document version and the build date). Authors, when set, appear as a table row like the PDF.</p>
 </li>
 </ul>
 </div></div></td>
@@ -3649,7 +3660,7 @@ with load balancing, virtual keys, and Grafana observability).</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-09-21 06:26:29 +0800
+Last updated 2026-09-21 07:01:49 +0800
 </div>
 </div>
 </body>

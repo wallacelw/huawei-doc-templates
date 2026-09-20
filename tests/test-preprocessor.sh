@@ -329,13 +329,15 @@ check("technical table: | *Scenario* | Standard Scenario",
 check("technical: type label 'Technical Report'",
       "Technical Report" in out)
 
-# 29. technical + :nochangelog: → no meta AND no version table
+# 29. technical + :nochangelog: → no meta, but the version table stays
+# (PDF technical.cls renders the table outside \if@changelog; only
+# covermeta is gated — L12).
 out = process(":lang: en\n:version: 3.6.1\n:nochangelog:\n\n"
               + TECH_PASSTHROUGH + "Body.\n", 'technical', 'md')
 check("technical nochangelog: no meta line",
       "**vHCS 8.5.1**" not in out)
-check("technical nochangelog: no version table",
-      "| *Version*" not in out)
+check("technical nochangelog: version table present",
+      "| *Version* | HCS 8.5.1" in out)
 
 # 30. technical + :authors: → Author row
 out = process(":lang: en\n:version: 3.6.1\n:notime:\n:authors: Jane Doe\n\n"

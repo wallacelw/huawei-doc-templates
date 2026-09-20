@@ -4,6 +4,47 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.8.1 (2026-09-20)
+
+### Quality-pass fixes for v6.8.0
+
+Fresh-oracle review of v6.8.0 returned "approved with fixes" — this
+release lands the 2 HIGH + 2 MEDIUM findings plus 5 ride-along LOWs.
+
+#### Fixed
+
+- Non-technical covers no longer show a **stray Date paragraph** (HIGH-1
+  — regression from the v6.8.0 meta-scan change: the date scan was moved
+  to start after the logo, but pandoc emits Date before the logo, so it
+  was never captured/deleted and fell into the author chain).  The scan
+  is now split: date scan over the full cover region, meta scan only
+  after the logo.
+- The technical cover table is no longer **hijacked from the body** when
+  `:nochangelog:` is set or no cover table exists (HIGH-2 — the
+  detection only checked position, not boundaries; a body table could be
+  yanked into the cover and painted red).  A boundary check now rejects
+  candidate tables past the first Heading/TOC paragraph.
+- The Version/Date/Scenario table now renders **unconditionally** like
+  the PDF (MEDIUM-1 — was gated by `:nochangelog:`; the PDF renders the
+  table outside `\if@changelog`; only covermeta is gated).
+- Empty cover tables are **skipped** when no report values are set
+  (LOW-1 — empty-table guard).
+- Corrected the **cover-element-order wording** in the v6.8.0 changelog
+  (MEDIUM-2 — the type label appears below the title in DOCX, not above;
+  the DOCX cover keeps the established title-first order).
+- Corrected the **"Victor" example** in the v6.8.0 changelog (LOW-6 —
+  the `^v\S+` pattern is case-sensitive; the actual beneficiary is
+  lowercase names like "van der Berg").
+
+#### Tests
+
+- New per-template assertion: no stray Date paragraph on the cover
+  (HIGH-1 regression guard).
+- Strengthened technical cover-table assertion: first cell text must be
+  "Version" (LOW-5 — a hijacked body table wouldn't match).
+- Updated preprocessor case 29: version table present with
+  `:nochangelog:` (was: absent).
+
 ## v6.8.0 (2026-09-20)
 
 ### Technical cover parity
@@ -16,8 +57,9 @@ DOCX/MD/HTML now match the verified PDF source.  No PDF-path changes.
 - Technical report **title size** in DOCX is now 24pt (was 36pt) —
   matches `technical.cls` (the guide/poc/testbook 36pt is unchanged).
 - The **report type label** ("Technical Report") now appears on the
-  cover above the title, styled 16pt bold red (PDF: `\setreporttype`
-  default).
+  cover below the title (the DOCX cover keeps the established title-first
+  order; the PDF has label-then-title), styled 16pt bold red (PDF:
+  `\setreporttype` default).
 - A **Version/Date/Scenario table** is now rendered on the cover with
   the PDF's red label column (white bold on `huaweired` background) and
   black grid borders.  Rows are omitted when the corresponding
@@ -34,9 +76,9 @@ DOCX/MD/HTML now match the verified PDF source.  No PDF-path changes.
   `\setreportscenario`/`\setreporttype`** from the passthrough block
   (previously dropped as unrecognized raw LaTeX).
 - `_assemble_cover` meta scan now starts **after the logo** (was
-  scanning from the title — author names like "Victor" could falsely
-  match) and uses pattern `^v\S+` (matches `vHCS 8.5.1`, not just
-  `v\d+\.\d+\.\d+`).
+  scanning from the title — lowercase author names like "van der Berg"
+  could false-match) and uses pattern `^v\S+` (matches `vHCS 8.5.1`,
+  not just `v\d+\.\d+\.\d+`).
 
 #### Tests
 

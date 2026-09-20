@@ -422,31 +422,64 @@ PYEOF
     fi
   fi
 
-  # 15. Technical cover: first cover table has red label column
+  # 15. Technical cover: first cover table has red label column AND
+  # the first cell text is "Version" (a hijacked body table wouldn't be).
   if [ "$TEMPLATE_NAME" = "technical" ]; then
     if python3 - "$UNZIP_DIR/word/document.xml" << 'PYEOF' 2>/dev/null; then
 import xml.etree.ElementTree as ET, sys
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 tree = ET.parse(sys.argv[1])
 root = tree.getroot()
-# Find the first w:tbl in the document
 tbl = root.find(f".//{{{W}}}tbl")
 if tbl is not None:
-    # Check first-column cells for red shading
-    for row in tbl.findall(f"{{{W}}}tr"):
-        cells = row.findall(f"{{{W}}}tc")
+    rows = tbl.findall(f"{{{W}}}tr")
+    if rows:
+        cells = rows[0].findall(f"{{{W}}}tc")
         if cells:
-            tcPr = cells[0].find(f"{{{W}}}tcPr")
-            if tcPr is not None:
-                shd = tcPr.find(f"{{{W}}}shd")
-                if shd is not None and shd.get(f"{{{W}}}fill") == "C7000B":
-                    sys.exit(0)
+            # First cell text must be "Version"
+            texts = [t.text for t in cells[0].iter(f"{{{W}}}t") if t.text]
+            first_text = "".join(texts).strip()
+            if first_text != "Version":
+                sys.exit(1)
+            # First-column cells must have red shading
+            for row in rows:
+                rcells = row.findall(f"{{{W}}}tc")
+                if rcells:
+                    tcPr = rcells[0].find(f"{{{W}}}tcPr")
+                    if tcPr is not None:
+                        shd = tcPr.find(f"{{{W}}}shd")
+                        if shd is not None and shd.get(f"{{{W}}}fill") == "C7000B":
+                            continue
+                    sys.exit(1)
+            sys.exit(0)
 sys.exit(1)
 PYEOF
       pass "$TEMPLATE_NAME: cover table has red label column"
     else
       fail "$TEMPLATE_NAME: cover table missing red label column"
     fi
+  fi
+
+  # 16. No stray Date paragraph on the cover (HIGH-1 regression guard).
+  # After --fix, the cover region (before the first Heading/TOC) must
+  # contain no paragraph with style_id 'Date' — the date is carried by
+  # the meta line; a stray Date paragraph is a regression from the
+  # meta-scan change.
+  if python3 - "$DOCX_OUT" << 'PYEOF' 2>/dev/null; then
+import sys
+from docx import Document
+doc = Document(sys.argv[1])
+for p in doc.paragraphs:
+    sid = p.style.style_id or ''
+    if sid.startswith('Heading') or sid.startswith('TOC'):
+        break
+    if sid == 'Date':
+        sys.exit(1)
+sys.exit(0)
+PYEOF
+    pass "$TEMPLATE_NAME: no stray Date paragraph on cover"
+  else
+    fail "$TEMPLATE_NAME: stray Date paragraph on cover"
   fi
 }
 
