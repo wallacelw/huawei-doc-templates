@@ -724,13 +724,13 @@ assert_contains "section auto id → anchor" '\hypertarget{' "$OUT"
 # ════════════════════════════════════════════════════════════════════════════
 echo "=== 19. Evidence list, kbd, footnote, badges ==="
 
-# Evidence list uses \fbox{\,} not $\square$
+# Evidence list renders plain bullets (v6.5.0: checkbox markers removed)
 OUT=$(convert '= Test
 :template: guide
 
 [.evidence]
 * Item one')
-assert_contains "evidence list → fbox bullet" '\item[\fbox{\,}]' "$OUT"
+assert_contains "evidence list → plain bullet" '\item Item one' "$OUT"
 
 # kbd macro escapes special chars (requires :experimental:)
 OUT=$(convert '= Test
