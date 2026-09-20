@@ -1036,6 +1036,41 @@ def _style_testcase_blocks(doc, qn):
                 p.runs[0].font.color.rgb = red
                 # PDF: \par\smallskip between steps
                 p.paragraph_format.space_before = Pt(6)
+            elif (p.style.style_id or '') == 'SourceCode':
+                # Code block inside a testcase (PDF: codebg box with
+                # codeborder inside the tcolorbox).  The SourceCode style
+                # indents left=397 twips — that jogs the red left rule,
+                # so reset indents to keep the rule continuous; add the
+                # code box top/bottom/right borders (codeborder #E1E4E8),
+                # keeping the red left border.  Shading (codebg #F6F8FA)
+                # comes from the style.
+                p.paragraph_format.left_indent = Pt(0)
+                p.paragraph_format.right_indent = Pt(0)
+                pPr = p._p.get_or_add_pPr()
+                pBdr = pPr.find(qn('w:pBdr'))
+                if pBdr is not None:
+                    left_b = pBdr.find(qn('w:left'))
+                    top_b = pBdr.find(qn('w:top'))
+                    if top_b is None:
+                        top_b = OxmlElement('w:top')
+                        pBdr.insert(0, top_b)
+                    bottom_b = pBdr.find(qn('w:bottom'))
+                    if bottom_b is None:
+                        bottom_b = OxmlElement('w:bottom')
+                        if left_b is not None:
+                            left_b.addnext(bottom_b)
+                        else:
+                            pBdr.append(bottom_b)
+                    right_b = pBdr.find(qn('w:right'))
+                    if right_b is None:
+                        right_b = OxmlElement('w:right')
+                        bottom_b.addnext(right_b)
+                    # Schema order inside pBdr: top, left, bottom, right
+                    for el in (top_b, bottom_b, right_b):
+                        el.set(qn('w:val'), 'single')
+                        el.set(qn('w:sz'), '4')       # 0.5pt — codeborder
+                        el.set(qn('w:space'), '4')
+                        el.set(qn('w:color'), 'E1E4E8')
             elif t:
                 # Content paragraphs (objective/scope/result/remarks text)
                 p.paragraph_format.space_after = Pt(6)

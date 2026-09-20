@@ -4,6 +4,34 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.4.6 (2026-09-20)
+
+### DOCX fix: code blocks no longer break the testcase red rule
+
+Code blocks inside testcase blocks jogged the red left rule ~0.7cm to
+the right and lost the PDF's code box look.
+
+#### Root cause
+
+- Pandoc's `Source Code` style (from the reference docx) carries
+  `w:ind w:left="397"` — the paragraph-level left border (the red rule)
+  draws at the indent position, so the rule shifted right at every code
+  block and the gray box sat misaligned with the rest of the block.
+
+#### Fix (docx_fix.py, SourceCode paragraphs inside testcase ranges)
+
+- Left/right indent reset to 0 — the red rule draws at the same
+  position as every other testcase paragraph, keeping the vertical line
+  continuous.
+- Code box borders added: top/bottom/right in `codeborder` #E1E4E8
+  (0.5pt), left stays red C7000B — matching the PDF, where the code
+  block renders as a codebg box inside the tcolorbox.
+- Shading (codebg #F6F8FA) and font (Cascadia Code) still come from the
+  style; line breaks verified intact (`w:br`).
+- Body-level code blocks (outside testcases) keep the style indent and
+  no borders — unchanged, as intended.
+- pBdr children emitted in schema order (top, left, bottom, right).
+
 ## v6.4.5 (2026-09-20)
 
 ### DOCX polish: centered captions, vertical rhythm, step separation
