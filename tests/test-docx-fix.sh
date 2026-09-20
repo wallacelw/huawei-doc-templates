@@ -378,6 +378,26 @@ PYEOF
       fail "$TEMPLATE_NAME: markers leaked on styling failure"
     fi
   fi
+
+  # 13. Styles-phase failure (unmocked): break Heading1 in a pre-fix
+  # copy — the styles-phase assertion raises BEFORE the zip rewrite, so
+  # the file on disk is pristine pandoc output; the widened finally must
+  # still strip the markers (and the fix must exit non-zero).
+  if [ "$TEMPLATE_NAME" = "testbook" ]; then
+    STYLES_FAIL_DOCX="$TMPDIR_FIX/${TEMPLATE_NAME}-stylesfail.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$STYLES_FAIL_DOCX"
+    break_style_in_docx "$STYLES_FAIL_DOCX" "Heading1"
+
+    styles_rc=0
+    python3 "$FIX_SCRIPT" --fix "$STYLES_FAIL_DOCX" 2>/dev/null || styles_rc=$?
+    styles_markers=$(unzip -p "$STYLES_FAIL_DOCX" word/document.xml 2>/dev/null \
+      | grep -c 'TESTCASE-START\|TESTCASE-END' || true)
+    if [ "$styles_rc" -ne 0 ] && [ "$styles_markers" -eq 0 ]; then
+      pass "$TEMPLATE_NAME: markers stripped on styles-phase failure"
+    else
+      fail "$TEMPLATE_NAME: markers stripped on styles-phase failure (rc=$styles_rc, markers=$styles_markers)"
+    fi
+  fi
 }
 
 # ── Auto-discover templates and run DOCX fix tests for each ──────────────

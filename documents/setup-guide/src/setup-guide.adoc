@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.6.0
+:version: 6.6.1
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.6.1}{2026-09-20}{\item Quality-pass fixes for v6.6.0: the TESTCASE-marker strip now covers the entire DOCX fix run (a failure at any stage can no longer leave markers in the output file); the fixer resets its template state between in-process runs (the documented path-sniffing fallback works again); build.sh also cleans temporary files on interrupt signals; fixed a CHANGELOG typo.}
   \changelogentry{6.6.0}{2026-09-20}{\item Pipeline robustness: DOCX post-processing now fails loudly when content styling errors occur (TESTCASE markers can no longer leak into output); the DOCX fixer takes an explicit \inlinecode{--template} flag so badge sizing no longer sniffs the output path; build.sh cleans temporary files on all exit paths and makes the asciidoctor-diagram dependency optional for HTML generation; the pandoc version pin now warns instead of failing hard.}
   \changelogentry{6.5.2}{2026-09-20}{\item Quality-pass fixes for v6.5.1: LaTeX quote conversion now handles only paired quotes (quote characters inside code arguments are no longer corrupted); signature cells containing escaped ampersands are no longer split; round-trip HTML generation guards the asciidoctor-diagram dependency and fails loudly when generation fails; pre-processor unit tests now cover pipe escaping in all five table handlers.}
   \changelogentry{6.5.1}{2026-09-20}{\item Fixed DOCX/MD/HTML output: tables are no longer corrupted when changelog, signature, or summary content contains a pipe character (``|''). Badge text is now preserved in DOCX/MD/HTML — a ``Ready'' badge renders ``Ready'' instead of ``[NEW]''. Multi-item changelog entries render as bullet lists instead of being joined with a literal ``+''. POC documents now include the changelog in DOCX/MD/HTML. The :noanswers: attribute now hides test results and remarks in DOCX/MD/HTML, matching the PDF. Inline LaTeX (monospace text, arrows, LaTeX quotes) no longer leaks from changelog entries. The test suite now exercises the real build pipeline (pre-processor wired into round-trip and DOCX tests), with new pre-processor unit tests.}

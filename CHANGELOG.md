@@ -4,12 +4,42 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.6.1 (2026-09-20)
+
+### Quality-pass fixes for v6.6.0
+
+Fresh-oracle review of v6.6.0 returned "approved with fixes" — this release
+lands the 2 MEDIUM findings plus 2 ride-along LOWs.
+
+#### Fixed
+
+- The TESTCASE-marker strip in `docx_fix.py` now covers the entire DOCX
+  fix run (styles phase, zip rewrite, content styling) — a failure at
+  any stage can no longer leave `TESTCASE-START`/`TESTCASE-END` markers
+  in the output file.
+- The DOCX fixer resets its template state (`_TEMPLATE`) between
+  in-process `main()` calls, so the documented path-sniffing fallback
+  works again on the second call.
+- `build.sh` also cleans temporary files on interrupt signals (INT/TERM)
+  — Ctrl-C or SIGTERM during a long asciidoctor/pandoc run no longer
+  leaves temp files behind.
+- Fixed a CHANGELOG typo in the v6.6.0 entry ("is1 is" → "is").
+
+#### Tests
+
+- New styles-phase marker assertion in `test-docx-fix.sh` (testbook
+  only): breaks `Heading1` in a pre-fix DOCX copy, runs the real
+  (unmocked) fixer, and asserts a non-zero exit AND zero
+  `TESTCASE-START`/`END` markers in the output — pinning the widened
+  strip guarantee (the existing mock test only covered content-styling
+  failures).
+
 ## v6.6.0 (2026-09-20)
 
 ### Pipeline robustness
 
 Phase B of the approved remediation plan. No PDF-path changes; the DOCX/MD/HTML
-pipeline is1 is hardened against silent failures and environment drift.
+pipeline is hardened against silent failures and environment drift.
 
 #### Added
 

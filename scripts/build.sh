@@ -21,6 +21,7 @@ _cleanup_tmp() {
   fi
 }
 trap _cleanup_tmp EXIT
+trap '_cleanup_tmp; exit 130' INT TERM
 
 # ── Template detection ─────────────────────────────────────────────────────
 TEMPLATE=""  # set by --template flag or auto-detected

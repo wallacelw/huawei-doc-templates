@@ -1471,76 +1471,80 @@ def fix_generated_docx(docx_path):
     import zipfile, shutil
     W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
-    with zipfile.ZipFile(docx_path, 'r') as z:
-        styles_xml = z.read('word/styles.xml')
-
-    root = etree.fromstring(styles_xml)
-
-    # Remove duplicate styleIds (keep first occurrence, remove subsequent)
-    # python-docx's BabelFish lookup can create duplicates; this ensures a clean styles.xml
-    seen_ids = set()
-    for s in root.findall(f"{{{W_NS}}}style"):
-        sid = s.get(f"{{{W_NS}}}styleId")
-        if sid:
-            if sid in seen_ids:
-                root.remove(s)
-            else:
-                seen_ids.add(sid)
-
-    _fix_heading_styles(root, W_NS)
-    _fix_title_style(root, W_NS)
-    _fix_verbatim_style(root, W_NS)
-    _fix_source_code_style(root, W_NS)
-    _fix_callout_spacing(root, W_NS)
-    _fix_font_fallbacks(root, W_NS)
-    _fix_normal_style(root, W_NS)
-    _fix_doc_defaults(root, W_NS)
-    _add_caption_style(root, W_NS)
-    _add_badge_style(root, W_NS)
-    _add_result_badge_styles(root, W_NS)
-    _fix_toc_styles(root, W_NS)
-
-    modified_xml = etree.tostring(
-        root, xml_declaration=True, encoding="UTF-8", standalone=True
-    )
-
-    # Fix list indentation in numbering.xml
-    modified_numbering = _fix_list_indentation(docx_path, W_NS)
-
-    # Footer with page number (pandoc doesn't carry over reference footer)
-    footer_xml = (
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
-        '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
-        '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
-        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-        '<w:t xml:space="preserve">Page </w:t></w:r>'
-        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-        '<w:fldChar w:fldCharType="begin"/></w:r>'
-        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-        '<w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>'
-        '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-        '<w:fldChar w:fldCharType="end"/></w:r>'
-        '</w:p></w:ftr>'
-    )
-
-    tmp_path = docx_path + '.tmp'
-    with zipfile.ZipFile(docx_path, 'r') as zin:
-        with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
-            for item in zin.infolist():
-                if item.filename == 'word/styles.xml':
-                    zout.writestr(item, modified_xml)
-                elif item.filename == 'word/numbering.xml' and modified_numbering is not None:
-                    zout.writestr(item, modified_numbering)
-                elif item.filename.startswith('word/footer') and item.filename.endswith('.xml'):
-                    zout.writestr(item, footer_xml)
-                else:
-                    zout.writestr(item, zin.read(item.filename))
-    shutil.move(tmp_path, docx_path)
-
-    # Apply badge character styles and hutable table styling to document
-    # content.  Failures are loud (non-zero exit) — and TESTCASE markers
-    # are stripped even then, so they can never ship in a DOCX.
+    # TESTCASE markers are stripped on every exit path of the ENTIRE fix
+    # run — styles phase, zip rewrite, and content styling alike — so a
+    # failure at any stage can no longer leave them in the DOCX.  The
+    # strip is idempotent, and on a styles-phase failure the file on
+    # disk is pristine pandoc output, so Document() opens fine.
     try:
+        with zipfile.ZipFile(docx_path, 'r') as z:
+            styles_xml = z.read('word/styles.xml')
+
+        root = etree.fromstring(styles_xml)
+
+        # Remove duplicate styleIds (keep first occurrence, remove subsequent)
+        # python-docx's BabelFish lookup can create duplicates; this ensures a clean styles.xml
+        seen_ids = set()
+        for s in root.findall(f"{{{W_NS}}}style"):
+            sid = s.get(f"{{{W_NS}}}styleId")
+            if sid:
+                if sid in seen_ids:
+                    root.remove(s)
+                else:
+                    seen_ids.add(sid)
+
+        _fix_heading_styles(root, W_NS)
+        _fix_title_style(root, W_NS)
+        _fix_verbatim_style(root, W_NS)
+        _fix_source_code_style(root, W_NS)
+        _fix_callout_spacing(root, W_NS)
+        _fix_font_fallbacks(root, W_NS)
+        _fix_normal_style(root, W_NS)
+        _fix_doc_defaults(root, W_NS)
+        _add_caption_style(root, W_NS)
+        _add_badge_style(root, W_NS)
+        _add_result_badge_styles(root, W_NS)
+        _fix_toc_styles(root, W_NS)
+
+        modified_xml = etree.tostring(
+            root, xml_declaration=True, encoding="UTF-8", standalone=True
+        )
+
+        # Fix list indentation in numbering.xml
+        modified_numbering = _fix_list_indentation(docx_path, W_NS)
+
+        # Footer with page number (pandoc doesn't carry over reference footer)
+        footer_xml = (
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
+            '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
+            '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+            '<w:t xml:space="preserve">Page </w:t></w:r>'
+            '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+            '<w:fldChar w:fldCharType="begin"/></w:r>'
+            '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+            '<w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>'
+            '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
+            '<w:fldChar w:fldCharType="end"/></w:r>'
+            '</w:p></w:ftr>'
+        )
+
+        tmp_path = docx_path + '.tmp'
+        with zipfile.ZipFile(docx_path, 'r') as zin:
+            with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
+                for item in zin.infolist():
+                    if item.filename == 'word/styles.xml':
+                        zout.writestr(item, modified_xml)
+                    elif item.filename == 'word/numbering.xml' and modified_numbering is not None:
+                        zout.writestr(item, modified_numbering)
+                    elif item.filename.startswith('word/footer') and item.filename.endswith('.xml'):
+                        zout.writestr(item, footer_xml)
+                    else:
+                        zout.writestr(item, zin.read(item.filename))
+        shutil.move(tmp_path, docx_path)
+
+        # Apply badge character styles and hutable table styling to
+        # document content.  Failures are loud (non-zero exit).
         _apply_content_styling(docx_path)
     finally:
         _strip_testcase_markers(docx_path)
@@ -1749,6 +1753,7 @@ def main(argv=None, reference_name=None):
             Used when no filename argument is provided.
     """
     global _TEMPLATE
+    _TEMPLATE = None  # reset between in-process main() calls
     if argv is None:
         argv = sys.argv[1:]
 
