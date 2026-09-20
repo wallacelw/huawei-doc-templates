@@ -83,7 +83,7 @@ out = process(HEADER + "++++\n\\begin{testsummary}\n"
               "{\\testresultbadge{Pass}}\n"
               "\\end{testsummary}\n++++\n", 'testbook', 'md')
 check("pipe escape: test summary title cell", "Title \\| Sub" in out)
-check("pipe escape: test summary badge", "**[PASS]**" in out)
+check("pipe escape: test summary badge", "**[Pass]**" in out)
 
 print("=== Badge contract ===")
 
@@ -96,9 +96,9 @@ out = process(HEADER + "[.badge]#Ready#\n", 'guide', 'md')
 check("badge md: text preserved", "**[Ready]**" in out)
 check("badge md: no sentinel", "BADGE:" not in out)
 
-# 5. Result roles still map to fixed markers (regression)
+# 5. Result roles map to title-case markers (regression)
 out = process(HEADER + "[.result-pass]#Pass#\n", 'testbook', 'docx')
-check("result-pass role: **[PASS]**", "**[PASS]**" in out)
+check("result-pass role: **[Pass]**", "**[Pass]**" in out)
 
 print("=== Changelog bullets ===")
 
@@ -229,6 +229,80 @@ check("cover meta: **v1.0.0** shown", "**v1.0.0**" in out)
 out = process(":lang: en\n:version: 1.0.0\n:nochangelog:\n\nBody.\n",
               'guide', 'md')
 check("cover meta: hidden by :nochangelog:", "**v1.0.0**" not in out)
+
+print("=== Language-aware result badges ===")
+
+# 17. POC + pt: result roles → Portuguese \pocresult labels
+out = process(":lang: pt\n:version: 1.0.0\n\n[.result-pass]#Pass#\n",
+              'poc', 'docx')
+check("poc+pt: result-pass → **[Atendido]**", "**[Atendido]**" in out)
+out = process(":lang: pt\n:version: 1.0.0\n\n[.result-fail]#Fail#\n",
+              'poc', 'docx')
+check("poc+pt: result-fail → **[Falha]**", "**[Falha]**" in out)
+
+# 18. testbook + pt: English stays (testbook.cls is English-only)
+out = process(":lang: pt\n:version: 1.0.0\n\n[.result-pass]#Pass#\n",
+              'testbook', 'docx')
+check("testbook+pt: result-pass stays **[Pass]**", "**[Pass]**" in out)
+
+# 19. \testresultbadge preserves case (Blocked, not BLOCKED)
+out = process(HEADER + "++++\n\\begin{testsummary}\n"
+              "\\testsummaryrow{TC-01}{Title}"
+              "{\\testresultbadge{Blocked}}\n"
+              "\\end{testsummary}\n++++\n", 'testbook', 'md')
+check("testresultbadge: case preserved (**[Blocked]**)",
+      "**[Blocked]**" in out)
+
+print("=== PT signatures + classification ===")
+
+# 20. PT signature greeting matches PDF (At.te,), not Atenciosamente
+SIG_PT = (":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{signatures}\n"
+          "\\signaturecell{Alice}{Dev}{a@x}{City}\n"
+          "\\end{signatures}\n++++\n")
+out = process(SIG_PT, 'poc', 'md')
+check("pt signature: At.te,", "At.te," in out)
+check("pt signature: no Atenciosamente", "Atenciosamente" not in out)
+
+# 21. PT classification label matches full PDF wording
+out = process(":lang: pt\n:version: 1.0.0\n\n"
+              + changelog("  \\changelogentry{1.0.0}{2026-01-01}"
+                          "{\\item Status: \\pocwithreservations}"),
+              'poc', 'md')
+check("pt classification: Homologada com ressalvas",
+      "Homologada com ressalvas" in out)
+
+print("=== Language-aware table headers ===")
+
+# 22. PT closing-record header
+out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{closingrecord}\n"
+              "\\closingrow{A}{B}\n"
+              "\\end{closingrecord}\n++++\n", 'poc', 'md')
+check("pt closingrecord: Item | Registro", "| Item | Registro" in out)
+
+# 23. PT changelog header
+out = process(":lang: pt\n:version: 1.0.0\n\n"
+              + changelog("  \\changelogentry{1.0.0}{2026-01-01}"
+                          "{\\item Change.}"), 'poc', 'md')
+check("pt changelog: Versão | Data | Alterações",
+      "| Versão | Data | Alterações" in out)
+
+# 24. EN regression: closing-record + changelog headers
+out = process(HEADER + "++++\n\\begin{closingrecord}\n"
+              "\\closingrow{A}{B}\n"
+              "\\end{closingrecord}\n++++\n", 'poc', 'md')
+check("en closingrecord: Item | Record", "| Item | Record" in out)
+out = process(HEADER
+              + changelog("  \\changelogentry{1.0.0}{2026-01-01}"
+                          "{\\item Change.}"), 'poc', 'md')
+check("en changelog: Version | Date | Changes",
+      "| Version | Date | Changes" in out)
+
+# 25. PT stakeholders header
+out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{stakeholders}\n"
+              "\\stakeholderorg{Org}\n"
+              "\\end{stakeholders}\n++++\n", 'poc', 'md')
+check("pt stakeholders: Nome | E-mail | Telefone | Papel",
+      "| Nome | E-mail | Telefone | Papel" in out)
 
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

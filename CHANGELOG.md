@@ -4,6 +4,54 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.7.0 (2026-09-20)
+
+### Badge and language fidelity
+
+Phase C of the approved remediation plan. User-visible DOCX/MD/HTML output
+improvements — no PDF-path changes.  Badge pills and language-aware labels
+now match the verified PDF source.
+
+#### Changed
+
+- DOCX badge pills now render **black text** like the PDF
+  (`\huaweibadge` sets no text color) — was frame-colored text.
+  Fallback character styles corrected too (BadgeFail was red-bg/white-text;
+  now red!15 bg/black text).
+- Badge labels use the correct **title case** (Pass, Partial, Fail, Skip,
+  Blocked, Untested) — was uppercase (PASS, FAIL, ...).
+- Badge pills include the **Portuguese POC labels** (Atendido, Parcial,
+  Falha, Ignorado) for `\pocresult` with `:lang: pt`.
+- Badge pills render at **native width** per template (testbook 1.5 cm,
+  POC 2 cm) — pre-rendered PNGs at both widths, no docx_fix downscaling
+  (testbook badge text no longer shrinks).
+- Skip/Untested pills use the **ruleblack** frame (`#000000`) matching
+  the PDF (was `#1F2328`).
+- Secondary-format table headers (stakeholders, closing record, test
+  summary, changelog) are now **language-aware** — PT: Nome/E-mail/
+  Telefone/Papel, Item/Registro, ID/Título/Status, Versão/Data/Alterações.
+- Portuguese signature greeting matches the PDF: **At.te,** (was
+  Atenciosamente,).
+- POC classification label matches the full PDF wording:
+  **Homologada com ressalvas** (was Com ressalvas).
+- DOCX footers show **Página** in Portuguese documents via a new
+  `--lang en|pt` flag on the DOCX fixer (build.sh injects it from the
+  `:lang:` header attribute).
+- Cover dates no longer **zero-pad the day** (e.g. "September 5" not
+  "September 05") — matches the PDF `\today`.
+
+#### Removed
+
+- Dead **NEW badge** chain: `[NEW]` marker, `BadgeNew` character style,
+  and `badge-NEW.png` asset (nothing emits `[NEW]` since v6.5.1).
+
+#### Tests
+
+- Updated preprocessor expectations for title-case badges; new cases for
+  POC+pt result labels, testbook+pt English-only, `\testresultbadge` case
+  preservation, PT signature/classification/table-headers, and EN
+  header regression.
+
 ## v6.6.1 (2026-09-20)
 
 ### Quality-pass fixes for v6.6.0

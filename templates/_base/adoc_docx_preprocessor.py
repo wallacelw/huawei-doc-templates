@@ -36,10 +36,14 @@ LABELS = {
         'figure': 'Figure',
         'changelog': 'Changelog',
         'sincerely': 'Sincerely,',
+        'th_name': 'Name', 'th_email': 'Email', 'th_phone': 'Phone', 'th_role': 'Role',
+        'th_item': 'Item', 'th_record': 'Record',
+        'th_id': 'ID', 'th_title': 'Title', 'th_status': 'Status',
+        'th_version': 'Version', 'th_date': 'Date', 'th_changes': 'Changes',
     },
     'pt': {
         'homologated': 'Homologada',
-        'with_reservations': 'Com ressalvas',
+        'with_reservations': 'Homologada com ressalvas',
         'not_homologated': 'Não homologada',
         'objective': 'Objetivo',
         'scope': 'Escopo do Teste',
@@ -53,7 +57,11 @@ LABELS = {
         'diagram': 'Diagrama',
         'figure': 'Figura',
         'changelog': 'Histórico de versões',
-        'sincerely': 'Atenciosamente,',
+        'sincerely': 'At.te,',
+        'th_name': 'Nome', 'th_email': 'E-mail', 'th_phone': 'Telefone', 'th_role': 'Papel',
+        'th_item': 'Item', 'th_record': 'Registro',
+        'th_id': 'ID', 'th_title': 'Título', 'th_status': 'Status',
+        'th_version': 'Versão', 'th_date': 'Data', 'th_changes': 'Alterações',
     },
 }
 
@@ -163,10 +171,11 @@ def convert_inline_latex(text, lang='en'):
     text = text.replace(r'\pocwithreservations', labels['with_reservations'])
     text = text.replace(r'\pocnothomologated', labels['not_homologated'])
 
-    # \testresultbadge{X} → **[X]**
+    # \testresultbadge{X} → **[X]**  (case preserved — PDF renders the
+    # text as written, e.g. Blocked/Untested, not BLOCKED/UNTESTED)
     text = re.sub(
         r'\\testresultbadge\{([^}]*)\}',
-        lambda m: '**[' + m.group(1).upper() + ']**',
+        lambda m: '**[' + m.group(1) + ']**',
         text,
     )
 
@@ -249,7 +258,11 @@ def _replace_cmd_2args(text, command, replacer):
 
 def convert_stakeholders(content, lang):
     r"""Convert \begin{stakeholders}...\end{stakeholders} to AsciiDoc table."""
-    lines = ['[.hutable]', '|===', '| Name | Email | Phone | Role', '']
+    labels = LABELS.get(lang, LABELS['en'])
+    # No header row in the PDF (stakeholders is a tcolorbox list); this
+    # header is a secondary-format (DOCX/MD/HTML) table construct.
+    header = '| ' + labels['th_name'] + ' | ' + labels['th_email'] + ' | ' + labels['th_phone'] + ' | ' + labels['th_role']
+    lines = ['[.hutable]', '|===', header, '']
     for line in content.split('\n'):
         line = line.strip()
         if not line:
@@ -274,7 +287,10 @@ def convert_stakeholders(content, lang):
 
 def convert_closingrecord(content, lang):
     r"""Convert \begin{closingrecord}...\end{closingrecord} to AsciiDoc table."""
-    lines = ['[.hutable]', '|===', '| Item | Record', '']
+    labels = LABELS.get(lang, LABELS['en'])
+    # Header mirrors the cls labels (poc.cls: Item | Record / Item | Registro).
+    header = '| ' + labels['th_item'] + ' | ' + labels['th_record']
+    lines = ['[.hutable]', '|===', header, '']
     for line in content.split('\n'):
         line = line.strip()
         if not line:
@@ -624,7 +640,10 @@ def _process_step_list(env_content, lang, out):
 
 def convert_testsummary(content, lang):
     r"""Convert \begin{testsummary}...\end{testsummary} to AsciiDoc table."""
-    lines = ['[.hutable]', '|===', '| ID | Title | Status', '']
+    labels = LABELS.get(lang, LABELS['en'])
+    # Header mirrors the cls labels (testbook.cls: ID | Title | Status).
+    header = '| ' + labels['th_id'] + ' | ' + labels['th_title'] + ' | ' + labels['th_status']
+    lines = ['[.hutable]', '|===', header, '']
     for line in content.split('\n'):
         line = line.strip()
         if not line:
@@ -659,8 +678,12 @@ def convert_changelog(content, lang):
     conversion emits a level-1 heading before the table.
     """
     labels = LABELS.get(lang, LABELS['en'])
+    # No header row in the PDF (changelog is version+date+itemize, no
+    # table); this header is a secondary-format (DOCX/MD/HTML) table
+    # construct.
+    header = '| ' + labels['th_version'] + ' | ' + labels['th_date'] + ' | ' + labels['th_changes']
     lines = ['== ' + labels['changelog'], '',
-             '[.hutable]', '|===', '| Version | Date | Changes', '']
+             '[.hutable]', '|===', header, '']
     pos = 0
     while True:
         ce_pos = content.find(r'\changelogentry', pos)
@@ -700,20 +723,26 @@ def convert_changelog(content, lang):
 # Custom role converters
 # ---------------------------------------------------------------------------
 
-ROLE_MAP = {
-    'result-pass': 'PASS',
-    'result-partial': 'PARTIAL',
-    'result-fail': 'FAIL',
-    'result-skip': 'SKIP',
-}
+def _result_badge_texts(template, lang):
+    r"""Badge text per result role — mirrors the converter's \pocresult
+    (POC labels are language-aware) and \testresultbadge (English)."""
+    if template == 'poc' and lang == 'pt':
+        return {
+            'result-pass': 'Atendido', 'result-partial': 'Parcial',
+            'result-fail': 'Falha', 'result-skip': 'Ignorado',
+        }
+    return {
+        'result-pass': 'Pass', 'result-partial': 'Partial',
+        'result-fail': 'Fail', 'result-skip': 'Skip',
+    }
 
 
-def convert_roles(line, lang):
+def convert_roles(line, lang, template):
     """Convert custom AsciiDoc roles to docbook-compatible markup."""
     labels = LABELS.get(lang, LABELS['en'])
 
-    # [.result-pass]#Pass# → **[PASS]**
-    for role, badge in ROLE_MAP.items():
+    # [.result-pass]#Pass# → **[Pass]** (POC+pt: **[Atendido]**, etc.)
+    for role, badge in _result_badge_texts(template, lang).items():
         line = re.sub(
             r'\[\.' + role + r'\]#([^#]*)#',
             '**[' + badge + ']**',
@@ -899,7 +928,9 @@ def _cover_datetime(lang):
         date = '{0} de {1} de {2}'.format(
             now.day, PT_MONTHS[now.month - 1], now.year)
     else:
-        date = now.strftime('%B %d, %Y')
+        # PDF \today has no leading zero on the day (e.g. "September 5",
+        # not "September 05").
+        date = now.strftime('%B ') + str(now.day) + now.strftime(', %Y')
     return date, now.strftime('%H:%M')
 
 
@@ -1039,7 +1070,7 @@ def process_adoc(content, template, target='docx'):
 
     # 6. Convert inline roles (line by line)
     lines = content.split('\n')
-    lines = [convert_roles(line, lang) for line in lines]
+    lines = [convert_roles(line, lang, template) for line in lines]
     content = '\n'.join(lines)
 
     # 7. Inject cover block (logo, cover text, meta line — PDF cover)

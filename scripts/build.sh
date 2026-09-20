@@ -378,6 +378,11 @@ generate_docx() {
         return
     fi
     echo "  Generating DOCX..."
+    # Footer page label follows the PDF (\lg@pagelabel): "Página" for pt
+    local fix_lang=""
+    if grep -q '^:lang: *pt' "$ADOC_FILE" 2>/dev/null; then
+        fix_lang="--lang pt"
+    fi
     if [[ -n "$ADOC_FILE" ]]; then
         # Pre-process .adoc for DOCX (passthrough blocks, custom roles,
         # caption numbering, cover block) — runs for all templates;
@@ -436,7 +441,7 @@ generate_docx() {
     fi
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
     if [ -f "${PROJECT_DIR}/$out" ]; then
-        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" 2>&1; then
+        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" $fix_lang 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2
             RESULTS_FAIL+=("DOCX:post-processing failed for $TEMPLATE")
         fi

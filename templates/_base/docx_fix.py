@@ -39,6 +39,11 @@ SUPPORTED_PANDOC_RANGE = ((3, 1, 0), (3, 6, 0))  # >=3.1.0, <3.6.0
 # _TARGET pattern.
 _TEMPLATE = None
 
+# Document language for footer label localization ("Página" vs "Page").
+# Set from the --lang CLI arg (build.sh injects it from :lang:).  Defaults
+# to 'en' (backward compat for direct calls / older wrappers).
+_LANG = 'en'
+
 
 def check_pandoc_version():
     """Warn when pandoc is outside the tested range (non-fatal).
@@ -736,25 +741,32 @@ def _add_badge_style(root, W_NS):
 
 
 # Badge style definitions: (style_id, bg_color, fg_color)
+# Fallback character styles (used when the PNG asset is missing).  BG
+# matches the pill background; text is BLACK (PDF \huaweibadge sets no
+# text color).  These mirror the generate-badges.py SPECS.
 RESULT_BADGE_STYLES = [
-    ("BadgePass",     "E8F5E9", "62B230"),   # green
-    ("BadgePartial",  "FFF3E0", "ED6D00"),   # orange
-    ("BadgeFail",     "C7000B", "FFFFFF"),   # red
-    ("BadgeSkip",     "F6F8FA", "1F2328"),   # gray
-    ("BadgeNew",      "C7000B", "FFFFFF"),   # red
-    ("BadgeBlocked",  "FFF3E0", "ED6D00"),   # orange
-    ("BadgeUntested", "F6F8FA", "1F2328"),   # gray
+    ("BadgePass",     "E8F5E9", "000000"),   # green bg, black text
+    ("BadgePartial",  "FFF3E0", "000000"),   # orange bg, black text
+    ("BadgeFail",     "E7D9DA", "000000"),   # red!15 bg, black text (was C7000B/FFFFFF)
+    ("BadgeSkip",     "F6F8FA", "000000"),   # gray bg, black text
+    ("BadgeBlocked",  "FFF3E0", "000000"),   # orange bg, black text
+    ("BadgeUntested", "F6F8FA", "000000"),   # gray bg, black text
 ]
 
-# Map marker text → style_id
+# Map marker text → style_id.  Keys are title-case (PDF label case) plus
+# the Portuguese POC labels (\pocresult, lang=pt).
 BADGE_MARKERS = {
-    "[PASS]": "BadgePass",
-    "[PARTIAL]": "BadgePartial",
-    "[FAIL]": "BadgeFail",
-    "[SKIP]": "BadgeSkip",
-    "[NEW]": "BadgeNew",
-    "[BLOCKED]": "BadgeBlocked",
-    "[UNTESTED]": "BadgeUntested",
+    "[Pass]": "BadgePass",
+    "[Partial]": "BadgePartial",
+    "[Fail]": "BadgeFail",
+    "[Skip]": "BadgeSkip",
+    "[Blocked]": "BadgeBlocked",
+    "[Untested]": "BadgeUntested",
+    # Portuguese POC labels (\pocresult, lang=pt)
+    "[Atendido]": "BadgePass",
+    "[Parcial]": "BadgePartial",
+    "[Falha]": "BadgeFail",
+    "[Ignorado]": "BadgeSkip",
 }
 
 # Badge text sentinel from the pre-processor: **[BADGE:text]** arrives as
@@ -1163,21 +1175,22 @@ def _apply_content_styling(docx_path):
             style.font.size = Pt(56)
             break
 
-    # --- Badge styling: [PASS]/[FAIL]/... → inline PNG images ---
-    # Replaces the flat character-styled text with rounded pill PNGs
-    # that replicate the PDF \huaweibadge look (arc=2pt, colored bg +
-    # 0.8pt frame, bold text).  Falls back to character styles if a
+    # --- Badge styling: [Pass]/[Fail]/... → inline PNG images ---
+    # Replaces the flat character-styled text with rounded pill PNGs that
+    # replicate the PDF \huaweibadge look (arc=2pt, colored bg + 0.8pt
+    # frame, BLACK bold text — the PDF sets no text color).  PNGs are
+    # pre-rendered at native width per template (testbook 1.5cm, POC 2cm)
+    # so no downscaling is needed.  Falls back to character styles if a
     # PNG asset is missing.
     import os
     _badge_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'badge-assets')
     # POC result badges use the 2cm \huaweibadge default; testbook's
-    # \testresultbadge uses 1.5cm.  NEW is a flat red box (auto width
-    # via fixed height).  Template comes from --template (wrappers
-    # inject it); direct calls fall back to sniffing the output path.
+    # \testresultbadge uses 1.5cm.  Template comes from --template
+    # (wrappers inject it); direct calls fall back to sniffing the path.
     _tmpl = _TEMPLATE or ('poc' if 'poc' in docx_path else '')
+    _badge_cm = '2' if _tmpl == 'poc' else '1.5'
     _badge_w = Cm(2.0) if _tmpl == 'poc' else Cm(1.5)
-    _new_h = Cm(0.55)
 
     def _replace_badge_runs(paragraphs):
         for paragraph in paragraphs:
@@ -1195,14 +1208,11 @@ def _apply_content_styling(docx_path):
                 if text not in BADGE_MARKERS:
                     continue
                 style_id = BADGE_MARKERS[text]
-                label = style_id.replace('Badge', '').upper()
-                png = os.path.join(_badge_dir, 'badge-{}.png'.format(label))
+                label = text[1:-1]   # the badge text, e.g. Pass/Atendido
+                png = os.path.join(_badge_dir, 'badge-{}-{}cm.png'.format(label, _badge_cm))
                 if os.path.isfile(png):
                     run.text = ''
-                    if label == 'NEW':
-                        run.add_picture(png, height=_new_h)
-                    else:
-                        run.add_picture(png, width=_badge_w)
+                    run.add_picture(png, width=_badge_w)
                 else:
                     try:
                         run.style = doc.styles[style_id]
@@ -1513,13 +1523,16 @@ def fix_generated_docx(docx_path):
         # Fix list indentation in numbering.xml
         modified_numbering = _fix_list_indentation(docx_path, W_NS)
 
-        # Footer with page number (pandoc doesn't carry over reference footer)
+        # Footer with page number (pandoc doesn't carry over reference
+        # footer).  Page label follows the PDF (\lg@pagelabel): "Página"
+        # for pt, "Page" otherwise.
+        _page_label = 'Página ' if _LANG == 'pt' else 'Page '
         footer_xml = (
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
             '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
             '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
             '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-            '<w:t xml:space="preserve">Page </w:t></w:r>'
+            '<w:t xml:space="preserve">' + _page_label + '</w:t></w:r>'
             '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
             '<w:fldChar w:fldCharType="begin"/></w:r>'
             '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
@@ -1753,13 +1766,17 @@ def main(argv=None, reference_name=None):
             Used when no filename argument is provided.
     """
     global _TEMPLATE
+    global _LANG
     _TEMPLATE = None  # reset between in-process main() calls
+    _LANG = 'en'      # reset between in-process main() calls
     if argv is None:
         argv = sys.argv[1:]
 
     # --template <name> — explicit template (the wrappers inject it so
     # badge sizing no longer sniffs the output path).  Direct calls
     # without --template fall back to path sniffing (backward compat).
+    # --lang en|pt — document language for footer label localization
+    # (build.sh injects it from the :lang: header attribute).
     args = []
     i = 0
     while i < len(argv):
@@ -1774,6 +1791,17 @@ def main(argv=None, reference_name=None):
                       "(expected poc|testbook|guide|technical)")
                 sys.exit(1)
             _TEMPLATE = tmpl
+            i += 2
+            continue
+        if argv[i] == '--lang':
+            if i + 1 >= len(argv):
+                print("error: --lang requires a value (en|pt)")
+                sys.exit(1)
+            lang_val = argv[i + 1]
+            if lang_val not in ('en', 'pt'):
+                print(f"error: unknown lang: {lang_val} (expected en|pt)")
+                sys.exit(1)
+            _LANG = lang_val
             i += 2
             continue
         args.append(argv[i])
