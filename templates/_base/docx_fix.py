@@ -789,120 +789,157 @@ def _add_result_badge_styles(root, W_NS):
 
 
 def _apply_content_styling(docx_path):
-    """Apply badge character styles and hutable table styling to document content.
+    """Apply content styling that mirrors the PDF.
 
-    Called after styles.xml is written.  Uses python-docx to modify
-    document.xml (paragraphs, runs, tables).  python-docx preserves
-    styles.xml when saving.
+    - Badge character styles for [PASS]/[FAIL]/... markers
+    - Hutable table styling (red header row, alternating rows, red grid)
+    - Page break before each Heading 1 (PDF: \\clearpage before \\section)
+    - Centered testcase captions (PDF renders them as centered captions)
+    - Cover version line under the title (PDF cover shows version + date)
+
+    Called after styles.xml is written.  Uses python-docx high-level APIs
+    for run/paragraph properties so elements are inserted in schema order —
+    raw lxml appends can violate the OOXML sequence and make strict
+    consumers (LibreOffice) silently drop the formatting.
     """
+    import re as _re
     from docx import Document
+    from docx.shared import Pt, RGBColor
     from docx.oxml.ns import qn
 
     doc = Document(docx_path)
-    W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
-    # --- Badge styling: find [PASS], [FAIL], etc. and apply character style ---
-    for paragraph in doc.paragraphs:
-        for run in paragraph.runs:
-            text = run.text.strip()
-            if text in BADGE_MARKERS:
-                style_id = BADGE_MARKERS[text]
-                rPr = run._element.find(qn('w:rPr'))
-                if rPr is None:
-                    rPr = etree.SubElement(run._element, qn('w:rPr'))
-                rStyle = rPr.find(qn('w:rStyle'))
-                if rStyle is None:
-                    rStyle = etree.SubElement(rPr, qn('w:rStyle'))
-                rStyle.set(qn('w:val'), style_id)
+    # --- Update fields on open (Word populates the TOC field automatically) ---
+    settings = doc.settings.element
+    if settings.find(qn('w:updateFields')) is None:
+        update_fields = etree.SubElement(settings, qn('w:updateFields'))
+        update_fields.set(qn('w:val'), 'true')
 
-    # Also check runs inside table cells
+    # --- Heading 1 starts on a new page (matches PDF \clearpage) ---
+    for style in doc.styles:
+        if style.style_id == 'Heading1':
+            style.paragraph_format.page_break_before = True
+            break
+
+    # --- Badge styling: [PASS]/[FAIL]/... -> character style ---
+    def style_badge_runs(paragraphs):
+        for paragraph in paragraphs:
+            for run in paragraph.runs:
+                marker = run.text.strip()
+                if marker in BADGE_MARKERS:
+                    try:
+                        run.style = doc.styles[BADGE_MARKERS[marker]]
+                    except KeyError:
+                        pass
+
+    style_badge_runs(doc.paragraphs)
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    for run in paragraph.runs:
-                        text = run.text.strip()
-                        if text in BADGE_MARKERS:
-                            style_id = BADGE_MARKERS[text]
-                            rPr = run._element.find(qn('w:rPr'))
-                            if rPr is None:
-                                rPr = etree.SubElement(
-                                    run._element, qn('w:rPr'))
-                            rStyle = rPr.find(qn('w:rStyle'))
-                            if rStyle is None:
-                                rStyle = etree.SubElement(
-                                    rPr, qn('w:rStyle'))
-                            rStyle.set(qn('w:val'), style_id)
+                style_badge_runs(cell.paragraphs)
 
-    # --- Hutable table styling: red header, alternating rows, full grid ---
+    # --- Table styling (hutable vs plain grid) ---
     for table in doc.tables:
-        tbl = table._element
-        tblPr = tbl.find(qn('w:tblPr'))
-        if tblPr is None:
-            tblPr = etree.SubElement(tbl, qn('w:tblPr'))
+        _style_table(table, qn)
 
-        # Add table borders (full grid, red #C7000B)
-        tblBorders = tblPr.find(qn('w:tblBorders'))
-        if tblBorders is None:
-            tblBorders = etree.SubElement(tblPr, qn('w:tblBorders'))
-        for border_name in ['top', 'left', 'bottom', 'right',
-                            'insideH', 'insideV']:
-            border = tblBorders.find(qn(f'w:{border_name}'))
-            if border is None:
-                border = etree.SubElement(
-                    tblBorders, qn(f'w:{border_name}'))
-            border.set(qn('w:val'), 'single')
-            border.set(qn('w:sz'), '4')  # 0.5pt
-            border.set(qn('w:space'), '0')
-            border.set(qn('w:color'), 'C7000B')
+    # --- Testcase captions: center (PDF: centered bold caption) ---
+    tc_pat = _re.compile(r'^(Test Case|Caso de Teste) \d+:')
+    for paragraph in doc.paragraphs:
+        if tc_pat.match(paragraph.text.strip()):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # Style header row (first row): red bg, white bold text
-        if len(table.rows) > 0:
-            header_row = table.rows[0]
-            for cell in header_row.cells:
-                tcPr = cell._element.find(qn('w:tcPr'))
-                if tcPr is None:
-                    tcPr = etree.SubElement(
-                        cell._element, qn('w:tcPr'))
-                shd = tcPr.find(qn('w:shd'))
-                if shd is None:
-                    shd = etree.SubElement(tcPr, qn('w:shd'))
-                shd.set(qn('w:val'), 'clear')
-                shd.set(qn('w:color'), 'auto')
-                shd.set(qn('w:fill'), 'C7000B')
-                # White bold text
-                for paragraph in cell.paragraphs:
-                    for run in paragraph.runs:
-                        rPr = run._element.find(qn('w:rPr'))
-                        if rPr is None:
-                            rPr = etree.SubElement(
-                                run._element, qn('w:rPr'))
-                        if rPr.find(qn('w:b')) is None:
-                            etree.SubElement(rPr, qn('w:b'))
-                        color = rPr.find(qn('w:color'))
-                        if color is None:
-                            color = etree.SubElement(
-                                rPr, qn('w:color'))
-                        color.set(qn('w:val'), 'FFFFFF')
-
-        # Alternating row colors (skip header row)
-        for i, row in enumerate(table.rows):
-            if i == 0:
-                continue  # header already styled
-            if i % 2 == 0:  # 3rd, 5th, etc. (0-indexed: 2, 4, ...)
-                for cell in row.cells:
-                    tcPr = cell._element.find(qn('w:tcPr'))
-                    if tcPr is None:
-                        tcPr = etree.SubElement(
-                            cell._element, qn('w:tcPr'))
-                    shd = tcPr.find(qn('w:shd'))
-                    if shd is None:
-                        shd = etree.SubElement(tcPr, qn('w:shd'))
-                    shd.set(qn('w:val'), 'clear')
-                    shd.set(qn('w:color'), 'auto')
-                    shd.set(qn('w:fill'), 'F6F8FA')
+    # --- Cover version line: move under the title, centered gray ---
+    title_p = None
+    version_p = None
+    for paragraph in doc.paragraphs:
+        if title_p is None and paragraph.style.style_id == 'Title':
+            title_p = paragraph
+            continue
+        if paragraph.text.strip().startswith('Version '):
+            version_p = paragraph
+            break
+    if version_p is not None and title_p is not None:
+        version_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in version_p.runs:
+            run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+            run.font.size = Pt(12)
+        # Place directly under the title (before the TOC), like the PDF cover
+        title_p._element.addnext(version_p._element)
 
     doc.save(docx_path)
+
+
+def _style_table(table, qn):
+    """Style a table to match its PDF counterpart.
+
+    Header tables (pandoc marks them with w:tblHeader on row 0) get the
+    hutable look: red full-grid borders, red header row with white bold
+    text, alternating #F6F8FA body rows.  Plain grids without a header
+    row (e.g. signatures) get neutral black rules only — matching the
+    PDF's plain tabular with \\hline.
+    """
+    from docx.shared import RGBColor
+
+    tbl = table._element
+    tblPr = tbl.find(qn('w:tblPr'))
+    if tblPr is None:
+        tblPr = etree.SubElement(tbl, qn('w:tblPr'))
+        tbl.insert(0, tblPr)
+
+    # Detect header row (pandoc emits w:tblHeader in the thead row's trPr)
+    has_header = False
+    if len(table.rows) > 0:
+        trPr = table.rows[0]._tr.find(qn('w:trPr'))
+        if trPr is not None and trPr.find(qn('w:tblHeader')) is not None:
+            has_header = True
+
+    border_color = 'C7000B' if has_header else '000000'
+
+    # Full-grid borders.  Schema order: tblBorders must precede
+    # tblLook/tblCaption, so reposition after creation when needed.
+    tblBorders = tblPr.find(qn('w:tblBorders'))
+    if tblBorders is None:
+        tblBorders = etree.SubElement(tblPr, qn('w:tblBorders'))
+        anchor = None
+        for tag in ('w:tblLook', 'w:tblCaption', 'w:tblDescription'):
+            el = tblPr.find(qn(tag))
+            if el is not None:
+                anchor = el
+                break
+        if anchor is not None:
+            anchor.addprevious(tblBorders)
+    for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+        border = tblBorders.find(qn(f'w:{border_name}'))
+        if border is None:
+            border = etree.SubElement(tblBorders, qn(f'w:{border_name}'))
+        border.set(qn('w:val'), 'single')
+        border.set(qn('w:sz'), '4')  # 0.5pt
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), border_color)
+
+    def shade_cell(cell, fill):
+        tcPr = cell._tc.get_or_add_tcPr()
+        shd = tcPr.find(qn('w:shd'))
+        if shd is None:
+            shd = etree.SubElement(tcPr, qn('w:shd'))
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), fill)
+
+    if has_header:
+        # Header row: red background, white bold text
+        for cell in table.rows[0].cells:
+            shade_cell(cell, 'C7000B')
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        # Alternating body rows (2nd, 4th, ... data rows get #F6F8FA)
+        for i, row in enumerate(table.rows):
+            if i == 0 or i % 2 != 0:
+                continue
+            for cell in row.cells:
+                shade_cell(cell, 'F6F8FA')
 
 
 def _fix_toc_styles(root, W_NS):

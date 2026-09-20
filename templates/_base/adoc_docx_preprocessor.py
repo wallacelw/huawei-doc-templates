@@ -141,7 +141,14 @@ def convert_inline_latex(text, lang='en'):
     # \textbf{text} → **text**  (handle nested braces)
     text = _replace_cmd(text, 'textbf', lambda arg: '**' + arg + '**')
     # \inlinecode{text} → `text`
-    text = _replace_cmd(text, 'inlinecode', lambda arg: '`' + arg + '`')
+    # Asterisk runs (e.g. *********) are wrapped in pass:[...] — asciidoctor's
+    # docbook backend otherwise parses ** inside literals as bold, collapsing
+    # the run (PDF keeps all asterisks; DOCX must match).
+    def _inlinecode_replacer(arg):
+        if '**' in arg and '[' not in arg and ']' not in arg:
+            return '`pass:[' + arg + ']`'
+        return '`' + arg + '`'
+    text = _replace_cmd(text, 'inlinecode', _inlinecode_replacer)
     # \param{text} → *text*
     text = _replace_cmd(text, 'param', lambda arg: '*' + arg + '*')
     # \note{text} → *text*
@@ -314,7 +321,10 @@ def convert_testcase(content, lang):
     inner = re.sub(r'\s*\\end\{testcase\}\s*$', '', inner)
 
     out = []
-    out.append('=== ' + labels['test_case'] + ' ' + str(tc_num) + ': ' + title)
+    # Bold caption paragraph (not a heading): keeps test cases out of the
+    # DOCX TOC and section numbering, matching the PDF where testcase
+    # titles are centered captions, not TOC entries.
+    out.append('**' + labels['test_case'] + ' ' + str(tc_num) + ': ' + title + '**')
     out.append('')
 
     # Process inner content
@@ -779,6 +789,39 @@ def detect_lang(content):
     return m.group(1) if m else 'en'
 
 
+def inject_cover_version(content):
+    """Inject a 'Version X' paragraph after the header block.
+
+    Approximates the PDF cover, which shows the version under the title.
+    Pandoc already emits the date (from docbook metadata) as its own
+    paragraph, so only the version number is injected here.
+    Skipped when :nochangelog: is set (the PDF hides version/date on the
+    cover then, per L12) or when no :version: attribute is present.
+    """
+    m = re.search(r'^:version:\s*(\S+)', content, re.MULTILINE)
+    if not m:
+        return content
+    if re.search(r'^:nochangelog:', content, re.MULTILINE):
+        return content
+    line = 'Version ' + m.group(1)
+
+    lines = content.split('\n')
+    # Find the last header attribute line (":key: value")
+    last_attr = -1
+    for i, l in enumerate(lines[:60]):
+        if l.startswith(':'):
+            last_attr = i
+    if last_attr == -1:
+        return content
+    # Insert as the first body content (after the blank line following attrs)
+    insert_at = last_attr + 1
+    while insert_at < len(lines) and lines[insert_at].strip() == '':
+        insert_at += 1
+    lines.insert(insert_at, line)
+    lines.insert(insert_at + 1, '')
+    return '\n'.join(lines)
+
+
 def process_adoc(content, template):
     """Main entry: transform .adoc content for DOCX generation."""
     global _testcase_counter
@@ -786,11 +829,13 @@ def process_adoc(content, template):
 
     lang = detect_lang(content)
 
-    # 1. Convert passthrough blocks
-    content = process_passthrough_blocks(content, template, lang)
-
-    # 2. Convert inline passthroughs (pass:[...])
+    # 1. Convert inline passthroughs (pass:[...]) — must run BEFORE block
+    #    conversion: the block handlers emit pass:[...] wraps (asterisk-run
+    #    protection for inlinecode) that this pass must not unwrap.
     content = convert_inline_passthroughs(content, lang)
+
+    # 2. Convert passthrough blocks
+    content = process_passthrough_blocks(content, template, lang)
 
     # 3. Convert block-level roles
     content = convert_block_roles(content, lang)
@@ -807,6 +852,9 @@ def process_adoc(content, template):
     lines = content.split('\n')
     lines = [convert_roles(line, lang) for line in lines]
     content = '\n'.join(lines)
+
+    # 6. Inject cover version line (approximates PDF cover version display)
+    content = inject_cover_version(content)
 
     return content
 

@@ -384,21 +384,40 @@ generate_docx() {
                 tmp_adoc=""
             fi
         fi
+        # Diagram support (same options as build-adoc.sh)
+        if ! command -v plantuml-native >/dev/null 2>&1; then
+            if [ -f "/usr/share/plantuml/plantuml.jar" ]; then
+                export DIAGRAM_PLANTUML_CLASSPATH="/usr/share/plantuml/plantuml.jar"
+            fi
+        fi
+        local diagram_opts=""
+        if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+            diagram_opts="-r asciidoctor-diagram"
+        fi
+        # TOC title follows the PDF (\lg@toc): "Sumário" for pt, "Contents" otherwise
+        local toc_title="Contents"
+        if grep -q '^:lang: *pt' "$ADOC_FILE" 2>/dev/null; then
+            toc_title="Sumário"
+        fi
         # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
         # Falls back to LaTeX pipeline if docbook fails (e.g. passthrough blocks with raw LaTeX)
-        local tmp_dbk
-        tmp_dbk=$(mktemp --suffix=.dbk)
-        if asciidoctor -b docbook "$docx_adoc" -o "$tmp_dbk" 2>/dev/null && \
+        # tmp_dir holds the .dbk plus any diagram PNGs generated next to it
+        local tmp_dir
+        tmp_dir=$(mktemp -d)
+        local tmp_dbk="$tmp_dir/doc.dbk"
+        if asciidoctor -b docbook $diagram_opts "$docx_adoc" -o "$tmp_dbk" 2>/dev/null && \
            pandoc -f docbook --reference-doc="$REF_DOCX" \
              --number-sections \
-             --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}/common-assets" \
+             --toc --toc-depth=2 \
+             --metadata toc-title="${toc_title}" \
+             --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}:${tmp_dir}" \
              "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
-            rm -f "$tmp_dbk"
+            :
         else
-            rm -f "$tmp_dbk"
             echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
             generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
         fi
+        rm -rf "$tmp_dir"
         rm -f "$tmp_adoc"
     else
         # Legacy .tex pipeline

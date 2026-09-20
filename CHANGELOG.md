@@ -4,6 +4,63 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.4.3 (2026-09-20)
+
+### Testbook/POC DOCX fidelity: TOC, page breaks, tables, images
+
+Closes the visual gap between DOCX and PDF (L18) for the testbook and POC
+templates. All fixes verified against the PDF reference on all 4 samples.
+
+#### Table of contents (was missing entirely)
+
+- Pandoc now runs with `--toc --toc-depth=2` — DOCX gets a native Word TOC
+  field (sections + subsections, matching PDF TOC depth).
+- `updateFields` set in `settings.xml` so Word populates the TOC on open.
+- TOC title is language-aware: "Contents" (en) / "Sumário" (pt), matching
+  the PDF's `\lg@toc`.
+
+#### Sections start on a new page (matches PDF `\clearpage`)
+
+- `pageBreakBefore` added to the Heading 1 style via python-docx
+  (schema-safe insertion).
+
+#### Table header white-on-red (was unreliable)
+
+- Header-row runs now styled via python-docx font APIs (`run.font.bold`,
+  `run.font.color.rgb`) — the previous raw lxml appends violated OOXML
+  element order (`w:color` after `w:sz`), which strict consumers like
+  LibreOffice silently drop.
+- Header rows detected via `w:tblHeader` (pandoc's thead marker): hutable
+  tables get red header + alternating rows; plain grids (signatures) get
+  neutral black rules only — previously signature data rows were wrongly
+  styled red/white.
+- `tblBorders` repositioned to schema-correct order (before `tblLook`).
+
+#### Images and diagrams now embedded (were silently dropped)
+
+- Resource-path bug fixed: pandoc looked in
+  `templates/<t>/common-assets/common-assets/...` (double segment) — now
+  `templates/<t>/` so `common-assets/...` refs resolve.
+- `asciidoctor-diagram` now loaded for the docbook conversion (same options
+  as build-adoc.sh) — PlantUML/Graphviz blocks render as PNG drawings
+  instead of leaking source code as literal text.
+- Temp dir holds the `.dbk` + generated diagram PNGs, added to pandoc's
+  resource-path, cleaned up after.
+
+#### Cover, captions, and content polish
+
+- Cover version line ("Version X") injected under the title, centered gray
+  (pandoc already emits the date; PDF cover shows version + date).
+  Skipped when `:nochangelog:` is set (L12).
+- Testcase titles emitted as bold centered captions instead of `===`
+  headings — keeps them out of the DOCX TOC and section numbering,
+  matching the PDF where they are captions.
+- Asterisk runs in `\inlinecode{}` (e.g. `*********`) wrapped in
+  `pass:[...]` — asciidoctor's docbook backend otherwise parses `**` inside
+  literals as bold and collapses the run (PDF keeps all 9 asterisks).
+- `convert_inline_passthroughs` now runs before block conversion so the
+  `pass:[...]` protection wraps are not unwrapped by the later pass.
+
 ## v6.4.2 (2026-09-20)
 
 ### DOCX pre-processor fixes
