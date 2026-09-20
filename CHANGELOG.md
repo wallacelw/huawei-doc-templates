@@ -4,6 +4,48 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.6.0 (2026-09-20)
+
+### Pipeline robustness
+
+Phase B of the approved remediation plan. No PDF-path changes; the DOCX/MD/HTML
+pipeline is1 is hardened against silent failures and environment drift.
+
+#### Added
+
+- Explicit `--template` flag on the DOCX fixer (`docx_fix.py`). The four
+  `create-<name>-reference-docx.py` wrappers now inject `--template <name>`,
+  so badge sizing no longer sniffs the output path. Direct `docx_fix.py`
+  calls fall back to path sniffing (backward compat).
+
+#### Changed
+
+- Content-styling failures are now loud (non-zero exit) instead of a
+  swallowed warning — and `TESTCASE-START`/`TESTCASE-END` markers are
+  guaranteed stripped (via a `finally` + idempotent
+  `_strip_testcase_markers`), so they can never ship in a DOCX even when
+  styling errors.
+- The pandoc version pin now warns instead of hard-failing on an
+  out-of-range version (builds must keep working on future releases; the
+  loud style assertions catch actual output-structure changes). Parse
+  failures and a missing pandoc stay hard errors.
+- `generate_html` in `build.sh` makes the `asciidoctor-diagram`
+  dependency optional (same `gem list` guard as the DOCX/MD paths),
+  instead of hard-requiring it.
+
+#### Fixed
+
+- `build.sh` temporary files (`tmp_adoc`, `tmp_dir`) are now cleaned on
+  all exit paths via an `EXIT` trap (`TMP_PATHS` array + `_cleanup_tmp`),
+  not just the happy path.
+
+#### Tests
+
+- New marker-strip-on-failure assertion in `test-docx-fix.sh` (testbook
+  only): patches `_apply_content_styling` to raise, asserts the fix exits
+  non-zero AND the resulting DOCX has zero `TESTCASE-START`/`END`
+  markers.
+
 ## v6.5.2 (2026-09-20)
 
 ### Quality-pass fixes for v6.5.1

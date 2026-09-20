@@ -18,8 +18,10 @@ fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
 
 # ── Pandoc version check ──────────────────────────────────────────────────
-# Must be in supported range >=3.1.0, <3.6.0 (matches SUPPORTED_PANDOC_RANGE
-# in docx-fix.py)
+# Tested range is >=3.1.0, <3.6.0 (matches SUPPORTED_PANDOC_RANGE in
+# docx-fix.py).  An out-of-range pandoc now only warns — builds must
+# keep working on future releases; the loud style assertions catch
+# actual structure changes.  Only a parse failure stays a hard exit.
 echo "=== Pandoc version check ==="
 PANDOC_VERSION_LINE="$(pandoc --version | head -1)"
 PANDOC_VERSION="$(echo "$PANDOC_VERSION_LINE" | sed -n 's/^pandoc \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p')"
@@ -35,10 +37,10 @@ PANDOC_NUM=$((PANDOC_MAJOR * 10000 + PANDOC_MINOR * 100 + PANDOC_PATCH))
 MIN_NUM=$((3 * 10000 + 1 * 100 + 0))   # 30100 = 3.1.0
 MAX_NUM=$((3 * 10000 + 6 * 100 + 0))   # 30600 = 3.6.0
 if [ "$PANDOC_NUM" -lt "$MIN_NUM" ] || [ "$PANDOC_NUM" -ge "$MAX_NUM" ]; then
-  echo "  FAIL: pandoc $PANDOC_VERSION is outside supported range (3.1.0–3.6.0)"
-  exit 1
+  echo "  WARN: pandoc $PANDOC_VERSION is outside the tested range (3.1.0–3.6.0) — DOCX structure may differ; proceeding"
+else
+  echo "  pandoc version: $PANDOC_VERSION (in tested range 3.1.0–3.6.0)"
 fi
-echo "  pandoc version: $PANDOC_VERSION (in supported range 3.1.0–3.6.0)"
 
 # ── Helper: remove a style from a DOCX file's styles.xml ──────────────────
 # Usage: break_style_in_docx <docx_path> <style_id>
@@ -130,6 +132,9 @@ run_template_tests() {
   fi
 
   echo "Running --fix..."
+  # Keep a pre-fix copy for the styling-failure assertion (testbook only,
+  # but cheap to make for all templates)
+  cp "$DOCX_OUT" "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx"
   python3 "$FIX_SCRIPT" --fix "$DOCX_OUT" 2>/dev/null
 
   # ── Unzip for inspection ───────────────────────────────────────────────
@@ -315,6 +320,63 @@ PYEOF
     fail "$TEMPLATE_NAME: Missing VerbatimChar style did not cause --fix to fail"
   else
     pass "$TEMPLATE_NAME: Missing VerbatimChar style causes --fix to fail with non-zero exit"
+  fi
+
+  # 12. Content-styling failure: loud exit + TESTCASE markers stripped.
+  # testbook is the only template that emits TESTCASE markers; the
+  # pre-processor's --target docx path adds them and docx_fix must
+  # remove them even when _apply_content_styling raises.
+  if [ "$TEMPLATE_NAME" = "testbook" ]; then
+    result=$(python3 - "$REPO_ROOT" \
+        "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" << 'PYEOF' 2>/dev/null || true
+import importlib.util
+import shutil
+import sys
+import unittest.mock
+import zipfile
+
+repo_root, prefix_path = sys.argv[1], sys.argv[2]
+
+spec = importlib.util.spec_from_file_location(
+    "docx_fix", repo_root + "/templates/_base/docx_fix.py")
+docx_fix = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(docx_fix)
+
+scratch = prefix_path + ".styling-fail"
+shutil.copy(prefix_path, scratch)
+
+# Patch the content-styling entry to raise — mirrors a real styling bug.
+raised = False
+try:
+    with unittest.mock.patch.object(
+            docx_fix, '_apply_content_styling',
+            side_effect=RuntimeError("boom")):
+        docx_fix.main(['--fix', scratch], 'testbook-reference.docx')
+except RuntimeError:
+    raised = True
+
+# Markers must be gone even though styling raised.
+marker_count = 0
+with zipfile.ZipFile(scratch) as z:
+    xml = z.read('word/document.xml').decode('utf-8')
+    marker_count = xml.count('TESTCASE-START') + xml.count('TESTCASE-END')
+
+print(f"LOUD={1 if raised else 0}")
+print(f"STRIP={1 if marker_count == 0 else 0}")
+PYEOF
+    )
+    loud=$(echo "$result" | sed -n 's/^LOUD=\([01]\)$/\1/p')
+    strip=$(echo "$result" | sed -n 's/^STRIP=\([01]\)$/\1/p')
+    if [ "$loud" = "1" ]; then
+      pass "$TEMPLATE_NAME: styling failure exits loudly"
+    else
+      fail "$TEMPLATE_NAME: styling failure did not raise"
+    fi
+    if [ "$strip" = "1" ]; then
+      pass "$TEMPLATE_NAME: markers stripped on styling failure"
+    else
+      fail "$TEMPLATE_NAME: markers leaked on styling failure"
+    fi
   fi
 }
 

@@ -28,32 +28,45 @@ from lxml import etree
 
 # ── Pandoc version pin ────────────────────────────────────────────────────
 # The --fix post-processing depends on pandoc's XML output structure.
-# If pandoc changes its DOCX generation, the assertions below will catch it.
+# The range below is the TESTED range — an out-of-range pandoc only
+# warns now (builds must keep working on future releases); the loud
+# style assertions catch actual structure changes.
 SUPPORTED_PANDOC_RANGE = ((3, 1, 0), (3, 6, 0))  # >=3.1.0, <3.6.0
+
+# Explicit template name, set from the --template CLI arg (the wrappers
+# inject it).  None → fall back to sniffing the output path (backward
+# compat for direct docx_fix.py calls).  Mirrors the pre-processor's
+# _TARGET pattern.
+_TEMPLATE = None
 
 
 def check_pandoc_version():
-    """Verify pandoc version is in the supported range."""
+    """Warn when pandoc is outside the tested range (non-fatal).
+
+    A hard pin would break builds on every future pandoc release; the
+    loud style assertions in --fix catch actual output-structure
+    changes.  Parse failures and a missing pandoc stay hard errors.
+    """
     try:
         result = subprocess.run(
             ['pandoc', '--version'], capture_output=True, text=True, check=True
         )
-        version_line = result.stdout.split('\n')[0]
-        match = re.match(r'pandoc (\d+)\.(\d+)(?:\.(\d+))?', version_line)
-        if not match:
-            raise RuntimeError(f"Could not parse pandoc version from: {version_line}")
-        major, minor = int(match.group(1)), int(match.group(2))
-        patch = int(match.group(3) or 0)
-        version = (major, minor, patch)
-        min_ver, max_ver = SUPPORTED_PANDOC_RANGE
-        if version < min_ver or version >= max_ver:
-            raise RuntimeError(
-                f"pandoc {major}.{minor}.{patch} is outside supported range "
-                f"({min_ver[0]}.{min_ver[1]}.{min_ver[2]}–{max_ver[0]}.{max_ver[1]}.{max_ver[2]}). "
-                f"The DOCX --fix post-processing depends on pandoc's XML output structure."
-            )
     except FileNotFoundError:
         raise RuntimeError("pandoc not found — required for DOCX --fix version check")
+    version_line = result.stdout.split('\n')[0]
+    match = re.match(r'pandoc (\d+)\.(\d+)(?:\.(\d+))?', version_line)
+    if not match:
+        raise RuntimeError(f"Could not parse pandoc version from: {version_line}")
+    major, minor = int(match.group(1)), int(match.group(2))
+    patch = int(match.group(3) or 0)
+    version = (major, minor, patch)
+    min_ver, max_ver = SUPPORTED_PANDOC_RANGE
+    if version < min_ver or version >= max_ver:
+        log_warn(
+            f"pandoc {major}.{minor}.{patch} is outside the tested range "
+            f"({min_ver[0]}.{min_ver[1]}.{min_ver[2]}–{max_ver[0]}.{max_ver[1]}.{max_ver[2]}) "
+            f"— DOCX structure may differ; proceeding"
+        )
 
 
 def log_warn(msg):
@@ -1085,6 +1098,25 @@ def _style_testcase_blocks(doc, qn):
         end_p._p.getparent().remove(end_p._p)
 
 
+def _strip_testcase_markers(docx_path):
+    """Delete TESTCASE-START/END marker paragraphs (idempotent).
+
+    Safety net for the fail-loud content-styling path: even when
+    _apply_content_styling raises, markers can never ship in a DOCX.
+    Mirrors _style_testcase_blocks (body paragraphs — markers are never
+    emitted inside table cells).  No-op when no markers are present, so
+    the happy path (markers already deleted by styling) rewrites nothing.
+    """
+    doc = Document(docx_path)
+    doomed = [p for p in doc.paragraphs
+              if p.text.strip() in ('TESTCASE-START', 'TESTCASE-END')]
+    if not doomed:
+        return
+    for p in doomed:
+        p._element.getparent().remove(p._element)
+    doc.save(docx_path)
+
+
 def _apply_content_styling(docx_path):
     """Apply content styling that mirrors the PDF.
 
@@ -1141,8 +1173,10 @@ def _apply_content_styling(docx_path):
         os.path.dirname(os.path.abspath(__file__)), 'badge-assets')
     # POC result badges use the 2cm \huaweibadge default; testbook's
     # \testresultbadge uses 1.5cm.  NEW is a flat red box (auto width
-    # via fixed height).
-    _badge_w = Cm(2.0) if 'poc' in docx_path else Cm(1.5)
+    # via fixed height).  Template comes from --template (wrappers
+    # inject it); direct calls fall back to sniffing the output path.
+    _tmpl = _TEMPLATE or ('poc' if 'poc' in docx_path else '')
+    _badge_w = Cm(2.0) if _tmpl == 'poc' else Cm(1.5)
     _new_h = Cm(0.55)
 
     def _replace_badge_runs(paragraphs):
@@ -1431,7 +1465,7 @@ def fix_generated_docx(docx_path):
     because python-docx's save() overwrites any part blob modifications.
 
     Raises RuntimeError if expected XML elements are missing (pandoc output
-    structure has changed) or if pandoc version is outside supported range.
+    structure has changed).  An out-of-range pandoc version only warns.
     """
     check_pandoc_version()
     import zipfile, shutil
@@ -1503,11 +1537,13 @@ def fix_generated_docx(docx_path):
                     zout.writestr(item, zin.read(item.filename))
     shutil.move(tmp_path, docx_path)
 
-    # Apply badge character styles and hutable table styling to document content
+    # Apply badge character styles and hutable table styling to document
+    # content.  Failures are loud (non-zero exit) — and TESTCASE markers
+    # are stripped even then, so they can never ship in a DOCX.
     try:
         _apply_content_styling(docx_path)
-    except Exception as e:
-        log_warn(f"Content styling failed: {e}")
+    finally:
+        _strip_testcase_markers(docx_path)
 
     print(f"✓ Fixed heading styles in {docx_path}")
 
@@ -1712,8 +1748,32 @@ def main(argv=None, reference_name=None):
         reference_name: Default reference DOCX filename (e.g. 'guide-reference.docx').
             Used when no filename argument is provided.
     """
+    global _TEMPLATE
     if argv is None:
         argv = sys.argv[1:]
+
+    # --template <name> — explicit template (the wrappers inject it so
+    # badge sizing no longer sniffs the output path).  Direct calls
+    # without --template fall back to path sniffing (backward compat).
+    args = []
+    i = 0
+    while i < len(argv):
+        if argv[i] == '--template':
+            if i + 1 >= len(argv):
+                print("error: --template requires a value "
+                      "(poc|testbook|guide|technical)")
+                sys.exit(1)
+            tmpl = argv[i + 1]
+            if tmpl not in ('poc', 'testbook', 'guide', 'technical'):
+                print(f"error: unknown template: {tmpl} "
+                      "(expected poc|testbook|guide|technical)")
+                sys.exit(1)
+            _TEMPLATE = tmpl
+            i += 2
+            continue
+        args.append(argv[i])
+        i += 1
+    argv = args
 
     if len(argv) >= 1 and argv[0] == "--fix":
         if len(argv) < 2:

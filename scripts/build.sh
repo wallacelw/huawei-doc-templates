@@ -13,6 +13,15 @@ set -euo pipefail
 # ── Resolve repo root (parent of scripts/ directory) ──────────────────────
 REPO_ROOT="$(cd "$(dirname "$(realpath "$0")")/.." && pwd)"
 
+# Temp files/dirs created during generation — cleaned on ANY exit path
+TMP_PATHS=()
+_cleanup_tmp() {
+  if [ "${#TMP_PATHS[@]}" -gt 0 ]; then
+    rm -rf "${TMP_PATHS[@]}" 2>/dev/null || true
+  fi
+}
+trap _cleanup_tmp EXIT
+
 # ── Template detection ─────────────────────────────────────────────────────
 TEMPLATE=""  # set by --template flag or auto-detected
 
@@ -375,6 +384,7 @@ generate_docx() {
         local tmp_adoc=""
         local docx_adoc="$ADOC_FILE"
         tmp_adoc=$(mktemp --suffix=.adoc)
+        TMP_PATHS+=("$tmp_adoc")
         if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
           --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
             docx_adoc="$tmp_adoc"
@@ -403,6 +413,7 @@ generate_docx() {
         # tmp_dir holds the .dbk plus any diagram PNGs generated next to it
         local tmp_dir
         tmp_dir=$(mktemp -d)
+        TMP_PATHS+=("$tmp_dir")
         local tmp_dbk="$tmp_dir/doc.dbk"
         if asciidoctor -b docbook $diagram_opts "$docx_adoc" -o "$tmp_dbk" 2>/dev/null && \
            pandoc -f docbook --reference-doc="$REF_DOCX" \
@@ -454,6 +465,7 @@ generate_md() {
         local tmp_adoc=""
         local md_adoc="$ADOC_FILE"
         tmp_adoc=$(mktemp --suffix=.adoc)
+        TMP_PATHS+=("$tmp_adoc")
         if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
           --target md --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
             md_adoc="$tmp_adoc"
@@ -477,6 +489,7 @@ generate_md() {
         # tmp_dir holds the .dbk plus any diagram PNGs generated next to it
         local tmp_dir
         tmp_dir=$(mktemp -d)
+        TMP_PATHS+=("$tmp_dir")
         local tmp_dbk="$tmp_dir/doc.dbk"
         if asciidoctor -b docbook $diagram_opts "$md_adoc" -o "$tmp_dbk" 2>/dev/null && \
            pandoc -f docbook -t gfm \
@@ -531,6 +544,7 @@ generate_html() {
         local tmp_adoc=""
         local html_adoc="$ADOC_FILE"
         tmp_adoc=$(mktemp --suffix=.adoc)
+        TMP_PATHS+=("$tmp_adoc")
         if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
           --target html --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
             html_adoc="$tmp_adoc"
@@ -539,12 +553,17 @@ generate_html() {
             rm -f "$tmp_adoc"
             tmp_adoc=""
         fi
+        # Diagram extension optional (same guard as DOCX/MD paths)
+        local diagram_opts=""
+        if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+            diagram_opts="-r asciidoctor-diagram"
+        fi
         # AsciiDoc pipeline: asciidoctor directly
         asciidoctor -b html5 \
             -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
             -a docinfodir="$REPO_ROOT/templates/_base" \
             -a docinfo1 \
-            -r asciidoctor-diagram \
+            $diagram_opts \
             "$html_adoc" -o "${PROJECT_DIR}/$out" 2>&1 || {
             RESULTS_FAIL+=("HTML:asciidoctor failed")
             rm -f "$tmp_adoc"

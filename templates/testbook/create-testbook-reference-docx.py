@@ -13,4 +13,4 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '_base'))
 from docx_fix import main
 
 if __name__ == "__main__":
-    main(sys.argv[1:], reference_name="testbook-reference.docx")
+    main(sys.argv[1:] + ['--template', 'testbook'], reference_name="testbook-reference.docx")
