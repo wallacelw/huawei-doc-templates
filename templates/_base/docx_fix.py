@@ -373,8 +373,15 @@ def _fix_heading_styles(root, W_NS):
                 break
 
 
-def _fix_title_style(root, W_NS):
-    """Fix Title style (cover page): 36pt, near-black, HarmonyOS Sans."""
+def _fix_title_style(root, W_NS, docx_path):
+    """Fix Title style (cover page): near-black, HarmonyOS Sans.
+
+    Size is template-conditional: technical uses 24pt (sz 48) with
+    tighter spacing (PDF technical.cls title is 24pt); all other
+    templates use 36pt (sz 72) with the guide.cls cover spacing.
+    """
+    _tmpl = _TEMPLATE or ('technical' if 'technical' in docx_path else '')
+    _is_technical = (_tmpl == 'technical')
     title_found = False
     for s in root.findall(f"{{{W_NS}}}style"):
         if s.get(f"{{{W_NS}}}styleId") == "Title":
@@ -404,17 +411,23 @@ def _fix_title_style(root, W_NS):
             for tag in ['sz', 'szCs']:
                 sz = rPr.find(f"{{{W_NS}}}{tag}")
                 if sz is not None:
-                    sz.set(f"{{{W_NS}}}val", "72")
-            # Fix Title spacing for cover page (matches PDF guide.cls)
-            # before=62pt (~2.2cm), after=128pt (~4.5cm)
+                    sz.set(f"{{{W_NS}}}val", "48" if _is_technical else "72")
+            # Title spacing for cover page.
+            # Technical (PDF technical.cls): before=28pt (~1cm gap above),
+            # after=56pt (~2cm gap below).
+            # Other templates (PDF guide.cls): before=62pt, after=128pt.
             pPr = s.find(f"{{{W_NS}}}pPr")
             if pPr is None:
                 pPr = etree.SubElement(s, f"{{{W_NS}}}pPr")
             spacing = pPr.find(f"{{{W_NS}}}spacing")
             if spacing is None:
                 spacing = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
-            spacing.set(f"{{{W_NS}}}before", "1248")  # 62pt
-            spacing.set(f"{{{W_NS}}}after", "2560")    # 128pt
+            if _is_technical:
+                spacing.set(f"{{{W_NS}}}before", "560")   # 28pt
+                spacing.set(f"{{{W_NS}}}after", "1132")    # 56pt
+            else:
+                spacing.set(f"{{{W_NS}}}before", "1248")  # 62pt
+                spacing.set(f"{{{W_NS}}}after", "2560")    # 128pt
             break
     if not title_found:
         raise RuntimeError(
@@ -860,14 +873,24 @@ def _resize_drawing(paragraph, qn, width_cm):
             continue
 
 
-def _assemble_cover(doc, qn):
-    """Reorder + style the cover region to match the PDF (huawei-cover.sty).
+def _assemble_cover(doc, qn, docx_path):
+    """Reorder + style the cover region to match the PDF.
 
-    Pandoc order: Title, Author(s), Date, [logo, cover text, meta]...
-    PDF order:    Title, logo (3.6cm), cover text, Author(s), meta.
-    The date paragraph is deleted — the meta line carries the date
-    (docs with :nochangelog: hide it entirely, per L12).
+    Non-technical (guide/poc/testbook — huawei-cover.sty):
+        Pandoc order: Title, Author(s), Date, [logo, cover text, meta]...
+        PDF order:    Title, logo (3.6cm), cover text, Author(s), meta.
+        The date paragraph is deleted — the meta line carries the date.
+
+    Technical (technical.cls):
+        Pandoc order: Title, [logo, type label, version table, meta]...
+        PDF order:    Title, logo (3.6cm), type label (16pt red bold),
+                      version table (red label column), meta.
+        Author paragraphs are deleted — authors live inside the version
+        table (the preprocessor adds the Author row when :authors: is set).
     """
+    _tmpl = _TEMPLATE or ('technical' if 'technical' in docx_path else '')
+    _is_technical = (_tmpl == 'technical')
+
     paras = list(doc.paragraphs)
     title_p = next((p for p in paras if p.style.style_id == 'Title'), None)
     if title_p is None:
@@ -893,16 +916,18 @@ def _assemble_cover(doc, qn):
     idx = paras.index(logo_p)
     cover_text_p = paras[idx + 1] if idx + 1 < len(paras) else None
 
-    # Meta line ("vX — date time") and date paragraphs in the cover region
+    # Meta line ("vX — date time") — scan only paragraphs AFTER the logo
+    # (pandoc places authors before the logo; scanning from the top would
+    # match author names like "Victor").  Pattern ^v\S+ matches both
+    # v1.0.0 and vHCS 8.5.1.
     meta_p = None
     date_ps = []
-    for p in paras:
-        if p is title_p:
-            continue
+    logo_idx = paras.index(logo_p)
+    for p in paras[logo_idx:]:
         if is_boundary(p):
             break
         t = p.text.strip()
-        if re.match(r'^v\d+\.\d+\.\d+', t):
+        if re.match(r'^v\S+', t):
             meta_p = p
         elif re.match(r'^\d{4}-\d{2}-\d{2}$', t):
             date_ps.append(p)
@@ -940,19 +965,47 @@ def _assemble_cover(doc, qn):
     for p in date_ps:
         p._p.getparent().remove(p._p)
 
-    # Chain-reorder: title -> logo -> cover text -> authors -> meta.
+    # Cover table (technical only): first w:tbl between logo and the
+    # first boundary paragraph in document order.
+    cover_table = None
+    if _is_technical:
+        body = doc.element.body
+        for tbl in doc.tables:
+            # Position the table's _tbl relative to logo_p._p
+            tbl_idx = list(body).index(tbl._tbl)
+            logo_idx_el = list(body).index(logo_p._p)
+            if tbl_idx > logo_idx_el:
+                # Check no boundary paragraph between logo and table
+                cover_table = tbl
+                break
+
+    # Chain-reorder: title -> logo -> [type label] -> [table] -> [authors] -> meta.
     # Pandoc places the TOC before body content, so without this the
-    # meta line (and authors) would land on the wrong page.
+    # meta line (and authors/table) would land on the wrong page.
     anchor = title_p._element
     chain = [logo_p]
     if cover_text_p is not None:
         chain.append(cover_text_p)
-    chain.extend(author_ps)
+    if _is_technical and cover_table is not None:
+        chain.append(cover_table)   # lxml element, not a paragraph
+    if not _is_technical:
+        chain.extend(author_ps)
     if meta_p is not None:
         chain.append(meta_p)
     for el in chain:
-        anchor.addnext(el._element)
-        anchor = el._element
+        if hasattr(el, '_element'):
+            anchor.addnext(el._element)
+            anchor = el._element
+        else:
+            # Raw lxml element (e.g. a table's _tbl)
+            anchor.addnext(el)
+            anchor = el
+
+    # Technical: delete pandoc author paragraphs (authors live in the
+    # version table, added by the preprocessor).
+    if _is_technical:
+        for p in author_ps:
+            p._p.getparent().remove(p._p)
 
     # Styling (PDF huawei-cover.sty: 3.6cm logo, 16pt cover text,
     # 12pt authors, 12pt meta with bold version run)
@@ -961,7 +1014,13 @@ def _assemble_cover(doc, qn):
     if cover_text_p is not None:
         cover_text_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         for run in cover_text_p.runs:
-            run.font.size = Pt(16)
+            if _is_technical:
+                # Type label: 16pt bold red (PDF technical.cls)
+                run.font.size = Pt(16)
+                run.font.bold = True
+                run.font.color.rgb = RGBColor(0xC7, 0x00, 0x0B)
+            else:
+                run.font.size = Pt(16)
     for p in author_ps:
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         for run in p.runs:
@@ -970,6 +1029,43 @@ def _assemble_cover(doc, qn):
         meta_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         for run in meta_p.runs:
             run.font.size = Pt(12)
+
+    # Technical cover table: center + red label column + black grid.
+    if _is_technical and cover_table is not None:
+        from docx.shared import RGBColor as _RGB
+        from docx.enum.table import WD_TABLE_ALIGNMENT
+        cover_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        # Black full-grid borders (mirror _style_table's plain-grid path)
+        tbl = cover_table._element
+        tblPr = tbl.find(qn('w:tblPr'))
+        if tblPr is None:
+            tblPr = etree.SubElement(tbl, qn('w:tblPr'))
+            tbl.insert(0, tblPr)
+        tblBorders = tblPr.find(qn('w:tblBorders'))
+        if tblBorders is None:
+            tblBorders = etree.SubElement(tblPr, qn('w:tblBorders'))
+        for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+            border = tblBorders.find(qn(f'w:{border_name}'))
+            if border is None:
+                border = etree.SubElement(tblBorders, qn(f'w:{border_name}'))
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), '000000')
+        # First-column cells: red bg + white bold text (PDF label column)
+        for row in cover_table.rows:
+            cell = row.cells[0]
+            tcPr = cell._tc.get_or_add_tcPr()
+            shd = tcPr.find(qn('w:shd'))
+            if shd is None:
+                shd = etree.SubElement(tcPr, qn('w:shd'))
+            shd.set(qn('w:val'), 'clear')
+            shd.set(qn('w:color'), 'auto')
+            shd.set(qn('w:fill'), 'C7000B')
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+                    run.font.color.rgb = _RGB(0xFF, 0xFF, 0xFF)
 
 
 def _style_testcase_blocks(doc, qn):
@@ -1255,7 +1351,7 @@ def _apply_content_styling(docx_path):
     _style_testcase_blocks(doc, qn)
 
     # --- Cover: logo + cover text + meta line (PDF huawei-cover.sty) ---
-    _assemble_cover(doc, qn)
+    _assemble_cover(doc, qn, docx_path)
 
     doc.save(docx_path)
 
@@ -1504,7 +1600,7 @@ def fix_generated_docx(docx_path):
                     seen_ids.add(sid)
 
         _fix_heading_styles(root, W_NS)
-        _fix_title_style(root, W_NS)
+        _fix_title_style(root, W_NS, docx_path)
         _fix_verbatim_style(root, W_NS)
         _fix_source_code_style(root, W_NS)
         _fix_callout_spacing(root, W_NS)

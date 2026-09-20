@@ -398,6 +398,56 @@ PYEOF
       fail "$TEMPLATE_NAME: markers stripped on styles-phase failure (rc=$styles_rc, markers=$styles_markers)"
     fi
   fi
+
+  # 14. Technical cover: Title style is 24pt (sz=48)
+  if [ "$TEMPLATE_NAME" = "technical" ]; then
+    if python3 - "$STYLES_XML" << 'PYEOF' 2>/dev/null; then
+import xml.etree.ElementTree as ET, sys
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+tree = ET.parse(sys.argv[1])
+root = tree.getroot()
+for s in root.findall(f"{{{W}}}style"):
+    if s.get(f"{{{W}}}styleId") == "Title":
+        rPr = s.find(f"{{{W}}}rPr")
+        if rPr is not None:
+            sz = rPr.find(f"{{{W}}}sz")
+            if sz is not None and sz.get(f"{{{W}}}val") == "48":
+                sys.exit(0)
+        break
+sys.exit(1)
+PYEOF
+      pass "$TEMPLATE_NAME: Title style is 24pt"
+    else
+      fail "$TEMPLATE_NAME: Title style is not 24pt (sz!=48)"
+    fi
+  fi
+
+  # 15. Technical cover: first cover table has red label column
+  if [ "$TEMPLATE_NAME" = "technical" ]; then
+    if python3 - "$UNZIP_DIR/word/document.xml" << 'PYEOF' 2>/dev/null; then
+import xml.etree.ElementTree as ET, sys
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+tree = ET.parse(sys.argv[1])
+root = tree.getroot()
+# Find the first w:tbl in the document
+tbl = root.find(f".//{{{W}}}tbl")
+if tbl is not None:
+    # Check first-column cells for red shading
+    for row in tbl.findall(f"{{{W}}}tr"):
+        cells = row.findall(f"{{{W}}}tc")
+        if cells:
+            tcPr = cells[0].find(f"{{{W}}}tcPr")
+            if tcPr is not None:
+                shd = tcPr.find(f"{{{W}}}shd")
+                if shd is not None and shd.get(f"{{{W}}}fill") == "C7000B":
+                    sys.exit(0)
+sys.exit(1)
+PYEOF
+      pass "$TEMPLATE_NAME: cover table has red label column"
+    else
+      fail "$TEMPLATE_NAME: cover table missing red label column"
+    fi
+  fi
 }
 
 # ── Auto-discover templates and run DOCX fix tests for each ──────────────

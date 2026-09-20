@@ -4,6 +4,47 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.8.0 (2026-09-20)
+
+### Technical cover parity
+
+Phase D of the approved remediation plan. Technical report covers in
+DOCX/MD/HTML now match the verified PDF source.  No PDF-path changes.
+
+#### Changed
+
+- Technical report **title size** in DOCX is now 24pt (was 36pt) —
+  matches `technical.cls` (the guide/poc/testbook 36pt is unchanged).
+- The **report type label** ("Technical Report") now appears on the
+  cover above the title, styled 16pt bold red (PDF: `\setreporttype`
+  default).
+- A **Version/Date/Scenario table** is now rendered on the cover with
+  the PDF's red label column (white bold on `huaweired` background) and
+  black grid borders.  Rows are omitted when the corresponding
+  `\setreport*` value is absent.
+- The cover **meta line** now shows the **report version and its set
+  date** (e.g. `vHCS 8.5.1 — 2025-08-13`) — was the document `:version:`
+  and the build date.
+- **Authors**, when set via `:authors:`, appear as a table row in the
+  version table (PDF: `\lg@docauthors` row) — was chained paragraphs.
+
+#### Fixed
+
+- The preprocessor now **captures `\setreportversion`/`\setreportdate`/
+  `\setreportscenario`/`\setreporttype`** from the passthrough block
+  (previously dropped as unrecognized raw LaTeX).
+- `_assemble_cover` meta scan now starts **after the logo** (was
+  scanning from the title — author names like "Victor" could falsely
+  match) and uses pattern `^v\S+` (matches `vHCS 8.5.1`, not just
+  `v\d+\.\d+\.\d+`).
+
+#### Tests
+
+- New preprocessor cases: technical meta/table/type-label/nochangelog/
+  authors + guide regression.
+- New docx-fix assertions: technical Title style sz=48; cover table has
+  red label column.
+
 ## v6.7.0 (2026-09-20)
 
 ### Badge and language fidelity

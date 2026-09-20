@@ -304,6 +304,51 @@ out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{stakeholders}\n"
 check("pt stakeholders: Nome | E-mail | Telefone | Papel",
       "| Nome | E-mail | Telefone | Papel" in out)
 
+print("=== Technical cover parity ===")
+
+# 26. technical + setreport* passthrough: meta uses report values
+TECH_HDR = (":lang: en\n:version: 3.6.1\n:notime:\n\n")
+TECH_PASSTHROUGH = ("++++\n\\setreportversion{HCS 8.5.1}\n"
+                    "\\setreportdate{2025-08-13}\n"
+                    "\\setreportscenario{Standard Scenario}\n++++\n")
+out = process(TECH_HDR + TECH_PASSTHROUGH + "Body.\n", 'technical', 'md')
+check("technical meta: **vHCS 8.5.1** — 2025-08-13",
+      "**vHCS 8.5.1** — 2025-08-13" in out)
+check("technical meta: no doc version v3.6.1 in meta",
+      "v3.6.1" not in out)
+
+# 27. Version table rows present
+check("technical table: | *Version* | HCS 8.5.1",
+      "| *Version* | HCS 8.5.1" in out)
+check("technical table: | *Date* | 2025-08-13",
+      "| *Date* | 2025-08-13" in out)
+check("technical table: | *Scenario* | Standard Scenario",
+      "| *Scenario* | Standard Scenario" in out)
+
+# 28. Type label present
+check("technical: type label 'Technical Report'",
+      "Technical Report" in out)
+
+# 29. technical + :nochangelog: → no meta AND no version table
+out = process(":lang: en\n:version: 3.6.1\n:nochangelog:\n\n"
+              + TECH_PASSTHROUGH + "Body.\n", 'technical', 'md')
+check("technical nochangelog: no meta line",
+      "**vHCS 8.5.1**" not in out)
+check("technical nochangelog: no version table",
+      "| *Version*" not in out)
+
+# 30. technical + :authors: → Author row
+out = process(":lang: en\n:version: 3.6.1\n:notime:\n:authors: Jane Doe\n\n"
+              + TECH_PASSTHROUGH + "Body.\n", 'technical', 'md')
+check("technical authors: | *Author* | Jane Doe",
+      "| *Author* | Jane Doe" in out)
+
+# 31. Regression: guide cover unchanged
+out = process(HEADER + "Body.\n", 'guide', 'md')
+check("guide regression: **v1.0.0** meta", "**v1.0.0**" in out)
+check("guide regression: generic cover text",
+      "Huawei Technologies CO., LTD" in out)
+
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
 PYEOF

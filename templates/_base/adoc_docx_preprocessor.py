@@ -829,6 +829,13 @@ _TARGET = 'docx'
 # (PDF: testbook.cls noanswers class option).
 _NOANSWERS = False
 
+# Technical report cover values, captured from the \setreport* passthrough
+# block (technical.cls cover).  None → fall back to :version:/today.
+_REPORT_VERSION = None
+_REPORT_DATE = None
+_REPORT_SCENARIO = None
+_REPORT_TYPE = None
+
 # Map LaTeX environment names to handler functions
 POC_HANDLERS = {
     'stakeholders': convert_stakeholders,
@@ -890,7 +897,19 @@ def process_passthrough_blocks(content, template, lang):
                     result.append(converted)
                     i = j + 1
                     continue
-            # Unrecognized — drop the passthrough (raw LaTeX is useless in DOCX)
+            # Unrecognized — scan for \setreport* cover metadata (technical
+            # cls) before dropping the passthrough (raw LaTeX is useless
+            # downstream, but the values are needed by inject_cover_block).
+            global _REPORT_VERSION, _REPORT_DATE, _REPORT_SCENARIO, _REPORT_TYPE
+            for cmd, attr in [
+                ('setreportversion', '_REPORT_VERSION'),
+                ('setreportdate', '_REPORT_DATE'),
+                ('setreportscenario', '_REPORT_SCENARIO'),
+                ('setreporttype', '_REPORT_TYPE'),
+            ]:
+                r = find_cmd(block_content, cmd)
+                if r and r[0].strip():
+                    globals()[attr] = r[0].strip()
             i = j + 1
             continue
         result.append(lines[i])
@@ -934,15 +953,22 @@ def _cover_datetime(lang):
     return date, now.strftime('%H:%M')
 
 
-def inject_cover_block(content, lang):
+def inject_cover_block(content, lang, template):
     r"""Inject cover elements as the first body content.
 
-    Approximates the PDF cover (huawei-cover.sty): logo image, cover
-    text, and meta line 'vX — date time' (bold version, L5; :notime:
-    hides the time).  Pandoc already renders title, authors, and date;
-    docx_fix reorders (title → logo → cover text → authors → meta) and
-    deletes the redundant date paragraph.  The meta line is skipped
-    when :nochangelog: is set (L12 hides version/date/time).
+    Approximates the PDF cover (huawei-cover.sty / technical.cls):
+    - Non-technical (guide/poc/testbook): logo, generic cover text, meta
+      line 'vX — date time' (bold version, L5; :notime: hides the time).
+    - Technical: logo, report-type label (e.g. "Technical Report"), a
+      Version/Date/Scenario table (red label column in DOCX via
+      docx_fix), and a meta line using the REPORT version/date (not the
+      document :version:).  Authors appear as a table row when set.
+
+    Pandoc already renders title, authors, and date; docx_fix reorders
+    (title → logo → cover text/label [+ table] → authors → meta) and
+    deletes the redundant date paragraph.  The meta line and version
+    table are skipped when :nochangelog: is set (L12 hides version/date/
+    time).
     """
     lines = content.split('\n')
     # Find the last header attribute line (":key: value")
@@ -957,25 +983,72 @@ def inject_cover_block(content, lang):
     m_covertext = re.search(r'^:cover-text:\s*(.+?)\s*$', content, re.MULTILINE)
     m_version = re.search(r'^:version:\s*(\S+)', content, re.MULTILINE)
     m_date = re.search(r'^:date:\s*(.+?)\s*$', content, re.MULTILINE)
+    m_authors = re.search(r'^:authors:\s*(.+?)\s*$', content, re.MULTILINE)
     nochangelog = re.search(r'^:nochangelog:', content, re.MULTILINE)
     notime = re.search(r'^:notime:', content, re.MULTILINE)
+    noauthors = re.search(r'^:noauthors:', content, re.MULTILINE)
 
     logo = m_logo.group(1) if m_logo else 'common-assets/huawei-logo-cover.png'
-    cover_text = (m_covertext.group(1) if m_covertext
-                  else 'Huawei Technologies CO., LTD')
 
-    block = ['image::' + logo + '[]', '', cover_text, '']
-    if m_version and not nochangelog:
-        if m_date:
-            date_str = m_date.group(1)
-            _, time_str = _cover_datetime(lang)
-        else:
-            date_str, time_str = _cover_datetime(lang)
-        meta = '**v' + m_version.group(1) + '** — ' + date_str
-        if not notime:
-            meta += ' ' + time_str
-        block.append(meta)
+    block = ['image::' + logo + '[]', '']
+
+    if template == 'technical':
+        # Report-type label (PDF: 16pt bold huaweired, centered).
+        type_label = _REPORT_TYPE or 'Technical Report'
+        block.append(type_label)
         block.append('')
+
+        # Version/Date/Scenario table (PDF: red label column).  Gated by
+        # :nochangelog: (L12 — the PDF's \if@changelog hides covermeta
+        # and the version table alike).
+        if not nochangelog:
+            table_lines = ['[cols="1,1"]', '|===']
+            if _REPORT_VERSION:
+                table_lines.append('| *Version* | ' + _REPORT_VERSION)
+            if _REPORT_DATE:
+                table_lines.append('| *Date* | ' + _REPORT_DATE)
+            if _REPORT_SCENARIO:
+                table_lines.append('| *Scenario* | ' + _REPORT_SCENARIO)
+            if m_authors and not noauthors:
+                table_lines.append('| *Author* | ' + m_authors.group(1))
+            table_lines.append('|===')
+            block.extend(table_lines)
+            block.append('')
+
+        # Meta line uses the REPORT version/date (not :version:).
+        if not nochangelog:
+            meta_ver = _REPORT_VERSION or (m_version.group(1) if m_version else None)
+            if meta_ver:
+                if _REPORT_DATE:
+                    date_str = _REPORT_DATE
+                    _, time_str = _cover_datetime(lang)
+                elif m_date:
+                    date_str = m_date.group(1)
+                    _, time_str = _cover_datetime(lang)
+                else:
+                    date_str, time_str = _cover_datetime(lang)
+                meta = '**v' + meta_ver + '** — ' + date_str
+                if not notime:
+                    meta += ' ' + time_str
+                block.append(meta)
+                block.append('')
+    else:
+        # Non-technical: generic cover text + :version: meta (unchanged).
+        cover_text = (m_covertext.group(1) if m_covertext
+                      else 'Huawei Technologies CO., LTD')
+        block.append(cover_text)
+        block.append('')
+        if m_version and not nochangelog:
+            if m_date:
+                date_str = m_date.group(1)
+                _, time_str = _cover_datetime(lang)
+            else:
+                date_str, time_str = _cover_datetime(lang)
+            meta = '**v' + m_version.group(1) + '** — ' + date_str
+            if not notime:
+                meta += ' ' + time_str
+            block.append(meta)
+            block.append('')
 
     # Insert as the first body content (after the blank line following attrs)
     insert_at = last_attr + 1
@@ -1040,9 +1113,14 @@ def process_adoc(content, template, target='docx'):
     global _testcase_counter
     global _TARGET
     global _NOANSWERS
+    global _REPORT_VERSION, _REPORT_DATE, _REPORT_SCENARIO, _REPORT_TYPE
     _testcase_counter = 0
     _TARGET = target
     _NOANSWERS = bool(re.search(r'^:noanswers:', content, re.MULTILINE))
+    _REPORT_VERSION = None
+    _REPORT_DATE = None
+    _REPORT_SCENARIO = None
+    _REPORT_TYPE = None
 
     lang = detect_lang(content)
 
@@ -1074,7 +1152,7 @@ def process_adoc(content, template, target='docx'):
     content = '\n'.join(lines)
 
     # 7. Inject cover block (logo, cover text, meta line — PDF cover)
-    content = inject_cover_block(content, lang)
+    content = inject_cover_block(content, lang, template)
 
     return content
 
