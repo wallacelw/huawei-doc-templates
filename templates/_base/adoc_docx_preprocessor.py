@@ -536,11 +536,15 @@ def _process_step_list(env_content, lang, out):
         # \teststep{text} — explicit bold number (PDF: red bold "N.").
         # A plain paragraph keeps full styling control in docx_fix;
         # AsciiDoc list markers would render via numbering.xml instead.
+        # Blank line before every step after the first — consecutive
+        # lines would merge into a single AsciiDoc paragraph.
         if env_content.startswith(r'\teststep{', pos):
             r = find_cmd(env_content, 'teststep', pos)
             if r:
                 arg, _, after = r
                 step_num += 1
+                if step_num > 1:
+                    out.append('')
                 out.append('**' + str(step_num) + '.** '
                            + convert_inline_latex(arg.strip(), lang))
                 pos = after

@@ -1028,9 +1028,17 @@ def _style_testcase_blocks(doc, qn):
                 for run in p.runs:
                     run.font.bold = True
                     run.font.color.rgb = white
+                # PDF: \par\medskip before the header bar, \smallskip after
+                p.paragraph_format.space_before = Pt(8)
+                p.paragraph_format.space_after = Pt(4)
             elif p.runs and re.match(r'^\d+\.$', p.runs[0].text.strip()):
                 # Red bold step number (PDF: red bold "N.")
                 p.runs[0].font.color.rgb = red
+                # PDF: \par\smallskip between steps
+                p.paragraph_format.space_before = Pt(6)
+            elif t:
+                # Content paragraphs (objective/scope/result/remarks text)
+                p.paragraph_format.space_after = Pt(6)
         # Remove the markers
         start_p._p.getparent().remove(start_p._p)
         end_p._p.getparent().remove(end_p._p)
@@ -1091,12 +1099,12 @@ def _apply_content_styling(docx_path):
         _style_table(table, qn)
 
     # --- Captions: match the PDF caption systems ---
-    # Table/Tabela: \small (9pt), left-aligned above the table (LaTeX
-    #   \caption + captionsetup font=small, labelfont=bf).
-    # Figure/Figura: \small, centered (\imagecap + captionsetup[figure]).
-    # Diagram/Diagrama: body size, centered (\diagramcap).
-    # Testcase/Caso de Teste: body size, centered (testbook.cls).
-    # The bold symbol run comes from the **Table N:** markup.
+    # All captions are centered in the PDF (\caption, \imagecap,
+    # \diagramcap, and the testcase caption all render centered).
+    # Table/Figure use \small (9pt) via captionsetup; Diagram/Testcase
+    # use body size.  The bold symbol run comes from **Table N:** markup.
+    # Vertical rhythm: \par\medskip + parskip above, caption-package
+    # spacing below (huawei-fonts.sty sets \parskip=4pt).
     cap_pat = _re.compile(
         r'^(Table|Tabela|Figure|Figura|Diagram|Diagrama'
         r'|Testcase|Caso de Teste) \d+:')
@@ -1105,16 +1113,12 @@ def _apply_content_styling(docx_path):
         if not m:
             continue
         kind = m.group(1)
-        if kind in ('Table', 'Tabela'):
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if kind in ('Table', 'Tabela', 'Figure', 'Figura'):
             for run in paragraph.runs:
                 run.font.size = Pt(9)
-        elif kind in ('Figure', 'Figura'):
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            for run in paragraph.runs:
-                run.font.size = Pt(9)
-        else:
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        paragraph.paragraph_format.space_before = Pt(12)
+        paragraph.paragraph_format.space_after = Pt(8)
 
     # --- Testcase blocks: red left rule + red field bars (PDF tcolorbox) ---
     _style_testcase_blocks(doc, qn)

@@ -4,6 +4,37 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.4.5 (2026-09-20)
+
+### DOCX polish: centered captions, vertical rhythm, step separation
+
+Follow-up to v6.4.4 addressing three visual gaps against the PDF.
+
+#### Captions centered
+
+- All captions (Table/Tabela, Figure/Figura, Diagram/Diagrama,
+  Testcase/Caso de Teste) render centered in DOCX — matching the PDF,
+  where `\caption`, `\imagecap`, `\diagramcap`, and the testcase
+  caption all render centered (Table captions were left-aligned).
+
+#### Vertical spacing matched to the LaTeX rhythm
+
+- Captions: 12pt before / 8pt after (PDF: `\par\medskip` + parskip).
+- Field header bars: 8pt before / 4pt after (PDF: `\par\medskip`
+  before, `\par\nobreak\smallskip` after).
+- Steps: 6pt before each (PDF: `\par\smallskip` between steps).
+- Content paragraphs inside testcase blocks: 6pt after.
+- Reference: `\parskip` = 4pt (huawei-fonts.sty), `\medskip` = 6pt,
+  `\smallskip` = 3pt.
+
+#### Steps render as separate paragraphs
+
+- The pre-processor emitted step lines without blank separators, so
+  AsciiDoc merged all steps of a procedure/expected-result list into
+  ONE paragraph ("numbers not on separate lines"). Each step is now
+  its own paragraph, and every step number gets the red bold styling
+  (previously only the first run of the merged blob could be styled).
+
 ## v6.4.4 (2026-09-20)
 
 ### DOCX cover, testcase wrapper, caption ordering + MD/HTML pipeline fix
