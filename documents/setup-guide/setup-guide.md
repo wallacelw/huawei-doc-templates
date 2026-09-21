@@ -5,7 +5,7 @@ alt="huawei logo cover" />
 
 Huawei Technologies CO., LTD
 
-**v6.9.1** — September 20, 2026 22:31
+**v6.9.2** — September 20, 2026 22:58
 
 # Provision a Flexus X Instance on Huawei Cloud
 
@@ -1297,6 +1297,14 @@ secondary text:
 </thead>
 <tbody>
 <tr class="odd">
+<td style="text-align: left;"><p>6.9.2</p></td>
+<td style="text-align: left;"><p>2026-09-21</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Fix DOCX body text alignment: paragraphs are now justified
+(matching the PDF LaTeX default), instead of left-aligned.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><p>6.9.1</p></td>
 <td style="text-align: left;"><p>2026-09-21</p></td>
 <td style="text-align: left;"><ul>
@@ -1306,7 +1314,7 @@ rendered at 56pt (same as H1) instead of matching the heading text size
 size); 56pt is set directly on H1 number runs only.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.9.0</p></td>
 <td style="text-align: left;"><p>2026-09-21</p></td>
 <td style="text-align: left;"><ul>
@@ -1317,7 +1325,7 @@ DOCX TOC entries now match the PDF: level 1 bold 12pt, levels 2-3 normal
 (matching PDF tocdepth). Dead TOCTitle style removed from DOCX.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.8.3</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1329,7 +1337,7 @@ implied HTML also went through docbook and pandoc. Corrected a stale
 comment in the DOCX fixer.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.8.2</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1343,7 +1351,7 @@ dead HTML badge CSS). The --template and --lang flags accept the equals
 form (--template=guide). Various stale comments corrected.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.8.1</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1357,7 +1365,7 @@ report values are set; corrected the cover-element-order wording in the
 v6.8.0 changelog.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.8.0</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1371,7 +1379,7 @@ build date). Authors, when set, appear as a table row like the
 PDF.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.7.0</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1386,7 +1394,7 @@ summary, changelog) are now language-aware. DOCX footers show Página in
 Portuguese documents. Cover dates no longer zero-pad the day.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.6.1</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1398,7 +1406,7 @@ again); build.sh also cleans temporary files on interrupt signals; fixed
 a CHANGELOG typo.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.6.0</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1411,7 +1419,7 @@ dependency optional for HTML generation; the pandoc version pin now
 warns instead of failing hard.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.5.2</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1423,7 +1431,7 @@ dependency and fails loudly when generation fails; pre-processor unit
 tests now cover pipe escaping in all five table handlers.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.5.1</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1440,7 +1448,7 @@ build pipeline (pre-processor wired into round-trip and DOCX tests),
 with new pre-processor unit tests.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.5.0</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1454,7 +1462,7 @@ blocks in DOCX no longer show literal + symbols (proper hard line
 breaks).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.4.7</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1465,7 +1473,7 @@ runs below — previously the title sat left-aligned next to a small
 number. Applies to all templates.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.4.6</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1476,7 +1484,7 @@ inside test case blocks, and code blocks now show the PDF’s code box
 continuing on the left).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.4.5</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1487,7 +1495,7 @@ steps now render as separate paragraphs each with the red bold number
 (previously merged into one paragraph).</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.4.4</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1501,7 +1509,7 @@ and HTML output no longer leaks raw LaTeX from passthrough blocks — the
 DOCX pre-processor now feeds those pipelines too.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.4.3</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1513,7 +1521,7 @@ line under the title, centered test case captions, and plain black rules
 for signature grids.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>6.4.2</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1523,7 +1531,7 @@ cases, test summary, changelog) via a new pre-processor. Fixed dropped
 Test Scope fields in testbook DOCX output.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>6.4.0</p></td>
 <td style="text-align: left;"><p>2026-09-20</p></td>
 <td style="text-align: left;"><ul>
@@ -1532,7 +1540,7 @@ historical release dates. Eliminated zero-width-space missing-glyph
 warnings from typographic substitutions.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>5.1.1</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
@@ -1540,7 +1548,7 @@ warnings from typographic substitutions.</p></li>
 palette. Added color palette demo.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>5.1.0</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
@@ -1548,7 +1556,7 @@ palette. Added color palette demo.</p></li>
 scale. Aligned callout colors to brand specifications.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>5.0.3</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
@@ -1556,7 +1564,7 @@ scale. Aligned callout colors to brand specifications.</p></li>
 consistency.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>5.0.2</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
@@ -1564,14 +1572,14 @@ consistency.</p></li>
 inline code.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>5.0.1</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
 <li><p>Testcase caption centered above the block.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>5.0.0</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
@@ -1583,7 +1591,7 @@ lines), added testbook unit tests, fixed build system error
 handling.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>4.7.0</p></td>
 <td style="text-align: left;"><p>2026-09-14</p></td>
 <td style="text-align: left;"><ul>
@@ -1592,7 +1600,7 @@ figures/tables): bold “Testcase N:” followed by description. Changed
 label from “Test Case” to “Testcase”.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>4.6.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1601,7 +1609,7 @@ subsections), Conclusion. Testcases auto-numbered like figures/tables.
 Changed testcase from subsection to subsubsection.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>4.5.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1612,7 +1620,7 @@ matching <code>testprocedure</code>. All three now use
 Uniform code, same visual style.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>4.4.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1623,7 +1631,7 @@ testprocedure handler preserves non-step content (images, code,
 callouts).</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>4.3.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1633,7 +1641,7 @@ red bold numbers in testcase fields. Fixed alignment: zeroed
 numbering to align with <code>testlist</code> items.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>4.2.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1644,7 +1652,7 @@ blocks, and callouts can be placed freely between steps inside
 <code>testprocedure</code>.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>4.1.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1655,7 +1663,7 @@ Result before Remarks. Updated Lua filter and round-trip test for grid
 table counting.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>4.0.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1667,7 +1675,7 @@ environment for page-breaking tables. Updated Lua filter to produce
 definition lists for DOCX/MD/HTML.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.9.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1677,7 +1685,7 @@ testcase layout (full-width tabular with proper text
 alignment).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.8.1</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1688,7 +1696,7 @@ testbook sample PDFs, set TZ for pandoc cover time consistency, widened
 pandoc version range.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.8.0</p></td>
 <td style="text-align: left;"><p>2026-09-13</p></td>
 <td style="text-align: left;"><ul>
@@ -1697,7 +1705,7 @@ VS Code-specific keybindings that don’t generalize across terminal
 setups.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.7.0</p></td>
 <td style="text-align: left;"><p>2026-09-12</p></td>
 <td style="text-align: left;"><ul>
@@ -1706,7 +1714,7 @@ documents with <code>testcase</code> environment and
 <code>[noanswers]</code> option.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.6.0</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1717,7 +1725,7 @@ displayed on the cover page (optional --- hidden if not set or if
 samples.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.5.0</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1728,7 +1736,7 @@ README, AGENTS.md, SKILL.md, and setup guide. One-liner URLs now use
 <code>main/scripts/install.sh</code>.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.4.0</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1745,7 +1753,7 @@ detection. Updated Chapter 7 with one-liner update/uninstall and full
 menu documentation.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.3.0</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1761,7 +1769,7 @@ comparison table.</p></li>
 <code>setup-guide/</code>.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.2.1</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1771,7 +1779,7 @@ MaaS Gateway and the document templates. Added cloud resource cleanup as
 an optional subsection.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.2.0</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1787,7 +1795,7 @@ reporting.</p></li>
 <li><p>Updated Chapter 7 with uninstall instructions.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.1.2</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1796,7 +1804,7 @@ Markdown, DOCX, and HTML with purpose, copy-paste quality, and
 limitations. Recommends Markdown for copy-paste.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.1.1</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1809,7 +1817,7 @@ selection, skill install).</p></li>
 validation, code style, git conventions, when unsure.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.1.0</p></td>
 <td style="text-align: left;"><p>2026-09-11</p></td>
 <td style="text-align: left;"><ul>
@@ -1833,7 +1841,7 @@ Added troubleshooting subsection in Chapter 4 with common SSH connection
 issues and ncat debugging commands.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>3.0.1</p></td>
 <td style="text-align: left;"><p>2026-09-10</p></td>
 <td style="text-align: left;"><ul>
@@ -1843,7 +1851,7 @@ version gap note, callout-in-code fix, CI font auto-discovery, dofile
 path comment, test-sync.sh header.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>3.0.0</p></td>
 <td style="text-align: left;"><p>2026-09-09</p></td>
 <td style="text-align: left;"><ul>
@@ -1852,7 +1860,7 @@ DOCX fix logic, build system auto-discovery, unified format pipeline,
 GitHub Actions CI.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.16.0</p></td>
 <td style="text-align: left;"><p>2026-09-05</p></td>
 <td style="text-align: left;"><ul>
@@ -1860,7 +1868,7 @@ GitHub Actions CI.</p></li>
 system updates, and technical template parity improvements.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.13.0</p></td>
 <td style="text-align: left;"><p>2026-08-24</p></td>
 <td style="text-align: left;"><ul>
@@ -1875,7 +1883,7 @@ output-structure regressions on upgrade. Extended
 tests (missing style → non-zero exit).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.12.0</p></td>
 <td style="text-align: left;"><p>2026-08-24</p></td>
 <td style="text-align: left;"><ul>
@@ -1894,7 +1902,7 @@ future preamble command or class option now flows through
 automatically.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.11.0</p></td>
 <td style="text-align: left;"><p>2026-08-24</p></td>
 <td style="text-align: left;"><ul>
@@ -1908,7 +1916,7 @@ heading colors, list indentation, and footer PAGE field in patched
 <code>styles.xml</code>.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.10.0</p></td>
 <td style="text-align: left;"><p>2026-08-24</p></td>
 <td style="text-align: left;"><ul>
@@ -1917,7 +1925,7 @@ fix stale doc references (L16 output count, L-range, setup-guide feature
 claim), add test-sync.sh for version consistency checking.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.9.1</p></td>
 <td style="text-align: left;"><p>2026-08-23</p></td>
 <td style="text-align: left;"><ul>
@@ -1927,7 +1935,7 @@ with <code>embed-images.py</code>. Outputs are self-contained — no
 external image files needed.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.9.0</p></td>
 <td style="text-align: left;"><p>2026-08-23</p></td>
 <td style="text-align: left;"><ul>
@@ -1936,7 +1944,7 @@ Add footer page numbers. Style TOC heading (22pt bold + rule). Add
 hutable table width + fixed layout.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.8.3</p></td>
 <td style="text-align: left;"><p>2026-08-23</p></td>
 <td style="text-align: left;"><ul>
@@ -1945,7 +1953,7 @@ fixed layout. Changelog section heading now uses custom H1 format (56pt
 number, red border, right tab) instead of pandoc’s default.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.8.2</p></td>
 <td style="text-align: left;"><p>2026-08-23</p></td>
 <td style="text-align: left;"><ul>
@@ -1955,7 +1963,7 @@ Paragraph preserves Heading1 style for navigation while matching PDF
 layout (number left, title right, red rule below).</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.8.1</p></td>
 <td style="text-align: left;"><p>2026-08-23</p></td>
 <td style="text-align: left;"><ul>
@@ -1965,7 +1973,7 @@ left, title right) with red bottom rule. H2-H4 use simple inline format
 (number + title, no right tab stop).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.8.0</p></td>
 <td style="text-align: left;"><p>2026-08-23</p></td>
 <td style="text-align: left;"><ul>
@@ -1976,7 +1984,7 @@ changelog formatting (rules, bold version, italic date), caption style
 indentation.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.7.1</p></td>
 <td style="text-align: left;"><p>2026-08-17</p></td>
 <td style="text-align: left;"><ul>
@@ -1984,7 +1992,7 @@ indentation.</p></li>
 (<code>huawei-doc-templates</code>).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.7.0</p></td>
 <td style="text-align: left;"><p>2026-08-12</p></td>
 <td style="text-align: left;"><ul>
@@ -1993,7 +2001,7 @@ heading; <code>[nochangelog]</code> suppresses the heading and entries
 in one switch.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.6.1</p></td>
 <td style="text-align: left;"><p>2026-08-12</p></td>
 <td style="text-align: left;"><ul>
@@ -2002,7 +2010,7 @@ to <code>\ hline</code> for <code>colortbl</code>
 compatibility).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.6.0</p></td>
 <td style="text-align: left;"><p>2026-08-12</p></td>
 <td style="text-align: left;"><ul>
@@ -2012,14 +2020,14 @@ full-grid style.</p></li>
 order).</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.5.1</p></td>
 <td style="text-align: left;"><p>2026-08-10</p></td>
 <td style="text-align: left;"><ul>
 <li><p>H1 section title size reduced from 27pt to 20pt.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.5.0</p></td>
 <td style="text-align: left;"><p>2026-08-10</p></td>
 <td style="text-align: left;"><ul>
@@ -2027,7 +2035,7 @@ order).</p></li>
 height 40% → 50% of text height.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.4.0</p></td>
 <td style="text-align: left;"><p>2026-08-10</p></td>
 <td style="text-align: left;"><ul>
@@ -2036,7 +2044,7 @@ height 40% → 50% of text height.</p></li>
 on the cover page.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.3.1</p></td>
 <td style="text-align: left;"><p>2026-08-09</p></td>
 <td style="text-align: left;"><ul>
@@ -2044,7 +2052,7 @@ on the cover page.</p></li>
 rendering.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.3.0</p></td>
 <td style="text-align: left;"><p>2026-08-09</p></td>
 <td style="text-align: left;"><ul>
@@ -2053,7 +2061,7 @@ rendering.</p></li>
 now be set independently.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.2.4</p></td>
 <td style="text-align: left;"><p>2026-08-09</p></td>
 <td style="text-align: left;"><ul>
@@ -2062,7 +2070,7 @@ Code programming ligatures (<code>calt</code>) that corrupted
 <code>//</code> into <code>))</code> on copy.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.2.3</p></td>
 <td style="text-align: left;"><p>2026-08-09</p></td>
 <td style="text-align: left;"><ul>
@@ -2071,7 +2079,7 @@ have no italic variants; enabled synthetic slant
 (<code>AutoFakeSlant</code>).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.2.2</p></td>
 <td style="text-align: left;"><p>2026-08-08</p></td>
 <td style="text-align: left;"><ul>
@@ -2079,7 +2087,7 @@ have no italic variants; enabled synthetic slant
 4).</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.2.1</p></td>
 <td style="text-align: left;"><p>2026-08-08</p></td>
 <td style="text-align: left;"><ul>
@@ -2087,7 +2095,7 @@ have no italic variants; enabled synthetic slant
 red).</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.2.0</p></td>
 <td style="text-align: left;"><p>2026-08-08</p></td>
 <td style="text-align: left;"><ul>
@@ -2095,7 +2103,7 @@ red).</p></li>
 row colors, and bordered cells.</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>2.1.0</p></td>
 <td style="text-align: left;"><p>2026-08-06</p></td>
 <td style="text-align: left;"><ul>
@@ -2118,7 +2126,7 @@ can be set later as a second access method.</p></li>
 <li><p>Added <code>Port 4444</code> to SSH config examples.</p></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><p>2.0.0</p></td>
 <td style="text-align: left;"><p>2026-08-05</p></td>
 <td style="text-align: left;"><ul>
@@ -2133,7 +2141,7 @@ avoid package name collisions.</p></li>
 (<code>\ codefile</code>).</p></li>
 </ul></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><p>1.0.0</p></td>
 <td style="text-align: left;"><p>2026-08-05</p></td>
 <td style="text-align: left;"><ul>

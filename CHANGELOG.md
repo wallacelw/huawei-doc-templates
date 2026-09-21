@@ -4,6 +4,13 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.9.2 (2026-09-21)
+
+### Fix DOCX body text justification
+
+- DOCX body paragraphs are now justified (matching the PDF LaTeX
+  default), instead of left-aligned.
+
 ## v6.9.1 (2026-09-21)
 
 ### Fix DOCX subsection number size

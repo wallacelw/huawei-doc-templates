@@ -601,6 +601,11 @@ def _fix_normal_style(root, W_NS):
             spacing.set(f"{{{W_NS}}}after", "80")
             spacing.set(f"{{{W_NS}}}line", "280")
             spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
+            # Justified (PDF LaTeX default)
+            jc = pPr.find(f"{{{W_NS}}}jc")
+            if jc is None:
+                jc = etree.SubElement(pPr, f"{{{W_NS}}}jc")
+            jc.set(f"{{{W_NS}}}val", "both")
             break
     if not normal_found:
         raise RuntimeError(
