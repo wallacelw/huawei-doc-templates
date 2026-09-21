@@ -441,7 +441,15 @@ generate_docx() {
     fi
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
     if [ -f "${PROJECT_DIR}/$out" ]; then
-        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" $fix_lang 2>&1; then
+        local fix_args="$fix_lang"
+        local header_logo=""
+        if grep -q '^:header-logo:' "$ADOC_FILE" 2>/dev/null; then
+            header_logo=$(grep -oP '^:header-logo:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
+        fi
+        if [ -n "$header_logo" ] && [ -f "${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}" ]; then
+            fix_args="$fix_args --header-logo ${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}"
+        fi
+        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" $fix_args 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2
             RESULTS_FAIL+=("DOCX:post-processing failed for $TEMPLATE")
         fi

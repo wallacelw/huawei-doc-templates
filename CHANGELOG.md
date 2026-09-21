@@ -4,6 +4,20 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.10.0 (2026-09-21)
+
+### Header logo, callout boxes, and note labels
+
+- **DOCX header logo**: the Huawei logo now appears in the top-left corner
+  of the DOCX header (optional, driven by `:header-logo:` attribute).
+  Flexible — documents without the attribute get no logo.
+- **DOCX callout boxes**: admonitions (TIP, NOTE, WARNING, CAUTION,
+  IMPORTANT) now render as styled callout boxes with colored backgrounds,
+  left borders, and type labels — matching the PDF. Previously they
+  rendered as plain paragraphs.
+- **PDF note labels**: inline notes (`[.note]` role) now show a
+  language-aware "Note:" / "Nota:" label (was unlabeled italic text).
+
 ## v6.9.2 (2026-09-21)
 
 ### Fix DOCX body text justification

@@ -44,6 +44,10 @@ _TEMPLATE = None
 # to 'en' (backward compat for direct calls / older wrappers).
 _LANG = 'en'
 
+# Optional header logo path (from --header-logo CLI arg, build.sh injects
+# it from :header-logo:).  None = no logo in header.
+_HEADER_LOGO = None
+
 
 def check_pandoc_version():
     """Warn when pandoc is outside the tested range (non-fatal).
@@ -1344,6 +1348,32 @@ def _apply_content_styling(docx_path):
     # Fix TOC field depth (PDF tocdepth=3, pandoc defaults to 2)
     _fix_toc_field(doc, qn)
 
+    # Convert admonition sentinels to styled callout boxes
+    _fix_callout_boxes(doc, qn)
+
+    # Add header logo (optional, from --header-logo CLI arg)
+    import os
+    if _HEADER_LOGO and os.path.isfile(_HEADER_LOGO):
+        section = doc.sections[0]
+        header = section.header
+        hp = header.paragraphs[0]
+        text_width = section.page_width - section.left_margin - section.right_margin
+        hp.paragraph_format.tab_stops.add_tab_stop(
+            text_width // 2, WD_TAB_ALIGNMENT.CENTER)
+        hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        logo_run = hp.add_run()
+        logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
+        tab_run = hp.add_run('\t')
+        tab_run.font.size = Pt(10)
+        tab_run.font.name = "HarmonyOS Sans"
+        # Move logo + tab to the beginning (after pPr)
+        p_elem = hp._element
+        pPr = p_elem.find(qn('w:pPr'))
+        insert_pos = 1 if pPr is not None else 0
+        for run_elem in [tab_run._element, logo_run._element]:
+            p_elem.remove(run_elem)
+            p_elem.insert(insert_pos, run_elem)
+
     doc.save(docx_path)
 
 
@@ -1612,6 +1642,73 @@ def _fix_list_indentation(docx_path, W_NS):
 
 # ── Main fix function ─────────────────────────────────────────────────────
 
+def _fix_callout_boxes(doc, qn):
+    """Convert **[TIP]**/​**[NOTE]**/​**[WARNING]** sentinels to styled callout boxes.
+
+    The preprocessor converts AsciiDoc admonitions to sentinel format
+    (e.g. TIP: text → **[TIP]** text) because pandoc strips the admonition
+    type.  This function finds the sentinels and applies callout styling
+    matching the PDF (huawei-callouts.sty).
+    """
+    callout_map = {
+        'TIP':       ('E8F5E9', '62B230', 'Tip'),
+        'NOTE':      ('E0F7FA', '30B5C5', 'Info'),
+        'WARNING':   ('FFF3E0', 'ED6D00', 'Important'),
+        'CAUTION':   ('FFF3E0', 'ED6D00', 'Important'),
+        'IMPORTANT': ('FFF3E0', 'ED6D00', 'Important'),
+    }
+    for paragraph in doc.paragraphs:
+        text = paragraph.text.strip()
+        for sentinel, (bg, border_color, label) in callout_map.items():
+            marker = sentinel + '\u2016'
+            if not text.startswith(marker):
+                continue
+            # Remove the sentinel from the first run(s)
+            for run in paragraph.runs:
+                if marker in run.text:
+                    run.text = run.text.replace(marker, '').lstrip()
+                    if not run.text:
+                        run._element.getparent().remove(run._element)
+                    break
+            # Insert label run at the beginning
+            p_elem = paragraph._element
+            label_r = OxmlElement('w:r')
+            label_rPr = etree.SubElement(label_r, qn('w:rPr'))
+            etree.SubElement(label_rPr, qn('w:b'))
+            color_elem = etree.SubElement(label_rPr, qn('w:color'))
+            color_elem.set(qn('w:val'), border_color)
+            rFonts = etree.SubElement(label_rPr, qn('w:rFonts'))
+            rFonts.set(qn('w:ascii'), 'HarmonyOS Sans')
+            rFonts.set(qn('w:hAnsi'), 'HarmonyOS Sans')
+            label_t = etree.SubElement(label_r, qn('w:t'))
+            label_t.set(qn('xml:space'), 'preserve')
+            label_t.text = label + ': '
+            if paragraph.runs:
+                paragraph.runs[0]._element.addprevious(label_r)
+            else:
+                p_elem.append(label_r)
+            # Apply shading + left border via pPr
+            pPr = p_elem.find(qn('w:pPr'))
+            if pPr is None:
+                pPr = etree.SubElement(p_elem, qn('w:pPr'))
+            # pBdr (schema: before shd)
+            pBdr = pPr.find(qn('w:pBdr'))
+            if pBdr is None:
+                pBdr = etree.SubElement(pPr, qn('w:pBdr'))
+            left = etree.SubElement(pBdr, qn('w:left'))
+            left.set(qn('w:val'), 'single')
+            left.set(qn('w:sz'), '24')  # 3pt
+            left.set(qn('w:space'), '4')
+            left.set(qn('w:color'), border_color)
+            # Shading
+            shd = pPr.find(qn('w:shd'))
+            if shd is None:
+                shd = etree.SubElement(pPr, qn('w:shd'))
+            shd.set(qn('w:val'), 'clear')
+            shd.set(qn('w:fill'), bg)
+            break
+
+
 def fix_generated_docx(docx_path):
     """Post-process a pandoc-generated DOCX to fix heading styles.
 
@@ -1848,26 +1945,39 @@ def regenerate_reference(docx_path):
     header = section.header
     header.is_linked_to_previous = False
     hp = header.paragraphs[0]
-    hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in list(hp.runs):
         run._element.getparent().remove(run._element)
+    # Optional header logo (left) + document title (center) — PDF huawei-page.sty
+    import os
+    if _HEADER_LOGO and os.path.isfile(_HEADER_LOGO):
+        hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        text_width = section.page_width - section.left_margin - section.right_margin
+        hp.paragraph_format.tab_stops.add_tab_stop(
+            text_width // 2, WD_TAB_ALIGNMENT.CENTER)
+        logo_run = hp.add_run()
+        logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
+        tab_run = hp.add_run('\t')
+        tab_run.font.size = Pt(10)
+        tab_run.font.name = "HarmonyOS Sans"
+    else:
+        hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in [hp.add_run(), hp.add_run(), hp.add_run(), hp.add_run("Document Title"), hp.add_run()]:
         run.font.size = Pt(10)
         run.font.name = "HarmonyOS Sans"
     # Field: STYLEREF "Title"
     fld_begin = OxmlElement('w:fldChar')
     fld_begin.set(qn('w:fldCharType'), 'begin')
-    hp.runs[0]._r.append(fld_begin)
+    hp.runs[-5]._r.append(fld_begin)
     instr = OxmlElement('w:instrText')
     instr.set(qn('xml:space'), 'preserve')
     instr.text = ' STYLEREF "Title" \\* MERGEFORMAT '
-    hp.runs[1]._r.append(instr)
+    hp.runs[-4]._r.append(instr)
     fld_sep = OxmlElement('w:fldChar')
     fld_sep.set(qn('w:fldCharType'), 'separate')
-    hp.runs[2]._r.append(fld_sep)
+    hp.runs[-3]._r.append(fld_sep)
     fld_end = OxmlElement('w:fldChar')
     fld_end.set(qn('w:fldCharType'), 'end')
-    hp.runs[4]._r.append(fld_end)
+    hp.runs[-1]._r.append(fld_end)
 
     # ── Footer: page number (10pt, centered) ──────────────────────────────
     footer = section.footer
@@ -1906,8 +2016,10 @@ def main(argv=None, reference_name=None):
     """
     global _TEMPLATE
     global _LANG
+    global _HEADER_LOGO
     _TEMPLATE = None  # reset between in-process main() calls
     _LANG = 'en'      # reset between in-process main() calls
+    _HEADER_LOGO = None  # reset between in-process main() calls
     if argv is None:
         argv = sys.argv[1:]
 
@@ -1959,6 +2071,13 @@ def main(argv=None, reference_name=None):
                 print(f"error: unknown lang: {lang_val} (expected en|pt)")
                 sys.exit(1)
             _LANG = lang_val
+            i += 2
+            continue
+        if argv[i] == '--header-logo':
+            if i + 1 >= len(argv):
+                print("error: --header-logo requires a file path")
+                sys.exit(1)
+            _HEADER_LOGO = argv[i + 1]
             i += 2
             continue
         args.append(argv[i])

@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.9.2
+:version: 6.10.0
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.10.0}{2026-09-21}{\item Header logo, callout boxes, and note labels: DOCX header now shows the Huawei logo in the top-left corner (optional, driven by the :header-logo: attribute). DOCX admonitions (TIP, NOTE, WARNING) now render as styled callout boxes with colored backgrounds, left borders, and type labels — matching the PDF. PDF inline notes ([.note] role) now show a language-aware ``Note:'' label (was unlabeled italic text).}
   \changelogentry{6.9.2}{2026-09-21}{\item Fix DOCX body text alignment: paragraphs are now justified (matching the PDF LaTeX default), instead of left-aligned.}
   \changelogentry{6.9.1}{2026-09-21}{\item Fix DOCX subsection number size: H2/H3/H4 section numbers were rendered at 56pt (same as H1) instead of matching the heading text size (18/16/14pt). The SectionNumber style is now unstyled (inherits heading size); 56pt is set directly on H1 number runs only.}
   \changelogentry{6.9.0}{2026-09-21}{\item TOC styling: the table-of-contents title rule is now Huawei red (was black) in both PDF and DOCX, matching the H1 heading red rules. DOCX TOC entries now match the PDF: level 1 bold 12pt, levels 2-3 normal 10pt, HarmonyOS Sans font. DOCX TOC depth increased from 2 to 3 levels (matching PDF tocdepth). Dead TOCTitle style removed from DOCX.}

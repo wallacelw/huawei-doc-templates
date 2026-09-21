@@ -1133,6 +1133,17 @@ def process_adoc(content, template, target='docx'):
     # 2. Convert passthrough blocks
     content = process_passthrough_blocks(content, template, lang)
 
+    # 2.5. Convert admonitions to sentinel format for DOCX callout styling
+    # (pandoc strips the admonition type prefix; the **[TIP]** sentinel
+    # lets docx_fix.py identify and style them as callout boxes)
+    if target == 'docx':
+        content = re.sub(
+            r'^(TIP|NOTE|WARNING|CAUTION|IMPORTANT): ',
+            r'**\1‖** ',
+            content,
+            flags=re.MULTILINE,
+        )
+
     # 3. Convert block-level roles
     content = convert_block_roles(content, lang)
 
