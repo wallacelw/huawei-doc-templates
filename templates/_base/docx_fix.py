@@ -1317,6 +1317,9 @@ def _apply_content_styling(docx_path):
     # --- Cover: logo + cover text + meta line (PDF huawei-cover.sty) ---
     _assemble_cover(doc, qn, docx_path)
 
+    # Fix TOC field depth (PDF tocdepth=3, pandoc defaults to 2)
+    _fix_toc_field(doc, qn)
+
     doc.save(docx_path)
 
 
@@ -1396,13 +1399,17 @@ def _style_table(table, qn):
 def _fix_toc_styles(root, W_NS):
     """Fix TOC1/TOC2/TOC3 + TOCHeading styles (Word built-in TOC entry styles)."""
     toc_configs = [
-        ("TOC1", "0",   "9"),
-        ("TOC2", "420", "9"),
-        ("TOC3", "840", "9"),
+        ("TOC1", "0",   "9",  True,  "24"),  # bold 12pt (PDF: \cftsecfont)
+        ("TOC2", "420", "9",  False, "20"),  # normal 10pt (PDF: \cftsubsecfont)
+        ("TOC3", "840", "9",  False, "20"),  # normal 10pt (PDF: \cftsubsubsecfont)
     ]
-    for toc_id, indent, ui_pri in toc_configs:
-        has_toc = any(s.get(f"{{{W_NS}}}styleId") == toc_id for s in root.findall(f"{{{W_NS}}}style"))
-        if not has_toc:
+    for toc_id, indent, ui_pri, bold, sz_val in toc_configs:
+        ts = None
+        for s in root.findall(f"{{{W_NS}}}style"):
+            if s.get(f"{{{W_NS}}}styleId") == toc_id:
+                ts = s
+                break
+        if ts is None:
             ts = etree.SubElement(root, f"{{{W_NS}}}style")
             ts.set(f"{{{W_NS}}}type", "paragraph")
             ts.set(f"{{{W_NS}}}styleId", toc_id)
@@ -1411,15 +1418,54 @@ def _fix_toc_styles(root, W_NS):
             etree.SubElement(ts, f"{{{W_NS}}}next").set(f"{{{W_NS}}}val", "Normal")
             etree.SubElement(ts, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", ui_pri)
             etree.SubElement(ts, f"{{{W_NS}}}qFormat")
+        # pPr: indent, right tab + dot leader, spacing (schema: pPr before rPr)
+        pPr = ts.find(f"{{{W_NS}}}pPr")
+        if pPr is None:
             pPr = etree.SubElement(ts, f"{{{W_NS}}}pPr")
+        tabs = pPr.find(f"{{{W_NS}}}tabs")
+        if tabs is None:
             tabs = etree.SubElement(pPr, f"{{{W_NS}}}tabs")
+        tab = tabs.find(f"{{{W_NS}}}tab")
+        if tab is None:
             tab = etree.SubElement(tabs, f"{{{W_NS}}}tab")
-            tab.set(f"{{{W_NS}}}val", "right")
-            tab.set(f"{{{W_NS}}}leader", "dot")
-            tab.set(f"{{{W_NS}}}pos", "9638")  # content text width in twips (A4 minus margins)
-            etree.SubElement(pPr, f"{{{W_NS}}}ind").set(f"{{{W_NS}}}left", indent)
+        tab.set(f"{{{W_NS}}}val", "right")
+        tab.set(f"{{{W_NS}}}leader", "dot")
+        tab.set(f"{{{W_NS}}}pos", "9638")  # content text width in twips (A4 minus margins)
+        ind = pPr.find(f"{{{W_NS}}}ind")
+        if ind is None:
+            ind = etree.SubElement(pPr, f"{{{W_NS}}}ind")
+        ind.set(f"{{{W_NS}}}left", indent)
+        sp = pPr.find(f"{{{W_NS}}}spacing")
+        if sp is None:
             sp = etree.SubElement(pPr, f"{{{W_NS}}}spacing")
-            sp.set(f"{{{W_NS}}}after", "40")  # 2pt
+        sp.set(f"{{{W_NS}}}after", "40")  # 2pt
+        # rPr: font, size, bold, color (match PDF huawei-toc.sty entry fonts)
+        rPr = ts.find(f"{{{W_NS}}}rPr")
+        if rPr is None:
+            rPr = etree.SubElement(ts, f"{{{W_NS}}}rPr")
+        rFonts = rPr.find(f"{{{W_NS}}}rFonts")
+        if rFonts is None:
+            rFonts = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
+        for attr in list(rFonts.attrib.keys()):
+            if "Theme" in attr or "theme" in attr:
+                del rFonts.attrib[attr]
+        rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
+        rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
+        if bold:
+            for tag in ['b', 'bCs']:
+                for elem in rPr.findall(f"{{{W_NS}}}{tag}"):
+                    rPr.remove(elem)
+            etree.SubElement(rPr, f"{{{W_NS}}}b")
+            etree.SubElement(rPr, f"{{{W_NS}}}bCs")
+        for tag in ['sz', 'szCs']:
+            elem = rPr.find(f"{{{W_NS}}}{tag}")
+            if elem is None:
+                elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
+            elem.set(f"{{{W_NS}}}val", sz_val)
+        color = rPr.find(f"{{{W_NS}}}color")
+        if color is None:
+            color = etree.SubElement(rPr, f"{{{W_NS}}}color")
+        color.set(f"{{{W_NS}}}val", "1F2328")
 
     # Style TOC heading: 22pt bold + bottom rule (matches PDF)
     toc_heading = None
@@ -1463,7 +1509,7 @@ def _fix_toc_styles(root, W_NS):
     if szCs is None:
         szCs = etree.SubElement(rPr, f"{{{W_NS}}}szCs")
     szCs.set(f"{{{W_NS}}}val", "44")
-    # Bottom border (0.5pt black rule) + right alignment (PDF huawei-toc.sty)
+    # Bottom border (0.5pt red rule) + right alignment (PDF huawei-toc.sty)
     pPr = toc_heading.find(f"{{{W_NS}}}pPr")
     if pPr is None:
         pPr = etree.SubElement(toc_heading, f"{{{W_NS}}}pPr")
@@ -1480,7 +1526,21 @@ def _fix_toc_styles(root, W_NS):
     bottom.set(f"{{{W_NS}}}val", "single")
     bottom.set(f"{{{W_NS}}}sz", "4")  # 0.5pt
     bottom.set(f"{{{W_NS}}}space", "1")
-    bottom.set(f"{{{W_NS}}}color", "000000")
+    bottom.set(f"{{{W_NS}}}color", "C7000B")  # huaweired (matches PDF)
+
+    # Remove dead TOCTitle style (superseded by TOCHeading)
+    for s in root.findall(f"{{{W_NS}}}style"):
+        if s.get(f"{{{W_NS}}}styleId") == "TOCTitle":
+            root.remove(s)
+            break
+
+
+def _fix_toc_field(doc, qn):
+    """Update TOC field to show 3 levels (PDF tocdepth=3, not pandoc's default 2)."""
+    for sdt in doc.element.body.findall(f'.//{qn("w:sdt")}'):
+        for instr in sdt.findall(f'.//{qn("w:instrText")}'):
+            if instr.text and 'TOC' in instr.text:
+                instr.text = instr.text.replace('\\o "1-2"', '\\o "1-3"')
 
 
 def _fix_list_indentation(docx_path, W_NS):

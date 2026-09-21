@@ -4,6 +4,19 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.9.0 (2026-09-21)
+
+### TOC styling match (PDF ↔ DOCX)
+
+- PDF TOC title rule changed from black (`ruleblack`) to Huawei red
+  (`huaweired`), matching the H1 heading red rules for brand consistency.
+- DOCX TOC entries now match the PDF:
+  - TOC1 (level 1): bold 12pt, HarmonyOS Sans
+  - TOC2/TOC3 (levels 2-3): normal 10pt, HarmonyOS Sans
+- DOCX TOC depth increased from 2 to 3 levels (matching PDF `tocdepth=3`).
+- DOCX TOC heading border changed from black to Huawei red (`C7000B`).
+- Dead `TOCTitle` style removed from DOCX (superseded by `TOCHeading`).
+
 ## v6.8.3 (2026-09-20)
 
 ### Docs accuracy fix

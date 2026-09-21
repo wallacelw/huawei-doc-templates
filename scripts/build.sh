@@ -424,7 +424,7 @@ generate_docx() {
         if asciidoctor -b docbook $diagram_opts "$docx_adoc" -o "$tmp_dbk" 2>/dev/null && \
            pandoc -f docbook --reference-doc="$REF_DOCX" \
              --number-sections \
-             --toc --toc-depth=2 \
+             --toc --toc-depth=3 \
              --metadata toc-title="${toc_title}" \
              --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}:${tmp_dir}" \
              "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
