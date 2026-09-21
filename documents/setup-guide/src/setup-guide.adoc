@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.9.0
+:version: 6.9.1
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.9.1}{2026-09-21}{\item Fix DOCX subsection number size: H2/H3/H4 section numbers were rendered at 56pt (same as H1) instead of matching the heading text size (18/16/14pt). The SectionNumber style is now unstyled (inherits heading size); 56pt is set directly on H1 number runs only.}
   \changelogentry{6.9.0}{2026-09-21}{\item TOC styling: the table-of-contents title rule is now Huawei red (was black) in both PDF and DOCX, matching the H1 heading red rules. DOCX TOC entries now match the PDF: level 1 bold 12pt, levels 2-3 normal 10pt, HarmonyOS Sans font. DOCX TOC depth increased from 2 to 3 levels (matching PDF tocdepth). Dead TOCTitle style removed from DOCX.}
   \changelogentry{6.8.3}{2026-09-20}{\item Docs accuracy fix: the multi-format pipeline descriptions in README, AGENTS, and all four SKILL.md files now correctly separate the DOCX/Markdown path (pre-processor then docbook then pandoc) from the HTML path (pre-processor then asciidoctor html5) — the previous wording implied HTML also went through docbook and pandoc. Corrected a stale comment in the DOCX fixer.}
   \changelogentry{6.8.2}{2026-09-20}{\item Documentation and cleanup: README, AGENTS, and all four SKILL.md files now describe the real multi-format pipeline (pre-processor + docx\_fix --fix + --lang flag) instead of the pre-v6.4 asciidoctor-to-pandoc chain. DOCX TOC title is now right-aligned like the PDF (was targeting a dead style). Signature names render bold like the PDF. Dead code removed (unused Caption style, dead TOCTitle style, dead HTML badge CSS). The --template and --lang flags accept the equals form (--template=guide). Various stale comments corrected.}

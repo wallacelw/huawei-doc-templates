@@ -4,6 +4,15 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.9.1 (2026-09-21)
+
+### Fix DOCX subsection number size
+
+- H2/H3/H4 section numbers were rendered at 56pt (same as H1) instead
+  of matching the heading text size (18/16/14pt).
+- The `SectionNumber` style is now unstyled (inherits heading size);
+  56pt is set directly on H1 number runs only.
+
 ## v6.9.0 (2026-09-21)
 
 ### TOC styling match (PDF ↔ DOCX)

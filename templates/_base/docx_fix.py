@@ -1230,10 +1230,29 @@ def _apply_content_styling(docx_path):
             style.paragraph_format.tab_stops.add_tab_stop(
                 text_width, WD_TAB_ALIGNMENT.RIGHT)
             break
+    # Section numbers: only H1's number is 56pt (PDF huawei-titles.sty).
+    # H2/H3/H4 numbers inherit the heading size (18/16/14pt).  Pandoc
+    # applies the same SectionNumber style to all — setting the style
+    # to 56pt makes subsection numbers huge.  Clear the style size and
+    # set 56pt directly on H1 number runs only.
     for style in doc.styles:
         if style.style_id == 'SectionNumber':
-            style.font.size = Pt(56)
+            rPr = style.element.find(qn('w:rPr'))
+            if rPr is not None:
+                for tag in ('sz', 'szCs'):
+                    elem = rPr.find(qn(f'w:{tag}'))
+                    if elem is not None:
+                        rPr.remove(elem)
             break
+    for paragraph in doc.paragraphs:
+        if paragraph.style.style_id != 'Heading1':
+            continue
+        for run in paragraph.runs:
+            rPr = run._element.find(qn('w:rPr'))
+            if rPr is not None:
+                rStyle = rPr.find(qn('w:rStyle'))
+                if rStyle is not None and rStyle.get(qn('w:val')) == 'SectionNumber':
+                    run.font.size = Pt(56)
 
     # --- Badge styling: [Pass]/[Fail]/... → inline PNG images ---
     # Replaces the flat character-styled text with rounded pill PNGs that
