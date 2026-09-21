@@ -35,7 +35,14 @@ update_repo() {
     SCRIPT_DIR="$(pwd)"
     local current_tag latest_tag new_tag
     current_tag=$(git describe --tags 2>/dev/null || echo "unknown")
-    latest_tag=$(git ls-remote --tags --sort=-v:refname origin 2>/dev/null | head -1 | awk -F/ '{print $3}')
+    # Latest stable tag, version-sorted. The old `--sort=-v:refname | head -1`
+    # could return a "vX.Y.Z^{}" dereference line for annotated tags (never
+    # equals current_tag → spurious update prompts). Filter to plain
+    # v<major>.<minor>.<patch> tags (excludes -beta/-alpha pre-releases),
+    # strip ^{}, and sort -V so v10.0.0 > v9.0.0 at any major version.
+    # || true: grep exits 1 on no match — under pipefail the assignment
+    # would abort silently; the [ -z ] guard below degrades to "unknown".
+    latest_tag=$(git ls-remote --tags origin 2>/dev/null | awk '{print $2}' | sed 's|refs/tags/||;s|\^{}$||' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
     [ -z "$latest_tag" ] && latest_tag="unknown"
     echo ""
     echo "  Existing installation found: $repo_path ($current_tag)"
@@ -152,6 +159,7 @@ echo ""
 # ── Confirmation ──
 INSTALL_SKILLS=true
 INSTALL_VSCODE=true
+INSTALL_SYSTEM_LATEXMK=false
 
 if [[ "$AUTO_YES" != true ]]; then
     echo -ne "  ${C_BOLD}Proceed with installation?${C_RESET} [y/N] "
@@ -171,6 +179,19 @@ if [[ "$AUTO_YES" != true ]]; then
     if [[ "$response" =~ ^[Nn]$ ]]; then
         INSTALL_VSCODE=false
     fi
+    # Optional system-wide latexmk default (default no).
+    log_dim "Optional: set latexmk's default engine to XeLaTeX system-wide (/etc/LatexMk)."
+    log_dim "Affects every LaTeX project on this machine — not needed here (each project ships its own .latexmkrc)."
+    echo -ne "  ${C_BOLD}Write /etc/LatexMk (\$pdf_mode = 5)?${C_RESET} [y/N] "
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        INSTALL_SYSTEM_LATEXMK=true
+    fi
+else
+    # Unattended (curl | bash or --yes): no confirmation prompts are shown.
+    echo ""
+    log_warn "Running unattended install — this will install packages, fonts, and modify LaTeX configuration on this system."
+    echo ""
 fi
 
 # ── Pre-flight checks ──
@@ -284,18 +305,34 @@ fi
 log_step "Installing HarmonyOS Sans font"
 
 HARMONYOS_DEB_URL="https://github.com/zhiyuan1i/fonts-harmonyos-sans-cn/releases/download/v1.0.0/harmonyos_sans.deb"
-HARMONYOS_DEB="/tmp/harmonyos_sans.deb"
 HARMONYOS_DEB_SHA256="d1fdaccd6d8f7a8918db366430c586503480d6e0d44ace33715fb7d999537123"
 
 if fc-list : family | grep -qi "HarmonyOS Sans"; then
     log_ok "HarmonyOS Sans: already installed"
 else
     log_desc "Downloading from GitHub releases..."
+    # mktemp path (no fixed /tmp name — closes the checksum→install symlink
+    # race), same pattern as the fvextra download above. Bash keeps a single
+    # EXIT trap, so this one also re-removes the fvextra temps (no-op if the
+    # fvextra branch never ran or already cleaned up; rm -rf "" is silent).
+    HARMONYOS_DEB="$(mktemp --suffix=.deb)"
+    trap 'rm -rf "$HARMONYOS_DEB" "${FVEXTRA_ZIP:-}" "${FVEXTRA_BUILD:-}"' EXIT
     if wget -q "$HARMONYOS_DEB_URL" -O "$HARMONYOS_DEB"; then
         if echo "$HARMONYOS_DEB_SHA256  $HARMONYOS_DEB" | sha256sum -c - 2>/dev/null; then
+            # apt is noisy — suppress output but keep its real exit code;
+            # set -e would abort silently with no diagnostics otherwise.
+            set +e
             $SUDO apt install -y "$HARMONYOS_DEB" >/dev/null 2>&1
+            harmonyos_apt_status=$?
+            set -e
             rm -f "$HARMONYOS_DEB"
-            log_done "HarmonyOS Sans: installed"
+            if [[ "$harmonyos_apt_status" -eq 0 ]]; then
+                log_done "HarmonyOS Sans: installed"
+            else
+                log_error "HarmonyOS Sans: apt install failed (exit code $harmonyos_apt_status)"
+                log_dim "Install manually: wget $HARMONYOS_DEB_URL -O harmonyos_sans.deb && sudo apt install -y ./harmonyos_sans.deb"
+                log_warn "Continuing — documents will use the fallback font Liberation Sans (L8)"
+            fi
         else
             log_error "HarmonyOS Sans: checksum mismatch — possible tampered download"
             rm -f "$HARMONYOS_DEB"
@@ -405,19 +442,27 @@ else
     log_dim "Skipped by user"
 fi
 
-# ── Fix system-wide latexmk default ──
-log_step "Fixing system-wide latexmk default (/etc/LatexMk)"
+# ── Optional: system-wide latexmk default (/etc/LatexMk) ──
+# Opt-in: every project in this repo ships its own .latexmkrc with
+# $pdf_mode = 5 (see AGENTS.md L6), so the system-wide default is not
+# needed for these templates.
+if [[ "$INSTALL_SYSTEM_LATEXMK" == true ]]; then
+    log_step "Setting system-wide latexmk default (/etc/LatexMk)"
 
-if [[ -f /etc/LatexMk ]]; then
-    if grep -q '^\$pdf_mode\s*=\s*[14];' /etc/LatexMk; then
-        $SUDO sed -i 's/^\$pdf_mode\s*=\s*[14];/$pdf_mode = 5;  # xelatex — required by fontspec/' /etc/LatexMk
-        log_ok "/etc/LatexMk: fixed \$pdf_mode → 5 (xelatex)"
+    if [[ -f /etc/LatexMk ]]; then
+        if grep -q '^\$pdf_mode\s*=\s*[14];' /etc/LatexMk; then
+            $SUDO sed -i 's/^\$pdf_mode\s*=\s*[14];/$pdf_mode = 5;  # xelatex — required by fontspec/' /etc/LatexMk
+            log_ok "/etc/LatexMk: fixed \$pdf_mode → 5 (xelatex)"
+        else
+            log_ok "/etc/LatexMk: already xelatex or custom"
+        fi
     else
-        log_ok "/etc/LatexMk: already xelatex or custom"
+        echo '$pdf_mode = 5;  # xelatex — required by fontspec' | $SUDO tee /etc/LatexMk >/dev/null
+        log_ok "/etc/LatexMk: created with \$pdf_mode = 5 (xelatex)"
     fi
 else
-    echo '$pdf_mode = 5;  # xelatex — required by fontspec' | $SUDO tee /etc/LatexMk >/dev/null
-    log_ok "/etc/LatexMk: created with \$pdf_mode = 5 (xelatex)"
+    log_step "System-wide latexmk default (/etc/LatexMk)"
+    log_info "Skipped — per-project .latexmkrc files handle this (each document ships its own .latexmkrc with \$pdf_mode = 5)"
 fi
 
 # ── Configure VS Code (local + remote) ──

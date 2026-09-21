@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Pre-processor for DOCX generation.
+r"""Pre-processor for DOCX generation.
 
 Transforms .adoc passthrough blocks (raw LaTeX) and custom roles to
 AsciiDoc-native syntax before `asciidoctor -b docbook` conversion,
-so content survives into DOCX output.
+so content survives into DOCX output.  Also inlines [.codefile,...]
+role blocks (external file content) so DOCX/MD/HTML match the PDF,
+which typesets the file via \codefile.
 
 Usage:
     python3 adoc_docx_preprocessor.py --template poc input.adoc -o output.adoc
@@ -13,6 +15,7 @@ Usage:
 import re
 import sys
 import argparse
+import os
 
 # ---------------------------------------------------------------------------
 # Language-aware labels
@@ -779,18 +782,168 @@ def convert_block_roles(content, lang):
     return content
 
 
+# ---------------------------------------------------------------------------
+# Codefile blocks ([.codefile,file=...,lang=...])
+# ---------------------------------------------------------------------------
+
+# Role line of the codefile construct.  Both the role form
+# ([.codefile,file=...]) and the positional form ([codefile,file=...])
+# trigger \codefile in the Ruby converter; the file attribute is
+# required — without it the converter falls through to plain code
+# handling, and so does this pre-processor.
+_CODEFILE_ROLE_RE = re.compile(r'^([ \t]*)\[\.?codefile,([^\]]*)\][ \t]*$')
+
+
+def _source_fence_len(line):
+    """Return the ---- fence length on *line* (4+ dashes), else 0."""
+    stripped = line.strip()
+    if re.fullmatch(r'-{4,}', stripped):
+        return len(stripped)
+    return 0
+
+
+def _parse_codefile_attrs(attrs):
+    """Parse 'file=X,lang=Y' into a dict (keys and values stripped)."""
+    parsed = {}
+    for part in attrs.split(','):
+        key, sep, value = part.partition('=')
+        if sep:
+            parsed[key.strip()] = value.strip()
+    return parsed
+
+
+def _resolve_codefile_path(file_attr, base_dir):
+    """Resolve the codefile *file_attr* like the PDF's TEXINPUTS lookup.
+
+    The .adoc lives in <doc-root>/src/ and the asset in <doc-root>/assets/
+    (the document .latexmkrc puts the doc root first on TEXINPUTS), so
+    the doc root — the parent of the .adoc's directory — is tried first,
+    then the .adoc's own directory.  Returns None when unresolvable.
+    """
+    if not file_attr:
+        return None
+    if os.path.isabs(file_attr):
+        return file_attr if os.path.isfile(file_attr) else None
+    if base_dir is None:
+        return None
+    for candidate in (os.path.join(base_dir, os.pardir, file_attr),
+                      os.path.join(base_dir, file_attr)):
+        candidate = os.path.normpath(candidate)
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def _warn_codefile(file_attr, base_dir, reason='not found'):
+    """Warn on stderr that a [.codefile] block is left as-is."""
+    if base_dir is None:
+        where = 'input path unknown'
+    else:
+        where = 'looked in ' + base_dir + '/.. and ' + base_dir
+    sys.stderr.write(
+        'adoc_docx_preprocessor: warning: codefile \'' + file_attr
+        + '\' ' + reason + ' (' + where + '); block left as-is\n')
+
+
+def convert_codefile_blocks(content, base_dir):
+    r"""Replace [.codefile,file=...] + listing constructs with file content.
+
+    PDF (converter + huawei-code.sty): the role makes the Ruby converter
+    emit \codefile[lang]{file} and LaTeX typesets the FILE's content
+    (\VerbatimInput); the listing body is ignored.  Secondary formats
+    have no \codefile, so the file content is inlined as a real
+    [source] block instead (L18 — formats follow the PDF).  A missing
+    or unreadable file leaves the block untouched (graceful
+    degradation, mirroring \codefile's \PackageWarning) with a warning.
+    """
+    if 'codefile,' not in content:
+        return content
+    lines = content.split('\n')
+    out = []
+    i = 0
+    while i < len(lines):
+        m = _CODEFILE_ROLE_RE.match(lines[i])
+        if m is None:
+            out.append(lines[i])
+            i += 1
+            continue
+        indent = m.group(1)
+        attrs = _parse_codefile_attrs(m.group(2))
+        file_attr = attrs.get('file')
+        if not file_attr:
+            # No file attribute — the Ruby converter falls through to
+            # plain code handling; do the same (block left as-is).
+            out.append(lines[i])
+            i += 1
+            continue
+        # The listing fence must directly follow the role line; the
+        # closing fence must be at least as long (AsciiDoc rule).
+        if i + 1 >= len(lines):
+            open_len = 0
+        else:
+            open_len = _source_fence_len(lines[i + 1])
+        end = None
+        if open_len:
+            k = i + 2
+            while k < len(lines):
+                if _source_fence_len(lines[k]) >= open_len:
+                    end = k
+                    break
+                k += 1
+        if end is None:
+            # No (or unterminated) listing block — leave the role line;
+            # the loop copies the remaining lines verbatim.
+            out.append(lines[i])
+            i += 1
+            continue
+        path = _resolve_codefile_path(file_attr, base_dir)
+        file_content = None
+        if path is None:
+            _warn_codefile(file_attr, base_dir)
+        else:
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    file_content = f.read()
+            except (OSError, UnicodeDecodeError) as exc:
+                _warn_codefile(file_attr, base_dir,
+                               'unreadable: ' + str(exc))
+        if file_content is None:
+            out.append(lines[i])
+            i += 1
+            continue
+        # Fence guard: a content line of only dashes would close the
+        # block early (AsciiDoc: the closing fence must match or exceed
+        # the opener), so lengthen the fence past the longest dash run.
+        fence_len = 4
+        for content_line in file_content.split('\n'):
+            run_len = _source_fence_len(content_line)
+            if run_len >= fence_len:
+                fence_len = run_len + 1
+        fence = '-' * fence_len
+        lang = attrs.get('lang')
+        block = [indent + ('[source,' + lang + ']' if lang else '[source]'),
+                 indent + fence]
+        body = file_content.rstrip('\n')
+        for content_line in (body.split('\n') if body else []):
+            # Blank lines stay empty (no trailing whitespace).
+            block.append((indent + content_line) if content_line
+                         else content_line)
+        block.append(indent + fence)
+        out.append('\n'.join(block))
+        i = end + 1
+    return '\n'.join(out)
+
+
 def convert_inline_passthroughs(text, lang):
     """Convert pass:[latex] inline passthroughs to AsciiDoc."""
-    def replacer(m):
-        latex = m.group(1)
+    def replacer(latex):
         # \imageplaceholder{path}{desc}
         r = find_cmd_2args(latex, 'imageplaceholder')
         if r is not None:
             path, desc, _, _ = r
             return 'NOTE: Image placeholder: ' + desc.strip() + ' (' + path.strip() + ')'
         # \textcolor{color}{text} — just return the text
-        result = convert_inline_latex(latex, lang)
-        return result
+        return convert_inline_latex(latex, lang)
 
     # Match pass:[...] — need to handle nested brackets
     result = []
@@ -811,7 +964,7 @@ def convert_inline_passthroughs(text, lang):
                 depth -= 1
             i += 1
         latex_content = text[bracket_start:i - 1]
-        result.append(replacer(type('', (), {'group': lambda self, x: latex_content})()))
+        result.append(replacer(latex_content))
         pos = i
     return ''.join(result)
 
@@ -934,23 +1087,34 @@ def _cover_datetime(lang):
 
     Date: formatted per language (babel \\today).  Time: HH:MM build
     time.  TZ defaults to America/Sao_Paulo (L4); an existing TZ env
-    var wins, matching latexmk's behavior.
+    var wins, matching latexmk's behavior.  The default is applied
+    temporarily — the previous TZ (and the libc tz state) is restored
+    on exit, leaving the process environment untouched.
     """
     import datetime
     import os
     import time as _time
-    if 'TZ' not in os.environ:
-        os.environ['TZ'] = 'America/Sao_Paulo'
-    _time.tzset()
-    now = datetime.datetime.now()
-    if lang == 'pt':
-        date = '{0} de {1} de {2}'.format(
-            now.day, PT_MONTHS[now.month - 1], now.year)
-    else:
-        # PDF \today has no leading zero on the day (e.g. "September 5",
-        # not "September 05").
-        date = now.strftime('%B ') + str(now.day) + now.strftime(', %Y')
-    return date, now.strftime('%H:%M')
+    old_tz = os.environ.get('TZ')
+    try:
+        if old_tz is None:
+            os.environ['TZ'] = 'America/Sao_Paulo'
+        _time.tzset()
+        now = datetime.datetime.now()
+        if lang == 'pt':
+            date = '{0} de {1} de {2}'.format(
+                now.day, PT_MONTHS[now.month - 1], now.year)
+        else:
+            # PDF \today has no leading zero on the day (e.g. "September 5",
+            # not "September 05").
+            date = now.strftime('%B ') + str(now.day) + now.strftime(', %Y')
+        time_str = now.strftime('%H:%M')
+    finally:
+        if old_tz is None:
+            os.environ.pop('TZ', None)
+        else:
+            os.environ['TZ'] = old_tz
+        _time.tzset()
+    return date, time_str
 
 
 def inject_cover_block(content, lang, template):
@@ -1109,8 +1273,109 @@ def number_block_titles(content, lang):
     return '\n'.join(lines)
 
 
-def process_adoc(content, template, target='docx'):
-    """Main entry: transform .adoc content for DOCX/MD/HTML generation."""
+# Admonition prefix → **TYPE‖** sentinel.  docx_fix.py identifies callout
+# paragraphs by text.startswith(TYPE + '‖') (U+2016); pandoc strips the
+# plain AsciiDoc admonition prefix, so the sentinel carries the type.
+_ADMONITION_RE = re.compile(r'^(\s*)(TIP|NOTE|WARNING|CAUTION|IMPORTANT): ')
+
+# List item marker (bullet, ordered, or callout) — used to track list
+# context: an admonition indented to an active item's text column is
+# continuation content, not an indented literal block.
+_LIST_ITEM_RE = re.compile(r'^(\s*)(?:[-*]|\d+[.)]|\.)\s+')
+
+# Verbatim block fences (AsciiDoc delimiters: 4+ repeats, any indent):
+# ---- source/listing, .... literal, ++++ passthrough.
+_FENCE_RES = {
+    'source': re.compile(r'-{4,}'),
+    'literal': re.compile(r'\.{4,}'),
+    'passthrough': re.compile(r'\+{4,}'),
+}
+
+
+def _convert_admonition_sentinels(content):
+    """Rewrite admonition prefixes to **TYPE‖** sentinels (DOCX callouts).
+
+    Block-aware, so verbatim content is never corrupted:
+
+    - Lines inside source/listing (``----``), literal (``....``), and
+      passthrough (``++++``) fences are left untouched — a ``NOTE: ...``
+      line inside a code block is code, not an admonition.
+    - An indented line whose indent matches no active list item's text
+      column is an indented literal block — also left untouched.
+    - An admonition indented to an active list item's text column is
+      list continuation content: it gets the sentinel with its indent
+      preserved.
+    """
+    out = []
+    fence = None      # active verbatim fence type
+    list_cols = []    # text columns of active (nested) list items
+    for line in content.split('\n'):
+        stripped = line.strip()
+
+        if fence is not None:
+            # Inside a verbatim block; only the matching fence closes it.
+            if _FENCE_RES[fence].fullmatch(stripped):
+                fence = None
+            out.append(line)
+            continue
+
+        opener = next((ftype for ftype, rex in _FENCE_RES.items()
+                       if rex.fullmatch(stripped)), None)
+        if opener is not None:
+            fence = opener
+            # A column-0 fence ends the preceding list (asciidoctor
+            # detaches it); an indented fence stays in the list item.
+            if not line[0].isspace():
+                list_cols.clear()
+            out.append(line)
+            continue
+
+        if not stripped:
+            # Blank line — list context survives (continuation
+            # paragraphs follow blank lines).
+            out.append(line)
+            continue
+
+        m = _LIST_ITEM_RE.match(line)
+        if m is not None:
+            marker_indent = len(m.group(1))
+            while list_cols and list_cols[-1] > marker_indent:
+                list_cols.pop()
+            list_cols.append(m.end())
+            out.append(line)
+            continue
+
+        if line[0].isspace():
+            # Indented: list continuation when the indent matches an
+            # active text column, otherwise an indented literal block.
+            indent = len(line) - len(line.lstrip())
+            if indent in list_cols:
+                m = _ADMONITION_RE.match(line)
+                if m is not None:
+                    out.append(m.group(1) + '**' + m.group(2)
+                               + '‖** ' + line[m.end():])
+                    continue
+            out.append(line)
+            continue
+
+        # Column-0 content ends any list; rewrite admonition prefixes.
+        list_cols.clear()
+        m = _ADMONITION_RE.match(line)
+        if m is not None:
+            out.append('**' + m.group(2) + '‖** ' + line[m.end():])
+            continue
+        out.append(line)
+
+    return '\n'.join(out)
+
+
+def process_adoc(content, template, target='docx', base_dir=None):
+    """Main entry: transform .adoc content for DOCX/MD/HTML generation.
+
+    *base_dir* is the directory of the input .adoc file; it anchors
+    [.codefile] path resolution (doc root first, then the .adoc's own
+    directory).  None leaves [.codefile] blocks untouched.
+    """
     global _testcase_counter
     global _TARGET
     global _NOANSWERS
@@ -1134,15 +1399,20 @@ def process_adoc(content, template, target='docx'):
     content = process_passthrough_blocks(content, template, lang)
 
     # 2.5. Convert admonitions to sentinel format for DOCX callout styling
-    # (pandoc strips the admonition type prefix; the **[TIP]** sentinel
-    # lets docx_fix.py identify and style them as callout boxes)
+    # (pandoc strips the admonition type prefix; the **TYPE‖** sentinel
+    # lets docx_fix.py identify and style them as callout boxes).
+    # Block-aware: verbatim content (source/literal/passthrough blocks,
+    # indented literal blocks) is never rewritten — see
+    # _convert_admonition_sentinels.
     if target == 'docx':
-        content = re.sub(
-            r'^(TIP|NOTE|WARNING|CAUTION|IMPORTANT): ',
-            r'**\1‖** ',
-            content,
-            flags=re.MULTILINE,
-        )
+        content = _convert_admonition_sentinels(content)
+
+    # 2.6. Inline [.codefile] blocks — the file content becomes a real
+    # [source] block (PDF: \codefile typesets the file; L18 parity).
+    # Runs AFTER the sentinel pass: its fence tracking closes on any
+    # ---- line without comparing fence lengths, so inlined content
+    # must not flow through it.
+    content = convert_codefile_blocks(content, base_dir)
 
     # 3. Convert block-level roles
     content = convert_block_roles(content, lang)
@@ -1195,7 +1465,9 @@ def main():
     with open(args.input, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    processed = process_adoc(content, args.template, args.target)
+    # The .adoc's directory anchors [.codefile] path resolution.
+    base_dir = os.path.dirname(os.path.abspath(args.input))
+    processed = process_adoc(content, args.template, args.target, base_dir)
 
     with open(args.output, 'w', encoding='utf-8') as f:
         f.write(processed)

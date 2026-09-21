@@ -481,6 +481,31 @@ PYEOF
   else
     fail "$TEMPLATE_NAME: stray Date paragraph on cover"
   fi
+
+  # 17. PT footer label: --lang pt localizes the footer page label to
+  # "Página" (PDF \lg@pagelabel — huawei-lang.sty).  Re-run --fix on a
+  # pre-fix copy with --lang pt and inspect the footer XML: the PT label
+  # must be present and the EN label absent.
+  local PT_DOCX="$TMPDIR_FIX/${TEMPLATE_NAME}-pt-lang.docx"
+  cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$PT_DOCX"
+  python3 "$FIX_SCRIPT" --fix --lang pt "$PT_DOCX" 2>/dev/null
+  local PT_UNZIP_DIR="$TMPDIR_FIX/${TEMPLATE_NAME}-pt-unzipped"
+  unzip -o -q "$PT_DOCX" -d "$PT_UNZIP_DIR"
+  local pt_footer_files=("$PT_UNZIP_DIR"/word/footer*.xml)
+  local pt_label_ok=0
+  if [ ${#pt_footer_files[@]} -gt 0 ] && [ -f "${pt_footer_files[0]}" ]; then
+    for f in "${pt_footer_files[@]}"; do
+      if grep -q 'Página' "$f" && ! grep -q 'Page ' "$f"; then
+        pt_label_ok=1
+        break
+      fi
+    done
+  fi
+  if [ "$pt_label_ok" -eq 1 ]; then
+    pass "$TEMPLATE_NAME: --lang pt footer label is Página"
+  else
+    fail "$TEMPLATE_NAME: --lang pt footer label is not Página"
+  fi
 }
 
 # ── Auto-discover templates and run DOCX fix tests for each ──────────────

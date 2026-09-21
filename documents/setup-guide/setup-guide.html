@@ -347,7 +347,7 @@ pre:hover .copy-btn {
 <p>Huawei Technologies CO., LTD</p>
 </div>
 <div class="paragraph">
-<p><strong>v6.10.0</strong> — September 20, 2026 23:55</p>
+<p><strong>v6.11.0</strong> — September 21, 2026 14:35</p>
 </div>
 </div>
 </div>
@@ -2733,6 +2733,17 @@ secondary text:</p>
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6.11.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2026-09-22</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Project-wide audit: converter robustness and cross-format consistency. Objectives roles now work in all forms — inline ([.general-objective] and [.objective]) and block (inside [.objectives]) — rendering language-aware labels (the block form previously crashed the build; the inline form silently dropped the label). The [.prerequisites] and [.stepbystep] roles attached to lists no longer drop items. Multi-author documents now list all authors. Conversion errors print a clean file:line message instead of a Ruby object dump. Unknown code languages (go, java, rust, terraform, &#8230;&#8203;) fall back to plain verbatim with a compile warning (was a hard error). DOCX/MD/HTML: codefile blocks ([.codefile,file=&#8230;&#8203;]) now inline the file content like the PDF, and admonition labels no longer corrupt NOTE:/TIP: lines inside code blocks. DOCX Fail/Falha badge backgrounds and plain-table borders now match the PDF colors. Shared class boilerplate extracted into the new huawei-base.cls base class (rendering unchanged). Watch mode survives compile errors; install reports failures instead of silent success; the /etc/LatexMk write is opt-in; build diagnostics are kept on failure; asciidoctor warnings now fail the build; a missing header logo warns instead of erroring. New test-pdf-compile.sh replaces the legacy test-filter stub; round-trip now validates the production build pipeline. Documentation corrected across README, AGENTS, and all SKILL files (objectives syntax, codefile example, supported languages, longhutable restriction, install requirements, pandoc range, security note).</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">6.10.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">2026-09-21</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
@@ -3709,7 +3720,7 @@ with load balancing, virtual keys, and Grafana observability).</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-09-21 10:55:45 +0800
+Last updated 2026-09-22 01:35:06 +0800
 </div>
 </div>
 </body>

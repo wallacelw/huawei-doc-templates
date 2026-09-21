@@ -4,6 +4,92 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.11.0 (2026-09-22)
+
+### Converter robustness and role fixes
+
+- **Objectives roles**: `[.general-objective]` and `[.objective]` now work
+  in all forms — inline spans and block form inside `[.objectives]` —
+  rendering language-aware labels. Previously the block form crashed the
+  build (`NoMethodError`) and the inline form silently dropped the label.
+- **Prerequisites/stepbystep**: the roles attached to lists no longer
+  drop all list items.
+- **Multi-author**: documents with multiple authors now list all of them
+  on the cover (was first-author only).
+- **Error handling**: conversion failures print a clean file:line error
+  message instead of a raw Ruby object dump.
+- **Code languages**: unknown `[source,<lang>]` languages (go, java,
+  rust, terraform, ...) fall back to plain verbatim with a compile
+  warning instead of a hard XeLaTeX error.
+
+### Cross-format consistency (DOCX/MD/HTML)
+
+- **Codefile blocks**: `[.codefile,file=...]` now inlines the file
+  content in DOCX/MD/HTML, matching the PDF (was an empty block).
+- **Admonition sentinels**: `NOTE:`/`TIP:`/`WARNING:` lines inside code
+  blocks are no longer rewritten as callout sentinels (was corrupting
+  code blocks in DOCX).
+- **Badge colors**: DOCX Fail/Falha badge backgrounds now use the true
+  `red!15` (FFD9D9), matching the PDF; the committed badge PNGs were
+  regenerated.
+- **Table borders**: DOCX plain-table borders are now Huawei red
+  (C7000B), matching the PDF's global `\arrayrulecolor`.
+
+### Class structure refactor
+
+- Shared class boilerplate (options, article load, package loads, the 13
+  huawei-* module loads, `\setdoctitle`) extracted into the new
+  `templates/_base/huawei-base.cls` base class. Each template class now
+  loads the base and holds only template-specific code. Rendering is
+  verified identical (pdftotext diff: cover timestamps only).
+
+### Build and install scripts
+
+- **watch.sh**: survives compile errors (was exiting on the first
+  failure); the entr path no longer depends on exported bash functions.
+- **install.sh**: font-install failures are reported with manual
+  recovery instructions (was silent success); the font `.deb` downloads
+  via mktemp (TOCTOU fix); the update check sorts versions correctly
+  past v10; the `/etc/LatexMk` system-wide write is now opt-in;
+  unattended runs print a system-modification banner.
+- **build.sh**: build-tool stderr is captured and shown on failure (was
+  discarded); `fix_args` is quoted (paths with spaces); the
+  asciidoctor-diagram gem check runs once per invocation.
+- **build-adoc.sh**: `--failure-level WARN` — asciidoctor warnings
+  (unresolved includes, malformed tables) now fail the build.
+- **huawei-page.sty**: a missing header logo warns and renders the
+  header text-only instead of a hard error.
+
+### Test suite
+
+- **test-converter.sh**: 161 assertions (was 135) — objectives roles,
+  prerequisites/stepbystep, unknown languages, multi-author, error
+  handling.
+- **test-preprocessor.sh**: 73 assertions (was 60) — codefile inlining,
+  block-aware admonitions.
+- **round-trip.sh**: now delegates format generation to the production
+  `scripts/build.sh` pipeline (was a drifted re-implementation);
+  tolerances recalibrated to measured divergences with root-cause
+  comments.
+- **test-pdf-compile.sh** (new): scans build logs for LaTeX errors and
+  undefined references; replaces the legacy test-filter.sh stub.
+- **test-docx-fix.sh**: 65 checks (was 61) — adds the `--lang pt`
+  footer label.
+
+### Documentation accuracy
+
+- SKILL.md (×4): objectives syntax corrected (bold labels are literal,
+  role forms are language-aware), codefile example fixed, supported
+  language list added, longhutable title restriction documented, class
+  structure now references huawei-base.cls.
+- README.md/AGENTS.md: install requirements corrected
+  (asciidoctor-diagram is manual), pandoc tested range (>=3.1.0, <3.6.0),
+  security note (trusted inputs), test listings updated, base-class
+  structure documented.
+- Samples: guide-en/guide-pt codefile syntax fixed (the inline
+  `pass:[\codefile[bash]{...}]` form was broken) + list-continuation
+  fix; versions bumped to 3.6.1/3.6.2 with changelog entries.
+
 ## v6.10.0 (2026-09-21)
 
 ### Header logo, callout boxes, and note labels

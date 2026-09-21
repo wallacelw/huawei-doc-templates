@@ -75,6 +75,9 @@ fi
 # Mermaid: mmdc should include --no-sandbox if running as root
 # (configure via puppeteer-config.json or mmdc-safe wrapper)
 
-asciidoctor -b huawei-latex -r "$CONVERTER" $DIAGRAM_OPTS "$INPUT" -o "$OUTPUT"
+# --failure-level WARN: fail the build on asciidoctor warnings (unresolved
+# includes, malformed tables, dropped content) instead of silently omitting
+# them from the PDF.
+asciidoctor --failure-level WARN -b huawei-latex -r "$CONVERTER" $DIAGRAM_OPTS "$INPUT" -o "$OUTPUT"
 
 echo "Generated: $OUTPUT"

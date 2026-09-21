@@ -14,6 +14,29 @@
 \newcommand{\lg@deflangkey}[1]{\define@key{FV}{#1}[unused]{}}
 \forcsvlist{\lg@deflangkey}{bash,sh,shell,python,Python,json,yaml,xml,html,javascript,js,sql,text,ini,conf}
 
+% Catch-all for unknown language keys ([go], [java], [terraform], ...).
+% The converter emits \begin{code}[<lang>] for any [source,<lang>]
+% block, so the FV family must accept ANY key. keyval raises a hard
+% error for undefined keys via \KV@errx; that handler is wrapped here
+% so that, for the FV family only, an unknown key is skipped with a
+% compile-time warning and the block falls back to plain verbatim
+% styling (same as [text]). Every other keyval family (graphics,
+% tcolorbox, ...) keeps keyval's original hard error, so typos in
+% other packages' options are still caught. \KV@prefix holds
+% "KV@<family>@" while keyval parses, and \@tempa holds the key name.
+% Note: \def (not \newcommand) so the \ifx comparison matches keyval's
+% non-\long \KV@prefix — \ifx distinguishes the \long prefix.
+\def\lg@FV@prefix{KV@FV@}
+\let\lg@KV@errx\KV@errx
+\def\KV@errx#1{%
+  \ifx\KV@prefix\lg@FV@prefix
+    \PackageWarningNoLine{huawei-code}{Unknown language key '\@tempa' ignored.\MessageBreak
+      Using plain verbatim styling (same as [text]). Define a no-op\MessageBreak
+      key for it above to silence this warning.}%
+  \else
+    \lg@KV@errx{#1}%
+  \fi}
+
 % Code block: #F6F8FA background, subtle border, left indented
 % Uses fancyvrb (not listings) for clean copy-paste in PDF.
 % listings processes character by character -> xdvipdfmx writes each

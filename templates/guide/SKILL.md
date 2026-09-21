@@ -22,10 +22,11 @@ hard-coded to the Huawei house style.
 Before creating or editing any document, read these files to load the full
 project context:
 
-1. **`templates/guide/guide.cls`** — the class file. Shared formatting lives in
-   `templates/_base/huawei-*.sty` modules. Guide-specific formatting (cover, TOC,
-   titles) lives in `guide.cls`. Every command and environment available to
-   documents is defined across these files.
+1. **`templates/guide/guide.cls`** — the class file. It builds on the shared base
+   class `templates/_base/huawei-base.cls` (class options, packages, and the
+   shared `huawei-*.sty` modules live there) and adds only guide-specific
+   commands. Every command and environment available to documents is defined
+   across these files.
 2. **`templates/_base/huawei-latex-converter.rb`** — the AsciiDoc-to-LaTeX
    converter. Maps AsciiDoc roles and admonitions to Huawei LaTeX commands.
 3. **`README.md`** (repo root) — project setup, compilation instructions,
@@ -106,28 +107,38 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 ```asciidoc
 [.objectives]
 ====
-**General Objective:** <general objective>
+[.general-objective]#<general objective>#
 
-**Objective:** <objective>
+[.objective]#<objective>#
 
 **Prerequisites:**
+
 * <prerequisite 1>
 * <prerequisite 2>
 
 **Step by step:**
+
 . <step 1>
 . <step 2>
 ====
 ```
-Closes with a 1.5pt horizontal rule. `**Objective:**` and `**Step by step:**`
-also work outside the objectives block.
+Closes with a 1.5pt horizontal rule. The role spans and bold labels also
+work outside the objectives block.
+
+Only the roles are language-aware. Bold text is literal — it is never
+translated.
 
 | Syntax | Produces |
 |---|---|
-| `**General Objective:** ...` | **"General Objective:"** / **"Objetivo Geral:"** (bold label) + text. |
-| `**Objective:** ...` | **"Objective:"** / **"Objetivo:"** + text. |
-| `**Prerequisites:**` | **"Prerequisites:"** / **"Pré-requisitos:"** label (put a list after). |
-| `**Step by step:**` | **"Step by step:"** / **"Passo a passo:"** label (put a numbered list after). |
+| `[.general-objective]#...#` | Language-aware bold label **"General Objective:"** (EN) / **"Objetivo Geral:"** (PT) + text. The span may wrap over multiple lines. |
+| `[.objective]#...#` | Language-aware bold label **"Objective:"** / **"Objetivo:"** + text. |
+| `[.general-objective]` or `[.objective]` on its own line | Block form (inside `[.objectives]`) of the labels above — put the text on the next line. |
+| `**General Objective:** ...` / `**Objective:** ...` | Literal bold text — **not** translated. Write the labels in the document language yourself. |
+| `**Prerequisites:**` | Literal bold label — put a blank line, then the list after it. |
+| `**Step by step:**` | Literal bold label — put a blank line, then the numbered list after it. |
+
+Do not put a block role and its text on the same line
+(`[.general-objective] text`) — the role is then rendered as literal text.
 
 ### Lists
 
@@ -156,8 +167,25 @@ echo "Hello, World!"
 
 Inline code: `` `code` ``
 
-Code from file: `` `pass:[\codefile]{file}` `` (passthrough for the
-`\codefile` LaTeX command).
+Code from an external file (resolved via TEXINPUTS):
+
+```asciidoc
+[.codefile,file=assets/example-script.sh,lang=bash]
+----
+----
+```
+The `[.codefile]` role reads the `file` (required) and `lang` (optional)
+attributes and emits `\codefile[lang]{file}`. The listing body is ignored.
+An inline passthrough also works when no language is needed:
+`pass:[\codefile{assets/example-script.sh}]` — do not put the `[lang]`
+option inside the `pass:[]` macro, which ends at the first `]` and would
+mangle the emitted LaTeX.
+
+Recognized language keys for `[source,lang]`: `bash`, `sh`, `shell`,
+`python`, `Python`, `json`, `yaml`, `xml`, `html`, `javascript`, `js`,
+`sql`, `text`, `ini`, `conf`. Any other language (`go`, `java`, `rust`,
+`terraform`, ...) degrades gracefully to plain verbatim styling (same as
+`text`) with a compile-time warning.
 
 ### Tables (hutable)
 
@@ -189,6 +217,12 @@ and full-grid red borders. The first row is the header (white bold on red).
 Same visual style as `hutable` but breaks across pages. Use for tables
 with many rows. **Cannot be used inside testcase** — longtable requires
 top-level.
+
+**Warning:** do not add a block title (`.Caption`) to a `longhutable`.
+The converter wraps any titled table in a `table` float, and a longtable
+inside a float has undefined page-breaking — this defeats longhutable's
+purpose. For multi-page tables use `longhutable` without a block title;
+for a titled table that fits on one page use regular `hutable`.
 
 ### Images
 
@@ -512,18 +546,20 @@ The following features are specific to the guide template:
 
 [.objectives]
 ====
-**General Objective:** <general objective>
+[.general-objective]#<general objective>#
 
 **Prerequisites:**
+
 * <prerequisite 1>
 * <prerequisite 2>
 ====
 
 === <section title>
 
-**Objective:** <objective>
+[.objective]#<objective>#
 
 **Step by step:**
+
 . <step 1>
 . <step 2>
 
@@ -539,8 +575,10 @@ The following features are specific to the guide template:
 
 #### Portuguese
 
-Same skeleton but with `:lang: pt`. Labels switch automatically: *Sumário*,
-*Objetivo Geral:*, *Objetivo:*, *Pré-requisitos:*, *Passo a passo:*, *Página*.
+Same skeleton but with `:lang: pt`. Class labels switch automatically:
+*Sumário*, *Página*, and the role-based objective labels render as
+*Objetivo Geral:* and *Objetivo:*. Bold labels are literal — write them
+in Portuguese yourself (e.g. `**Pré-requisitos:**`, `**Passo a passo:**`).
 
 **Accent verification (PT-BR).** After compiling a Portuguese document,
 confirm no glyphs are missing:
@@ -559,7 +597,7 @@ here. Run this check after every sample compile.
 
 ```
 templates/guide/
-├── guide.cls          # guide-specific formatting (cover, TOC, titles)
+├── guide.cls          # guide class (builds on _base/huawei-base.cls)
 ├── guide-reference.docx  # reference DOCX with Huawei styles
 ├── guide-template.html   # HTML template for Pandoc
 ├── create-guide-reference-docx.py  # DOCX reference creation/fix script (calls _base/docx_fix.py)

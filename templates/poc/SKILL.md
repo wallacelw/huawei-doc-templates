@@ -30,9 +30,10 @@ Huawei house style (AGENTS.md L9).
 Before creating or editing any document, read these files to load the full
 project context:
 
-1. **`templates/poc/poc.cls`** — the class file. Shared formatting lives in
-   `templates/_base/huawei-*.sty` modules. POC-specific formatting (result
-   badges, stakeholders, closing record, signatures) lives in `poc.cls`.
+1. **`templates/poc/poc.cls`** — the class file. It builds on the shared base
+   class `templates/_base/huawei-base.cls` (class options, packages, and the
+   shared `huawei-*.sty` modules live there) and adds the POC-specific result
+   badges, stakeholders, closing record, and signatures.
 2. **`templates/_base/huawei-latex-converter.rb`** — the AsciiDoc-to-LaTeX
    converter. Maps AsciiDoc roles to Huawei LaTeX commands.
 3. **`README.md`** (repo root) — project setup, compilation instructions,
@@ -131,39 +132,47 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 
 The shared `[.objectives]` block (plural) renders a general objective,
 objectives, prerequisites, and step-by-step list, closed by a 1.5pt
-horizontal rule. Use sub-roles on the inner paragraphs/blocks:
+horizontal rule:
 
 ```asciidoc
 [.objectives]
 ====
-[.general-objective]
-Migrate the application to Huawei Cloud and validate the target architecture.
+[.general-objective]#Migrate the application to Huawei Cloud and validate the target architecture.#
 
-[.prerequisites]
+[.objective]#Validate performance under 10,000 concurrent users.#
+
+**Prerequisites:**
+
 * Active Huawei Cloud account
 * Container images in SWR
 
-[.objective]
-Validate performance under 10,000 concurrent users.
+**Step by step:**
 
-[.stepbystep]
 . Provision infrastructure
 . Deploy application
 . Run load tests
 ====
 ```
+The role spans and bold labels also work outside the objectives block.
 
-The bold-label forms also work inside the block:
+Only the roles are language-aware. Bold text is literal — it is never
+translated.
 
 | Syntax | Produces |
 |---|---|
-| `**General Objective:** ...` | **"General Objective:"** / **"Objetivo Geral:"** (bold label) + text. |
-| `**Objective:** ...` | **"Objective:"** / **"Objetivo:"** + text. |
-| `**Prerequisites:**` | **"Prerequisites:"** / **"Pré-requisitos:"** label (put a list after). |
-| `**Step by step:**` | **"Step by step:"** / **"Passo a passo:"** label (put a numbered list after). |
+| `[.general-objective]#...#` | Language-aware bold label **"General Objective:"** (EN) / **"Objetivo Geral:"** (PT) + text. The span may wrap over multiple lines. |
+| `[.objective]#...#` | Language-aware bold label **"Objective:"** / **"Objetivo:"** + text. |
+| `[.general-objective]` or `[.objective]` on its own line | Block form (inside `[.objectives]`) of the labels above — put the text on the next line. |
+| `**General Objective:** ...` / `**Objective:** ...` | Literal bold text — **not** translated. Write the labels in the document language yourself. |
+| `**Prerequisites:**` | Literal bold label — put a blank line, then the list after it. |
+| `**Step by step:**` | Literal bold label — put a blank line, then the numbered list after it. |
 
-Note: POC also has a distinct `[.objective]` role (singular) for the
-highlighted goal box in Section 3 — see Template-Specific Features.
+Do not put a block role and its text on the same line
+(`[.general-objective] text`) — the role is then rendered as literal text.
+
+Note: `[.objective]` as a standalone block (outside `[.objectives]`)
+renders the POC highlighted goal box instead — see Template-Specific
+Features.
 
 ### Lists
 
@@ -199,12 +208,22 @@ Inline code: `` `code` ``
 Code from an external file (resolved via TEXINPUTS):
 
 ```asciidoc
-[.codefile,file=assets/script.sh,lang=bash]
+[.codefile,file=assets/example-script.sh,lang=bash]
 ----
 ----
 ```
-The `[.codefile]` role reads the `file` and optional `lang` attributes and
-emits `\codefile[lang]{file}`. The listing body is ignored.
+The `[.codefile]` role reads the `file` (required) and `lang` (optional)
+attributes and emits `\codefile[lang]{file}`. The listing body is ignored.
+An inline passthrough also works when no language is needed:
+`pass:[\codefile{assets/example-script.sh}]` — do not put the `[lang]`
+option inside the `pass:[]` macro, which ends at the first `]` and would
+mangle the emitted LaTeX.
+
+Recognized language keys for `[source,lang]`: `bash`, `sh`, `shell`,
+`python`, `Python`, `json`, `yaml`, `xml`, `html`, `javascript`, `js`,
+`sql`, `text`, `ini`, `conf`. Any other language (`go`, `java`, `rust`,
+`terraform`, ...) degrades gracefully to plain verbatim styling (same as
+`text`) with a compile-time warning.
 
 ### Tables (hutable)
 
@@ -236,6 +255,12 @@ and full-grid red borders. The first row is the header (white bold on red).
 Same visual style as `hutable` but breaks across pages. Use for tables
 with many rows. **Cannot be used inside a tcolorbox** — longtable requires
 top-level.
+
+**Warning:** do not add a block title (`.Caption`) to a `longhutable`.
+The converter wraps any titled table in a `table` float, and a longtable
+inside a float has undefined page-breaking — this defeats longhutable's
+purpose. For multi-page tables use `longhutable` without a block title;
+for a titled table that fits on one page use regular `hutable`.
 
 ### Images
 
@@ -818,14 +843,17 @@ Observations and caveats.
 
 #### Portuguese
 
-Same skeleton but with `:lang: pt`. Labels switch automatically: *Sumário*,
-*Resumo Executivo*, *Contexto*, *Objetivos e Metas*, *Escopo*, *Premissas e
-Preparação*, *Metodologia*, *Atividades Planejadas*, *Cronograma*, *Matriz
-de Responsabilidades*, *Resultados Esperados*, *Resultados Obtidos*,
-*Comentários e Observações*, *Conclusão*, *Assinaturas*, *Histórico de
-versões*. Result badges show *Atendido* / *Parcial* / *Falha* / *Ignorado*;
-closing record labels show *Homologada* / *Homologada com ressalvas* /
-*Não homologada*.
+Same skeleton but with `:lang: pt` and the `==` section headings translated
+by the author (e.g. *Resumo Executivo*, *Contexto*, *Objetivos e Metas*,
+*Escopo*, *Premissas e Preparação*, *Metodologia*, *Atividades Planejadas*,
+*Cronograma*, *Matriz de Responsabilidades*, *Resultados Esperados*,
+*Resultados Obtidos*, *Comentários e Observações*, *Conclusão*,
+*Assinaturas*) — headings are literal author-written text and do not switch
+with the language. Only class-driven labels switch automatically: the TOC
+title (*Sumário*), the changelog heading (*Histórico de versões*), result
+badges (*Atendido* / *Parcial* / *Falha* / *Ignorado*), closing record
+labels (*Homologada* / *Homologada com ressalvas* / *Não homologada*), and
+the signature greeting (*At.te,*).
 
 **Accent verification (PT-BR).** After compiling a Portuguese document,
 confirm no glyphs are missing:
@@ -844,7 +872,7 @@ surface here. Run this check after every sample compile.
 
 ```
 templates/poc/
-├── poc.cls                     # POC-specific formatting (cover, badges, stakeholders, closing record, signatures)
+├── poc.cls                     # POC class (badges, stakeholders, closing record, signatures; builds on _base/huawei-base.cls)
 ├── poc-reference.docx          # reference DOCX with Huawei styles
 ├── poc-template.html           # HTML template for Pandoc
 ├── create-poc-reference-docx.py  # DOCX reference creation/fix script (calls _base/docx_fix.py)

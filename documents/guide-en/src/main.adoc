@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- ECS Quick Start Guide
 :cover-text: Huawei Technologies CO., LTD
-:version: 3.6.0
+:version: 3.6.1
 :header-logo: common-assets/huawei-logo-header.png
 :cover-logo: common-assets/huawei-logo-cover.png
 
@@ -102,7 +102,11 @@ df -h             # check disk space
 systemctl status  # verify services are running
 ----
 
-Alternatively, save the checks to a script and run it with pass:[\codefile[bash]{assets/example-script.sh}].
+Alternatively, save the checks to a script and run it:
+
+[.codefile,file=assets/example-script.sh,lang=bash]
+----
+----
 
 ==== Recommended flavors
 
@@ -172,8 +176,8 @@ provider "huaweicloud" {
 }
 ----
 +
-  Replace the *access_key* and *secret_key* values with the
-  credentials obtained in the previous section.
+Replace the *access_key* and *secret_key* values with the
+credentials obtained in the previous section.
 +
 . In a terminal, in the project folder, initialize the Terraform
   working directory:
@@ -291,6 +295,7 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+\changelogentry{3.6.1}{2026-09-22}{\item Fixed the external code file example: replaced the broken inline passthrough with the [.codefile] block role (the script content now renders) and fixed list continuation indentation.}
 \changelogentry{3.6.0}{2026-09-16}{\item Added authors feature on the cover page.}
 \changelogentry{1.0.0}{2026-08-05}{\item Initial version. \item Added callout boxes, badge, and changelog support.}
 \end{changelog}

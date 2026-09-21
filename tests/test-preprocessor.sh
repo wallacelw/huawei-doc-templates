@@ -2,14 +2,19 @@
 # test-preprocessor.sh — Unit tests for adoc_docx_preprocessor.py
 # Exercises process_adoc() directly (no asciidoctor/pandoc in the loop):
 # pipe escaping, badge contract, changelog bullets, :noanswers:,
-# signatures edge cases, and target-aware testcase markers.
+# signatures edge cases, target-aware testcase markers, and
+# [.codefile] inlining (path resolution, fence guard, graceful degrade).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 python3 - "$REPO_ROOT" << 'PYEOF'
+import contextlib
 import importlib.util
+import io
+import os
 import sys
+import tempfile
 
 repo_root = sys.argv[1]
 mod_path = repo_root + "/templates/_base/adoc_docx_preprocessor.py"
@@ -32,8 +37,8 @@ def check(name, cond):
         FAIL += 1
 
 
-def process(content, template, target):
-    return mod.process_adoc(content, template, target)
+def process(content, template, target, base_dir=None):
+    return mod.process_adoc(content, template, target, base_dir)
 
 
 # Common header for synthetic documents
@@ -350,6 +355,81 @@ out = process(HEADER + "Body.\n", 'guide', 'md')
 check("guide regression: **v1.0.0** meta", "**v1.0.0**" in out)
 check("guide regression: generic cover text",
       "Huawei Technologies CO., LTD" in out)
+
+print("=== Codefile blocks ===")
+
+# 32. [.codefile] with a real file → [source,lang] block with the content
+with tempfile.TemporaryDirectory() as tmp:
+    # Simulate the document layout: .adoc in src/, assets in assets/
+    adoc_dir = os.path.join(tmp, "src")
+    os.makedirs(adoc_dir)
+    os.makedirs(os.path.join(tmp, "assets"))
+    with open(os.path.join(tmp, "assets", "example-script.sh"), "w") as f:
+        f.write("#!/bin/bash\necho hello\n")
+    out = process(
+        HEADER + "[.codefile,file=assets/example-script.sh,lang=bash]\n"
+        "----\n----\n", 'guide', 'docx', adoc_dir)
+    check("codefile: [source,bash] emitted", "[source,bash]" in out)
+    check("codefile: file content inlined", "echo hello" in out)
+    check("codefile: role line removed", "[.codefile" not in out)
+
+    # Fallback: file next to the .adoc (src/), no lang → [source]
+    with open(os.path.join(adoc_dir, "local.txt"), "w") as f:
+        f.write("plain text\n")
+    out = process(
+        HEADER + "[.codefile,file=local.txt]\n----\n----\n",
+        'guide', 'md', adoc_dir)
+    check("codefile: no lang → [source]", "\n[source]\n" in out)
+    check("codefile: fallback to adoc dir", "plain text" in out)
+
+    # Non-empty listing body is discarded (PDF: the body is ignored)
+    out = process(
+        HEADER + "[.codefile,file=local.txt,lang=text]\n"
+        "----\nignored body\n----\n", 'guide', 'html', adoc_dir)
+    check("codefile: listing body discarded", "ignored body" not in out)
+    check("codefile: file content wins", "plain text" in out)
+
+    # NOTE: inside file content stays literal (no DOCX callout sentinel)
+    with open(os.path.join(tmp, "assets", "note.sh"), "w") as f:
+        f.write("# NOTE: literal inside script\n")
+    out = process(
+        HEADER + "[.codefile,file=assets/note.sh,lang=bash]\n----\n----\n",
+        'guide', 'docx', adoc_dir)
+    check("codefile: NOTE in content stays literal",
+          "# NOTE: literal inside script" in out and "\u2016" not in out)
+
+# 33. Missing file → block left as-is, warning on stderr, no crash
+with tempfile.TemporaryDirectory() as tmp:
+    err = io.StringIO()
+    miss_out = None
+    try:
+        with contextlib.redirect_stderr(err):
+            miss_out = process(
+                HEADER + "[.codefile,file=assets/missing.sh,lang=bash]\n"
+                "----\n----\n", 'guide', 'docx', tmp)
+        ok = True
+    except Exception:
+        ok = False
+    check("codefile missing: no exception", ok)
+    check("codefile missing: block left as-is",
+          miss_out is not None
+          and "[.codefile,file=assets/missing.sh,lang=bash]" in miss_out)
+    check("codefile missing: warning on stderr",
+          "warning" in err.getvalue() and "missing.sh" in err.getvalue())
+
+# 34. Content with a ---- line → fence lengthened past it
+with tempfile.TemporaryDirectory() as tmp:
+    adoc_dir = os.path.join(tmp, "src")
+    os.makedirs(adoc_dir)
+    with open(os.path.join(adoc_dir, "dashes.txt"), "w") as f:
+        f.write("echo start\n----\necho end\n")
+    out = process(
+        HEADER + "[.codefile,file=dashes.txt]\n----\n----\n",
+        'guide', 'md', adoc_dir)
+    check("codefile: fence lengthened past ---- line",
+          any(line == "-----" for line in out.split("\n")))
+    check("codefile: content around dashes preserved",
+          "echo start" in out and "echo end" in out)
 
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

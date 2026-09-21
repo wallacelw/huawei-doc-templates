@@ -155,8 +155,8 @@ watch: ## Watch .adoc and recompile PDF on save (make watch DIR=documents/guide-
 ##@ Testing
 # ============================================================================
 
-test: ## Run all tests (filter units, round-trip, DOCX fix, version sync, converter)
-	./tests/test-filter.sh
+test: ## Run all tests (PDF log scan, preprocessor, round-trip, DOCX fix, version sync, converter)
+	./tests/test-pdf-compile.sh
 	./tests/test-preprocessor.sh
 	./tests/round-trip.sh
 	./tests/test-docx-fix.sh

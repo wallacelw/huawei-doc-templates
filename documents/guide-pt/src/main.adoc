@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Guia de acesso ao Console
 :cover-text: Huawei Technologies CO., LTD
-:version: 3.6.1
+:version: 3.6.2
 :header-logo: common-assets/huawei-logo-header.png
 :cover-logo: common-assets/huawei-logo-cover.png
 
@@ -152,11 +152,13 @@ provider "huaweicloud" {
 }
 ----
 +
-  Substitua os valores de *access_key* e *secret_key* pelas
-  credenciais obtidas na seção anterior. Alternativamente, você pode incluir
-  o código a partir de um arquivo externo:
+Substitua os valores de *access_key* e *secret_key* pelas
+credenciais obtidas na seção anterior. Alternativamente, você pode incluir
+o código a partir de um arquivo externo:
 +
-  pass:[\codefile[bash]{assets/example-script.sh}]
+[.codefile,file=assets/example-script.sh,lang=bash]
+----
+----
 +
 . No terminal, na pasta do projeto, inicialize o diretório de trabalho
   do `terraform`:
@@ -280,6 +282,7 @@ graph TD
 
 ++++
 \begin{changelog}
+\changelogentry{3.6.2}{2026-09-22}{\item Corrigido o exemplo de código de arquivo externo: o passthrough inline quebrado foi substituído pelo role de bloco \texttt{[.codefile]} (o conteúdo do script agora renderiza) e corrigida a indentação da continuação da lista.}
 \changelogentry{3.6.1}{2026-09-19}{\item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.}
 \changelogentry{3.6.0}{2026-09-16}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}
 \changelogentry{1.10.0}{2026-09-10}{\item Atualização para modelo base v3.0.1 — correções menores (auto-descoberta de testes, textos de ajuda, comentários, CI).}

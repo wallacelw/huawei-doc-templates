@@ -10,87 +10,36 @@
 %%    5. Each test case uses a `testcase` environment (table format)
 %%    6. Changelog (optional)
 %%
-%%  Class options:
-%%    portuguese  -> uses Portuguese for predefined labels and babel.
-%%                   (default: English)
-%%    indentbody  -> indents all running text by \contentindent.
-%%                   (default: off)
-%%    notime      -> hides the compilation time on the cover.
-%%                   (default: show time)
-%%    nochangelog -> suppresses the changelog section entirely
-%%                   and hides version/date/time on the cover page.
-%%                   (default: show changelog)
-%%    noauthors   -> hides the authors on the cover page.
-%%                   (default: show authors if set)
+%%  All shared boilerplate lives in templates/_base/huawei-base.cls:
+%%    - Class options (portuguese, indentbody, notime, nochangelog,
+%%      noauthors); any other option is passed to the article class.
+%%    - \LoadClass of article (a4paper, 10pt) and all package loads.
+%%    - The 13 shared modules from templates/_base/.
+%%    - \setdoctitle (shared cover title setter).
+%%
+%%  Class options (testbook-specific):
 %%    noanswers   -> hides Remarks and Test Result rows in test cases.
 %%                   (default: show all rows)
-%%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/20 Huawei Test Book template v6.10.0]
+\ProvidesClass{testbook}[2026/09/22 Huawei Test Book template v6.11.0]
 
 % ---- Options --------------------------------------------------------
-\newif\if@indentbody \@indentbodyfalse
-\DeclareOption{indentbody}{\@indentbodytrue}
-\newif\if@portuguese \@portuguesefalse
-\DeclareOption{portuguese}{\@portuguesetrue}
-\newif\if@showtime \@showtimetrue
-\DeclareOption{notime}{\@showtimefalse}
-\newif\if@changelog \@changelogtrue
-\DeclareOption{nochangelog}{\@changelogfalse}
-\newif\if@showauthors \@showauthorstrue
-\DeclareOption{noauthors}{\@showauthorsfalse}
+% noanswers is testbook-specific; the shared options are declared in
+% huawei-base. Remaining options are passed to huawei-base, which
+% forwards unknown ones to the article class.
 \newif\if@showanswers \@showanswerstrue
 \DeclareOption{noanswers}{\@showanswersfalse}
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{huawei-base}}
 \ProcessOptions\relax
-\LoadClass[a4paper,10pt]{article}
 
-% ---- Packages -------------------------------------------------------
-\RequirePackage[a4paper,top=3cm,bottom=3cm,left=2cm,right=2cm,%
-                headheight=1.4cm,headsep=0.7cm]{geometry}
-\RequirePackage{fontspec}
-\PassOptionsToPackage{table}{xcolor}
-\RequirePackage{xcolor}
-\RequirePackage{graphicx}
-\RequirePackage{fancyhdr}
-\RequirePackage{titlesec}
-\RequirePackage[titles]{tocloft}
-\RequirePackage{enumitem}
-\RequirePackage{fancyvrb}
-\RequirePackage{fvextra}
-\fvset{breaklines,breakanywhere}
-\RequirePackage[most]{tcolorbox}
-\RequirePackage{etoolbox}
-\RequirePackage{booktabs}
-\RequirePackage{array}
+% ---- Base class (options, article, packages, shared modules) ---------
+\LoadClass{huawei-base}
+
+% ---- Packages (testbook-specific) ------------------------------------
 \RequirePackage{tabularx}
-\RequirePackage{ragged2e}
-\RequirePackage{babel}
-\if@portuguese
-  \babelprovide[import,main]{brazilian}
-\else
-  \babelprovide[import,main]{english}
-\fi
-\RequirePackage{hyperref}
-\RequirePackage{caption}
-\RequirePackage{float}
-\RequirePackage{longtable}
 
-% ---- Shared modules (templates/_base/) ------------------------------
-\RequirePackage{huawei-colors}
-\RequirePackage{huawei-fonts}
-\RequirePackage{huawei-lang}
-\RequirePackage{huawei-page}
-\RequirePackage{huawei-tables}
-\RequirePackage{huawei-code}
-\RequirePackage{huawei-callouts}
-\RequirePackage{huawei-images}
-\RequirePackage{huawei-changelog}
-\RequirePackage{huawei-titles}
-\RequirePackage{huawei-toc}
-\RequirePackage{huawei-cover}
-\RequirePackage{huawei-shared}
+% ---- Shared modules (testbook-specific) -------------------------------
 \RequirePackage{huawei-badges}
 
 % =====================================================================
@@ -131,7 +80,7 @@
 % (loaded via huawei-toc)
 
 % ---- Cover (shared) -----------------------------------------------
-\newcommand{\setdoctitle}[1]{\renewcommand{\lg@doctitle}{#1}}
+% \setdoctitle{...} is defined in huawei-base.
 \newcommand{\settestbooktitle}[1]{\setdoctitle{#1}}
 
 % =====================================================================

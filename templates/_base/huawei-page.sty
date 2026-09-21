@@ -49,8 +49,19 @@
 \renewcommand{\footrulewidth}{0pt}
 % Header: logo (left) + title (center)
 % Footer: "Page N" (center)
-\fancyhead[L]{\raisebox{-0.35cm}[0pt][0pt]{%
-    \includegraphics[height=1.05cm]{\lg@headerlogo}}}
+% Header logo box: render the logo only if the file exists.  A missing logo
+% is a compile-time warning, not a hard error — the header falls back to
+% text only (same graceful behavior as \lg@checkimg for content images).
+\newcommand{\lg@headerlogowarn}{%
+  \typeout{Warning: header logo not found — header text only}%
+  \global\let\lg@headerlogowarn\relax}
+\newcommand{\lg@headerlogobox}{%
+  \IfFileExists{\lg@headerlogo}{%
+    \raisebox{-0.35cm}[0pt][0pt]{\includegraphics[height=1.05cm]{\lg@headerlogo}}%
+  }{%
+    \lg@headerlogowarn
+  }}
+\fancyhead[L]{\lg@headerlogobox}
 \fancyhead[C]{\normalfont\fontsize{10}{12}\selectfont \lg@headertitle}
 \fancyfoot[C]{\normalfont\fontsize{10}{12}\selectfont \lg@pagelabel~\thepage}
 

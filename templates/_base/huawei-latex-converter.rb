@@ -175,6 +175,29 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     else
       node.content
     end
+  rescue StandardError => e
+    # Report an actionable error instead of aborting with a raw Ruby object
+    # dump. NoMethodError/NameError messages embed the receiver's full
+    # inspect ("undefined method 'text' for #<Asciidoctor::Block:0x...>"),
+    # which starts ~35 chars in — well inside the truncation window — so
+    # the inspect must be stripped, not just truncated. Source location
+    # requires :sourcemap; fall back to the docfile document attribute
+    # when node file/lineno are nil.
+    file = node.file if node.respond_to?(:file)
+    lineno = node.lineno if node.respond_to?(:lineno)
+    if file
+      source = lineno ? "#{file}:#{lineno}" : file.to_s
+    else
+      source = node.document.attr('docfile')
+    end
+    # Keep only the part before the embedded object dump, then mask any
+    # other inspect so stderr never leaks a raw node dump.
+    message = e.message.to_s.split(' for #<', 2).first
+    message = message.gsub(/#<[^>]*>/, '#<node>')
+    message = "#{message.slice(0, 300)}..." if message.length > 300
+    location = source ? " (#{source})" : ''
+    warn "huawei-latex-converter: failed to convert #{transform} node#{location}: #{e.class}: #{message}"
+    exit 1
   end
 
   # --- DOCUMENT — generate full LaTeX file with preamble ---
@@ -198,7 +221,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
     # --- Document metadata ---
     doctitle   = node.doctitle
-    authors    = node.attr('author') || node.attr('authors')
+    # 'authors' holds ALL authors, comma-separated ("John Doe, Jane Smith");
+    # 'author' holds only the first. \setdocauthors renders the string
+    # verbatim on the cover, so the comma-separated form matches.
+    authors    = node.attr('authors') || node.attr('author')
     version    = node.attr('version')
     revdate    = node.attr('date') || node.attr('revdate')
     header_title = node.attr('header-title')
@@ -502,8 +528,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # --- POC objective block role → \begin{objectiveblock}...\end{objectiveblock} ---
+  # --- POC objective role → \begin{objectiveblock} (block) / \objective (inline) ---
+  # Block form (POC highlighted goal box): [.objective] on its own line.
+  # Inline span form: [.objective]#text# → bold "Objective:" label + text
+  # (\objective works standalone, see huawei-shared.sty).
   def convert_role_objective(node)
+    if node.node_name == 'inline_quoted'
+      return "\\objective{#{process_text(node.text)}}"
+    end
     "\\begin{objectiveblock}\n#{node.content}\n\\end{objectiveblock}"
   end
 
@@ -671,24 +703,20 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines << '\\begin{objectives}'
 
     node.blocks.each do |block|
+      # NOTE: block.text does not exist on Asciidoctor::Block (only
+      # ListItem responds to .text) — use block.content, which returns
+      # the paragraph text with inline nodes already converted.
       if block.role == 'general-objective'
-        lines << "\\generalobjective{#{process_text(block.text)}}"
+        lines << "\\generalobjective{#{process_text(block.content)}}"
       elsif block.role == 'prerequisites'
-        lines << '\\prerequisites'
-        # Prerequisites items — render as itemize
-        if block.blocks
-          block.blocks.each do |child|
-            if child.node_name == 'ulist'
-              lines << convert(child)
-            else
-              lines << child.content
-            end
-          end
-        end
+        # Label + list items — route through the role dispatch so the
+        # role works whether it sits on the list itself or on a wrapper.
+        lines << convert(block)
       elsif block.role == 'objective'
-        lines << "\\objective{#{process_text(block.text)}}"
+        lines << "\\objective{#{process_text(block.content)}}"
       elsif block.role == 'stepbystep'
-        lines << '\\stepbystep'
+        # Label + list items — route through the role dispatch.
+        lines << convert(block)
       else
         # Handle list blocks by calling the converter directly
         if block.node_name == 'ulist' || block.node_name == 'olist'
@@ -703,7 +731,43 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines.join("\n")
   end
 
+  # --- [.prerequisites] / [.stepbystep] block roles → label + list ---
+  # Emits the language-aware label command (\prerequisites / \stepbystep,
+  # see huawei-shared.sty) followed by the list items. The role may sit
+  # directly on the list block (the documented form) or on a block
+  # wrapping one.
+  def convert_role_prerequisites(node)
+    "\\prerequisites\n#{convert_content_under_label(node)}"
+  end
+
+  def convert_role_stepbystep(node)
+    "\\stepbystep\n#{convert_content_under_label(node)}"
+  end
+
+  # Convert the content that follows a [.prerequisites]/[.stepbystep]
+  # label. List nodes must be routed through convert_ulist/convert_olist:
+  # Asciidoctor aliases List#content to List#blocks, which returns the raw
+  # ListItem array — and ListItem#content is "" (item text lives in
+  # ListItem#text) — so node.content on a list would drop every item.
+  def convert_content_under_label(node)
+    case node.node_name
+    when 'ulist' then convert_ulist(node)
+    when 'olist' then convert_olist(node)
+    else node.content
+    end
+  end
+
   # --- ROLE-BASED INLINE (SPAN) CONVERTERS ---
+
+  # --- [.general-objective]#text# → \generalobjective{text} ---
+  # Inline span form used in guide/testbook/setup-guide sources. Also covers
+  # a block-role paragraph outside [.objectives] (inside that block the
+  # block form is handled by convert_role_objectives). \generalobjective
+  # works standalone, see huawei-shared.sty.
+  def convert_role_general_objective(node)
+    text = node.node_name == 'inline_quoted' ? node.text : node.content
+    "\\generalobjective{#{process_text(text)}}"
+  end
 
   # --- [.badge]#text# → \badge{text} ---
   def convert_role_badge(node)

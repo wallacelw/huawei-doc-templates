@@ -37,8 +37,9 @@ multiple unrelated changes in one commit. Do not leave uncommitted changes.
 Before committing, validate the change from **all** relevant perspectives:
 
 1. **Compile + test:** Run `make samples` (converts `.adoc` → `.tex` → PDF
-   for all template samples) and `make test` (runs `test-filter.sh`,
-   `round-trip.sh`, `test-docx-fix.sh`, `test-sync.sh`, `test-converter.sh`).
+   for all template samples) and `make test` (runs `test-pdf-compile.sh`,
+   `test-preprocessor.sh`, `round-trip.sh`, `test-docx-fix.sh`,
+   `test-sync.sh`, `test-converter.sh`).
    All must pass.
    Verify 0 raw LaTeX blocks in output.
 
@@ -290,6 +291,9 @@ approval. Changing them breaks existing documents and reproducibility.
 
 ### L15. Core/template inheritance: shared components in `templates/_base/`
 - **Core components** live in `templates/_base/` and are inherited by all templates:
+  - Base class: huawei-base.cls (shared class options portuguese/indentbody/notime/
+    nochangelog/noauthors, `\LoadClass` of article, all shared package loads, the 13
+    huawei-* module loads, and `\setdoctitle`).
   - LaTeX modules: huawei-colors, huawei-fonts, huawei-lang, huawei-page, huawei-tables,
     huawei-code, huawei-callouts, huawei-images, huawei-changelog, huawei-shared,
     huawei-cover, huawei-titles, huawei-toc, huawei-badges.
@@ -299,6 +303,10 @@ approval. Changing them breaks existing documents and reproducibility.
   - Pre-processing: adoc_docx_preprocessor.py (DOCX/MD/HTML — converts passthrough blocks/roles).
   - Post-processing: docx_fix.py (DOCX), embed-images.py (MD).
   - Diagram config: puppeteer-config.json (mermaid --no-sandbox).
+- **Template classes** build on `huawei-base.cls`: guide, technical, and poc call
+  `\LoadClassWithOptions{huawei-base}`; testbook declares its extra `noanswers`
+  option in the child class, passes remaining options through with
+  `\DeclareOption*`, then calls `\LoadClass{huawei-base}`.
 - **Template-specific** code stays in `templates/<name>/<name>.cls`:
   - guide: base template (no additions beyond core).
   - technical: 5-section structure (problem, rootcauseanalysis, rootcause, triggercondition, workaround).
@@ -306,8 +314,9 @@ approval. Changing them breaks existing documents and reproducibility.
   - poc: result badges, stakeholders, closing record, signatures.
 - Each SKILL.md is self-sufficient (no shared/external references) but organized with
   "Core Components" and "Template-Specific Features" sections.
-- Do not add `\RequirePackage` calls inside `.sty` modules — all packages are loaded
-  by the template class file.
+- Do not add `\RequirePackage` calls inside `.sty` modules — packages are loaded by
+  class files: the shared packages by `huawei-base.cls`, template-specific packages
+  (tabularx, amssymb, seqsplit) by the template class.
 
 ### L16. AsciiDoc is the single source of truth. LaTeX is generated.
 - AsciiDoc (`.adoc`) is the source format that authors edit. LaTeX (`.tex`)
@@ -326,8 +335,9 @@ approval. Changing them breaks existing documents and reproducibility.
   (e.g., `v6.0.1`, `v6.0.2`, `v6.1.0`).
 - Before tagging, validate: compile all samples (`make samples`, which converts
   `.adoc` → `.tex` → PDF for all templates), run all tests
-  (`make test`, which runs `test-filter.sh`, `round-trip.sh`, `test-docx-fix.sh`,
-  `test-sync.sh`, and `test-converter.sh`), and verify 0 raw LaTeX blocks in output.
+  (`make test`, which runs `test-pdf-compile.sh`, `test-preprocessor.sh`,
+  `round-trip.sh`, `test-docx-fix.sh`, `test-sync.sh`, and
+  `test-converter.sh`), and verify 0 raw LaTeX blocks in output.
 - Tag format: `v<major>.<minor>.<patch>` — patch for fixes, minor for features,
   major for breaking changes.
 - Push the tag: `git push --tags`.
@@ -473,7 +483,9 @@ at the repo root registers `templates/` as a discovery path.
 ### Steps
 
 1. **Create the template directory** `templates/<name>/` with:
-   - `<name>.cls` — the LaTeX class file
+   - `<name>.cls` — the LaTeX class file (build on
+     `templates/_base/huawei-base.cls` via `\LoadClassWithOptions`;
+     add only template-specific options, packages, and environments)
    - `SKILL.md` — the skill definition (see format below)
    - `README.md` — human-readable documentation
    - `.latexmkrc` — latexmk config (XeLaTeX, TZ=America/Sao_Paulo default)
@@ -519,7 +531,7 @@ at the repo root registers `templates/` as a discovery path.
 ## How to extend the existing template
 
 ### Adding a new command to `guide.cls`, `technical.cls`, `testbook.cls`, or `poc.cls`
-1. Define the command in the appropriate `.cls` file (`guide.cls`, `technical.cls`, `testbook.cls`, or `poc.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead.
+1. Define the command in the appropriate `.cls` file (`guide.cls`, `technical.cls`, `testbook.cls`, or `poc.cls`) with a `\newcommand`. If the command is shared across templates, define it in the appropriate `templates/_base/huawei-*.sty` module instead; shared class-level code (class options, package loads, commands like `\setdoctitle`) goes in `templates/_base/huawei-base.cls`.
 2. Use internal prefix `\lg@` for internal macros (e.g. `\lg@docversion`).
 3. Add the AsciiDoc role or passthrough pattern to `huawei-latex-converter.rb`.
 4. Add the syntax to the reference tables in `SKILL.md` and `README.md`.
@@ -550,7 +562,9 @@ at the repo root registers `templates/` as a discovery path.
 ## How to add a new template
 
 1. **Create the template directory** `templates/<name>/` with:
-   - `<name>.cls` — the LaTeX class file
+   - `<name>.cls` — the LaTeX class file (build on
+     `templates/_base/huawei-base.cls` via `\LoadClassWithOptions`;
+     add only template-specific options, packages, and environments)
    - `create-<name>-reference-docx.py` — thin wrapper (~16 lines) that imports
      `templates/_base/docx_fix.py`
    - `<name>-reference.docx` — reference DOCX for Pandoc
@@ -565,7 +579,8 @@ at the repo root registers `templates/` as a discovery path.
    - scripts/build.sh (auto-detects template from `.latexmkrc` TEXINPUTS)
    - scripts/build-adoc.sh (uses `:template:` attribute from `.adoc` header)
    - scripts/install.sh (auto-discovers template sample dirs)
-   - test-sync.sh, test-docx-fix.sh, round-trip.sh (auto-discover templates and samples). test-filter.sh needs a one-line addition per template (filter path).
+   - test-sync.sh, test-docx-fix.sh, round-trip.sh (auto-discover templates and samples)
+   - test-pdf-compile.sh (auto-discovers template sample logs; setup-guide is hardcoded)
 
 The naming convention is critical:
 - Converter: `templates/_base/huawei-latex-converter.rb` (shared)
@@ -578,12 +593,24 @@ The naming convention is critical:
 
 ## File editing rules
 
-- **`guide.cls`** — guide-specific formatting (cover, TOC, titles). Shared
-  formatting lives in `templates/_base/huawei-*.sty` modules. Changes here
-  affect every document. Test with both samples before committing.
-- **`technical.cls`** — technical-report-specific formatting (cover, TOC, titles). Same rules as `guide.cls`: test with both samples before committing.
-- **`testbook.cls`** — test-book-specific formatting (cover, TOC, titles, testcase environment). Same rules as `guide.cls`. Test with both samples before committing.
-- **`poc.cls`** — POC/homologation-specific formatting (cover, TOC, titles, result badges, stakeholders, signatures). Same rules as `guide.cls`. Test with both samples before committing.
+- **`guide.cls`** — guide-specific code only (the `\setguidetitle` alias). Shared
+  class boilerplate (class options, article load, package loads, shared modules)
+  lives in `templates/_base/huawei-base.cls`; shared formatting lives in
+  `templates/_base/huawei-*.sty` modules. Changes here affect every guide
+  document. Test with both samples before committing.
+- **`technical.cls`** — technical-report-specific code (metadata commands, 5-section
+  environments, cover page). Shared boilerplate lives in `huawei-base.cls`. Same
+  rules as `guide.cls`: test with both samples before committing.
+- **`testbook.cls`** — test-book-specific code (testcase/testsummary environments,
+  test result badges, `noanswers` option). Shared boilerplate lives in
+  `huawei-base.cls`. Same rules as `guide.cls`. Test with both samples before
+  committing.
+- **`poc.cls`** — POC/homologation-specific code (result badges, stakeholders,
+  closing record, signatures). Shared boilerplate lives in `huawei-base.cls`.
+  Same rules as `guide.cls`. Test with both samples before committing.
+- **`templates/_base/huawei-base.cls`** — shared class boilerplate (class options,
+  article load, package loads, shared module loads, `\setdoctitle`). Changes
+  affect ALL templates. Test with `make samples` before committing.
 - **`templates/_base/huawei-latex-converter.rb`** — shared AsciiDoc-to-LaTeX
   converter. Changes affect ALL templates' PDF output. Test with
   `make samples` before committing.

@@ -39,14 +39,14 @@ SPECS = [
     # label       bg       frame    pill?
     ("Pass",     "E8F5E9", "62B230", True),
     ("Partial",  "FFF3E0", "ED6D00", True),
-    ("Fail",     "E7D9DA", "C7000B", True),   # red!15 ≈ E7D9DA
+    ("Fail",     "FFD9D9", "C7000B", True),   # red!15 bg (15% red + 85% white)
     ("Skip",     "F6F8FA", "000000", True),   # ruleblack frame (PDF: codebg/ruleblack)
     ("Blocked",  "FFF3E0", "ED6D00", True),
     ("Untested", "F6F8FA", "000000", True),   # ruleblack frame
     # Portuguese POC labels (\pocresult, lang=pt)
     ("Atendido", "E8F5E9", "62B230", True),
     ("Parcial",  "FFF3E0", "ED6D00", True),
-    ("Falha",    "E7D9DA", "C7000B", True),
+    ("Falha",    "FFD9D9", "C7000B", True),   # red!15 bg (15% red + 85% white)
     ("Ignorado", "F6F8FA", "000000", True),
 ]
 

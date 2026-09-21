@@ -902,8 +902,167 @@ assert_contains "example title entities resolved" 'Ex—ample…W' "$OUT"
 assert_not_contains "example title no entity leak" '&#8230;' "$OUT"
 
 # ════════════════════════════════════════════════════════════════════════════
+## 22. Wave 1 regression coverage
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 22. Wave 1 regression coverage ==="
+
+# Objectives inline roles (were silently dropped before the fix)
+OUT=$(convert '= Test
+:template: guide
+
+[.general-objective]#Master the console#
+[.objective]#First objective#')
+assert_contains "general-objective inline → generalobjective" '\generalobjective{Master the console}' "$OUT"
+assert_contains "objective inline → objective" '\objective{First objective}' "$OUT"
+
+# Objectives block form (crashed with NoMethodError before the fix: the
+# converter called block.text, which Asciidoctor::Block does not respond to).
+# NOTE: block roles must sit on their own line — with the role prefix on the
+# same line as the text, Asciidoctor parses the whole line as plain paragraph
+# text (role=nil) and no converter can remap it.
+OUT=$(convert '= Test
+:template: guide
+
+[.objectives]
+--
+[.general-objective]
+General objective text
+
+[.objective]
+First objective text
+--')
+assert_contains "objectives block → generalobjective" '\generalobjective{General objective text}' "$OUT"
+assert_contains "objectives block → objective" '\objective{First objective text}' "$OUT"
+
+# Unknown code language passes through verbatim — the .sty handles fallback
+# highlighting for languages minted/listings do not know.
+OUT=$(convert '= Test
+:template: guide
+
+[source,go]
+----
+package main
+----')
+assert_contains "unknown lang go → begin code[go]" '\begin{code}[go]' "$OUT"
+assert_contains "unknown lang go → end code"       '\end{code}'         "$OUT"
+
+# Multi-author document (header author line) — was first-author-only before
+# the fix (attr('author') holds just the first; attr('authors') holds all,
+# comma-separated).
+OUT=$(convert '= My Document
+John Doe; Jane Smith
+:template: guide
+
+Text.')
+assert_contains "multi-author → all authors in setdocauthors" '\setdocauthors{John Doe, Jane Smith}' "$OUT"
+
+# Error handling: a malformed construct (block [.badge] role routes to the
+# inline-only convert_role_badge, which calls node.text on a Block) must exit
+# non-zero with an actionable one-line message — not the ~14 KB raw Ruby
+# object inspect dumped before the fix. NoMethodError messages embed the
+# node inspect from ~char 35 — inside the old 300-char truncation window —
+# so the message must be stripped of the inspect, not just truncated.
+ERR_AD="$TMPDIR/err-case.adoc"
+printf '%s\n' '= Test
+:template: guide
+
+[.badge]
+Block badge text' > "$ERR_AD"
+set +e
+asciidoctor -b huawei-latex -r "$CONVERTER" "$ERR_AD" -o "$TMPDIR/err-case.tex" 2>"$TMPDIR/err-case.log"
+ERR_STATUS=$?
+set -e
+if [[ "$ERR_STATUS" -ne 0 ]]; then
+  echo "  PASS: error case → non-zero exit"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: error case → non-zero exit"
+  echo "        converter exited 0 on a malformed construct"
+  FAIL=$((FAIL + 1))
+fi
+ERR_LOG="$(<"$TMPDIR/err-case.log")"
+assert_contains "error case → actionable message" 'failed to convert' "$ERR_LOG"
+assert_contains "error case → node type reported" 'paragraph node'    "$ERR_LOG"
+assert_not_contains "error case → no raw node inspect" '#<Asciidoctor' "$ERR_LOG"
+ERR_BYTES=$(wc -c < "$TMPDIR/err-case.log")
+if [[ "$ERR_BYTES" -lt 1000 ]]; then
+  echo "  PASS: error case → bounded output ($ERR_BYTES bytes)"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: error case → bounded output"
+  echo "        stderr was $ERR_BYTES bytes (raw Ruby object inspect dumped?)"
+  FAIL=$((FAIL + 1))
+fi
+
+# ════════════════════════════════════════════════════════════════════════════
+## 23. Prerequisites / stepbystep roles
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 23. Prerequisites / stepbystep roles ==="
+
+# [.prerequisites] directly on a ulist inside [.objectives] (the form
+# documented in templates/poc/SKILL.md): label + ALL items. Before the fix
+# every item was dropped — Asciidoctor aliases List#blocks to the ListItems
+# and ListItem#content is "" (text lives in ListItem#text), so the old
+# handler emitted only the label.
+OUT=$(convert '= Test
+:template: poc
+
+[.objectives]
+--
+[.prerequisites]
+* Item one
+* Item two
+--')
+assert_contains "prerequisites on list → label"    '\prerequisites'  "$OUT"
+assert_contains "prerequisites on list → itemize"  '\begin{itemize}' "$OUT"
+assert_contains "prerequisites on list → item one" '\item Item one'   "$OUT"
+assert_contains "prerequisites on list → item two" '\item Item two'   "$OUT"
+
+# [.stepbystep] directly on an olist inside [.objectives]: the old handler
+# emitted only the label and never rendered the list at all.
+OUT=$(convert '= Test
+:template: poc
+
+[.objectives]
+--
+[.stepbystep]
+. Step one
+. Step two
+--')
+assert_contains "stepbystep on list → label"     '\stepbystep'       "$OUT"
+assert_contains "stepbystep on list → enumerate" '\begin{enumerate}' "$OUT"
+assert_contains "stepbystep on list → step one"  '\item Step one'    "$OUT"
+assert_contains "stepbystep on list → step two"  '\item Step two'    "$OUT"
+
+# Standalone role-on-list (outside [.objectives]) emits label + items too
+OUT=$(convert '= Test
+:template: poc
+
+[.prerequisites]
+* Solo item one
+* Solo item two')
+assert_contains "standalone prerequisites → label"    '\prerequisites'      "$OUT"
+assert_contains "standalone prerequisites → item one" '\item Solo item one' "$OUT"
+assert_contains "standalone prerequisites → item two" '\item Solo item two' "$OUT"
+
+OUT=$(convert '= Test
+:template: poc
+
+[.stepbystep]
+. Solo step one
+. Solo step two')
+assert_contains "standalone stepbystep → label"    '\stepbystep'        "$OUT"
+assert_contains "standalone stepbystep → step one" '\item Solo step one' "$OUT"
+assert_contains "standalone stepbystep → step two" '\item Solo step two' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
 # Summary
 # ════════════════════════════════════════════════════════════════════════════
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
-exit $FAIL
+# Exit with status, not the failure count: `exit $FAIL` wrapped mod 256 past
+# 255 failures (e.g. 256 failures → exit 0 → CI would see success).
+if [[ "$FAIL" -gt 0 ]]; then
+  exit 1
+fi
+exit 0

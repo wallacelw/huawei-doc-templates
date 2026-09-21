@@ -60,7 +60,9 @@
 }
 
 % Disable changelog when [nochangelog] option is active.
-% The environment and entries become no-ops (content is absorbed, nothing rendered).
+% The renewed environment drops the section heading and \changelogentry
+% becomes a no-op, so no heading or entry text is rendered. Any other
+% content inside the environment is still typeset normally.
 \if@changelog\else
   \renewenvironment{changelog}{}{}
   \renewcommand{\changelogentry}[3]{\ignorespaces}

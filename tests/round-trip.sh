@@ -3,30 +3,17 @@
 # Checks that heading counts, image counts, code block counts,
 # and table/callout counts are consistent across Markdown, HTML, and DOCX outputs.
 # Also hard-checks 0 raw LaTeX in all three formats (excluding code examples).
-# Allows ±1 tolerance for most counts (HTML template may add a title <h1>, etc.).
+# Format generation is DELEGATED to scripts/build.sh so the test exercises the
+# real production pipeline (preprocessor → asciidoctor -b docbook → pandoc →
+# post-processors) instead of a drifting re-implementation.  Exception:
+# setup-guide's committed .md/.html/.docx are checked as-is, never regenerated
+# here (see the policy note in the main loop).
+# Count tolerances are calibrated per sample to the ACTUAL measured divergence
+# (see the tolerance table in the main loop) — never wider.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PASS=0; FAIL=0
-
-# ── Template-aware path resolution ──────────────────────────────────────────
-get_template_paths() {
-    local sample_dir="$1"
-    # Extract template from path: documents/<template>-<lang>
-    local template
-    template=$(basename "$sample_dir" | sed 's/-pt$//;s/-en$//')
-    # Validate: check templates/${template}/${template}.cls exists
-    if [ ! -f "$REPO_ROOT/templates/${template}/${template}.cls" ]; then
-        template="guide"  # fallback
-    fi
-    # For .adoc sources: asciidoctor -b docbook → pandoc -f docbook (no Lua filter)
-    # For .tex sources (legacy): pandoc -f latex+raw_tex --lua-filter
-    FILTER="$REPO_ROOT/templates/${template}/${template}-pandoc.lua"
-    HTML_TMPL="$REPO_ROOT/templates/${template}/${template}-template.html"
-    REF_DOCX="$REPO_ROOT/templates/${template}/${template}-reference.docx"
-    FIX_SCRIPT="$REPO_ROOT/templates/${template}/create-${template}-reference-docx.py"
-    TEMPLATE_NAME="$template"
-}
 
 # Temp directory (cleaned up on exit)
 RT_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/rt-roundtrip.XXXXXX")"
@@ -57,13 +44,13 @@ pat = re.compile(pattern)
 n = 0
 in_fenced = False
 with open(md_file) as f:
-    for line in f:
-        if line.startswith("```"):
-            in_fenced = not in_fenced
-            continue
-        if in_fenced:
-            continue
-        n += len(pat.findall(line))
+  for line in f:
+    if line.startswith("```"):
+      in_fenced = not in_fenced
+      continue
+    if in_fenced:
+      continue
+    n += len(pat.findall(line))
 print(n)
 PYEOF
 }
@@ -195,34 +182,34 @@ import sys, re
 
 md_file = sys.argv[1]
 with open(md_file) as f:
-    lines = f.readlines()
+  lines = f.readlines()
 
 raw_count = 0
 in_fenced = False
 
 for line in lines:
-    # Track fenced code blocks (```)
-    if line.startswith("```"):
-        in_fenced = not in_fenced
-        continue
-    if in_fenced:
-        continue
-    # Skip indented code blocks (4+ spaces or tab)
-    if line.startswith("    ") or line.startswith("\t"):
-        continue
-    # Check for raw LaTeX markers
-    if "{=latex}" in line:
-        raw_count += 1
-    if "\\begin{" in line:
-        raw_count += 1
-    # \set followed by doc command (not inside backtick inline code)
-    # Simple check: \set followed by lowercase letter
-    if re.search(r"\\set[a-z]", line):
-        # Exclude if inside inline code (between backticks)
-        # This is a heuristic — strip backtick-enclosed segments first
-        stripped = re.sub(r"`[^`]*`", "", line)
-        if re.search(r"\\set[a-z]", stripped):
-            raw_count += 1
+  # Track fenced code blocks (```)
+  if line.startswith("```"):
+    in_fenced = not in_fenced
+    continue
+  if in_fenced:
+    continue
+  # Skip indented code blocks (4+ spaces or tab)
+  if line.startswith("    ") or line.startswith("\t"):
+    continue
+  # Check for raw LaTeX markers
+  if "{=latex}" in line:
+    raw_count += 1
+  if "\\begin{" in line:
+    raw_count += 1
+  # \set followed by doc command (not inside backtick inline code)
+  # Simple check: \set followed by lowercase letter
+  if re.search(r"\\set[a-z]", line):
+    # Exclude if inside inline code (between backticks)
+    # This is a heuristic — strip backtick-enclosed segments first
+    stripped = re.sub(r"`[^`]*`", "", line)
+    if re.search(r"\\set[a-z]", stripped):
+      raw_count += 1
 
 print(raw_count)
 PYEOF
@@ -312,201 +299,182 @@ for entry in "${SAMPLES[@]}"; do
 
   # Resolve source file (all samples are .adoc)
   src_file="$REPO_ROOT/$sample/src/${basename}.adoc"
-  USE_ADOC=true
-  tex_file="$RT_TMPDIR/${basename}-from-adoc.tex"
-  if ! asciidoctor -b huawei-latex -r "$REPO_ROOT/templates/_base/huawei-latex-converter.rb" "$src_file" -o "$tex_file" 2>/dev/null; then
-    echo "  SKIP: asciidoctor conversion failed for $src_file"
+  if [ ! -f "$src_file" ]; then
+    echo "  SKIP: source not found: $src_file"
     continue
   fi
 
-  if [ ! -f "$tex_file" ]; then
-    echo "  SKIP: $tex_file not found"
-    continue
-  fi
-
-  # ── Resolve template-specific paths ────────────────────────────────────
-  get_template_paths "$sample"
-
-  # ── Pre-process for each target (same pipeline as scripts/build.sh) ────
-  pre_md="$RT_TMPDIR/${basename}-pre-md.adoc"
-  pre_docx="$RT_TMPDIR/${basename}-pre-docx.adoc"
-  pre_html="$RT_TMPDIR/${basename}-pre-html.adoc"
-  if ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
-        --target md --template "$TEMPLATE_NAME" "$src_file" -o "$pre_md" 2>/dev/null || \
-     ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
-        --target docx --template "$TEMPLATE_NAME" "$src_file" -o "$pre_docx" 2>/dev/null || \
-     ! python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
-        --target html --template "$TEMPLATE_NAME" "$src_file" -o "$pre_html" 2>/dev/null; then
-    echo "  FAIL: pre-processor failed for $name"
-    FAIL=$((FAIL + 1))
-    continue
-  fi
-
-  # ── Generate Markdown ──────────────────────────────────────────────────
-  # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
-  # Fallback: pandoc -f latex+raw_tex from generated .tex
-  tmp_dbk=$(mktemp --suffix=.dbk)
-  if asciidoctor -b docbook "$pre_md" -o "$tmp_dbk" 2>/dev/null && \
-     pandoc -f docbook -t gfm "$tmp_dbk" -o "$RT_TMPDIR/rt.md" 2>/dev/null; then
-    : # success
-  else
-    pandoc -f latex+raw_tex "$tex_file" -t gfm -o "$RT_TMPDIR/rt.md" 2>/dev/null || true
-  fi
-  rm -f "$tmp_dbk"
-
-  # ── Generate HTML ──────────────────────────────────────────────────────
-  # Diagram extension optional (same guard as scripts/build.sh)
-  diagram_opts=""
-  if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
-    diagram_opts="-r asciidoctor-diagram"
-  fi
-  asciidoctor -b html5 \
-    -a stylesheet="$REPO_ROOT/templates/_base/huawei.css" \
-    -a docinfodir="$REPO_ROOT/templates/_base" \
-    -a docinfo1 \
-    $diagram_opts \
-    "$pre_html" -o "$RT_TMPDIR/rt.html" 2>/dev/null
-  if [ ! -f "$RT_TMPDIR/rt.html" ]; then
-    echo "  FAIL: HTML generation failed for $name"
-    FAIL=$((FAIL + 1))
-    continue
-  fi
-
-  # ── Generate DOCX ──────────────────────────────────────────────────────
-  docx_outdir="$RT_TMPDIR/docx_out"
-  rm -rf "$docx_outdir"
-  mkdir -p "$docx_outdir"
-  if [[ "$USE_ADOC" == "true" ]]; then
-    # Pipeline: asciidoctor -b docbook → pandoc -f docbook (same as build.sh)
-    # Fallback: pandoc -f latex+raw_tex from generated .tex
-    tmp_dbk=$(mktemp --suffix=.dbk)
-    if asciidoctor -b docbook "$pre_docx" -o "$tmp_dbk" 2>/dev/null && \
-       pandoc -f docbook \
-       --reference-doc="$REF_DOCX" --number-sections \
-       --resource-path="$REPO_ROOT/$sample:$REPO_ROOT/templates/${TEMPLATE_NAME}:${REPO_ROOT}/templates/${TEMPLATE_NAME}/common-assets" \
-       "$tmp_dbk" -o "$docx_outdir/${basename}.docx" 2>/dev/null; then
-      : # success
-    else
-      pandoc -f latex+raw_tex "$tex_file" \
-        --reference-doc="$REF_DOCX" --number-sections \
-        -o "$docx_outdir/${basename}.docx" 2>/dev/null || true
+  # ── Obtain MD/HTML/DOCX ────────────────────────────────────────────────
+  # Policy (two kinds of samples):
+  # * The 8 template samples (documents/<tmpl>-{pt,en}/) REGENERATE their
+  #   outputs here via scripts/build.sh so the test validates the REAL
+  #   pipeline (preprocessor → asciidoctor -b docbook → pandoc →
+  #   post-processors) with production arguments (--toc --toc-depth=3
+  #   --metadata toc-title, --lang for the DOCX fix step, embed-images.py
+  #   for MD) instead of a drifting re-implementation.  build.sh writes
+  #   the outputs into the document's own folder (documents/<name>/) —
+  #   for these samples they are gitignored build artifacts, safe to
+  #   delete and regenerate.
+  # * setup-guide is DIFFERENT: its .md/.html/.docx are COMMITTED to git
+  #   (see AGENTS.md).  Regenerating them here would rewrite committed
+  #   files with a fresh cover timestamp (dirty tree after every test
+  #   run), and the pre-build rm would leave them deleted if the build
+  #   failed.  So setup-guide is never rm'd or rebuilt — the test checks
+  #   its EXISTING committed outputs, which the standard validation gate
+  #   (make all-formats / make setup-guide, same build.sh pipeline)
+  #   keeps current.
+  md_file="$REPO_ROOT/$sample/${basename}.md"
+  html_file="$REPO_ROOT/$sample/${basename}.html"
+  docx_file="$REPO_ROOT/$sample/${basename}.docx"
+  if [ "$name" = "setup-guide" ]; then
+    # Committed outputs: use as-is.  If missing, the validation gate has
+    # not been run yet — skip this sample's format checks (do not fail,
+    # and do not build, which would mutate the working tree).
+    if [ ! -f "$md_file" ] || [ ! -f "$html_file" ] || [ ! -f "$docx_file" ]; then
+      echo "  SKIP: committed outputs missing (${basename}.md/.html/.docx) — run make all-formats first"
+      continue
     fi
-    rm -f "$tmp_dbk"
-  fi
-  # Post-process with --fix (same pipeline as scripts/build.sh)
-  if [ -f "$docx_outdir/${basename}.docx" ]; then
-    python3 "$FIX_SCRIPT" --fix "$docx_outdir/${basename}.docx" 2>/dev/null || true
+  else
+    # Remove stale outputs first so a silently failing build cannot pass
+    # on artifacts left over from a previous run.
+    rm -f "$md_file" "$html_file" "$docx_file"
+    build_log="$RT_TMPDIR/${name}-build.log"
+    if ! "$REPO_ROOT/scripts/build.sh" --docx --md --html "$REPO_ROOT/$sample" \
+          >"$build_log" 2>&1; then
+      echo "  FAIL: scripts/build.sh failed for $name"
+      tail -20 "$build_log" | sed 's/^/  │ /'
+      FAIL=$((FAIL + 1))
+      continue
+    fi
+    if [ ! -f "$md_file" ] || [ ! -f "$html_file" ] || [ ! -f "$docx_file" ]; then
+      echo "  FAIL: build.sh succeeded but an output (md/html/docx) is missing for $name"
+      FAIL=$((FAIL + 1))
+      continue
+    fi
   fi
 
   # ── Count MD ───────────────────────────────────────────────────────────
   # Fenced-code-aware: bash `#` comments inside code blocks must not
   # count as headings; pandoc's raw-HTML fallbacks (<img>, <table>) must
   # count as images/tables.
-  md_h1=$(count_md "$RT_TMPDIR/rt.md" '^# ')
-  md_h2=$(count_md "$RT_TMPDIR/rt.md" '^## ')
-  md_img=$(count_md "$RT_TMPDIR/rt.md" '!\[|<img')
+  md_h1=$(count_md "$md_file" '^# ')
+  md_h2=$(count_md "$md_file" '^## ')
+  md_img=$(count_md "$md_file" '!\[|<img')
   # Code blocks: count fenced code blocks only (``` open+close, divide by 2).
   # Indented code blocks in Pandoc MD are ambiguous with list-item indentation,
   # so we count only fenced blocks for reliable cross-format comparison.
-  md_code_markers=$(count '^```' "$RT_TMPDIR/rt.md")
+  md_code_markers=$(count '^```' "$md_file")
   md_code=$((md_code_markers / 2))
-  # Tables: count pipe-table separator lines (only |-: chars — a data
-  # row containing "---" in a cell must not count), grid-table separator
+  # Tables: count pipe-table separator lines, grid-table separator
   # lines (indented ---), and raw-HTML <table> blocks (pandoc emits HTML
   # tables when a cell holds block content, e.g. changelog bullet lists
   # — GFM pipe tables are inline-only).
+  # A pipe separator line must contain at least one "-" — pandoc emits an
+  # all-spaces pipe row ("|   |   |") as the empty header of headerless
+  # tables (e.g. the cover version table), which is data, not a separator,
+  # and must not count as a second table.
   # Grid tables may have 2 separator lines (header + footer), so count
   # only the first separator of each contiguous group.
-  md_tables=$(count_md "$RT_TMPDIR/rt.md" '^\|[-| :]+$')
-  md_grid_tables=$(awk '/^[[:space:]]+---/ {if(!p) c++; p=1} !/^[[:space:]]+---/ {p=0} END{print c+0}' "$RT_TMPDIR/rt.md")
-  md_html_tables=$(count_md "$RT_TMPDIR/rt.md" '<table')
+  md_tables=$(count_md "$md_file" '^\|[-| :]*-[-| :]*$')
+  md_grid_tables=$(awk '/^[[:space:]]+---/ {if(!p) c++; p=1} !/^[[:space:]]+---/ {p=0} END{print c+0}' "$md_file")
+  md_html_tables=$(count_md "$md_file" '<table')
   md_tables=$((md_tables + md_grid_tables + md_html_tables))
   # Callouts: pandoc renders docbook admonitions as raw HTML divs
   # (class="note|warning|tip|...").  DOCX cannot count them — pandoc
   # drops the admonition label and keeps only the body text.
-  md_callouts=$(count_md "$RT_TMPDIR/rt.md" '<div class="(note|warning|tip|caution|important)"')
+  md_callouts=$(count_md "$md_file" '<div class="(note|warning|tip|caution|important)"')
 
   # ── Count HTML ─────────────────────────────────────────────────────────
-  html_h1=$(count '<h1' "$RT_TMPDIR/rt.html")
-  html_h2=$(count '<h2' "$RT_TMPDIR/rt.html")
-  html_img=$(count '<img' "$RT_TMPDIR/rt.html")
-  html_code=$(count '<pre><code' "$RT_TMPDIR/rt.html")
+  html_h1=$(count '<h1' "$html_file")
+  html_h2=$(count '<h2' "$html_file")
+  html_img=$(count '<img' "$html_file")
+  # Code blocks: listing blocks ([source] with or without a language).
+  # asciidoctor renders each as <div class="listingblock"> containing
+  # either <pre class="highlight"><code ...> (with language) or a bare
+  # <pre> (without). Literal blocks (<div class="literalblock">) are
+  # excluded: pandoc's docbook reader does not map them to SourceCode
+  # paragraphs in DOCX, so counting them would diverge.
+  html_code=$(count_occ '<div class="listingblock"' "$html_file")
   # Real tables only: asciidoctor also renders admonitions (NOTE/TIP/
   # WARNING) as bare <table> layout grids — those are counted as callouts
   # below, not as tables.
-  html_tables=$(count '<table class="tableblock' "$RT_TMPDIR/rt.html")
+  html_tables=$(count '<table class="tableblock' "$html_file")
   # Callouts: asciidoctor admonition blocks
-  html_callouts=$(count_occ 'class="admonitionblock ' "$RT_TMPDIR/rt.html")
+  html_callouts=$(count_occ 'class="admonitionblock ' "$html_file")
 
   # ── Count DOCX ─────────────────────────────────────────────────────────
   docx_tmpdir="$RT_TMPDIR/docx_unzip"
-  docx_counts=$(count_docx "$docx_outdir/${basename}.docx" "$docx_tmpdir")
+  docx_counts=$(count_docx "$docx_file" "$docx_tmpdir")
   read -r docx_h1 docx_h2 docx_img docx_code_paras docx_code_blocks docx_tables docx_callouts <<< "$docx_counts"
 
   # ── Cross-format consistency ───────────────────────────────────────────
+  # Tolerances are calibrated per sample to the ACTUAL max pairwise diff
+  # measured with the production pipeline (scripts/build.sh) — the smallest
+  # value that passes, never wider. When a divergence is fixed, or a sample's
+  # content changes, re-run this test, read the measured counts from the
+  # FAIL line / summary table, and update the case entry below.
+  #
+  # Root causes of the remaining non-zero divergences:
+  #
+  # * H1/H2 — asciidoctor's HTML output shifts headings down one level: the
+  #   document title is the only <h1> and chapters become <h2>, while the
+  #   MD/DOCX pipelines put chapters at H1. So html_h1 is always 1 and
+  #   html_h2 equals the chapter count (= md_h1 = docx_h1). The H1
+  #   divergence is (chapters − 1); the H2 divergence is
+  #   |sections − chapters|. MD and DOCX agree exactly on both levels.
+  #
+  # * Tables+Callouts — DOCX loses the admonition structure: pandoc's
+  #   docbook reader drops the NOTE/TIP/WARNING labels and keeps only the
+  #   body text as plain paragraphs, so DOCX contributes tables only while
+  #   MD/HTML count tables + callout divs. The divergence equals the
+  #   document's callout count (guide 9, poc 5, technical 4, testbook 6,
+  #   setup-guide 32).
+  #
+  # * Code blocks converged to 0: the pre-processor now inlines
+  #   [.codefile,file=...] content as a real [source] block for
+  #   secondary formats (L18 — the PDF typesets the file via
+  #   \codefile), so HTML listing blocks and DOCX SourceCode runs map
+  #   1:1 again (measured 6/6 guide-en, 3/3 guide-pt).
+  #
+  # * Images converged to 0 with the production pipeline: build.sh passes
+  #   -r asciidoctor-diagram to every conversion, so MD/DOCX now embed the
+  #   same diagram images as HTML. Code blocks also map 1:1 (HTML listing
+  #   blocks → DOCX SourceCode runs).
+  case "$name" in
+    guide-en)     h1_tol=5;  h2_tol=3;  img_tol=0; code_tol=0; tc_tol=9 ;;
+    guide-pt)     h1_tol=5;  h2_tol=2;  img_tol=0; code_tol=0; tc_tol=9 ;;
+    poc-en)       h1_tol=14; h2_tol=10; img_tol=0; code_tol=0; tc_tol=5 ;;
+    poc-pt)       h1_tol=14; h2_tol=10; img_tol=0; code_tol=0; tc_tol=5 ;;
+    technical-en) h1_tol=3;  h2_tol=0;  img_tol=0; code_tol=0; tc_tol=4 ;;
+    technical-pt) h1_tol=3;  h2_tol=0;  img_tol=0; code_tol=0; tc_tol=4 ;;
+    testbook-en)  h1_tol=3;  h2_tol=5;  img_tol=0; code_tol=0; tc_tol=6 ;;
+    testbook-pt)  h1_tol=3;  h2_tol=5;  img_tol=0; code_tol=0; tc_tol=6 ;;
+    setup-guide)  h1_tol=8;  h2_tol=19; img_tol=0; code_tol=0; tc_tol=32 ;;
+    *)
+      # Uncalibrated sample (new template/document): measure its actual
+      # diffs and add an entry above. img_tol/code_tol stay 0 (converged
+      # formats); h1/h2/tc carry the known HTML heading shift and DOCX
+      # callout drop, so small documents fit these defaults.
+      h1_tol=5; h2_tol=10; img_tol=0; code_tol=0; tc_tol=5 ;;
+  esac
 
-  # H1: ±5 tolerance (HTML template uses different heading structure than MD/DOCX;
-  # HTML puts doc title in <h1> and chapters in <h2>, MD/DOCX use H1 for chapters)
-  h1_tol=5
-  # poc has many sections → larger HTML heading shift (max_diff=14)
-  if [[ "$name" == *"poc"* ]]; then h1_tol=14; fi
-  # setup-guide: many chapters → larger HTML heading shift (max_diff=7)
-  if [ "$name" = "setup-guide" ]; then h1_tol=8; fi
   check_tol3 "H1 count (MD/HTML/DOCX)" "$md_h1" "$html_h1" "$docx_h1" "$h1_tol"
-
-  # H2: ±10 tolerance (HTML template heading structure differs from MD/DOCX;
-  # HTML shifts all headings down one level, so H2 diff ≈ H1 count)
-  h2_tol=10
-  # setup-guide: many chapters → larger cumulative shift (max_diff=20)
-  if [ "$name" = "setup-guide" ]; then h2_tol=20; fi
   check_tol3 "H2 count (MD/HTML/DOCX)" "$md_h2" "$html_h2" "$docx_h2" "$h2_tol"
-
-  # Images: ±3 tolerance (MD pipeline may not handle all images)
-  img_tol=3
-  if [ "$name" = "setup-guide" ]; then img_tol=6; fi
   check_tol3 "Image count (MD/HTML/DOCX)" "$md_img" "$html_img" "$docx_img" "$img_tol"
 
-  # Code blocks: compare MD fenced blocks, HTML <pre><code>, DOCX contiguous SourceCode runs.
-  # Known divergence: Pandoc MD uses indented code blocks (inside lists) that are
-  # hard to distinguish from list-item indentation without a full parser. We count
-  # only fenced blocks in MD, so MD may undercount vs HTML/DOCX.
-  # DOCX may overcount because each SourceCode line is a separate paragraph and
-  # non-contiguous lines (e.g. separated by list items) count as separate blocks.
-  # Primary comparison: HTML vs DOCX (tighter); MD is informational.
-  # Default ±10: HTML and DOCX counts should be close for most documents.
-  # setup-guide has many code blocks across 8 chapters — wider divergence (±20)
-  code_tol=10
-  # setup-guide: HTML has 0 code blocks (asciidoctor doesn't emit <pre><code> for
-  # some listings), DOCX has ~37 SourceCode runs → large diff (max_diff=37)
-  if [ "$name" = "setup-guide" ]; then code_tol=37; fi
+  # Code blocks: HTML listing blocks vs DOCX contiguous SourceCode runs
+  # (1:1 with the production pipeline). MD fenced blocks are informational
+  # only — pandoc emits indented code blocks inside lists that are hard to
+  # distinguish from list-item indentation without a full parser.
   check_tol "Code blocks HTML vs DOCX" "$html_code" "$docx_code_blocks" "$code_tol"
 
-  # Tables + callouts combined comparison.
-  # We compare:
+  # Tables + callouts combined comparison:
   #   MD:   md_tables + md_callouts
   #   HTML: html_tables + html_callouts
-  #   DOCX: docx_tables
-  # DOCX cannot count admonitions: pandoc drops the NOTE/TIP/WARNING
-  # labels and keeps only the body text, so no callout structure survives
-  # into the DOCX.  That divergence is why the guide tolerance is 9
-  # (its ~9 admonitions count in MD/HTML but not in DOCX).
+  #   DOCX: docx_tables (admonitions are dropped — see root cause above)
   md_tc=$((md_tables + md_callouts))
   html_tc=$((html_tables + html_callouts))
   docx_tc=$docx_tables
-  # HTML renders callouts as divs with classes, MD as blockquotes — divergence
-  # Default ±5: most documents have moderate callout/table divergence
-  # guide: DOCX cannot count admonitions (pandoc drops the NOTE/TIP/
-  # WARNING labels, keeping only body text) — ~9 callouts diverge (max_diff=9)
-  tc_tol=5
-  if [[ "$name" == *"guide"* ]]; then tc_tol=9; fi
-  # setup-guide: many callouts where MD blockquote keyword matching undercounts (max_diff=32)
-  if [ "$name" = "setup-guide" ]; then tc_tol=32; fi
-  # testbook uses definition lists for testcases (v4.0+), which render
-  # as grid tables in MD (header+footer separators counted separately)
-  # but as regular tables in HTML/DOCX. Wider tolerance needed.
-  if [[ "$name" == *"testbook"* ]]; then tc_tol=10; fi
-  # poc renders stakeholders/signatures as tables in HTML but not MD/DOCX (max_diff=11)
-  if [[ "$name" == *"poc"* ]]; then tc_tol=11; fi
   check_tol3 "Tables+Callouts (MD/HTML/DOCX)" "$md_tc" "$html_tc" "$docx_tc" "$tc_tol"
 
   # ── Summary table ──────────────────────────────────────────────────────
@@ -525,7 +493,7 @@ for entry in "${SAMPLES[@]}"; do
   # ── Hard check: 0 raw LaTeX in all 3 formats ──────────────────────────
 
   # MD: no raw LaTeX outside code blocks
-  raw_md=$(count_raw_latex_md "$RT_TMPDIR/rt.md")
+  raw_md=$(count_raw_latex_md "$md_file")
   if [ "$raw_md" -eq 0 ]; then
     echo "  PASS: No raw LaTeX in MD"
     PASS=$((PASS + 1))
@@ -535,7 +503,7 @@ for entry in "${SAMPLES[@]}"; do
   fi
 
   # HTML: no \begin{ outside <pre><code> blocks, no class="latex"
-  raw_html=$(python3 - "$RT_TMPDIR/rt.html" << 'PYEOF'
+  raw_html=$(python3 - "$html_file" << 'PYEOF'
 import sys, re
 from html.parser import HTMLParser
 
@@ -604,4 +572,7 @@ done
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
-exit $FAIL
+if [ "$FAIL" -gt 0 ]; then
+  exit 1
+fi
+exit 0

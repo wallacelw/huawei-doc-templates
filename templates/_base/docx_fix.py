@@ -14,6 +14,7 @@ templates/technical/create-technical-reference-docx.py).
 Requires: python-docx (pip install python-docx)
 """
 
+import os
 import sys
 import subprocess
 import re
@@ -268,7 +269,6 @@ def _fix_heading_styles(root, W_NS):
         rFonts.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
         rFonts.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
 
-        # Add bottom border to Heading 1
         # Fix bold: H2-H4 should be regular weight (matches PDF \normalfont)
         if heading_id != 'Heading1':
             for tag in ['b', 'bCs', 'i', 'iCs']:
@@ -668,26 +668,30 @@ def _fix_doc_defaults(root, W_NS):
     spacing.set(f"{{{W_NS}}}lineRule", "atLeast")
 
 
-def _add_badge_style(root, W_NS):
-    """Add/fix badge character style (red pill, white bold text).
+def _ensure_badge_char_style(root, W_NS, style_id, bg, fg, name=None):
+    """Find or create a badge character style with the given colors.
 
-    PDF: bg=huaweired, white bold footnotesize (8pt).
+    Shared by the flat red "badge" style (_add_badge_style) and the
+    result-badge fallbacks (_add_result_badge_styles): bold 8pt
+    HarmonyOS Sans on a shaded pill background.
     """
-    badge_style = None
+    style = None
     for s in root.findall(f"{{{W_NS}}}style"):
-        if s.get(f"{{{W_NS}}}styleId") == "badge":
-            badge_style = s
+        if s.get(f"{{{W_NS}}}styleId") == style_id:
+            style = s
             break
-    if badge_style is None:
-        badge_style = etree.SubElement(root, f"{{{W_NS}}}style")
-        badge_style.set(f"{{{W_NS}}}type", "character")
-        badge_style.set(f"{{{W_NS}}}styleId", "badge")
-        etree.SubElement(badge_style, f"{{{W_NS}}}name").set(f"{{{W_NS}}}val", "Badge")
-        etree.SubElement(badge_style, f"{{{W_NS}}}uiPriority").set(f"{{{W_NS}}}val", "99")
-    # Ensure rPr with bold + white text + red bg + 8pt + HarmonyOS Sans
-    rPr = badge_style.find(f"{{{W_NS}}}rPr")
+    if style is None:
+        style = etree.SubElement(root, f"{{{W_NS}}}style")
+        style.set(f"{{{W_NS}}}type", "character")
+        style.set(f"{{{W_NS}}}styleId", style_id)
+        etree.SubElement(style, f"{{{W_NS}}}name").set(
+            f"{{{W_NS}}}val", name if name is not None else style_id)
+        etree.SubElement(style, f"{{{W_NS}}}uiPriority").set(
+            f"{{{W_NS}}}val", "99")
+    # Ensure rPr with bold + fg text + bg shading + 8pt + HarmonyOS Sans
+    rPr = style.find(f"{{{W_NS}}}rPr")
     if rPr is None:
-        rPr = etree.SubElement(badge_style, f"{{{W_NS}}}rPr")
+        rPr = etree.SubElement(style, f"{{{W_NS}}}rPr")
     rf = rPr.find(f"{{{W_NS}}}rFonts")
     if rf is None:
         rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
@@ -698,28 +702,40 @@ def _add_badge_style(root, W_NS):
     color = rPr.find(f"{{{W_NS}}}color")
     if color is None:
         color = etree.SubElement(rPr, f"{{{W_NS}}}color")
-    color.set(f"{{{W_NS}}}val", "FFFFFF")
+    color.set(f"{{{W_NS}}}val", fg)
     shd = rPr.find(f"{{{W_NS}}}shd")
     if shd is None:
         shd = etree.SubElement(rPr, f"{{{W_NS}}}shd")
     shd.set(f"{{{W_NS}}}val", "clear")
     shd.set(f"{{{W_NS}}}color", "auto")
-    shd.set(f"{{{W_NS}}}fill", "C7000B")
+    shd.set(f"{{{W_NS}}}fill", bg)
     for tag in ['sz', 'szCs']:
         elem = rPr.find(f"{{{W_NS}}}{tag}")
         if elem is None:
             elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
         elem.set(f"{{{W_NS}}}val", "16")  # 8pt
+    return style
+
+
+def _add_badge_style(root, W_NS):
+    """Add/fix badge character style (red pill, white bold text).
+
+    PDF: bg=huaweired, white bold footnotesize (8pt).
+    """
+    _ensure_badge_char_style(root, W_NS, "badge", "C7000B", "FFFFFF",
+                             name="Badge")
 
 
 # Badge style definitions: (style_id, bg_color, fg_color)
 # Fallback character styles (used when the PNG asset is missing).  BG
 # matches the pill background; text is BLACK (PDF \huaweibadge sets no
-# text color).  These mirror the generate-badges.py SPECS.
+# text color).  These mirror the generate-badges.py SPECS, including
+# BadgeFail's true red!15 (FFD9D9) — the SPECS and the committed
+# Fail/Falha PNGs were regenerated to match.
 RESULT_BADGE_STYLES = [
     ("BadgePass",     "E8F5E9", "000000"),   # green bg, black text
     ("BadgePartial",  "FFF3E0", "000000"),   # orange bg, black text
-    ("BadgeFail",     "E7D9DA", "000000"),   # red!15 bg, black text (was C7000B/FFFFFF)
+    ("BadgeFail",     "FFD9D9", "000000"),   # red!15 bg (15% red + 85% white), black text
     ("BadgeSkip",     "F6F8FA", "000000"),   # gray bg, black text
     ("BadgeBlocked",  "FFF3E0", "000000"),   # orange bg, black text
     ("BadgeUntested", "F6F8FA", "000000"),   # gray bg, black text
@@ -751,44 +767,7 @@ BADGE_SENTINEL_RE = re.compile(r'^\[BADGE:(.*)\]$')
 def _add_result_badge_styles(root, W_NS):
     """Add individual result badge character styles (green/red/orange/gray)."""
     for style_id, bg, fg in RESULT_BADGE_STYLES:
-        s = None
-        for existing in root.findall(f"{{{W_NS}}}style"):
-            if existing.get(f"{{{W_NS}}}styleId") == style_id:
-                s = existing
-                break
-        if s is None:
-            s = etree.SubElement(root, f"{{{W_NS}}}style")
-            s.set(f"{{{W_NS}}}type", "character")
-            s.set(f"{{{W_NS}}}styleId", style_id)
-            etree.SubElement(s, f"{{{W_NS}}}name").set(
-                f"{{{W_NS}}}val", style_id)
-            etree.SubElement(s, f"{{{W_NS}}}uiPriority").set(
-                f"{{{W_NS}}}val", "99")
-        rPr = s.find(f"{{{W_NS}}}rPr")
-        if rPr is None:
-            rPr = etree.SubElement(s, f"{{{W_NS}}}rPr")
-        rf = rPr.find(f"{{{W_NS}}}rFonts")
-        if rf is None:
-            rf = etree.SubElement(rPr, f"{{{W_NS}}}rFonts")
-        rf.set(f"{{{W_NS}}}ascii", "HarmonyOS Sans")
-        rf.set(f"{{{W_NS}}}hAnsi", "HarmonyOS Sans")
-        if rPr.find(f"{{{W_NS}}}b") is None:
-            etree.SubElement(rPr, f"{{{W_NS}}}b")
-        color = rPr.find(f"{{{W_NS}}}color")
-        if color is None:
-            color = etree.SubElement(rPr, f"{{{W_NS}}}color")
-        color.set(f"{{{W_NS}}}val", fg)
-        shd = rPr.find(f"{{{W_NS}}}shd")
-        if shd is None:
-            shd = etree.SubElement(rPr, f"{{{W_NS}}}shd")
-        shd.set(f"{{{W_NS}}}val", "clear")
-        shd.set(f"{{{W_NS}}}color", "auto")
-        shd.set(f"{{{W_NS}}}fill", bg)
-        for tag in ['sz', 'szCs']:
-            elem = rPr.find(f"{{{W_NS}}}{tag}")
-            if elem is None:
-                elem = etree.SubElement(rPr, f"{{{W_NS}}}{tag}")
-            elem.set(f"{{{W_NS}}}val", "16")  # 8pt
+        _ensure_badge_char_style(root, W_NS, style_id, bg, fg)
 
 
 # Testcase field labels (en/pt) — these paragraphs get the red header
@@ -1003,12 +982,13 @@ def _assemble_cover(doc, qn, docx_path):
         for run in meta_p.runs:
             run.font.size = Pt(12)
 
-    # Technical cover table: center + red label column + black grid.
+    # Technical cover table: center + red label column + red grid.
     if _is_technical and cover_table is not None:
         from docx.shared import RGBColor as _RGB
         from docx.enum.table import WD_TABLE_ALIGNMENT
         cover_table.alignment = WD_TABLE_ALIGNMENT.CENTER
-        # Black full-grid borders (mirror _style_table's plain-grid path)
+        # Red full-grid borders (mirror _style_table — the PDF cover
+        # tabular's \hline rules are red via \arrayrulecolor{huaweired})
         tbl = cover_table._element
         tblPr = tbl.find(qn('w:tblPr'))
         if tblPr is None:
@@ -1024,7 +1004,7 @@ def _assemble_cover(doc, qn, docx_path):
             border.set(qn('w:val'), 'single')
             border.set(qn('w:sz'), '4')
             border.set(qn('w:space'), '0')
-            border.set(qn('w:color'), '000000')
+            border.set(qn('w:color'), 'C7000B')
         # First-column cells: red bg + white bold text (PDF label column)
         for row in cover_table.rows:
             cell = row.cells[0]
@@ -1065,6 +1045,10 @@ def _style_testcase_blocks(doc, qn):
             start_p = None
     if not ranges:
         return
+
+    # Precompute paragraph → index so the range slicing below is O(1)
+    # per lookup (paras.index would rescan the list per testcase: O(n²)).
+    index_of = {id(p): i for i, p in enumerate(paras)}
 
     # pPr children that must follow pBdr (OOXML schema order)
     after_pbdr = (
@@ -1118,8 +1102,8 @@ def _style_testcase_blocks(doc, qn):
     red = RGBColor(0xC7, 0x00, 0x0B)
     white = RGBColor(0xFF, 0xFF, 0xFF)
     for start_p, end_p in ranges:
-        s = paras.index(start_p)
-        e = paras.index(end_p)
+        s = index_of[id(start_p)]
+        e = index_of[id(end_p)]
         for p in paras[s + 1:e]:
             add_left_border(p)
             t = p.text.strip()
@@ -1198,6 +1182,38 @@ def _strip_testcase_markers(docx_path):
     doc.save(docx_path)
 
 
+def _add_header_logo(section, qn):
+    """Insert the header logo (left) + center tab into the header paragraph.
+
+    Shared by the --fix path (_apply_content_styling) and
+    regenerate_reference.  The logo run pair is moved to the front of
+    the paragraph (after pPr) so it precedes any existing header
+    content (e.g. the STYLEREF title field).  Returns True when the
+    logo was inserted; False when --header-logo is unset or missing.
+    """
+    if not (_HEADER_LOGO and os.path.isfile(_HEADER_LOGO)):
+        return False
+    header = section.header
+    hp = header.paragraphs[0]
+    text_width = section.page_width - section.left_margin - section.right_margin
+    hp.paragraph_format.tab_stops.add_tab_stop(
+        text_width // 2, WD_TAB_ALIGNMENT.CENTER)
+    hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    logo_run = hp.add_run()
+    logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
+    tab_run = hp.add_run('\t')
+    tab_run.font.size = Pt(10)
+    tab_run.font.name = "HarmonyOS Sans"
+    # Move logo + tab to the beginning (after pPr)
+    p_elem = hp._element
+    pPr = p_elem.find(qn('w:pPr'))
+    insert_pos = 1 if pPr is not None else 0
+    for run_elem in [tab_run._element, logo_run._element]:
+        p_elem.remove(run_elem)
+        p_elem.insert(insert_pos, run_elem)
+    return True
+
+
 def _apply_content_styling(docx_path):
     """Apply content styling that mirrors the PDF.
 
@@ -1212,7 +1228,6 @@ def _apply_content_styling(docx_path):
     raw lxml appends can violate the OOXML sequence and make strict
     consumers (LibreOffice) silently drop the formatting.
     """
-    import re as _re
     from docx import Document
     from docx.shared import Pt, RGBColor
     from docx.oxml.ns import qn
@@ -1270,7 +1285,6 @@ def _apply_content_styling(docx_path):
     # pre-rendered at native width per template (testbook 1.5cm, POC 2cm)
     # so no downscaling is needed.  Falls back to character styles if a
     # PNG asset is missing.
-    import os
     _badge_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'badge-assets')
     # POC result badges use the 2cm \huaweibadge default; testbook's
@@ -1324,7 +1338,7 @@ def _apply_content_styling(docx_path):
     # use body size.  The bold symbol run comes from **Table N:** markup.
     # Vertical rhythm: \par\medskip + parskip above, caption-package
     # spacing below (huawei-fonts.sty sets \parskip=4pt).
-    cap_pat = _re.compile(
+    cap_pat = re.compile(
         r'^(Table|Tabela|Figure|Figura|Diagram|Diagrama'
         r'|Testcase|Caso de Teste) \d+:')
     for paragraph in doc.paragraphs:
@@ -1352,27 +1366,7 @@ def _apply_content_styling(docx_path):
     _fix_callout_boxes(doc, qn)
 
     # Add header logo (optional, from --header-logo CLI arg)
-    import os
-    if _HEADER_LOGO and os.path.isfile(_HEADER_LOGO):
-        section = doc.sections[0]
-        header = section.header
-        hp = header.paragraphs[0]
-        text_width = section.page_width - section.left_margin - section.right_margin
-        hp.paragraph_format.tab_stops.add_tab_stop(
-            text_width // 2, WD_TAB_ALIGNMENT.CENTER)
-        hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        logo_run = hp.add_run()
-        logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
-        tab_run = hp.add_run('\t')
-        tab_run.font.size = Pt(10)
-        tab_run.font.name = "HarmonyOS Sans"
-        # Move logo + tab to the beginning (after pPr)
-        p_elem = hp._element
-        pPr = p_elem.find(qn('w:pPr'))
-        insert_pos = 1 if pPr is not None else 0
-        for run_elem in [tab_run._element, logo_run._element]:
-            p_elem.remove(run_elem)
-            p_elem.insert(insert_pos, run_elem)
+    _add_header_logo(doc.sections[0], qn)
 
     doc.save(docx_path)
 
@@ -1383,8 +1377,9 @@ def _style_table(table, qn):
     Header tables (pandoc marks them with w:tblHeader on row 0) get the
     hutable look: red full-grid borders, red header row with white bold
     text, alternating #F6F8FA body rows.  Plain grids without a header
-    row (e.g. signatures) get neutral black rules only — matching the
-    PDF's plain tabular with \\hline.
+    row (e.g. signatures) get the same red rules — huawei-colors.sty
+    sets \\arrayrulecolor{huaweired} globally, so the PDF's plain
+    tabular \\hline rules are red (C7000B) too, not black.
     """
     from docx.shared import RGBColor
 
@@ -1401,7 +1396,10 @@ def _style_table(table, qn):
         if trPr is not None and trPr.find(qn('w:tblHeader')) is not None:
             has_header = True
 
-    border_color = 'C7000B' if has_header else '000000'
+    # All table rules are Huawei red — the PDF colors every table rule
+    # via \arrayrulecolor{huaweired} (hutable grids and plain \hline
+    # alike), so the DOCX must follow (L18).
+    border_color = 'C7000B'
 
     # Full-grid borders.  Schema order: tblBorders must precede
     # tblLook/tblCaption, so reposition after creation when needed.
@@ -1787,18 +1785,25 @@ def fix_generated_docx(docx_path):
         )
 
         tmp_path = docx_path + '.tmp'
-        with zipfile.ZipFile(docx_path, 'r') as zin:
-            with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
-                for item in zin.infolist():
-                    if item.filename == 'word/styles.xml':
-                        zout.writestr(item, modified_xml)
-                    elif item.filename == 'word/numbering.xml' and modified_numbering is not None:
-                        zout.writestr(item, modified_numbering)
-                    elif item.filename.startswith('word/footer') and item.filename.endswith('.xml'):
-                        zout.writestr(item, footer_xml)
-                    else:
-                        zout.writestr(item, zin.read(item.filename))
-        shutil.move(tmp_path, docx_path)
+        try:
+            with zipfile.ZipFile(docx_path, 'r') as zin:
+                with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
+                    for item in zin.infolist():
+                        if item.filename == 'word/styles.xml':
+                            zout.writestr(item, modified_xml)
+                        elif item.filename == 'word/numbering.xml' and modified_numbering is not None:
+                            zout.writestr(item, modified_numbering)
+                        elif item.filename.startswith('word/footer') and item.filename.endswith('.xml'):
+                            zout.writestr(item, footer_xml)
+                        else:
+                            zout.writestr(item, zin.read(item.filename))
+            shutil.move(tmp_path, docx_path)
+        finally:
+            # Never leave a .tmp behind: on failure (e.g. disk full
+            # mid-rewrite) remove it and re-raise; on success the move
+            # above already consumed it.
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
         # Apply badge character styles and hutable table styling to
         # document content.  Failures are loud (non-zero exit).
@@ -1806,7 +1811,7 @@ def fix_generated_docx(docx_path):
     finally:
         _strip_testcase_markers(docx_path)
 
-    print(f"✓ Fixed heading styles in {docx_path}")
+    print(f"✓ Fixed DOCX styling in {docx_path}")
 
 
 def regenerate_reference(docx_path):
@@ -1948,18 +1953,7 @@ def regenerate_reference(docx_path):
     for run in list(hp.runs):
         run._element.getparent().remove(run._element)
     # Optional header logo (left) + document title (center) — PDF huawei-page.sty
-    import os
-    if _HEADER_LOGO and os.path.isfile(_HEADER_LOGO):
-        hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        text_width = section.page_width - section.left_margin - section.right_margin
-        hp.paragraph_format.tab_stops.add_tab_stop(
-            text_width // 2, WD_TAB_ALIGNMENT.CENTER)
-        logo_run = hp.add_run()
-        logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
-        tab_run = hp.add_run('\t')
-        tab_run.font.size = Pt(10)
-        tab_run.font.name = "HarmonyOS Sans"
-    else:
+    if not _add_header_logo(section, qn):
         hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in [hp.add_run(), hp.add_run(), hp.add_run(), hp.add_run("Document Title"), hp.add_run()]:
         run.font.size = Pt(10)

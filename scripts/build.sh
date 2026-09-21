@@ -293,6 +293,22 @@ interactive_menu() {
 declare -a RESULTS_OK=()
 declare -a RESULTS_FAIL=()
 
+# Print the tail of a captured build-tool error log (last 20 lines) plus a
+# pointer to the full file. Error logs are created with mktemp at each call
+# site, removed on success, and intentionally NOT registered in TMP_PATHS:
+# on failure the log is kept so the full output survives for inspection.
+# Usage: _err_log_tail <logfile> <context>
+_err_log_tail() {
+    local log=$1 context=$2
+    if [ -s "$log" ]; then
+        echo "  ┌─ Last 20 lines of $context error log:"
+        tail -20 "$log" | sed 's/^/  │ /'
+        echo "  └─ Full log (kept for inspection): $log"
+    else
+        echo "  (no error output captured from $context)"
+    fi
+}
+
 generate_pdf() {
     local out="${BASENAME}.pdf"
     if [ "$DRY_RUN" -eq 1 ]; then
@@ -378,10 +394,12 @@ generate_docx() {
         return
     fi
     echo "  Generating DOCX..."
-    # Footer page label follows the PDF (\lg@pagelabel): "Página" for pt
-    local fix_lang=""
+    # Footer page label follows the PDF (\lg@pagelabel): "Página" for pt.
+    # fix_args is an array so values with spaces (e.g. header-logo paths)
+    # expand as single arguments.
+    local -a fix_args=()
     if grep -q '^:lang: *pt' "$ADOC_FILE" 2>/dev/null; then
-        fix_lang="--lang pt"
+        fix_args=(--lang pt)
     fi
     if [[ -n "$ADOC_FILE" ]]; then
         # Pre-process .adoc for DOCX (passthrough blocks, custom roles,
@@ -391,22 +409,27 @@ generate_docx() {
         local docx_adoc="$ADOC_FILE"
         tmp_adoc=$(mktemp --suffix=.adoc)
         TMP_PATHS+=("$tmp_adoc")
+        local pre_err
+        pre_err=$(mktemp)
         if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
-          --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+          --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>"$pre_err"; then
             docx_adoc="$tmp_adoc"
+            rm -f "$pre_err"
         else
             echo "  ↳ DOCX pre-processing failed, using original .adoc"
+            _err_log_tail "$pre_err" "DOCX preprocessor"
             rm -f "$tmp_adoc"
             tmp_adoc=""
         fi
-        # Diagram support (same options as build-adoc.sh)
+        # Diagram support (same options as build-adoc.sh); gem detection is
+        # cached once per invocation in Main (HAS_DIAGRAM_GEM)
         if ! command -v plantuml-native >/dev/null 2>&1; then
             if [ -f "/usr/share/plantuml/plantuml.jar" ]; then
                 export DIAGRAM_PLANTUML_CLASSPATH="/usr/share/plantuml/plantuml.jar"
             fi
         fi
         local diagram_opts=""
-        if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+        if [ -n "$HAS_DIAGRAM_GEM" ]; then
             diagram_opts="-r asciidoctor-diagram"
         fi
         # TOC title follows the PDF (\lg@toc): "Sumário" for pt, "Contents" otherwise
@@ -421,16 +444,19 @@ generate_docx() {
         tmp_dir=$(mktemp -d)
         TMP_PATHS+=("$tmp_dir")
         local tmp_dbk="$tmp_dir/doc.dbk"
-        if asciidoctor -b docbook $diagram_opts "$docx_adoc" -o "$tmp_dbk" 2>/dev/null && \
+        local err_log
+        err_log=$(mktemp)
+        if asciidoctor -b docbook $diagram_opts "$docx_adoc" -o "$tmp_dbk" 2>"$err_log" && \
            pandoc -f docbook --reference-doc="$REF_DOCX" \
              --number-sections \
              --toc --toc-depth=3 \
              --metadata toc-title="${toc_title}" \
              --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}:${tmp_dir}" \
-             "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
-            :
+             "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>>"$err_log"; then
+            rm -f "$err_log"
         else
             echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
+            _err_log_tail "$err_log" "docbook pipeline (asciidoctor/pandoc)"
             generate_pandoc_format "DOCX" docx docx --reference-doc="$REF_DOCX"
         fi
         rm -rf "$tmp_dir"
@@ -441,15 +467,14 @@ generate_docx() {
     fi
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
     if [ -f "${PROJECT_DIR}/$out" ]; then
-        local fix_args="$fix_lang"
         local header_logo=""
         if grep -q '^:header-logo:' "$ADOC_FILE" 2>/dev/null; then
             header_logo=$(grep -oP '^:header-logo:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
         fi
         if [ -n "$header_logo" ] && [ -f "${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}" ]; then
-            fix_args="$fix_args --header-logo ${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}"
+            fix_args+=(--header-logo "${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}")
         fi
-        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" $fix_args 2>&1; then
+        if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" "${fix_args[@]}" 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2
             RESULTS_FAIL+=("DOCX:post-processing failed for $TEMPLATE")
         fi
@@ -480,22 +505,27 @@ generate_md() {
         local md_adoc="$ADOC_FILE"
         tmp_adoc=$(mktemp --suffix=.adoc)
         TMP_PATHS+=("$tmp_adoc")
+        local pre_err
+        pre_err=$(mktemp)
         if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
-          --target md --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+          --target md --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>"$pre_err"; then
             md_adoc="$tmp_adoc"
+            rm -f "$pre_err"
         else
             echo "  ↳ MD pre-processing failed, using original .adoc"
+            _err_log_tail "$pre_err" "MD preprocessor"
             rm -f "$tmp_adoc"
             tmp_adoc=""
         fi
-        # Diagram support (same options as the DOCX path)
+        # Diagram support (same options as the DOCX path); uses the cached
+        # gem detection from Main (HAS_DIAGRAM_GEM)
         if ! command -v plantuml-native >/dev/null 2>&1; then
             if [ -f "/usr/share/plantuml/plantuml.jar" ]; then
                 export DIAGRAM_PLANTUML_CLASSPATH="/usr/share/plantuml/plantuml.jar"
             fi
         fi
         local diagram_opts=""
-        if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+        if [ -n "$HAS_DIAGRAM_GEM" ]; then
             diagram_opts="-r asciidoctor-diagram"
         fi
         # AsciiDoc pipeline: asciidoctor -b docbook -> pandoc
@@ -505,13 +535,16 @@ generate_md() {
         tmp_dir=$(mktemp -d)
         TMP_PATHS+=("$tmp_dir")
         local tmp_dbk="$tmp_dir/doc.dbk"
-        if asciidoctor -b docbook $diagram_opts "$md_adoc" -o "$tmp_dbk" 2>/dev/null && \
+        local err_log
+        err_log=$(mktemp)
+        if asciidoctor -b docbook $diagram_opts "$md_adoc" -o "$tmp_dbk" 2>"$err_log" && \
            pandoc -f docbook -t gfm \
              --resource-path="${PROJECT_DIR}:${REPO_ROOT}/templates/${TEMPLATE}:${tmp_dir}" \
-             "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>/dev/null; then
-            :
+             "$tmp_dbk" -o "${PROJECT_DIR}/$out" 2>>"$err_log"; then
+            rm -f "$err_log"
         else
             echo "  ↳ Docbook pipeline failed, falling back to LaTeX pipeline..."
+            _err_log_tail "$err_log" "docbook pipeline (asciidoctor/pandoc)"
             generate_pandoc_format "Markdown" markdown md
         fi
         # Post-process: embed images as base64 data URIs (self-contained MD).
@@ -559,17 +592,22 @@ generate_html() {
         local html_adoc="$ADOC_FILE"
         tmp_adoc=$(mktemp --suffix=.adoc)
         TMP_PATHS+=("$tmp_adoc")
+        local pre_err
+        pre_err=$(mktemp)
         if python3 "${REPO_ROOT}/templates/_base/adoc_docx_preprocessor.py" \
-          --target html --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>/dev/null; then
+          --target html --template "$TEMPLATE" "$ADOC_FILE" -o "$tmp_adoc" 2>"$pre_err"; then
             html_adoc="$tmp_adoc"
+            rm -f "$pre_err"
         else
             echo "  ↳ HTML pre-processing failed, using original .adoc"
+            _err_log_tail "$pre_err" "HTML preprocessor"
             rm -f "$tmp_adoc"
             tmp_adoc=""
         fi
-        # Diagram extension optional (same guard as DOCX/MD paths)
+        # Diagram extension optional (same guard as DOCX/MD paths); uses the
+        # cached gem detection from Main (HAS_DIAGRAM_GEM)
         local diagram_opts=""
-        if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+        if [ -n "$HAS_DIAGRAM_GEM" ]; then
             diagram_opts="-r asciidoctor-diagram"
         fi
         # AsciiDoc pipeline: asciidoctor directly
@@ -628,6 +666,16 @@ fi
 
 # Check dependencies for selected formats
 check_deps
+
+# Detect the asciidoctor-diagram gem once per invocation for all Pandoc
+# formats (DOCX/MD/HTML). The gem query takes ~0.5s; running it once per
+# format added ~1.5s to multi-format builds.
+HAS_DIAGRAM_GEM=""
+if [ "$FLAG_DOCX" = true ] || [ "$FLAG_MD" = true ] || [ "$FLAG_HTML" = true ]; then
+    if gem list asciidoctor-diagram --installed >/dev/null 2>&1; then
+        HAS_DIAGRAM_GEM="yes"
+    fi
+fi
 
 # Generate selected formats (Pandoc formats run sequentially — ~0.7s total, parallelization not worth the complexity)
 if [ "$FLAG_PDF"   = true ]; then generate_pdf;   fi

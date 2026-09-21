@@ -28,10 +28,11 @@ house style (AGENTS.md L9).
 Before creating or editing any document, read these files to load the full
 project context:
 
-1. **`templates/testbook/testbook.cls`** — the class file. Shared formatting
-   lives in `templates/_base/huawei-*.sty` modules. Testbook-specific
-   formatting (cover, TOC, titles, testcase environment) lives in
-   `testbook.cls`.
+1. **`templates/testbook/testbook.cls`** — the class file. It builds on the
+   shared base class `templates/_base/huawei-base.cls` (class options, packages,
+   and the shared `huawei-*.sty` modules live there) and adds the
+   testbook-specific testcase/testsummary environments, result badges, and
+   `noanswers` option.
 2. **`templates/_base/huawei-latex-converter.rb`** — the AsciiDoc-to-LaTeX
    converter. Maps AsciiDoc roles to Huawei LaTeX commands.
 3. **`README.md`** (repo root) — project setup, compilation instructions,
@@ -99,15 +100,38 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 ```asciidoc
 [.objectives]
 ====
-**General Objective:** <general objective>
+[.general-objective]#<general objective>#
 
-**Objective:** <objective>
+[.objective]#<objective>#
 
 **Prerequisites:**
+
 * <prerequisite 1>
 * <prerequisite 2>
+
+**Step by step:**
+
+. <step 1>
+. <step 2>
 ====
 ```
+Closes with a 1.5pt horizontal rule. The role spans and bold labels also
+work outside the objectives block.
+
+Only the roles are language-aware. Bold text is literal — it is never
+translated.
+
+| Syntax | Produces |
+|---|---|
+| `[.general-objective]#...#` | Language-aware bold label **"General Objective:"** (EN) / **"Objetivo Geral:"** (PT) + text. The span may wrap over multiple lines. |
+| `[.objective]#...#` | Language-aware bold label **"Objective:"** / **"Objetivo:"** + text. |
+| `[.general-objective]` or `[.objective]` on its own line | Block form (inside `[.objectives]`) of the labels above — put the text on the next line. |
+| `**General Objective:** ...` / `**Objective:** ...` | Literal bold text — **not** translated. Write the labels in the document language yourself. |
+| `**Prerequisites:**` | Literal bold label — put a blank line, then the list after it. |
+| `**Step by step:**` | Literal bold label — put a blank line, then the numbered list after it. |
+
+Do not put a block role and its text on the same line
+(`[.general-objective] text`) — the role is then rendered as literal text.
 
 ### Code
 
@@ -120,6 +144,26 @@ echo "Hello, World!"
 
 Inline code: `` `code` ``
 
+Code from an external file (resolved via TEXINPUTS):
+
+```asciidoc
+[.codefile,file=assets/example-script.sh,lang=bash]
+----
+----
+```
+The `[.codefile]` role reads the `file` (required) and `lang` (optional)
+attributes and emits `\codefile[lang]{file}`. The listing body is ignored.
+An inline passthrough also works when no language is needed:
+`pass:[\codefile{assets/example-script.sh}]` — do not put the `[lang]`
+option inside the `pass:[]` macro, which ends at the first `]` and would
+mangle the emitted LaTeX.
+
+Recognized language keys for `[source,lang]`: `bash`, `sh`, `shell`,
+`python`, `Python`, `json`, `yaml`, `xml`, `html`, `javascript`, `js`,
+`sql`, `text`, `ini`, `conf`. Any other language (`go`, `java`, `rust`,
+`terraform`, ...) degrades gracefully to plain verbatim styling (same as
+`text`) with a compile-time warning.
+
 ### Tables (hutable)
 
 ```asciidoc
@@ -131,6 +175,28 @@ Inline code: `` `code` ``
 | Row 2 | Value | Value
 |===
 ```
+
+### Page-breaking table (longhutable)
+
+```asciidoc
+[.longhutable]
+|===
+| Col A | Col B | Col C
+
+| row 1 | value | value
+| row 2 | value | value
+|===
+```
+
+Same visual style as `hutable` but breaks across pages. Use for tables
+with many rows. **Cannot be used inside testcase** — longtable requires
+top-level.
+
+**Warning:** do not add a block title (`.Caption`) to a `longhutable`.
+The converter wraps any titled table in a `table` float, and a longtable
+inside a float has undefined page-breaking — this defeats longhutable's
+purpose. For multi-page tables use `longhutable` without a block title;
+for a titled table that fits on one page use regular `hutable`.
 
 ### Images
 
@@ -629,7 +695,7 @@ grep -i "Missing character" documents/testbook-pt/src/main.log   # must produce 
 
 ```
 templates/testbook/
-├── testbook.cls          # testbook-specific formatting (cover, TOC, titles, testcase env)
+├── testbook.cls          # testbook class (testcase env, noanswers; builds on _base/huawei-base.cls)
 ├── testbook-template.html   # HTML template for Pandoc
 ├── create-testbook-reference-docx.py  # DOCX reference creation/fix script (calls _base/docx_fix.py)
 ├── README.md             # human docs (brief — see root README for setup)

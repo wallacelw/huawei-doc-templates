@@ -73,12 +73,20 @@ Run `make setup-guide` to regenerate all four formats after changing the source.
 - fvextra ≥ 1.5 (updated from CTAN if the system version is too old)
 - HarmonyOS Sans font (body text — from GitHub releases, SHA-256 verified)
 - Cascadia Code font (code — via `fonts-cascadia-code`)
-- asciidoctor + asciidoctor-diagram (Ruby gems via Gemfile)
+- asciidoctor (Ruby gem — installed via `gem install`, not the Gemfile).
+  `asciidoctor-diagram` is **not** installed; diagram blocks (`[plantuml]`,
+  `[graphviz]`, `[mermaid]`) produce no output without it. Install it
+  manually with `gem install asciidoctor-diagram` (the Gemfile pins `~> 2.3`).
 - opencode skills (copies each `templates/*/SKILL.md` to `~/.config/opencode/skills/`)
 - VS Code LaTeX Workshop extension + settings (local and remote)
 
 > `pdflatex` won't work — the templates use `fontspec` (system fonts), which
 > requires XeLaTeX. `install.sh` installs and configures XeLaTeX automatically.
+
+> **Security note:** The build pipeline executes LaTeX on document sources.
+> Passthrough blocks (`++++`) intentionally allow raw LaTeX, and the
+> converter's escaping layer does not block `\input`-class commands.
+> Only compile `.adoc` files from trusted sources.
 
 ### Uninstalling
 
@@ -110,8 +118,6 @@ Interactive menu options:
 font, `/etc/LatexMk` xelatex fix, VS Code settings + extensions. Use `--packages`
 to also remove apt packages (texlive, latexmk, fonts, pandoc). Use `--repo` to
 also delete the repository directory (requires typing `yes` to confirm).
-
-## Building documents
 
 ## Compilation
 
@@ -200,7 +206,8 @@ DOCX, Markdown, and HTML are secondary outputs.
 
 ### Requirements
 
-- `pandoc >= 3.0` (install via `install.sh` or your package manager)
+- `pandoc >= 3.1.0, < 3.6.0` (tested range — install via `install.sh` or your
+  package manager)
 - `asciidoctor` (Ruby gem, installed by `install.sh`)
 
 ### Usage
@@ -283,7 +290,8 @@ for the technical report template syntax reference.
 ├── .vscode/
 │   └── settings.json        # VS Code + LaTeX Workshop config (latexmk recipe)
 ├── templates/
-│   ├── _base/               # shared formatting modules and converter
+│   ├── _base/               # shared base class, formatting modules, and converter
+│   │   ├── huawei-base.cls          # base class (class options, packages, huawei-* modules)
 │   │   ├── huawei-latex-converter.rb  # AsciiDoc-to-LaTeX converter
 │   │   ├── huawei.css               # Huawei brand CSS for HTML output (337 lines)
 │   │   ├── huawei-badges.sty        # shared badge rendering (\huaweibadge)
@@ -292,14 +300,14 @@ for the technical report template syntax reference.
 │   ├── guide/               # self-contained template + skill
 │   │   ├── SKILL.md          # opencode skill + AsciiDoc syntax reference
 │   │   ├── README.md         # template-specific details (brief)
-│   │   ├── guide.cls         # guide-specific formatting (cover, TOC, titles)
+│   │   ├── guide.cls         # guide class (builds on _base/huawei-base.cls)
 │   │   ├── guide-reference.docx  # custom DOCX styles for Pandoc
 │   │   ├── guide-template.html   # HTML5 template with Huawei brand CSS
 │   │   ├── create-guide-reference-docx.py  # regenerate guide-reference.docx
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX, TZ=America/Sao_Paulo)
 │   │   └── common-assets/      # logos, sample images, example scripts
 │   ├── technical/             # technical report template + skill
-│   │   ├── technical.cls       # LaTeX class (5-section environments, cover page)
+│   │   ├── technical.cls       # technical class (5-section envs, cover; builds on _base/huawei-base.cls)
 │   │   ├── technical-template.html  # HTML template for Pandoc
 │   │   ├── create-technical-reference-docx.py  # DOCX reference style generator
 │   │   ├── technical-reference.docx  # reference DOCX with Huawei styles
@@ -308,7 +316,7 @@ for the technical report template syntax reference.
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX)
 │   │   └── common-assets/    # logos
 │   ├── testbook/             # test case template + skill
-│   │   ├── testbook.cls       # LaTeX class (testcase environment, cover page)
+│   │   ├── testbook.cls       # testbook class (testcase env, noanswers; builds on _base/huawei-base.cls)
 │   │   ├── testbook-template.html  # HTML template for Pandoc
 │   │   ├── create-testbook-reference-docx.py  # DOCX reference style generator
 │   │   ├── testbook-reference.docx  # reference DOCX with Huawei styles
@@ -317,7 +325,7 @@ for the technical report template syntax reference.
 │   │   ├── .latexmkrc        # latexmk config (XeLaTeX)
 │   │   └── common-assets/    # logos
 │   ├── poc/                  # POC/homologation template + skill
-│   │   ├── poc.cls            # LaTeX class (result badges, stakeholders, signatures)
+│   │   ├── poc.cls            # POC class (badges, stakeholders, signatures; builds on _base/huawei-base.cls)
 │   │   ├── poc-template.html   # HTML template for Pandoc
 │   │   ├── create-poc-reference-docx.py  # DOCX reference style generator
 │   │   ├── poc-reference.docx  # reference DOCX with Huawei styles
@@ -379,7 +387,8 @@ for the technical report template syntax reference.
 │       │   └── .latexmkrc   # TEXINPUTS → ../../../templates/_base/ + ../../../templates/guide/; $out_dir='..'
 │       └── assets/           # project-specific images
 └── tests/
-    ├── test-filter.sh   # Lua filter unit tests (legacy, skipped)
+    ├── test-pdf-compile.sh # scans sample LaTeX build logs for errors (no recompile)
+    ├── test-preprocessor.sh # unit tests for adoc_docx_preprocessor.py
     ├── round-trip.sh    # cross-format validation (MD + DOCX + HTML)
     ├── test-docx-fix.sh # DOCX --fix post-processing smoke test
     ├── test-sync.sh     # version + doc consistency check
