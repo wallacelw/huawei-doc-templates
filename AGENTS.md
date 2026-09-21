@@ -6,6 +6,21 @@ changes.
 
 ---
 
+## Scope
+
+This file governs development of the **template repository itself** —
+the classes, converters, scripts, tests, samples, and documentation that
+make up the templates.
+
+**User documents are standalone deliverables, not repository content.**
+Documents created via the skills (in `documents/<name>/`) are gitignored;
+git operations (commit, push, tag) apply only to template code, never to
+user documents. A document's own versioning is its `:version:` attribute
++ changelog block (L11); L17's tag-per-change applies to template
+releases only.
+
+---
+
 ## Project overview
 
 See [README.md](README.md) for project overview, setup, and layout.
@@ -27,8 +42,9 @@ LaTeX is generated, not hand-edited.
 5. Push: `git push origin main && git push --tags`.
 6. Repeat.
 
-**Always commit and push after completing a unit of work.** Do not accumulate
-multiple unrelated changes in one commit. Do not leave uncommitted changes.
+**Always commit and push after completing a unit of work** (template repo
+work — see Scope). Do not accumulate multiple unrelated changes in one
+commit. Do not leave uncommitted changes.
 
 ---
 
@@ -331,6 +347,8 @@ approval. Changing them breaks existing documents and reproducibility.
 - Generated outputs (`.tex`, `.docx`, `.md`, `.html`) are gitignored build artifacts.
 
 ### L17. Version tag + validation after each change
+- Applies to template releases only — user documents are versioned via
+  L11 (`:version:` + changelog), never via git tags.
 - After every change (bug fix, feature, docs edit), create a new git version tag
   (e.g., `v6.0.1`, `v6.0.2`, `v6.1.0`).
 - Before tagging, validate: compile all samples (`make samples`, which converts

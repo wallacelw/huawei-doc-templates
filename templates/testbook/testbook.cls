@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/22 Huawei Test Book template v6.11.0]
+\ProvidesClass{testbook}[2026/09/22 Huawei Test Book template v6.11.1]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in

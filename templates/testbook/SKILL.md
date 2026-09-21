@@ -23,6 +23,24 @@ English; set `:lang: pt` for Portuguese labels. Do **not** use this for
 general AsciiDoc documents — the formatting is hard-coded to the Huawei
 house style (AGENTS.md L9).
 
+## Document lifecycle
+
+Documents created with this skill are **standalone deliverables**, not
+repository content:
+
+- The output is a self-contained folder — `src/` (`.adoc` source +
+  `.latexmkrc`), `assets/`, and the compiled artifacts (PDF, DOCX, MD,
+  HTML) — that the user can copy, share, or archive anywhere.
+- **Git is never used for individual documents.** Do not `git init`,
+  commit, push, or tag a user document. The `:version:` header attribute
+  and the changelog block ARE the document's version control (see the
+  Versioning workflow section).
+- Documents may live under `documents/` inside the template repository
+  checkout for build convenience — they are gitignored there and are NOT
+  repository content.
+- Distribution means sharing the compiled artifacts — the PDF is the
+  primary deliverable.
+
 ## Context loading (do this first)
 
 Before creating or editing any document, read these files to load the full
@@ -37,8 +55,11 @@ project context:
    converter. Maps AsciiDoc roles to Huawei LaTeX commands.
 3. **`README.md`** (repo root) — project setup, compilation instructions,
    install steps, and project layout.
-4. **`AGENTS.md`** (repo root) — locked decisions, file editing rules,
-   versioning workflow, and project standards.
+4. **`AGENTS.md`** (repo root) — locked decisions, file editing rules, and
+   project standards. The locked decisions and syntax constraints are
+   mandatory; its git workflow (commit, push, tag) applies to **template
+   repository development only — never to your document** (see Document
+   lifecycle).
 5. **`templates/testbook/README.md`** — human-readable template overview.
 
 Read all five files before proceeding to the Quick start below. Do not

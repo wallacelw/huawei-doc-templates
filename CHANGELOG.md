@@ -4,6 +4,24 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.11.1 (2026-09-22)
+
+### Document lifecycle clarification
+
+- All four SKILL.md files gained a "Document lifecycle" section:
+  documents created via the skills are standalone deliverables; git is
+  never used for individual documents (no `git init`, commit, push, or
+  tag) — the `:version:` attribute + changelog block are the document's
+  own version control; documents under `documents/` are gitignored, not
+  repository content; distribution means sharing the compiled
+  artifacts (PDF primary).
+- SKILL.md context-reading lists now scope AGENTS.md's git workflow to
+  template repository development only — never to the user's document.
+- AGENTS.md gained a Scope section (template repo vs. user documents),
+  a Workflow parenthetical, and an L17 clarification (tag-per-change
+  applies to template releases only; user documents are versioned via
+  L11).
+
 ## v6.11.0 (2026-09-22)
 
 ### Converter robustness and role fixes
