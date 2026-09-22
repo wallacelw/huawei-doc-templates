@@ -1,7 +1,7 @@
 = [Relatório de Análise] A lista de projetos empresariais não é exibida na página de criação do ECS na 8.5.1 no site do Brasil
 :template: technical
 :lang: pt
-:version: 3.6.1
+:version: 3.6.2
 :header-title: Huawei Cloud --- Relatório Técnico
 
 ++++
@@ -192,7 +192,7 @@ Diretrizes de Marca da Huawei Cloud:
 
 [.hutable]
 |===
-| Color | HEX | Pantone | Sample
+| Cor | HEX | Pantone | Amostra
 
 | Rose Red | `#C40054` | 7636 | pass:[\textcolor{rosered}{\rule{2cm}{4pt}}]
 | Dark Red | `#7F0001` | 483C | pass:[\textcolor{darkred}{\rule{2cm}{4pt}}]
@@ -204,6 +204,7 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+\changelogentry{3.6.2}{2026-09-22}{\item Revisão de idioma: cabeçalhos de tabela ``Cor''/``Amostra'' (antes ``Color''/``Sample'').}
 \changelogentry{3.6.1}{2026-09-19}{\item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.}
 \changelogentry{3.6.0}{2026-09-11}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}
 \changelogentry{1.3.0}{2026-09-10}{\item Atualização para modelo base v3.0.1 — correções menores (auto-descoberta de testes, textos de ajuda, comentários, CI).}

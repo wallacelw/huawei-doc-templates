@@ -19,7 +19,7 @@
 %%    - Code : Cascadia Code (fallback: DejaVu Sans Mono)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{guide}[2026/09/22 Huawei Guide template v6.11.1]
+\ProvidesClass{guide}[2026/09/23 Huawei Guide template v6.12.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}

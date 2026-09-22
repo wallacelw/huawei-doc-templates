@@ -5,7 +5,7 @@
 %%  Extracted from guide.cls v2.0.0 decomposition.
 %% =====================================================================
 \ProvidesPackage{huawei-images}[2026/08/20 Huawei image commands]
-%% Depends on: huawei-colors (ruleblack, codebg, codetext, warningfg), huawei-fonts (\codefont), huawei-code (\inlinecode), keyval (\define@key)
+%% Depends on: huawei-colors (ruleblack, codebg, codetext, warningfg), huawei-fonts (\codefont), huawei-code (\inlinecode), huawei-lang (\lg@img* labels), keyval (\define@key)
 
 % =====================================================================
 %  IMAGES  — always horizontally centered, with key-value sizing options
@@ -78,16 +78,16 @@
     before skip=8pt, after skip=8pt,
     breakable, enhanced jigsaw]
     \centering
-    {\codefont\color{codetext}\fontsize{11}{13}\selectfont
-     [ Image placeholder ]}\\[6pt]
-    {\footnotesize\color{codetext}
-     \textbf{File:} \inlinecode{#1}}\\[4pt]
-    {\footnotesize\color{codetext}
-     \textbf{Description:} #2}\\[6pt]
-    {\footnotesize\itshape\color{warningfg}
-     Place the image file at the path above, then replace this command with
-     \inlinecode{\textbackslash image\{#1\}} or
-     \inlinecode{\textbackslash imagecap\{#1\}\{caption\}}.}
+     {\codefont\color{codetext}\fontsize{11}{13}\selectfont
+      [ \lg@imgplaceholder{} ]}\\[6pt]
+     {\footnotesize\color{codetext}
+      \textbf{\lg@imgfilelabel} \inlinecode{#1}}\\[4pt]
+     {\footnotesize\color{codetext}
+      \textbf{\lg@imgdesclabel} #2}\\[6pt]
+     {\footnotesize\itshape\color{warningfg}
+      \lg@imgplaceinstr\
+      \inlinecode{\textbackslash image\{#1\}} \lg@imgorlabel\
+      \inlinecode{\textbackslash imagecap\{#1\}\{caption\}}.}
   \end{tcolorbox}
   \par\medskip}
 

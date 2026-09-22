@@ -39,10 +39,13 @@ LABELS = {
         'figure': 'Figure',
         'changelog': 'Changelog',
         'sincerely': 'Sincerely,',
-        'th_name': 'Name', 'th_email': 'Email', 'th_phone': 'Phone', 'th_role': 'Role',
+        'th_name': 'Name', 'th_email': 'E-mail', 'th_phone': 'Phone', 'th_role': 'Role',
         'th_item': 'Item', 'th_record': 'Record',
         'th_id': 'ID', 'th_title': 'Title', 'th_status': 'Status',
         'th_version': 'Version', 'th_date': 'Date', 'th_changes': 'Changes',
+        'th_scenario': 'Scenario', 'th_author': 'Author',
+        'general_objective': 'General Objective',
+        'image_placeholder': 'Image placeholder',
     },
     'pt': {
         'homologated': 'Homologada',
@@ -65,6 +68,9 @@ LABELS = {
         'th_item': 'Item', 'th_record': 'Registro',
         'th_id': 'ID', 'th_title': 'Título', 'th_status': 'Status',
         'th_version': 'Versão', 'th_date': 'Data', 'th_changes': 'Alterações',
+        'th_scenario': 'Cenário', 'th_author': 'Autor',
+        'general_objective': 'Objetivo Geral',
+        'image_placeholder': 'Espaço reservado para imagem',
     },
 }
 
@@ -143,6 +149,26 @@ def _badge_text(text):
     return '**[' + text + ']**'
 
 
+def _testresultbadge_text(value, lang):
+    r"""Map \testresultbadge source enums to the rendered badge text.
+
+    PDF (testbook.cls): the source keeps language-neutral enum values
+    (Pass/Fail/Blocked/Untested); rendering is language-aware under the
+    portuguese class option (Aprovado/Reprovado/Bloqueado/Não testado),
+    mirroring \pocresult in poc.cls.  Unknown values pass through unchanged
+    (matching the cls fallback badge).  Only testbook+pt is mapped; other
+    templates/languages keep the source value as-is.
+    """
+    if _TEMPLATE == 'testbook' and lang == 'pt':
+        return {
+            'Pass': 'Aprovado',
+            'Fail': 'Reprovado',
+            'Blocked': 'Bloqueado',
+            'Untested': 'Não testado',
+        }.get(value, value)
+    return value
+
+
 def convert_inline_latex(text, lang='en'):
     """Convert inline LaTeX commands to AsciiDoc inline formatting."""
     labels = LABELS.get(lang, LABELS['en'])
@@ -174,11 +200,12 @@ def convert_inline_latex(text, lang='en'):
     text = text.replace(r'\pocwithreservations', labels['with_reservations'])
     text = text.replace(r'\pocnothomologated', labels['not_homologated'])
 
-    # \testresultbadge{X} → **[X]**  (case preserved — PDF renders the
-    # text as written, e.g. Blocked/Untested, not BLOCKED/UNTESTED)
+    # \testresultbadge{X} → **[X]**  (testbook+pt: **[Aprovado]** etc. —
+    # PDF renders language-aware labels under the portuguese class option;
+    # source keeps the EN enum.  Case preserved for unmapped values.)
     text = re.sub(
         r'\\testresultbadge\{([^}]*)\}',
-        lambda m: '**[' + m.group(1) + ']**',
+        lambda m: '**[' + _testresultbadge_text(m.group(1), lang) + ']**',
         text,
     )
 
@@ -344,7 +371,7 @@ def convert_signatures(content, lang):
                 cell = (
                     labels['sincerely'] + ' +\n'
                     + '**' + name + '**' + ' +\n' + title + ' +\n'
-                    + 'E-mail: `' + email + '` +\n' + address
+                    + labels['th_email'] + ': `' + email + '` +\n' + address
                 )
                 cells.append(cell)
         if cells:
@@ -728,7 +755,9 @@ def convert_changelog(content, lang):
 
 def _result_badge_texts(template, lang):
     r"""Badge text per result role — mirrors the converter's \pocresult
-    (POC labels are language-aware) and \testresultbadge (English)."""
+    (POC labels are language-aware).  Testbook badge text is emitted via
+    \testresultbadge (see _testresultbadge_text), not these roles, so the
+    testbook path returns the EN defaults here."""
     if template == 'poc' and lang == 'pt':
         return {
             'result-pass': 'Atendido', 'result-partial': 'Parcial',
@@ -936,12 +965,15 @@ def convert_codefile_blocks(content, base_dir):
 
 def convert_inline_passthroughs(text, lang):
     """Convert pass:[latex] inline passthroughs to AsciiDoc."""
+    labels = LABELS.get(lang, LABELS['en'])
+
     def replacer(latex):
         # \imageplaceholder{path}{desc}
         r = find_cmd_2args(latex, 'imageplaceholder')
         if r is not None:
             path, desc, _, _ = r
-            return 'NOTE: Image placeholder: ' + desc.strip() + ' (' + path.strip() + ')'
+            return ('NOTE: ' + labels['image_placeholder'] + ': '
+                    + desc.strip() + ' (' + path.strip() + ')')
         # \textcolor{color}{text} — just return the text
         return convert_inline_latex(latex, lang)
 
@@ -977,6 +1009,10 @@ def convert_inline_passthroughs(text, lang):
 # deleted by docx_fix to draw the PDF's red left rule); 'md'/'html' have
 # no post-processor, so markers are skipped there.
 _TARGET = 'docx'
+
+# Template name — set per invocation by process_adoc; gates template-aware
+# conversions (e.g. \testresultbadge PT rendering for testbook).
+_TEMPLATE = None
 
 # :noanswers: header attribute — hides Test Result and Remarks fields
 # (PDF: testbook.cls noanswers class option).
@@ -1158,6 +1194,7 @@ def inject_cover_block(content, lang, template):
     block = ['image::' + logo + '[]', '']
 
     if template == 'technical':
+        labels = LABELS.get(lang, LABELS['en'])
         # Report-type label (PDF: 16pt bold huaweired, centered).
         type_label = _REPORT_TYPE or 'Technical Report'
         block.append(type_label)
@@ -1165,15 +1202,17 @@ def inject_cover_block(content, lang, template):
 
         # Version/Date/Scenario table (PDF technical.cls:191-209 — NOT
         # gated by :nochangelog:; only covermeta is).  Skip when no rows.
+        # Labels are language-aware (Versão/Data/Cenário/Autor for pt),
+        # matching technical.cls \lg@report*label.
         table_lines = ['[cols="1,1"]', '|===']
         if _REPORT_VERSION:
-            table_lines.append('| *Version* | ' + _REPORT_VERSION)
+            table_lines.append('| *' + labels['th_version'] + '* | ' + _REPORT_VERSION)
         if _REPORT_DATE:
-            table_lines.append('| *Date* | ' + _REPORT_DATE)
+            table_lines.append('| *' + labels['th_date'] + '* | ' + _REPORT_DATE)
         if _REPORT_SCENARIO:
-            table_lines.append('| *Scenario* | ' + _REPORT_SCENARIO)
+            table_lines.append('| *' + labels['th_scenario'] + '* | ' + _REPORT_SCENARIO)
         if m_authors and not noauthors:
-            table_lines.append('| *Author* | ' + m_authors.group(1))
+            table_lines.append('| *' + labels['th_author'] + '* | ' + m_authors.group(1))
         if len(table_lines) > 2:   # at least one row (empty-table guard)
             table_lines.append('|===')
             block.extend(table_lines)
@@ -1369,6 +1408,51 @@ def _convert_admonition_sentinels(content):
     return '\n'.join(out)
 
 
+# PT caption/admonition attributes for asciidoctor html5.  asciidoctor's
+# html5 backend defaults to English admonition titles (Note/Tip/Warning)
+# and caption prefixes (Figure/Table); without these attributes they leak
+# English inside <html lang="pt">.  Values match the PDF PT labels
+# (huawei-lang.sty): tip→Dica, note→Informação (NOTE maps to the infobox
+# callout), warning/caution/important→Importante (all map to the warning
+# callout — see huawei-latex-converter.rb ADMONITION_MAP), figure→Figura,
+# table→Tabela, toc→Sumário.  Only applied for target='html' + lang='pt':
+# DOCX converts admonitions to **TYPE‖** sentinels before asciidoctor and
+# numbers captions itself (number_block_titles); MD renders no such labels
+# (verified), so injecting there is unnecessary and could double-label.
+_PT_HTML_CAPTION_ATTRS = [
+    ':tip-caption: Dica',
+    ':note-caption: Informação',
+    ':warning-caption: Importante',
+    ':caution-caption: Importante',
+    ':important-caption: Importante',
+    ':figure-caption: Figura',
+    ':table-caption: Tabela',
+    ':toc-title: Sumário',
+]
+
+
+def inject_pt_html_captions(content, lang, target):
+    r"""Inject PT caption attributes into the AsciiDoc header (html+pt only).
+
+    Inserts the attributes right after the last header attribute line so
+    asciidoctor html5 renders Portuguese admonition titles, figure/table
+    caption prefixes, and the TOC title.  Inert for documents without a
+    TOC or captions.  Returns content unchanged for non-html targets or
+    non-pt languages.
+    """
+    if target != 'html' or lang != 'pt':
+        return content
+    lines = content.split('\n')
+    last_attr = -1
+    for i, l in enumerate(lines[:60]):
+        if l.startswith(':'):
+            last_attr = i
+    if last_attr == -1:
+        return content
+    lines[last_attr + 1:last_attr + 1] = _PT_HTML_CAPTION_ATTRS
+    return '\n'.join(lines)
+
+
 def process_adoc(content, template, target='docx', base_dir=None):
     """Main entry: transform .adoc content for DOCX/MD/HTML generation.
 
@@ -1378,10 +1462,12 @@ def process_adoc(content, template, target='docx', base_dir=None):
     """
     global _testcase_counter
     global _TARGET
+    global _TEMPLATE
     global _NOANSWERS
     global _REPORT_VERSION, _REPORT_DATE, _REPORT_SCENARIO, _REPORT_TYPE
     _testcase_counter = 0
     _TARGET = target
+    _TEMPLATE = template
     _NOANSWERS = bool(re.search(r'^:noanswers:', content, re.MULTILINE))
     _REPORT_VERSION = None
     _REPORT_DATE = None
@@ -1389,6 +1475,7 @@ def process_adoc(content, template, target='docx', base_dir=None):
     _REPORT_TYPE = None
 
     lang = detect_lang(content)
+    labels = LABELS.get(lang, LABELS['en'])
 
     # 1. Convert inline passthroughs (pass:[...]) — must run BEFORE block
     #    conversion: the block handlers emit pass:[...] wraps (asterisk-run
@@ -1420,10 +1507,12 @@ def process_adoc(content, template, target='docx', base_dir=None):
     # 4. Number block titles (Table/Diagram/Figure N: — PDF caption systems)
     content = number_block_titles(content, lang)
 
-    # 5. Convert multi-line inline roles (general-objective spans multiple lines)
+    # 5. Convert multi-line inline roles (general-objective spans multiple
+    #    lines).  Language-aware: PT label matches \lg@generalobjectivelabel
+    #    in huawei-lang.sty ("Objetivo Geral:").
     content = re.sub(
         r'\[\.general-objective\]#([^#]*)#',
-        r'**General Objective:** \1',
+        '**' + labels['general_objective'] + ':** \\1',
         content,
         flags=re.DOTALL,
     )
@@ -1432,6 +1521,11 @@ def process_adoc(content, template, target='docx', base_dir=None):
     lines = content.split('\n')
     lines = [convert_roles(line, lang, template) for line in lines]
     content = '\n'.join(lines)
+
+    # 6.5. Inject PT caption/admonition attributes for asciidoctor html5
+    # (lang=pt only; inert for docx/md).  Must run before the cover block
+    # so the attributes land in the header, before the body content.
+    content = inject_pt_html_captions(content, lang, target)
 
     # 7. Inject cover block (logo, cover text, meta line — PDF cover)
     content = inject_cover_block(content, lang, template)

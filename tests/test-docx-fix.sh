@@ -527,6 +527,299 @@ for tmpl_dir in "$REPO_ROOT"/templates/*/; do
     fi
 done
 
+# ── PT callout labels + PT testbook badges ─────────────────────────────────
+# Build a minimal DOCX with callout sentinels and testbook badge markers,
+# run --fix --lang pt, and verify the output uses PT labels/badges.
+echo ""
+echo "=== PT callout labels + PT testbook badges ==="
+
+PT_LANG_DOCX="$TMPDIR_FIX/pt-lang-test.docx"
+PT_LANG_OUT="$TMPDIR_FIX/pt-lang-fixed.docx"
+# Start from the testbook reference DOCX (has the styles --fix expects)
+cp "$REPO_ROOT/templates/testbook/testbook-reference.docx" "$PT_LANG_DOCX"
+python3 - "$PT_LANG_DOCX" << 'PYEOF'
+import sys
+from docx import Document
+from docx.shared import Pt
+doc = Document(sys.argv[1])
+# Callout sentinels (preprocessor format: **TYPE‖** text → bold "TYPE‖" run)
+for sentinel, body in [('TIP', 'Dica callout body'),
+                        ('NOTE', 'Info callout body'),
+                        ('WARNING', 'Important callout body')]:
+    p = doc.add_paragraph()
+    r = p.add_run(sentinel + '\u2016' + body)
+    r.bold = True
+# Testbook badge markers (preprocessor emits [Pass]/[Fail]/etc.)
+for badge in ['[Pass]', '[Fail]', '[Blocked]', '[Untested]']:
+    p = doc.add_paragraph()
+    r = p.add_run(badge)
+    r.bold = True
+doc.save(sys.argv[1])
+PYEOF
+
+cp "$PT_LANG_DOCX" "$PT_LANG_OUT"
+python3 "$REPO_ROOT/templates/testbook/create-testbook-reference-docx.py" \
+    --fix --lang pt "$PT_LANG_OUT" 2>/dev/null
+
+# Unzip for inspection
+PT_LANG_UNZIP="$TMPDIR_FIX/pt-lang-unzipped"
+unzip -o -q "$PT_LANG_OUT" -d "$PT_LANG_UNZIP"
+
+# 18. PT callout labels: Dica/Informação/Importante present, EN labels absent
+pt_callout_ok=0
+if python3 - "$PT_LANG_UNZIP/word/document.xml" << 'PYEOF' 2>/dev/null; then
+import sys
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+tree = etree.parse(sys.argv[1])
+root = tree.getroot()
+texts = [t.text for t in root.iter(f"{{{W}}}t") if t.text]
+full = " ".join(texts)
+# PT labels must be present
+for pt_label in ['Dica:', 'Informação:', 'Importante:']:
+    if pt_label not in full:
+        sys.exit(1)
+# EN labels must be absent
+for en_label in ['Tip:', 'Info:', 'Important:']:
+    if en_label in full:
+        sys.exit(1)
+sys.exit(0)
+PYEOF
+  pt_callout_ok=1
+fi
+if [ "$pt_callout_ok" -eq 1 ]; then
+  pass "PT callout labels: Dica/Informação/Importante (no EN leak)"
+else
+  fail "PT callout labels: EN labels leaked or PT labels missing"
+fi
+
+# 19. PT callout labels: EN mode still uses Tip/Info/Important
+EN_LANG_OUT="$TMPDIR_FIX/en-lang-fixed.docx"
+cp "$PT_LANG_DOCX" "$EN_LANG_OUT"
+python3 "$REPO_ROOT/templates/testbook/create-testbook-reference-docx.py" \
+    --fix --lang en "$EN_LANG_OUT" 2>/dev/null
+EN_LANG_UNZIP="$TMPDIR_FIX/en-lang-unzipped"
+unzip -o -q "$EN_LANG_OUT" -d "$EN_LANG_UNZIP"
+
+en_callout_ok=0
+if python3 - "$EN_LANG_UNZIP/word/document.xml" << 'PYEOF' 2>/dev/null; then
+import sys
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+tree = etree.parse(sys.argv[1])
+root = tree.getroot()
+texts = [t.text for t in root.iter(f"{{{W}}}t") if t.text]
+full = " ".join(texts)
+for en_label in ['Tip:', 'Info:', 'Important:']:
+    if en_label not in full:
+        sys.exit(1)
+sys.exit(0)
+PYEOF
+  en_callout_ok=1
+fi
+if [ "$en_callout_ok" -eq 1 ]; then
+  pass "EN callout labels: Tip/Info/Important (default lang)"
+else
+  fail "EN callout labels: missing Tip/Info/Important"
+fi
+
+# 20. PT testbook badges: PNG images embedded (Aprovado/Reprovado/
+# Bloqueado/Não testado), no EN badge text leaked.
+pt_badge_ok=0
+if python3 - "$PT_LANG_OUT" << 'PYEOF' 2>/dev/null; then
+import sys, zipfile
+from docx import Document
+doc = Document(sys.argv[1])
+# Collect all run text (badge PNGs replace text with images, so the
+# EN badge labels [Pass]/[Fail]/[Blocked]/[Untested] must be gone).
+all_text = []
+for p in doc.paragraphs:
+    for r in p.runs:
+        if r.text:
+            all_text.append(r.text)
+for tbl in doc.tables:
+    for row in tbl.rows:
+        for cell in row.cells:
+            for p in cell.paragraphs:
+                for r in p.runs:
+                    if r.text:
+                        all_text.append(r.text)
+full = " ".join(all_text)
+for en_badge in ['[Pass]', '[Fail]', '[Blocked]', '[Untested]']:
+    if en_badge in full:
+        sys.exit(1)
+# Count embedded images (drawings) — expect >= 4 badge PNGs
+img_count = 0
+for p in doc.paragraphs:
+    if p._p.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}drawing') is not None:
+        img_count += 1
+if img_count < 4:
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+  pt_badge_ok=1
+fi
+if [ "$pt_badge_ok" -eq 1 ]; then
+  pass "PT testbook badges: PNGs embedded, no EN badge text leaked"
+else
+  fail "PT testbook badges: EN text leaked or PNGs not embedded"
+fi
+
+# 21. PT testbook badges: the four PT PNG assets exist on disk
+pt_png_ok=0
+badge_dir="$REPO_ROOT/templates/_base/badge-assets"
+for label in Aprovado Reprovado Bloqueado "Não testado"; do
+  if [ ! -f "$badge_dir/badge-${label}-1.5cm.png" ]; then
+    pt_png_ok=0
+    break
+  fi
+  pt_png_ok=1
+done
+if [ "$pt_png_ok" -eq 1 ]; then
+  pass "PT testbook badge PNGs exist (Aprovado/Reprovado/Bloqueado/Não testado)"
+else
+  fail "PT testbook badge PNGs missing"
+fi
+
+# 22. EN testbook badges: PNG images embedded, EN badge text gone
+en_badge_ok=0
+if python3 - "$EN_LANG_OUT" << 'PYEOF' 2>/dev/null; then
+import sys
+from docx import Document
+doc = Document(sys.argv[1])
+all_text = []
+for p in doc.paragraphs:
+    for r in p.runs:
+        if r.text:
+            all_text.append(r.text)
+full = " ".join(all_text)
+for en_badge in ['[Pass]', '[Fail]', '[Blocked]', '[Untested]']:
+    if en_badge in full:
+        sys.exit(1)
+img_count = 0
+for p in doc.paragraphs:
+    if p._p.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}drawing') is not None:
+        img_count += 1
+if img_count < 4:
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+  en_badge_ok=1
+fi
+if [ "$en_badge_ok" -eq 1 ]; then
+  pass "EN testbook badges: PNGs embedded, no badge text leaked"
+else
+  fail "EN testbook badges: text leaked or PNGs not embedded"
+fi
+
+# 23. PT testbook badges via BADGE_MARKERS: direct [Aprovado] marker
+# (robustness — if the preprocessor ever emits PT text directly)
+PT_DIRECT_DOCX="$TMPDIR_FIX/pt-direct-test.docx"
+cp "$REPO_ROOT/templates/testbook/testbook-reference.docx" "$PT_DIRECT_DOCX"
+python3 - "$PT_DIRECT_DOCX" << 'PYEOF'
+import sys
+from docx import Document
+doc = Document(sys.argv[1])
+for badge in ['[Aprovado]', '[Reprovado]', '[Bloqueado]', '[Não testado]']:
+    p = doc.add_paragraph()
+    r = p.add_run(badge)
+    r.bold = True
+doc.save(sys.argv[1])
+PYEOF
+python3 "$REPO_ROOT/templates/testbook/create-testbook-reference-docx.py" \
+    --fix --lang pt "$PT_DIRECT_DOCX" 2>/dev/null
+
+pt_direct_ok=0
+if python3 - "$PT_DIRECT_DOCX" << 'PYEOF' 2>/dev/null; then
+import sys
+from docx import Document
+doc = Document(sys.argv[1])
+all_text = []
+for p in doc.paragraphs:
+    for r in p.runs:
+        if r.text:
+            all_text.append(r.text)
+full = " ".join(all_text)
+for pt_badge in ['[Aprovado]', '[Reprovado]', '[Bloqueado]', '[Não testado]']:
+    if pt_badge in full:
+        sys.exit(1)
+img_count = 0
+for p in doc.paragraphs:
+    if p._p.find('.//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}drawing') is not None:
+        img_count += 1
+if img_count < 4:
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+  pt_direct_ok=1
+fi
+if [ "$pt_direct_ok" -eq 1 ]; then
+  pass "PT testbook badges: direct [Aprovado] markers resolved to PNGs"
+else
+  fail "PT testbook badges: direct PT markers not resolved"
+fi
+
+# 24. PT testbook badges: byte-level PNG verification.  Check 20 cannot
+# tell a PT PNG embed from an EN one (both leave no badge text behind),
+# so verify the embedded media is byte-identical to the PT pill PNGs
+# (python-docx stores the original image bytes verbatim) and that no EN
+# testbook PNG was embedded.  Guards TESTBOOK_PT_BADGE_LABELS.
+pt_png_bytes_ok=0
+if python3 - "$PT_LANG_OUT" "$REPO_ROOT/templates/_base/badge-assets" << 'PYEOF' 2>/dev/null; then
+import hashlib, os, sys, zipfile
+
+docx_path, badge_dir = sys.argv[1], sys.argv[2]
+
+def md5(blob):
+    return hashlib.md5(blob).hexdigest()
+
+with zipfile.ZipFile(docx_path) as z:
+    media_md5 = {md5(z.read(n)) for n in z.namelist()
+                 if n.startswith('word/media/')}
+
+# PT pill PNGs must be embedded (byte-identical)
+for label in ('Aprovado', 'Reprovado', 'Bloqueado', 'Não testado'):
+    src = os.path.join(badge_dir, 'badge-{}-1.5cm.png'.format(label))
+    with open(src, 'rb') as f:
+        if md5(f.read()) not in media_md5:
+            sys.exit(1)
+
+# EN pill PNGs must NOT be embedded (translation must have happened)
+for label in ('Pass', 'Fail', 'Blocked', 'Untested'):
+    src = os.path.join(badge_dir, 'badge-{}-1.5cm.png'.format(label))
+    with open(src, 'rb') as f:
+        if md5(f.read()) in media_md5:
+            sys.exit(1)
+sys.exit(0)
+PYEOF
+  pt_png_bytes_ok=1
+fi
+if [ "$pt_png_bytes_ok" -eq 1 ]; then
+  pass "PT testbook badges: PT PNGs embedded byte-identical, EN PNGs absent"
+else
+  fail "PT testbook badges: wrong PNG variant embedded"
+fi
+
+# 25. Badge PNG inventory: every label (EN testbook, PT POC, PT testbook)
+# exists at BOTH native widths (1.5cm testbook, 2cm POC) — matches the
+# generate-badges.py SPECS.
+png_inventory_missing=""
+for label in Pass Partial Fail Skip Blocked Untested \
+             Atendido Parcial Falha Ignorado \
+             Aprovado Reprovado Bloqueado "Não testado"; do
+  for width in 1.5cm 2cm; do
+    png="$REPO_ROOT/templates/_base/badge-assets/badge-${label}-${width}.png"
+    if [ ! -f "$png" ]; then
+      png_inventory_missing="$png_inventory_missing badge-${label}-${width}.png"
+    fi
+  done
+done
+if [ -z "$png_inventory_missing" ]; then
+  pass "Badge PNG inventory complete (14 labels × 2 widths)"
+else
+  fail "Badge PNGs missing:$png_inventory_missing"
+fi
+
 # ── Summary ────────────────────────────────────────────────────────────────
 echo ""
 if [ "$FAIL" -eq 0 ]; then

@@ -245,7 +245,9 @@ out = process(":lang: pt\n:version: 1.0.0\n\n[.result-fail]#Fail#\n",
               'poc', 'docx')
 check("poc+pt: result-fail → **[Falha]**", "**[Falha]**" in out)
 
-# 18. testbook + pt: English stays (testbook.cls is English-only)
+# 18. testbook + pt: result-* roles stay EN (they are POC constructs —
+# \pocresult labels are POC-gated in _result_badge_texts); testbook's own
+# \testresultbadge is PT-aware (see "PT testbook badges" below)
 out = process(":lang: pt\n:version: 1.0.0\n\n[.result-pass]#Pass#\n",
               'testbook', 'docx')
 check("testbook+pt: result-pass stays **[Pass]**", "**[Pass]**" in out)
@@ -430,6 +432,146 @@ with tempfile.TemporaryDirectory() as tmp:
           any(line == "-----" for line in out.split("\n")))
     check("codefile: content around dashes preserved",
           "echo start" in out and "echo end" in out)
+
+print("=== PT technical cover labels ===")
+
+# 35. technical + pt: cover table labels render in Portuguese
+TECH_PT_HDR = ":lang: pt\n:version: 3.6.1\n:notime:\n:authors: Jane Doe\n\n"
+TECH_PT_PASS = ("++++\n\\setreportversion{HCS 8.5.1}\n"
+                "\\setreportdate{2025-08-13}\n"
+                "\\setreportscenario{Cenario Padrao}\n++++\n")
+out = process(TECH_PT_HDR + TECH_PT_PASS + "Body.\n", 'technical', 'md')
+check("pt technical cover: | *Versao* | HCS 8.5.1",
+      "| *Vers\u00e3o* | HCS 8.5.1" in out)
+check("pt technical cover: | *Data* | 2025-08-13",
+      "| *Data* | 2025-08-13" in out)
+check("pt technical cover: | *Cenario* label",
+      "| *Cen\u00e1rio* | Cenario Padrao" in out)
+check("pt technical cover: | *Autor* | Jane Doe",
+      "| *Autor* | Jane Doe" in out)
+# EN regression: labels stay English
+out = process(TECH_HDR + TECH_PASSTHROUGH + "Body.\n", 'technical', 'md')
+check("en technical cover: | *Version* | HCS 8.5.1",
+      "| *Version* | HCS 8.5.1" in out)
+check("en technical cover: no Versao label", "| *Vers\u00e3o*" not in out)
+
+print("=== PT general-objective label ===")
+
+# 36. [.general-objective]#...# — PT label matches \lg@generalobjectivelabel
+out = process(":lang: pt\n:version: 1.0.0\n\n"
+              "[.general-objective]#Verificar o acesso ao Console.#\n",
+              'guide', 'md')
+check("pt general-objective: **Objetivo Geral:**",
+      "**Objetivo Geral:**" in out)
+check("pt general-objective: no EN label", "General Objective" not in out)
+# EN regression
+out = process(HEADER + "[.general-objective]#Verify access.#\n", 'guide', 'md')
+check("en general-objective: **General Objective:**",
+      "**General Objective:**" in out)
+
+print("=== PT HTML caption attributes ===")
+
+# 37. html + pt: caption/admonition attributes injected into the header
+out = process(":lang: pt\n:version: 1.0.0\n\nBody.\n", 'guide', 'html')
+check("pt html: :tip-caption: Dica", ":tip-caption: Dica" in out)
+check("pt html: :note-caption: Informacao",
+      ":note-caption: Informa\u00e7\u00e3o" in out)
+check("pt html: :warning-caption: Importante",
+      ":warning-caption: Importante" in out)
+check("pt html: :caution-caption: Importante",
+      ":caution-caption: Importante" in out)
+check("pt html: :important-caption: Importante",
+      ":important-caption: Importante" in out)
+check("pt html: :figure-caption: Figura", ":figure-caption: Figura" in out)
+check("pt html: :table-caption: Tabela", ":table-caption: Tabela" in out)
+check("pt html: :toc-title: Sumario", ":toc-title: Sum\u00e1rio" in out)
+# Not injected for docx/md or en
+out = process(":lang: pt\n:version: 1.0.0\n\nBody.\n", 'guide', 'docx')
+check("pt docx: no caption attrs", ":figure-caption:" not in out)
+out = process(":lang: pt\n:version: 1.0.0\n\nBody.\n", 'guide', 'md')
+check("pt md: no caption attrs", ":figure-caption:" not in out)
+out = process(HEADER + "Body.\n", 'guide', 'html')
+check("en html: no caption attrs", ":figure-caption:" not in out)
+
+print("=== PT testbook result badges ===")
+
+# 38. testbook + pt: \testresultbadge enums render PT labels (source stays EN)
+TB_PT_HDR = ":lang: pt\n:version: 1.0.0\n\n"
+for _src, _pt in [("Pass", "Aprovado"), ("Fail", "Reprovado"),
+                  ("Blocked", "Bloqueado"), ("Untested", "N\u00e3o testado")]:
+    out = process(TB_PT_HDR + "++++\n\\begin{testsummary}\n"
+                  "\\testsummaryrow{1}{T}{\\testresultbadge{" + _src + "}}\n"
+                  "\\end{testsummary}\n++++\n", 'testbook', 'md')
+    check("pt testbook badge: " + _src + " -> **[" + _pt + "]**",
+          "**[" + _pt + "]**" in out)
+# EN regression: enums preserved
+out = process(HEADER + "++++\n\\begin{testsummary}\n"
+              "\\testsummaryrow{1}{T}{\\testresultbadge{Pass}}\n"
+              "\\end{testsummary}\n++++\n", 'testbook', 'md')
+check("en testbook badge: **[Pass]**", "**[Pass]**" in out)
+# Unknown value passes through (cls fallback badge)
+out = process(TB_PT_HDR + "++++\n\\begin{testsummary}\n"
+              "\\testsummaryrow{1}{T}{\\testresultbadge{Custom}}\n"
+              "\\end{testsummary}\n++++\n", 'testbook', 'md')
+check("pt testbook badge: unknown passes through", "**[Custom]**" in out)
+
+print("=== Signatures E-mail label (lang-aware) ===")
+
+# 39. signatures E-mail label routed through labels['th_email']
+# (PDF \lg@sigemail is 'E-mail' for both en and pt)
+out = process(HEADER + "++++\n\\begin{signatures}\n"
+              "\\signaturecell{Alice}{Dev}{a@x}{City}\n"
+              "\\end{signatures}\n++++\n", 'poc', 'md')
+check("en signature: E-mail: label", "E-mail: `a@x`" in out)
+out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{signatures}\n"
+              "\\signaturecell{Alice}{Dev}{a@x}{City}\n"
+              "\\end{signatures}\n++++\n", 'poc', 'md')
+check("pt signature: E-mail: label", "E-mail: `a@x`" in out)
+
+print("=== PT image placeholder ===")
+
+# 40. \imageplaceholder inline passthrough — PT label
+out = process(":lang: pt\n:version: 1.0.0\n\n"
+              "pass:[\\imageplaceholder{assets/x.png}{Tela do Console}]\n",
+              'guide', 'md')
+check("pt imageplaceholder: Espaco reservado para imagem",
+      "Espa\u00e7o reservado para imagem: Tela do Console" in out)
+check("pt imageplaceholder: no EN label", "Image placeholder:" not in out)
+# EN regression
+out = process(HEADER
+              + "pass:[\\imageplaceholder{assets/x.png}{Console screen}]\n",
+              'guide', 'md')
+check("en imageplaceholder: Image placeholder",
+      "Image placeholder: Console screen" in out)
+
+print("=== PT HTML caption attributes (placement) ===")
+
+# 41. html + pt: injected attributes land in the header (before the
+# first blank line), and the cover block follows them (header order)
+out = process(":lang: pt\n:version: 1.0.0\n\nBody.\n", 'guide', 'html')
+check("html pt: attrs in header",
+      ":note-caption: Informação" in out.split("\n\n")[0])
+_out_lines = out.split("\n")
+_toc_idx = next((i for i, l in enumerate(_out_lines)
+                 if l.startswith(":toc-title:")), -1)
+_logo_idx = next((i for i, l in enumerate(_out_lines)
+                  if l.startswith("image::")), -1)
+check("html pt: cover block after injected attrs",
+      _toc_idx != -1 and _logo_idx != -1 and _toc_idx < _logo_idx)
+
+# 42. docx + pt: admonition still becomes a **TYPE‖** sentinel (the
+# caption-attribute injection is html-only and must not touch docx)
+out = process(":lang: pt\n:version: 1.0.0\n\nNOTE: Aviso.\n", 'guide', 'docx')
+check("docx pt: admonition sentinel intact", "**NOTE\u2016**" in out)
+
+print("=== PT testcase result field ===")
+
+# 43. testcase \testresult passthrough: PT field label + PT badge text
+out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{testcase}{Demo}\n"
+              "  \\testresult{\\testresultbadge{Pass}}\n"
+              "\\end{testcase}\n++++\n", 'testbook', 'docx')
+check("pt testcase: Resultado do Teste + **[Aprovado]**",
+      "Resultado do Teste" in out and "**[Aprovado]**" in out)
 
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

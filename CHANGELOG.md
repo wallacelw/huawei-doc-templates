@@ -4,6 +4,33 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.12.0 (2026-09-23)
+
+### Language audit: PT labels for all formats
+
+Portuguese documents were showing English labels across PDF, DOCX, HTML,
+and MD. All user-visible labels are now language-aware under `:lang: pt`:
+
+- **Technical cover table**: Versão / Data / Cenário / Autor (was
+  Version / Date / Scenario / Author) — PDF + DOCX/MD/HTML
+- **Testbook result badges**: Aprovado / Reprovado / Bloqueado / Não
+  testado (was always English Pass/Fail/Blocked/Untested) — PDF + DOCX
+  (badge PNGs auto-sized to fit text, embedded at natural 1:1 width)
+- **HTML admonition titles**: Dica / Importante / Informação (was
+  Tip / Warning / Note) via injected AsciiDoc caption attributes
+- **HTML figure/table captions**: Figura / Tabela (was Figure / Table)
+- **HTML technical section headings**: PT via `html[lang="pt"]` CSS
+  selectors; 6 CSS strings aligned with PDF EN labels exactly (L18)
+- **DOCX callout labels**: Dica / Informação / Importante (was
+  Tip / Info / Important)
+- **General Objective / E-mail / image placeholder**: lang-aware in
+  preprocessor + huawei-images.sty
+- **Sample wording**: Cor / Amostra table headers, Infraestrutura como
+  Código, provedor heading (guide-pt 3.6.3, technical-pt 3.6.2,
+  testbook-pt 2.1.2)
+
+Tests: +43 cases (preprocessor 108, docx-fix 73).
+
 ## v6.11.1 (2026-09-22)
 
 ### Document lifecycle clarification

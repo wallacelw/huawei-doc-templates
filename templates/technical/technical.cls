@@ -22,7 +22,7 @@
 %%    Plus an optional Changelog.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/22 Huawei Technical Report template v6.11.1]
+\ProvidesClass{technical}[2026/09/23 Huawei Technical Report template v6.12.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -58,6 +58,11 @@
   \newcommand{\lg@verification}{Verificação após a solução alternativa}
   \newcommand{\lg@rollback}{Operação de Rollback}
   \newcommand{\lg@cleanup}{Operação de Limpeza}
+  % Cover-page table labels
+  \newcommand{\lg@reportversionlabel}{Versão}
+  \newcommand{\lg@reportdatelabel}{Data}
+  \newcommand{\lg@reportscenariolabel}{Cenário}
+  \newcommand{\lg@reportauthorlabel}{Autor}
 \else
   \newcommand{\lg@problem}{Problem Description and Impact}
   \newcommand{\lg@rootcauseanalysis}{Root Cause Analysis}
@@ -70,6 +75,11 @@
   \newcommand{\lg@verification}{Verification after the workaround}
   \newcommand{\lg@rollback}{Rollback Operation}
   \newcommand{\lg@cleanup}{Cleanup Operation}
+  % Cover-page table labels
+  \newcommand{\lg@reportversionlabel}{Version}
+  \newcommand{\lg@reportdatelabel}{Date}
+  \newcommand{\lg@reportscenariolabel}{Scenario}
+  \newcommand{\lg@reportauthorlabel}{Author}
 \fi
 
 % =====================================================================
@@ -122,15 +132,15 @@
   \renewcommand{\arraystretch}{1.4}%
   \begin{tabular}{|>{\columncolor{huaweired}\color{white}\bfseries}l|l|}%
   \hline
-  Version & \lg@reportversion \\
+  \lg@reportversionlabel & \lg@reportversion \\
   \hline
-  Date & \lg@reportdate \\
+  \lg@reportdatelabel & \lg@reportdate \\
   \hline
-  Scenario & \lg@reportscenario \\
+  \lg@reportscenariolabel & \lg@reportscenario \\
   \hline
   \if@showauthors
     \ifx\lg@docauthors\@empty\else
-      Author & \lg@docauthors \\
+      \lg@reportauthorlabel & \lg@docauthors \\
       \hline
     \fi
   \fi

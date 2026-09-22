@@ -53,6 +53,10 @@ scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 | `:nochangelog:` | Suppresses the changelog section and hides version, date, and time on the cover page. |
 | `:noauthors:` | Hides the authors on the cover page. |
 
+The cover page shows a Version/Date/Scenario table (and an Author row when
+`:authors:` is set). With `:lang: pt` the table labels render in Portuguese:
+Versão / Data / Cenário / Autor.
+
 ## Samples
 
 Two samples demonstrate all roles and passthrough blocks:

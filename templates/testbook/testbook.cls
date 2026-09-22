@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/22 Huawei Test Book template v6.11.1]
+\ProvidesClass{testbook}[2026/09/23 Huawei Test Book template v6.12.0]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in
@@ -58,6 +58,11 @@
   \newcommand{\lg@testcaseid}{ID}
   \newcommand{\lg@testcasetitle}{Título}
   \newcommand{\lg@teststatus}{Status}
+  % Test result badge labels (source keeps EN enums; rendering is PT-aware)
+  \newcommand{\lg@testpass}{Aprovado}
+  \newcommand{\lg@testfail}{Reprovado}
+  \newcommand{\lg@testblocked}{Bloqueado}
+  \newcommand{\lg@testuntested}{Não testado}
 \else
   \newcommand{\lg@testcases}{Test Cases}
   \newcommand{\lg@testcase}{Testcase}
@@ -71,6 +76,11 @@
   \newcommand{\lg@testcaseid}{ID}
   \newcommand{\lg@testcasetitle}{Title}
   \newcommand{\lg@teststatus}{Status}
+  % Test result badge labels (source keeps EN enums; rendering is PT-aware)
+  \newcommand{\lg@testpass}{Pass}
+  \newcommand{\lg@testfail}{Fail}
+  \newcommand{\lg@testblocked}{Blocked}
+  \newcommand{\lg@testuntested}{Untested}
 \fi
 
 % ---- Titles (shared) ----------------------------------------------
@@ -292,19 +302,22 @@
 % =====================================================================
 % Visual badge for pass/fail/blocked status.
 % Usage: \testresultbadge{Pass}  \testresultbadge{Fail}  \testresultbadge{Blocked}
+% Source keeps language-neutral enum values (Pass/Fail/Blocked/Untested);
+% rendering is language-aware under the portuguese class option
+% (Aprovado/Reprovado/Bloqueado/Não testado), mirroring \pocresult in poc.cls.
 
 \newcommand{\testresultbadge}[1]{%
   \ifstrequal{#1}{Pass}{%
-    \huaweibadge[1.5cm]{tipbg}{tipfg}{Pass}%
+    \huaweibadge[1.5cm]{tipbg}{tipfg}{\lg@testpass}%
   }{%
     \ifstrequal{#1}{Fail}{%
-      \huaweibadge[1.5cm]{red!15}{huaweired}{Fail}%
+      \huaweibadge[1.5cm]{red!15}{huaweired}{\lg@testfail}%
     }{%
       \ifstrequal{#1}{Blocked}{%
-        \huaweibadge[1.5cm]{warningbg}{warningfg}{Blocked}%
+        \huaweibadge[1.5cm]{warningbg}{warningfg}{\lg@testblocked}%
       }{%
         \ifstrequal{#1}{Untested}{%
-          \huaweibadge[1.5cm]{codebg}{ruleblack}{Untested}%
+          \huaweibadge[1.5cm]{codebg}{ruleblack}{\lg@testuntested}%
         }{%
           \huaweibadge[1.5cm]{codebg}{ruleblack}{#1}%
         }%

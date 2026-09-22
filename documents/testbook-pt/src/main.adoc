@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
 :cover-text: Huawei Technologies CO., LTD
-:version: 2.1.1
+:version: 2.1.2
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -510,7 +510,7 @@ Diretrizes de Marca da Huawei Cloud:
 
 [.hutable]
 |===
-| Color | HEX | Pantone | Sample
+| Cor | HEX | Pantone | Amostra
 
 | Rose Red | `#C40054` | 7636 | pass:[\textcolor{rosered}{\rule{2cm}{4pt}}]
 | Dark Red | `#7F0001` | 483C | pass:[\textcolor{darkred}{\rule{2cm}{4pt}}]
@@ -522,6 +522,9 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.1.2}{2026-09-22}{
+    \item Revisão de idioma: cabeçalhos de tabela ``Cor''/``Amostra'' (antes ``Color''/``Sample'').
+  }
   \changelogentry{2.1.1}{2026-09-19}{
     \item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.
   }

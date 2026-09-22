@@ -529,8 +529,15 @@ gray for Untested. Used inside passthrough blocks.
 | `\testresultbadge{Blocked}` | Light orange bg, orange border, black text | Test step/case blocked by dependency. |
 | `\testresultbadge{Untested}` | Light gray bg, black border, black text | Test step/case not yet executed. |
 
-**Badge labels are not translated** — they always display in English
-(Pass, Fail, Blocked, Untested) regardless of the `:lang:` attribute.
+The source keeps language-neutral enum values (`Pass`/`Fail`/`Blocked`/
+`Untested`); rendering is language-aware under `:lang: pt`:
+
+| Source value | English (default) | Portuguese (`:lang: pt`) |
+|---|---|---|
+| `Pass` | Pass | Aprovado |
+| `Fail` | Fail | Reprovado |
+| `Blocked` | Blocked | Bloqueado |
+| `Untested` | Untested | Não testado |
 
 ### Quick start — creating a new test book
 

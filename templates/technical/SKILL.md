@@ -383,6 +383,16 @@ passthrough blocks in the document body:
 ++++
 ```
 
+The cover page renders a Version/Date/Scenario table (plus an Author row
+when `:authors:` is set). The table labels are language-aware:
+
+| Cover label | English | Portuguese |
+|---|---|---|
+| Version | Version | Versão |
+| Date | Date | Data |
+| Scenario | Scenario | Cenário |
+| Author | Author | Autor |
+
 ### 5-section environments (the core structure)
 
 All five sections are mandatory in a technical report (with 6 subsections

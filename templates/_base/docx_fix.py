@@ -742,7 +742,8 @@ RESULT_BADGE_STYLES = [
 ]
 
 # Map marker text → style_id.  Keys are title-case (PDF label case) plus
-# the Portuguese POC labels (\pocresult, lang=pt).
+# the Portuguese POC labels (\pocresult, lang=pt) and Portuguese testbook
+# labels (\testresultbadge, lang=pt).
 BADGE_MARKERS = {
     "[Pass]": "BadgePass",
     "[Partial]": "BadgePartial",
@@ -755,6 +756,24 @@ BADGE_MARKERS = {
     "[Parcial]": "BadgePartial",
     "[Falha]": "BadgeFail",
     "[Ignorado]": "BadgeSkip",
+    # Portuguese testbook labels (\testresultbadge, lang=pt — canonical
+    # strings matching testbook.cls under [portuguese])
+    "[Aprovado]": "BadgePass",
+    "[Reprovado]": "BadgeFail",
+    "[Bloqueado]": "BadgeBlocked",
+    "[Não testado]": "BadgeUntested",
+}
+
+# Testbook result-badge EN→PT label translation (lang=pt).  Defensive:
+# handles stale or pre-preprocessor input where badge text is still EN.
+# In production, the preprocessor already emits PT text, so
+# BADGE_MARKERS catches it directly.  Canonical strings match testbook.cls
+# under [portuguese] (PDF parallel lane).
+TESTBOOK_PT_BADGE_LABELS = {
+    'Pass': 'Aprovado',
+    'Fail': 'Reprovado',
+    'Blocked': 'Bloqueado',
+    'Untested': 'Não testado',
 }
 
 # Badge text sentinel from the pre-processor: **[BADGE:text]** arrives as
@@ -1282,9 +1301,10 @@ def _apply_content_styling(docx_path):
     # Replaces the flat character-styled text with rounded pill PNGs that
     # replicate the PDF \huaweibadge look (arc=2pt, colored bg + 0.8pt
     # frame, BLACK bold text — the PDF sets no text color).  PNGs are
-    # pre-rendered at native width per template (testbook 1.5cm, POC 2cm)
-    # so no downscaling is needed.  Falls back to character styles if a
-    # PNG asset is missing.
+    # pre-rendered per nominal width (testbook 1.5cm, POC 2cm) and
+    # auto-fit their canvas to the text, so each one is embedded at its
+    # natural 1:1 size (no downscaling).  Falls back to character styles
+    # if a PNG asset is missing.
     _badge_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'badge-assets')
     # POC result badges use the 2cm \huaweibadge default; testbook's
@@ -1292,7 +1312,23 @@ def _apply_content_styling(docx_path):
     # (wrappers inject it); direct calls fall back to sniffing the path.
     _tmpl = _TEMPLATE or ('poc' if 'poc' in docx_path else '')
     _badge_cm = '2' if _tmpl == 'poc' else '1.5'
-    _badge_w = Cm(2.0) if _tmpl == 'poc' else Cm(1.5)
+    _badge_nominal_w = Cm(2.0) if _tmpl == 'poc' else Cm(1.5)
+    # Auto-fit PNGs can be wider than the nominal width (e.g. "Não
+    # testado" is 255px ≈ 2.16cm), so embed at the PNG's natural size
+    # (pixels ÷ 300 dpi, the generation DPI) — embedding at the nominal
+    # width would downscale and shrink the text.  Fall back to the
+    # nominal width only if PIL is unavailable or the PNG is unreadable.
+    _badge_widths = {}
+
+    def _badge_png_width(png):
+        if png not in _badge_widths:
+            try:
+                from PIL import Image
+                with Image.open(png) as im:
+                    _badge_widths[png] = Cm(im.size[0] * 2.54 / 300.0)
+            except (ImportError, OSError):
+                _badge_widths[png] = _badge_nominal_w
+        return _badge_widths[png]
 
     def _replace_badge_runs(paragraphs):
         for paragraph in paragraphs:
@@ -1311,11 +1347,20 @@ def _apply_content_styling(docx_path):
                     continue
                 style_id = BADGE_MARKERS[text]
                 label = text[1:-1]   # the badge text, e.g. Pass/Atendido
+                # Testbook PT: defensive EN→PT translation for the PNG
+                # lookup — in production the preprocessor already emits
+                # PT text (BADGE_MARKERS catches it directly); this only
+                # fires on stale or pre-preprocessor input.
+                if _TEMPLATE == 'testbook' and _LANG == 'pt':
+                    label = TESTBOOK_PT_BADGE_LABELS.get(label, label)
                 png = os.path.join(_badge_dir, 'badge-{}-{}cm.png'.format(label, _badge_cm))
                 if os.path.isfile(png):
                     run.text = ''
-                    run.add_picture(png, width=_badge_w)
+                    run.add_picture(png, width=_badge_png_width(png))
                 else:
+                    # Fallback: character style + translated text (PT)
+                    if _TEMPLATE == 'testbook' and _LANG == 'pt':
+                        run.text = '[' + label + ']'
                     try:
                         run.style = doc.styles[style_id]
                     except KeyError:
@@ -1647,13 +1692,24 @@ def _fix_callout_boxes(doc, qn):
     (e.g. TIP: text → **[TIP]** text) because pandoc strips the admonition
     type.  This function finds the sentinels and applies callout styling
     matching the PDF (huawei-callouts.sty).
+
+    Callout labels are language-aware (PT: Dica/Informação/Importante),
+    matching huawei-lang.sty \\lg@tiplabel/\\lg@infolabel/\\lg@warninglabel.
     """
+    # Callout labels (en/pt) — matches huawei-lang.sty:
+    #   \\lg@tiplabel     = Tip / Dica
+    #   \\lg@infolabel    = Info / Informação
+    #   \\lg@warninglabel = Important / Importante
+    if _LANG == 'pt':
+        _lbl_tip, _lbl_info, _lbl_important = 'Dica', 'Informação', 'Importante'
+    else:
+        _lbl_tip, _lbl_info, _lbl_important = 'Tip', 'Info', 'Important'
     callout_map = {
-        'TIP':       ('E8F5E9', '62B230', 'Tip'),
-        'NOTE':      ('E0F7FA', '30B5C5', 'Info'),
-        'WARNING':   ('FFF3E0', 'ED6D00', 'Important'),
-        'CAUTION':   ('FFF3E0', 'ED6D00', 'Important'),
-        'IMPORTANT': ('FFF3E0', 'ED6D00', 'Important'),
+        'TIP':       ('E8F5E9', '62B230', _lbl_tip),
+        'NOTE':      ('E0F7FA', '30B5C5', _lbl_info),
+        'WARNING':   ('FFF3E0', 'ED6D00', _lbl_important),
+        'CAUTION':   ('FFF3E0', 'ED6D00', _lbl_important),
+        'IMPORTANT': ('FFF3E0', 'ED6D00', _lbl_important),
     }
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
