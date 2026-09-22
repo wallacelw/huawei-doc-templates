@@ -587,10 +587,10 @@ contradictory input like `[.result-pass]#Fail#`).
 
 | Role | AsciiDoc | LaTeX | Color | PT label | EN label |
 |------|----------|-------|-------|----------|----------|
-| Pass | `[.result-pass]#Pass#` | `\pocresult{Pass}` | Green | Atendido | Pass |
-| Partial | `[.result-partial]#Partial#` | `\pocresult{Partial}` | Orange | Parcial | Partial |
-| Fail | `[.result-fail]#Fail#` | `\pocresult{Fail}` | Red | Falha | Fail |
-| Skip | `[.result-skip]#Skip#` | `\pocresult{Skip}` | Gray | Ignorado | Skip |
+| Pass | `[.result-pass]#Pass#` | `\pocresult{Pass}` | Green | Atende | Pass |
+| Partial | `[.result-partial]#Partial#` | `\pocresult{Partial}` | Orange | Atende com ressalvas | Partial |
+| Fail | `[.result-fail]#Fail#` | `\pocresult{Fail}` | Red | Não atende | Fail |
+| Skip | `[.result-skip]#Skip#` | `\pocresult{Skip}` | Gray | Não testado | Skip |
 
 Note: POC uses `\pocresult` (not `\testresultbadge`, which belongs to the
 `testbook` template). POC badge labels **are** language-aware, unlike
@@ -872,9 +872,9 @@ by the author (e.g. *Resumo Executivo*, *Contexto*, *Objetivos e Metas*,
 *Assinaturas*) — headings are literal author-written text and do not switch
 with the language. Only class-driven labels switch automatically: the TOC
 title (*Sumário*), the changelog heading (*Histórico de versões*), result
-badges (*Atendido* / *Parcial* / *Falha* / *Ignorado*), closing record
-labels (*Homologada* / *Homologada com ressalvas* / *Não homologada*), and
-the signature greeting (*At.te,*).
+badges (*Atende* / *Atende com ressalvas* / *Não atende* / *Não testado*),
+closing record labels (*Homologada* / *Homologada com ressalvas* /
+*Não homologada*), and the signature greeting (*At.te,*).
 
 **Accent verification (PT-BR).** After compiling a Portuguese document,
 confirm no glyphs are missing:

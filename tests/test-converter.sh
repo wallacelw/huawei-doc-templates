@@ -559,8 +559,9 @@ echo "=== 13. Testbook badges ==="
 OUT=$(convert '= Test
 :template: testbook
 
-[.badge-pass]#Pass# and [.badge-fail]#Fail#.')
+[.badge-pass]#Pass#, [.badge-partial]#Partial# and [.badge-fail]#Fail#.')
 assert_contains "badge-pass → testresultbadge Pass" '\testresultbadge{Pass}' "$OUT"
+assert_contains "badge-partial → testresultbadge Partial" '\testresultbadge{Partial}' "$OUT"
 assert_contains "badge-fail → testresultbadge Fail" '\testresultbadge{Fail}' "$OUT"
 
 # ════════════════════════════════════════════════════════════════════════════

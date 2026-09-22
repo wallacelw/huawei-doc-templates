@@ -87,10 +87,10 @@ scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 
 | Token | English (default) | Portuguese (`:lang: pt`) |
 |---|---|---|
-| Pass | Pass | Atendido |
-| Partial | Partial | Parcial |
-| Fail | Fail | Falha |
-| Skip | Skip | Ignorado |
+| Pass | Pass | Atende |
+| Partial | Partial | Atende com ressalvas |
+| Fail | Fail | Não atende |
+| Skip | Skip | Não testado |
 | Signature greeting | Sincerely, | At.te, |
 | Closing item | Item | Item |
 | Closing record | Record | Registro |

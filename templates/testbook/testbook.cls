@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/23 Huawei Test Book template v6.12.0]
+\ProvidesClass{testbook}[2026/09/23 Huawei Test Book template v6.13.0]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in
@@ -59,9 +59,9 @@
   \newcommand{\lg@testcasetitle}{Título}
   \newcommand{\lg@teststatus}{Status}
   % Test result badge labels (source keeps EN enums; rendering is PT-aware)
-  \newcommand{\lg@testpass}{Aprovado}
-  \newcommand{\lg@testfail}{Reprovado}
-  \newcommand{\lg@testblocked}{Bloqueado}
+  \newcommand{\lg@testpass}{Atende}
+  \newcommand{\lg@testpartial}{Atende com ressalvas}
+  \newcommand{\lg@testfail}{Não atende}
   \newcommand{\lg@testuntested}{Não testado}
 \else
   \newcommand{\lg@testcases}{Test Cases}
@@ -78,8 +78,8 @@
   \newcommand{\lg@teststatus}{Status}
   % Test result badge labels (source keeps EN enums; rendering is PT-aware)
   \newcommand{\lg@testpass}{Pass}
+  \newcommand{\lg@testpartial}{Partial}
   \newcommand{\lg@testfail}{Fail}
-  \newcommand{\lg@testblocked}{Blocked}
   \newcommand{\lg@testuntested}{Untested}
 \fi
 
@@ -300,21 +300,23 @@
 % =====================================================================
 %  TEST RESULT BADGE
 % =====================================================================
-% Visual badge for pass/fail/blocked status.
-% Usage: \testresultbadge{Pass}  \testresultbadge{Fail}  \testresultbadge{Blocked}
-% Source keeps language-neutral enum values (Pass/Fail/Blocked/Untested);
+% Visual badge for pass/partial/fail/untested status.
+% Usage: \testresultbadge{Pass}  \testresultbadge{Partial}  \testresultbadge{Fail}  \testresultbadge{Untested}
+% Source keeps language-neutral enum values (Pass/Partial/Fail/Untested);
 % rendering is language-aware under the portuguese class option
-% (Aprovado/Reprovado/Bloqueado/Não testado), mirroring \pocresult in poc.cls.
+% (Atende/Atende com ressalvas/Não atende/Não testado), mirroring
+% \pocresult in poc.cls.
+% Unknown values (e.g. legacy Blocked) fall back to the neutral gray pill.
 
 \newcommand{\testresultbadge}[1]{%
   \ifstrequal{#1}{Pass}{%
     \huaweibadge[1.5cm]{tipbg}{tipfg}{\lg@testpass}%
   }{%
-    \ifstrequal{#1}{Fail}{%
-      \huaweibadge[1.5cm]{red!15}{huaweired}{\lg@testfail}%
+    \ifstrequal{#1}{Partial}{%
+      \huaweibadge[1.5cm]{warningbg}{warningfg}{\lg@testpartial}%
     }{%
-      \ifstrequal{#1}{Blocked}{%
-        \huaweibadge[1.5cm]{warningbg}{warningfg}{\lg@testblocked}%
+      \ifstrequal{#1}{Fail}{%
+        \huaweibadge[1.5cm]{red!15}{huaweired}{\lg@testfail}%
       }{%
         \ifstrequal{#1}{Untested}{%
           \huaweibadge[1.5cm]{codebg}{ruleblack}{\lg@testuntested}%

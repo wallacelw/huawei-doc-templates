@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
 :cover-text: Huawei Technologies CO., LTD
-:version: 2.1.2
+:version: 2.2.0
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -77,10 +77,10 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
 |===
 | Resultado | Explicação
 
-| Satisfeito | O caso de teste passa completamente — o comportamento observado corresponde ao resultado esperado sem desvios.
-| Satisfeito com ressalvas | O caso de teste passa, mas desvios menores foram observados que não impactam os objetivos da POC (documentados em Observações).
-| Não satisfeito | O caso de teste falha — o comportamento observado não corresponde ao resultado esperado. Um relatório de defeito deve ser registrado.
-| Não testado | O caso de teste não pôde ser executado devido a dependências bloqueantes ou problemas de ambiente.
+| Atende | O caso de teste passa completamente — o comportamento observado corresponde ao resultado esperado sem desvios.
+| Atende com ressalvas | O caso de teste foi executado com sucesso, mas com restrições, dependências ou configuração adicional (documentadas em Observações).
+| Não atende | O caso de teste falha — o comportamento observado não corresponde ao resultado esperado. Um relatório de defeito deve ser registrado.
+| Não testado | O caso de teste não foi executado — a execução permanece pendente e deve ser agendada.
 |===
 
 == Casos de Teste
@@ -348,8 +348,8 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Usuário não administrador visualiza valores mascarados na coluna \inlinecode{ssn}.}
     \teststep{Usuário administrador visualiza valores reais na coluna \inlinecode{ssn}.}
   \end{testexpected}
-  \testresult{\testresultbadge{Blocked}}
-  \testremarks{Regras de mascaramento de dados são aplicadas no momento da consulta — os dados subjacentes no OBS/HDFS não são modificados.}
+  \testresult{\testresultbadge{Partial}}
+  \testremarks{Resultado com ressalvas: as regras de mascaramento são aplicadas no momento da consulta — os dados subjacentes no OBS/HDFS não são modificados, de modo que o mascaramento não cobre exportações diretas do bucket.}
 \end{testcase}
 ++++
 
@@ -457,7 +457,7 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do 
   \testsummaryrow{5}{Verificar execução do pipeline de ingestão de dados}{\testresultbadge{Pass}}
   \testsummaryrow{6}{Verificar consulta Spark SQL no cluster MRS}{\testresultbadge{Pass}}
   \testsummaryrow{7}{Verificar aplicação de política IAM nos buckets OBS}{\testresultbadge{Fail}}
-  \testsummaryrow{8}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Blocked}}
+  \testsummaryrow{8}{Verificar regra de mascaramento de dados do DataArts Studio}{\testresultbadge{Partial}}
   \testsummaryrow{9}{Verificar implantação de infraestrutura via Terraform}{\testresultbadge{Pass}}
   \testsummaryrow{10}{Verificar carregamento de dados de teste no OBS}{\testresultbadge{Untested}}
 \end{testsummary}
@@ -522,6 +522,10 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.2.0}{2026-09-23}{
+    \item Vocabulário de resultados unificado: a tabela de critérios de aceitação agora usa ``Atende'', ``Atende com ressalvas'', ``Não atende'' e ``Não testado''.
+    \item Resultado ``Bloqueado'' substituído por ``Atende com ressalvas'' (Partial): o Caso de Teste 8 e a linha correspondente da tabela de resumo foram convertidos, com observações alinhadas ao resultado parcial.
+  }
   \changelogentry{2.1.2}{2026-09-22}{
     \item Revisão de idioma: cabeçalhos de tabela ``Cor''/``Amostra'' (antes ``Color''/``Sample'').
   }

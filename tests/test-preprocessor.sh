@@ -240,10 +240,17 @@ print("=== Language-aware result badges ===")
 # 17. POC + pt: result roles → Portuguese \pocresult labels
 out = process(":lang: pt\n:version: 1.0.0\n\n[.result-pass]#Pass#\n",
               'poc', 'docx')
-check("poc+pt: result-pass → **[Atendido]**", "**[Atendido]**" in out)
+check("poc+pt: result-pass → **[Atende]**", "**[Atende]**" in out)
+out = process(":lang: pt\n:version: 1.0.0\n\n[.result-partial]#Partial#\n",
+              'poc', 'docx')
+check("poc+pt: result-partial → **[Atende com ressalvas]**",
+      "**[Atende com ressalvas]**" in out)
 out = process(":lang: pt\n:version: 1.0.0\n\n[.result-fail]#Fail#\n",
               'poc', 'docx')
-check("poc+pt: result-fail → **[Falha]**", "**[Falha]**" in out)
+check("poc+pt: result-fail → **[Não atende]**", "**[Não atende]**" in out)
+out = process(":lang: pt\n:version: 1.0.0\n\n[.result-skip]#Skip#\n",
+              'poc', 'docx')
+check("poc+pt: result-skip → **[Não testado]**", "**[Não testado]**" in out)
 
 # 18. testbook + pt: result-* roles stay EN (they are POC constructs —
 # \pocresult labels are POC-gated in _result_badge_texts); testbook's own
@@ -252,12 +259,14 @@ out = process(":lang: pt\n:version: 1.0.0\n\n[.result-pass]#Pass#\n",
               'testbook', 'docx')
 check("testbook+pt: result-pass stays **[Pass]**", "**[Pass]**" in out)
 
-# 19. \testresultbadge preserves case (Blocked, not BLOCKED)
-out = process(HEADER + "++++\n\\begin{testsummary}\n"
+# 19. \testresultbadge{Blocked} passes through unchanged under pt
+# (Blocked was dropped from the testbook vocabulary — graceful fallback
+# to the cls fallback badge, source enum preserved).
+out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{testsummary}\n"
               "\\testsummaryrow{TC-01}{Title}"
               "{\\testresultbadge{Blocked}}\n"
               "\\end{testsummary}\n++++\n", 'testbook', 'md')
-check("testresultbadge: case preserved (**[Blocked]**)",
+check("pt testbook badge: dropped Blocked passes through (**[Blocked]**)",
       "**[Blocked]**" in out)
 
 print("=== PT signatures + classification ===")
@@ -497,8 +506,10 @@ print("=== PT testbook result badges ===")
 
 # 38. testbook + pt: \testresultbadge enums render PT labels (source stays EN)
 TB_PT_HDR = ":lang: pt\n:version: 1.0.0\n\n"
-for _src, _pt in [("Pass", "Aprovado"), ("Fail", "Reprovado"),
-                  ("Blocked", "Bloqueado"), ("Untested", "N\u00e3o testado")]:
+for _src, _pt in [("Pass", "Atende"),
+                  ("Partial", "Atende com ressalvas"),
+                  ("Fail", "N\u00e3o atende"),
+                  ("Untested", "N\u00e3o testado")]:
     out = process(TB_PT_HDR + "++++\n\\begin{testsummary}\n"
                   "\\testsummaryrow{1}{T}{\\testresultbadge{" + _src + "}}\n"
                   "\\end{testsummary}\n++++\n", 'testbook', 'md')
@@ -570,8 +581,8 @@ print("=== PT testcase result field ===")
 out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{testcase}{Demo}\n"
               "  \\testresult{\\testresultbadge{Pass}}\n"
               "\\end{testcase}\n++++\n", 'testbook', 'docx')
-check("pt testcase: Resultado do Teste + **[Aprovado]**",
-      "Resultado do Teste" in out and "**[Aprovado]**" in out)
+check("pt testcase: Resultado do Teste + **[Atende]**",
+      "Resultado do Teste" in out and "**[Atende]**" in out)
 
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

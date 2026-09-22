@@ -22,7 +22,7 @@
 %%    - \setdoctitle (shared cover title setter).
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/23 Huawei POC template v6.12.0]
+\ProvidesClass{poc}[2026/09/23 Huawei POC template v6.13.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -40,10 +40,10 @@
 % =====================================================================
 \if@portuguese
   % POC result labels
-  \newcommand{\lg@pocpass}{Atendido}
-  \newcommand{\lg@pocpartial}{Parcial}
-  \newcommand{\lg@pocfail}{Falha}
-  \newcommand{\lg@pocskip}{Ignorado}
+  \newcommand{\lg@pocpass}{Atende}
+  \newcommand{\lg@pocpartial}{Atende com ressalvas}
+  \newcommand{\lg@pocfail}{Não atende}
+  \newcommand{\lg@pocskip}{Não testado}
   % Closing record labels
   \newcommand{\lg@closingitem}{Item}
   \newcommand{\lg@closingrecord}{Registro}
@@ -89,7 +89,7 @@
 % =====================================================================
 % Visual badge for POC/homologation results.
 % Usage: \pocresult{Pass}  \pocresult{Partial}  \pocresult{Fail}  \pocresult{Skip}
-% Labels are language-aware (Atendido / Pass, etc.)
+% Labels are language-aware (Atende / Pass, etc.)
 
 \newcommand{\pocresult}[1]{%
   \ifstrequal{#1}{Pass}{%

@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
 :cover-text: Huawei Technologies CO., LTD
-:version: 2.1.1
+:version: 2.2.0
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -77,10 +77,10 @@ infrastructure changes and avoid unintended resource modifications.
 |===
 | Result | Explanation
 
-| Satisfied | The test case passes fully — observed behavior matches the expected result with no deviations.
-| Satisfied but with reservations | The test case passes but minor deviations were observed that do not impact the POC objectives (documented in Remarks).
-| Not satisfied | The test case fails — observed behavior does not match the expected result. A defect report must be filed.
-| Untested | The test case could not be executed due to blocking dependencies or environment issues.
+| Pass | The test case passes fully — observed behavior matches the expected result with no deviations.
+| Partial | The test case was executed successfully, but with restrictions, dependencies, or additional configuration (documented in Remarks).
+| Fail | The test case fails — observed behavior does not match the expected result. A defect report must be filed.
+| Untested | The test case was not executed — execution remains pending and must be scheduled.
 |===
 
 == Test Cases
@@ -348,8 +348,8 @@ obsutil ls obs://poc-datalake-raw/
     \teststep{Non-admin user sees masked values in the \inlinecode{ssn} column.}
     \teststep{Admin user sees real values in the \inlinecode{ssn} column.}
   \end{testexpected}
-  \testresult{\testresultbadge{Blocked}}
-  \testremarks{Data masking rules apply at query time — the underlying data in OBS/HDFS is not modified.}
+  \testresult{\testresultbadge{Partial}}
+  \testremarks{Result with caveats: data masking rules apply at query time — the underlying data in OBS/HDFS is not modified, so masking does not cover direct bucket exports.}
 \end{testcase}
 ++++
 
@@ -457,7 +457,7 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the t
   \testsummaryrow{5}{Verify data ingestion pipeline execution}{\testresultbadge{Pass}}
   \testsummaryrow{6}{Verify Spark SQL query on MRS cluster}{\testresultbadge{Pass}}
   \testsummaryrow{7}{Verify IAM policy enforcement on OBS buckets}{\testresultbadge{Fail}}
-  \testsummaryrow{8}{Verify DataArts Studio data masking rule}{\testresultbadge{Blocked}}
+  \testsummaryrow{8}{Verify DataArts Studio data masking rule}{\testresultbadge{Partial}}
   \testsummaryrow{9}{Verify Terraform infrastructure deployment}{\testresultbadge{Pass}}
   \testsummaryrow{10}{Verify test data upload to OBS}{\testresultbadge{Untested}}
 \end{testsummary}
@@ -522,6 +522,10 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.2.0}{2026-09-23}{
+    \item Unified result vocabulary: the acceptance criteria table now uses Pass, Partial, Fail, and Untested.
+    \item Replaced the Blocked result with Partial: Test Case 8 and its test summary row were converted, with remarks aligned to the partial result.
+  }
   \changelogentry{2.1.1}{2026-09-19}{
     \item Fixed changelog dates — replaced \inlinecode{\textbackslash today} with the actual historical release dates.
     \item Fixed malformed row in the test-scope table (Security domain) — the first cell separator was missing.

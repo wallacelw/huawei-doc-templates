@@ -549,8 +549,9 @@ for sentinel, body in [('TIP', 'Dica callout body'),
     p = doc.add_paragraph()
     r = p.add_run(sentinel + '\u2016' + body)
     r.bold = True
-# Testbook badge markers (preprocessor emits [Pass]/[Fail]/etc.)
-for badge in ['[Pass]', '[Fail]', '[Blocked]', '[Untested]']:
+# Testbook badge markers (preprocessor emits [Pass]/[Partial]/[Fail]/
+# [Untested] under pt; Blocked was dropped from the vocabulary)
+for badge in ['[Pass]', '[Partial]', '[Fail]', '[Untested]']:
     p = doc.add_paragraph()
     r = p.add_run(badge)
     r.bold = True
@@ -623,15 +624,15 @@ else
   fail "EN callout labels: missing Tip/Info/Important"
 fi
 
-# 20. PT testbook badges: PNG images embedded (Aprovado/Reprovado/
-# Bloqueado/Não testado), no EN badge text leaked.
+# 20. PT testbook badges: PNG images embedded (Atende/Atende com
+# ressalvas/Não atende/Não testado), no EN badge text leaked.
 pt_badge_ok=0
 if python3 - "$PT_LANG_OUT" << 'PYEOF' 2>/dev/null; then
 import sys, zipfile
 from docx import Document
 doc = Document(sys.argv[1])
 # Collect all run text (badge PNGs replace text with images, so the
-# EN badge labels [Pass]/[Fail]/[Blocked]/[Untested] must be gone).
+# EN badge labels [Pass]/[Partial]/[Fail]/[Untested] must be gone).
 all_text = []
 for p in doc.paragraphs:
     for r in p.runs:
@@ -645,7 +646,7 @@ for tbl in doc.tables:
                     if r.text:
                         all_text.append(r.text)
 full = " ".join(all_text)
-for en_badge in ['[Pass]', '[Fail]', '[Blocked]', '[Untested]']:
+for en_badge in ['[Pass]', '[Partial]', '[Fail]', '[Untested]']:
     if en_badge in full:
         sys.exit(1)
 # Count embedded images (drawings) — expect >= 4 badge PNGs
@@ -668,7 +669,7 @@ fi
 # 21. PT testbook badges: the four PT PNG assets exist on disk
 pt_png_ok=0
 badge_dir="$REPO_ROOT/templates/_base/badge-assets"
-for label in Aprovado Reprovado Bloqueado "Não testado"; do
+for label in Atende "Atende com ressalvas" "Não atende" "Não testado"; do
   if [ ! -f "$badge_dir/badge-${label}-1.5cm.png" ]; then
     pt_png_ok=0
     break
@@ -676,7 +677,7 @@ for label in Aprovado Reprovado Bloqueado "Não testado"; do
   pt_png_ok=1
 done
 if [ "$pt_png_ok" -eq 1 ]; then
-  pass "PT testbook badge PNGs exist (Aprovado/Reprovado/Bloqueado/Não testado)"
+  pass "PT testbook badge PNGs exist (Atende/Atende com ressalvas/Não atende/Não testado)"
 else
   fail "PT testbook badge PNGs missing"
 fi
@@ -693,7 +694,7 @@ for p in doc.paragraphs:
         if r.text:
             all_text.append(r.text)
 full = " ".join(all_text)
-for en_badge in ['[Pass]', '[Fail]', '[Blocked]', '[Untested]']:
+for en_badge in ['[Pass]', '[Partial]', '[Fail]', '[Untested]']:
     if en_badge in full:
         sys.exit(1)
 img_count = 0
@@ -712,7 +713,7 @@ else
   fail "EN testbook badges: text leaked or PNGs not embedded"
 fi
 
-# 23. PT testbook badges via BADGE_MARKERS: direct [Aprovado] marker
+# 23. PT testbook badges via BADGE_MARKERS: direct [Atende] marker
 # (robustness — if the preprocessor ever emits PT text directly)
 PT_DIRECT_DOCX="$TMPDIR_FIX/pt-direct-test.docx"
 cp "$REPO_ROOT/templates/testbook/testbook-reference.docx" "$PT_DIRECT_DOCX"
@@ -720,7 +721,7 @@ python3 - "$PT_DIRECT_DOCX" << 'PYEOF'
 import sys
 from docx import Document
 doc = Document(sys.argv[1])
-for badge in ['[Aprovado]', '[Reprovado]', '[Bloqueado]', '[Não testado]']:
+for badge in ['[Atende]', '[Atende com ressalvas]', '[Não atende]', '[Não testado]']:
     p = doc.add_paragraph()
     r = p.add_run(badge)
     r.bold = True
@@ -740,7 +741,7 @@ for p in doc.paragraphs:
         if r.text:
             all_text.append(r.text)
 full = " ".join(all_text)
-for pt_badge in ['[Aprovado]', '[Reprovado]', '[Bloqueado]', '[Não testado]']:
+for pt_badge in ['[Atende]', '[Atende com ressalvas]', '[Não atende]', '[Não testado]']:
     if pt_badge in full:
         sys.exit(1)
 img_count = 0
@@ -754,7 +755,7 @@ PYEOF
   pt_direct_ok=1
 fi
 if [ "$pt_direct_ok" -eq 1 ]; then
-  pass "PT testbook badges: direct [Aprovado] markers resolved to PNGs"
+  pass "PT testbook badges: direct [Atende] markers resolved to PNGs"
 else
   fail "PT testbook badges: direct PT markers not resolved"
 fi
@@ -778,14 +779,14 @@ with zipfile.ZipFile(docx_path) as z:
                  if n.startswith('word/media/')}
 
 # PT pill PNGs must be embedded (byte-identical)
-for label in ('Aprovado', 'Reprovado', 'Bloqueado', 'Não testado'):
+for label in ('Atende', 'Atende com ressalvas', 'Não atende', 'Não testado'):
     src = os.path.join(badge_dir, 'badge-{}-1.5cm.png'.format(label))
     with open(src, 'rb') as f:
         if md5(f.read()) not in media_md5:
             sys.exit(1)
 
 # EN pill PNGs must NOT be embedded (translation must have happened)
-for label in ('Pass', 'Fail', 'Blocked', 'Untested'):
+for label in ('Pass', 'Partial', 'Fail', 'Untested'):
     src = os.path.join(badge_dir, 'badge-{}-1.5cm.png'.format(label))
     with open(src, 'rb') as f:
         if md5(f.read()) in media_md5:
@@ -800,13 +801,12 @@ else
   fail "PT testbook badges: wrong PNG variant embedded"
 fi
 
-# 25. Badge PNG inventory: every label (EN testbook, PT POC, PT testbook)
-# exists at BOTH native widths (1.5cm testbook, 2cm POC) — matches the
+# 25. Badge PNG inventory: every label (EN testbook/POC + shared PT)
+# exists at BOTH nominal widths (1.5cm testbook, 2cm POC) — matches the
 # generate-badges.py SPECS.
 png_inventory_missing=""
-for label in Pass Partial Fail Skip Blocked Untested \
-             Atendido Parcial Falha Ignorado \
-             Aprovado Reprovado Bloqueado "Não testado"; do
+for label in Pass Partial Fail Skip Untested \
+             Atende "Atende com ressalvas" "Não atende" "Não testado"; do
   for width in 1.5cm 2cm; do
     png="$REPO_ROOT/templates/_base/badge-assets/badge-${label}-${width}.png"
     if [ ! -f "$png" ]; then
@@ -815,7 +815,7 @@ for label in Pass Partial Fail Skip Blocked Untested \
   done
 done
 if [ -z "$png_inventory_missing" ]; then
-  pass "Badge PNG inventory complete (14 labels × 2 widths)"
+  pass "Badge PNG inventory complete (9 labels × 2 widths)"
 else
   fail "Badge PNGs missing:$png_inventory_missing"
 fi

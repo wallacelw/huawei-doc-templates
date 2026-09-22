@@ -730,49 +730,51 @@ def _add_badge_style(root, W_NS):
 # Fallback character styles (used when the PNG asset is missing).  BG
 # matches the pill background; text is BLACK (PDF \huaweibadge sets no
 # text color).  These mirror the generate-badges.py SPECS, including
-# BadgeFail's true red!15 (FFD9D9) — the SPECS and the committed
-# Fail/Falha PNGs were regenerated to match.
+# BadgeFail's true red!15 (FFD9D9).  BadgeBlocked is gone — Blocked was
+# dropped from the testbook vocabulary (old docs degrade to plain text —
+# graceful like the PDF fallback, though not pill-styled).  BadgeSkip
+# (POC EN) and BadgeUntested (testbook EN) share the same gray styling
+# but stay distinct so each template's EN marker resolves to its own style.
 RESULT_BADGE_STYLES = [
     ("BadgePass",     "E8F5E9", "000000"),   # green bg, black text
     ("BadgePartial",  "FFF3E0", "000000"),   # orange bg, black text
     ("BadgeFail",     "FFD9D9", "000000"),   # red!15 bg (15% red + 85% white), black text
     ("BadgeSkip",     "F6F8FA", "000000"),   # gray bg, black text
-    ("BadgeBlocked",  "FFF3E0", "000000"),   # orange bg, black text
     ("BadgeUntested", "F6F8FA", "000000"),   # gray bg, black text
 ]
 
-# Map marker text → style_id.  Keys are title-case (PDF label case) plus
-# the Portuguese POC labels (\pocresult, lang=pt) and Portuguese testbook
-# labels (\testresultbadge, lang=pt).
+# Map marker text → style_id.  Keys are title-case (PDF label case):
+# EN markers (both templates) plus the shared PT display labels
+# (Atende/Atende com ressalvas/Não atende/Não testado — testbook
+# \testresultbadge and POC \pocresult render the same PT strings).
+# BadgeSkip and BadgeUntested are visually identical (gray pill); both
+# EN markers stay so POC [Skip] and testbook [Untested] each resolve
+# naturally.  [Não testado] maps to BadgeUntested (semantically Untested).
 BADGE_MARKERS = {
     "[Pass]": "BadgePass",
     "[Partial]": "BadgePartial",
     "[Fail]": "BadgeFail",
     "[Skip]": "BadgeSkip",
-    "[Blocked]": "BadgeBlocked",
     "[Untested]": "BadgeUntested",
-    # Portuguese POC labels (\pocresult, lang=pt)
-    "[Atendido]": "BadgePass",
-    "[Parcial]": "BadgePartial",
-    "[Falha]": "BadgeFail",
-    "[Ignorado]": "BadgeSkip",
-    # Portuguese testbook labels (\testresultbadge, lang=pt — canonical
-    # strings matching testbook.cls under [portuguese])
-    "[Aprovado]": "BadgePass",
-    "[Reprovado]": "BadgeFail",
-    "[Bloqueado]": "BadgeBlocked",
+    # PT display labels (shared by testbook \testresultbadge and POC
+    # \pocresult under lang=pt)
+    "[Atende]": "BadgePass",
+    "[Atende com ressalvas]": "BadgePartial",
+    "[Não atende]": "BadgeFail",
     "[Não testado]": "BadgeUntested",
 }
 
 # Testbook result-badge EN→PT label translation (lang=pt).  Defensive:
 # handles stale or pre-preprocessor input where badge text is still EN.
 # In production, the preprocessor already emits PT text, so
-# BADGE_MARKERS catches it directly.  Canonical strings match testbook.cls
-# under [portuguese] (PDF parallel lane).
+# BADGE_MARKERS catches it directly.  Blocked is gone — stale [Blocked]
+# input is not translated and falls through to plain text (matching the
+# PDF fallback).  Canonical strings match testbook.cls under
+# [portuguese] (PDF parallel lane).
 TESTBOOK_PT_BADGE_LABELS = {
-    'Pass': 'Aprovado',
-    'Fail': 'Reprovado',
-    'Blocked': 'Bloqueado',
+    'Pass': 'Atende',
+    'Partial': 'Atende com ressalvas',
+    'Fail': 'Não atende',
     'Untested': 'Não testado',
 }
 
@@ -1346,7 +1348,7 @@ def _apply_content_styling(docx_path):
                 if text not in BADGE_MARKERS:
                     continue
                 style_id = BADGE_MARKERS[text]
-                label = text[1:-1]   # the badge text, e.g. Pass/Atendido
+                label = text[1:-1]   # the badge text, e.g. Pass/Atende
                 # Testbook PT: defensive EN→PT translation for the PNG
                 # lookup — in production the preprocessor already emits
                 # PT text (BADGE_MARKERS catches it directly); this only

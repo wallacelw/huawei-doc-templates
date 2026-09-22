@@ -105,9 +105,9 @@ scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 | Expected result label | Expected Result | Resultado Esperado |
 | Remarks label | Remarks | Observações |
 | Test result label | Test Result | Resultado do Teste |
-| Test result badge: Pass | Pass | Aprovado |
-| Test result badge: Fail | Fail | Reprovado |
-| Test result badge: Blocked | Blocked | Bloqueado |
+| Test result badge: Pass | Pass | Atende |
+| Test result badge: Partial | Partial | Atende com ressalvas |
+| Test result badge: Fail | Fail | Não atende |
 | Test result badge: Untested | Untested | Não testado |
 | Footer page label | Page | Página |
 

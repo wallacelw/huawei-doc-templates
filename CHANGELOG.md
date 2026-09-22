@@ -4,6 +4,33 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.13.0 (2026-09-23)
+
+### Unified PT test-result vocabulary
+
+Portuguese result badges now read **Atende / Atende com ressalvas /
+Não atende / Não testado** in BOTH testbook and POC templates
+(previously Aprovado/Reprovado/Bloqueado/Não testado in testbook and
+Atendido/Parcial/Falha/Ignorado in POC):
+
+- **Testbook**: gains the `Partial` result (Atende com ressalvas,
+  orange pill, `[.badge-partial]` role); `Blocked` dropped — legacy
+  documents render the neutral fallback pill
+- **POC**: `Skip` now displays Não testado (was Ignorado)
+- **EN display unchanged** (testbook Pass/Partial/Fail/Untested; POC
+  Pass/Partial/Fail/Skip); source enum values in `.adoc` unchanged
+  (backwards compatible)
+- **Badge PNGs**: shared PT set (Atende, Atende com ressalvas, Não
+  atende, Não testado), auto-sized; 16 obsolete PNGs removed
+- **round-trip.sh**: badge-pill exclusion in DOCX image counting is
+  now height-based (auto-fit pills vary in width up to ~3.6cm)
+- **Samples**: testbook-pt 2.2.0, testbook-en 2.2.0, poc-pt 1.1.0
+- **User-visible**: existing PT testbook/POC documents render the new
+  badge names on recompile — update any prose that references the old
+  names
+
+Tests: converter 162 (+1), preprocessor 110 (+2).
+
 ## v6.12.0 (2026-09-23)
 
 ### Language audit: PT labels for all formats

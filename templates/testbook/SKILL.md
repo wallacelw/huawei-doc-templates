@@ -510,14 +510,14 @@ The `testsummary` environment uses a LaTeX passthrough block. It renders a
 ### Result badge
 
 The `\testresultbadge` command renders a visual status badge with
-color-coded background: green for Pass, red for Fail, orange for Blocked,
+color-coded background: green for Pass, orange for Partial, red for Fail,
 gray for Untested. Used inside passthrough blocks.
 
 ```asciidoc
 ++++
 \testresultbadge{Pass}      % green badge
+\testresultbadge{Partial}   % orange badge
 \testresultbadge{Fail}      % red badge
-\testresultbadge{Blocked}   % orange badge
 \testresultbadge{Untested}  % gray badge
 ++++
 ```
@@ -525,18 +525,18 @@ gray for Untested. Used inside passthrough blocks.
 | Command | Color | Use |
 |---|---|---|
 | `\testresultbadge{Pass}` | Light green bg, green border, black text | Test step/case passed. |
+| `\testresultbadge{Partial}` | Light orange bg, orange border, black text | Test step/case passed with restrictions, dependencies, or additional configuration. |
 | `\testresultbadge{Fail}` | Light red bg, red border, black text | Test step/case failed. |
-| `\testresultbadge{Blocked}` | Light orange bg, orange border, black text | Test step/case blocked by dependency. |
 | `\testresultbadge{Untested}` | Light gray bg, black border, black text | Test step/case not yet executed. |
 
-The source keeps language-neutral enum values (`Pass`/`Fail`/`Blocked`/
+The source keeps language-neutral enum values (`Pass`/`Partial`/`Fail`/
 `Untested`); rendering is language-aware under `:lang: pt`:
 
 | Source value | English (default) | Portuguese (`:lang: pt`) |
 |---|---|---|
-| `Pass` | Pass | Aprovado |
-| `Fail` | Fail | Reprovado |
-| `Blocked` | Blocked | Bloqueado |
+| `Pass` | Pass | Atende |
+| `Partial` | Partial | Atende com ressalvas |
+| `Fail` | Fail | Não atende |
 | `Untested` | Untested | Não testado |
 
 ### Quick start — creating a new test book

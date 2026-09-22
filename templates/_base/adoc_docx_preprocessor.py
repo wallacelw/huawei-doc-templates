@@ -153,17 +153,18 @@ def _testresultbadge_text(value, lang):
     r"""Map \testresultbadge source enums to the rendered badge text.
 
     PDF (testbook.cls): the source keeps language-neutral enum values
-    (Pass/Fail/Blocked/Untested); rendering is language-aware under the
-    portuguese class option (Aprovado/Reprovado/Bloqueado/Não testado),
-    mirroring \pocresult in poc.cls.  Unknown values pass through unchanged
-    (matching the cls fallback badge).  Only testbook+pt is mapped; other
-    templates/languages keep the source value as-is.
+    (Pass/Partial/Fail/Untested); rendering is language-aware under the
+    portuguese class option (Atende/Atende com ressalvas/Não atende/
+    Não testado), mirroring \pocresult in poc.cls.  Unknown values (e.g.
+    the dropped Blocked) pass through unchanged (matching the cls
+    fallback badge).  Only testbook+pt is mapped; other templates/
+    languages keep the source value as-is.
     """
     if _TEMPLATE == 'testbook' and lang == 'pt':
         return {
-            'Pass': 'Aprovado',
-            'Fail': 'Reprovado',
-            'Blocked': 'Bloqueado',
+            'Pass': 'Atende',
+            'Partial': 'Atende com ressalvas',
+            'Fail': 'Não atende',
             'Untested': 'Não testado',
         }.get(value, value)
     return value
@@ -200,7 +201,7 @@ def convert_inline_latex(text, lang='en'):
     text = text.replace(r'\pocwithreservations', labels['with_reservations'])
     text = text.replace(r'\pocnothomologated', labels['not_homologated'])
 
-    # \testresultbadge{X} → **[X]**  (testbook+pt: **[Aprovado]** etc. —
+    # \testresultbadge{X} → **[X]**  (testbook+pt: **[Atende]** etc. —
     # PDF renders language-aware labels under the portuguese class option;
     # source keeps the EN enum.  Case preserved for unmapped values.)
     text = re.sub(
@@ -760,8 +761,8 @@ def _result_badge_texts(template, lang):
     testbook path returns the EN defaults here."""
     if template == 'poc' and lang == 'pt':
         return {
-            'result-pass': 'Atendido', 'result-partial': 'Parcial',
-            'result-fail': 'Falha', 'result-skip': 'Ignorado',
+            'result-pass': 'Atende', 'result-partial': 'Atende com ressalvas',
+            'result-fail': 'Não atende', 'result-skip': 'Não testado',
         }
     return {
         'result-pass': 'Pass', 'result-partial': 'Partial',
@@ -773,7 +774,7 @@ def convert_roles(line, lang, template):
     """Convert custom AsciiDoc roles to docbook-compatible markup."""
     labels = LABELS.get(lang, LABELS['en'])
 
-    # [.result-pass]#Pass# → **[Pass]** (POC+pt: **[Atendido]**, etc.)
+    # [.result-pass]#Pass# → **[Pass]** (POC+pt: **[Atende]**, etc.)
     for role, badge in _result_badge_texts(template, lang).items():
         line = re.sub(
             r'\[\.' + role + r'\]#([^#]*)#',

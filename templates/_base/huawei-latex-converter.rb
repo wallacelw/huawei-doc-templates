@@ -797,10 +797,17 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     "\\testresultbadge{#{process_text(node.text || 'Pass')}}"
   end
 
+  def convert_role_badge_partial(node)
+    "\\testresultbadge{#{process_text(node.text || 'Partial')}}"
+  end
+
   def convert_role_badge_fail(node)
     "\\testresultbadge{#{process_text(node.text || 'Fail')}}"
   end
 
+  # Kept for backwards compat: old documents still carrying the
+  # [.badge-blocked] role convert fine; the cls renders its fallback
+  # pill (Blocked was dropped from the testbook vocabulary).
   def convert_role_badge_blocked(node)
     "\\testresultbadge{#{process_text(node.text || 'Blocked')}}"
   end

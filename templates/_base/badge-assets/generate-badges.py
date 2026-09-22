@@ -11,20 +11,21 @@ PDF reference (huawei-badges.sty \\huaweibadge):
           fontupper=\\bfseries\\small]{\\makebox[WIDTH][c]{TEXT}}
 
     The PDF sets NO text color → badge text is BLACK on all pills.
-    Frame colors: Pass=tipfg(62B230), Partial/Blocked=warningfg(ED6D00),
+    Frame colors: Pass=tipfg(62B230), Partial=warningfg(ED6D00),
     Fail=huaweired(C7000B), Skip/Untested=ruleblack(000000).
 
-Labels are the exact texts the PDF renders, covering all three badge
-categories: EN testbook (Pass, Partial, Fail, Skip, Blocked, Untested —
-also the POC labels in English), PT POC (Atendido, Parcial, Falha,
-Ignorado), and PT testbook (Aprovado, Reprovado, Bloqueado, Não testado).
-Each label is generated at BOTH nominal widths — testbook
-\\testresultbadge uses 1.5 cm, POC \\pocresult/\\huaweibadge uses 2 cm.
-The canvas auto-fits the rendered text (mirroring tcolorbox): width =
-max(text + 2*padding, nominal width), so long labels get a wider pill
-instead of clipped text.  docx_fix embeds each PNG at its natural size
-(pixels / 300 dpi), so badges render 1:1 with no downscaling.  There is
-no NEW badge (nothing emits [NEW] since v6.5.1).
+Labels are the exact texts the PDF renders, covering all badge
+categories: EN testbook (Pass, Partial, Fail, Untested — Blocked was
+dropped from the testbook vocabulary), EN POC (Pass, Partial, Fail,
+Skip), and the shared PT display labels for testbook and POC (Atende,
+Atende com ressalvas, Não atende, Não testado).  Each label is
+generated at BOTH nominal widths — testbook \\testresultbadge uses
+1.5 cm, POC \\pocresult/\\huaweibadge uses 2 cm.  The canvas auto-fits
+the rendered text (mirroring tcolorbox): width = max(text + 2*padding,
+nominal width), so long labels get a wider pill instead of clipped
+text.  docx_fix embeds each PNG at its natural size (pixels / 300 dpi),
+so badges render 1:1 with no downscaling.  There is no NEW badge
+(nothing emits [NEW] since v6.5.1).
 """
 
 import os
@@ -40,26 +41,22 @@ FONT_PATH = "/usr/share/fonts/truetype/harmonyos/HarmonyOS_Sans_Bold.ttf"
 # Badge specifications: (label, bg_hex, frame_hex, is_pill)
 # Pills replicate \huaweibadge (rounded, framed, BLACK bold text — the
 # PDF sets no text color).  Labels are the exact texts the PDF renders:
-# EN testbook, PT POC, and PT testbook (see the module docstring).
+# EN testbook, EN POC, and the shared PT display labels (see the module
+# docstring).  PT testbook and PT POC render identical strings, so a
+# single PT spec list covers both.
 SPECS = [
     # label       bg       frame    pill?
     ("Pass",     "E8F5E9", "62B230", True),
     ("Partial",  "FFF3E0", "ED6D00", True),
     ("Fail",     "FFD9D9", "C7000B", True),   # red!15 bg (15% red + 85% white)
     ("Skip",     "F6F8FA", "000000", True),   # ruleblack frame (PDF: codebg/ruleblack)
-    ("Blocked",  "FFF3E0", "ED6D00", True),
     ("Untested", "F6F8FA", "000000", True),   # ruleblack frame
-    # Portuguese POC labels (\pocresult, lang=pt)
-    ("Atendido", "E8F5E9", "62B230", True),
-    ("Parcial",  "FFF3E0", "ED6D00", True),
-    ("Falha",    "FFD9D9", "C7000B", True),   # red!15 bg (15% red + 85% white)
-    ("Ignorado", "F6F8FA", "000000", True),
-    # Portuguese testbook labels (\testresultbadge, lang=pt — canonical
-    # strings matching testbook.cls under [portuguese])
-    ("Aprovado",    "E8F5E9", "62B230", True),
-    ("Reprovado",   "FFD9D9", "C7000B", True),   # red!15 bg
-    ("Bloqueado",   "FFF3E0", "ED6D00", True),
-    ("Não testado", "F6F8FA", "000000", True),   # ruleblack frame
+    # PT display labels (shared by testbook \testresultbadge and POC
+    # \pocresult under lang=pt)
+    ("Atende",               "E8F5E9", "62B230", True),
+    ("Atende com ressalvas", "FFF3E0", "ED6D00", True),
+    ("Não atende",           "FFD9D9", "C7000B", True),   # red!15 bg
+    ("Não testado",          "F6F8FA", "000000", True),   # ruleblack frame
 ]
 
 TEXT_COLOR = "000000"   # PDF \huaweibadge sets no text color → black
@@ -93,8 +90,8 @@ def make_pill(label, bg, frame, min_width_cm=2.0):
     text_h = bbox[3] - bbox[1]
     height_px = int(text_h + 2 * pad_y + 2 * frame_w)
     # Auto-fit canvas: text plus comfortable padding, never narrower
-    # than the nominal width (a fixed 1.5cm canvas clipped "Reprovado"
-    # and "Não testado").
+    # than the nominal width (a fixed 1.5cm canvas clipped long labels
+    # like "Não testado").
     width_px = int(max(text_w + 2 * pad_x + 2 * frame_w, min_width_px))
 
     img = Image.new("RGBA", (width_px, height_px), (255, 255, 255, 0))

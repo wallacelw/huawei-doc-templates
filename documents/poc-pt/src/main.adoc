@@ -1,7 +1,7 @@
 = Roteiro de Homologação
 :template: poc
 :lang: pt
-:version: 1.0.0
+:version: 1.1.0
 :authors: Carlos Santos
 :nochangelog:
 
@@ -112,9 +112,9 @@ Cada atividade será classificada conforme a escala abaixo:
 | Resultado | Interpretação
 
 | [.result-pass]#Pass# | Funcionalidade executada e evidenciada sem limitação relevante.
-| [.result-partial]#Partial# | Funcionalidade comprovada, mas com restrição, dependência ou configuração adicional.
-| [.result-fail]#Fail# | Funcionalidade não executada, não comprovada ou incompatível.
-| [.result-skip]#Skip# | Sem condição de execução. Deve haver justificativa e plano posterior.
+| [.result-partial]#Partial# | Funcionalidade executada com sucesso, mas com restrições, dependências ou configuração adicional.
+| [.result-fail]#Fail# | Funcionalidade não comprovada ou incompatível com o comportamento exigido.
+| [.result-skip]#Skip# | Funcionalidade não executada — a execução permanece pendente. Deve haver justificativa e plano posterior.
 |===
 
 === Evidências a Serem Coletadas
@@ -138,7 +138,7 @@ hcloud ECS servers list --region sa-brazil-1
 
 A homologação será considerada concluída quando:
 
-* Todos os testes classificados como críticos estiverem Atendidos ou Atendidos com ressalvas sem risco material.
+* Todos os testes classificados como críticos estiverem marcados como Atende ou Atende com ressalvas sem risco material.
 * O fluxo ponta a ponta puder ser reproduzido no ambiente testado.
 * As evidências forem suficientes para permitir auditoria posterior do resultado.
 * Eventuais ressalvas tiverem impacto, responsável e plano de tratamento registrados.
@@ -270,7 +270,7 @@ Evidências coletadas e organizadas no pacote. Algumas capturas de tela precisam
 
 * O provisionamento de todos os serviços foi concluído sem erros, demonstrando a maturidade da plataforma.
 * O failover de ECS em 45 segundos está dentro do requisito de 60 segundos.
-* A validação de monitoramento foi parcial porque o dashboard de métricas de banco de dados requer um plugin customizado que não estava disponível durante a homologação. Será endereçado no deployment de produção.
+* A validação de monitoramento foi classificada como Atende com ressalvas porque o dashboard de métricas de banco de dados requer um plugin customizado que não estava disponível durante a homologação. Será endereçado no deployment de produção.
 * Nenhuma questão de segurança foi identificada. Todas as políticas de IAM seguem menor privilégio e security groups restringem acesso adequadamente.
 
 == Conclusão
@@ -294,4 +294,13 @@ NOTE: Os critérios acima são uma proposta operacional para a homologação. A 
 \signaturecell{Pedro Oliveira}{Arquiteto de Soluções Cloud}{pedro.oliveira@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Carlos Santos}{Responsável Técnico}{carlos.santos@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
 \signaturecell{Mariana Costa}{Gerente de Contas Técnico}{mariana.costa@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Ana Lima}{Gerente de Projeto}{ana.lima@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
 \end{signatures}
+++++
+
+++++
+\begin{changelog}
+  \changelogentry{1.1.0}{2026-09-23}{
+    \item Vocabulário de resultados alinhado aos novos rótulos exibidos: Atende, Atende com ressalvas, Não atende e Não testado.
+    \item Descrições da tabela de classificação de resultados e dos critérios de conclusão atualizadas para os novos nomes.
+  }
+\end{changelog}
 ++++

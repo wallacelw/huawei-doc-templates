@@ -106,10 +106,10 @@ check_tol3() {
 # - code_paras: total SourceCode-styled paragraphs (lines of code)
 # - code_blocks: contiguous runs of SourceCode paragraphs (code blocks)
 # - callouts: tables with callout-colored left borders
-# - imgs: content images only — badge pill PNGs (≤2cm wide; the
-#   exclusion threshold BADGE_MAX_CX=1000000 EMU has headroom above the
-#   largest pill at 720000) for [Pass]-family markers are excluded so
-#   the count is comparable with MD/HTML, where badges are text.
+# - imgs: content images only — badge pill PNGs (short one-line pills;
+#   the exclusion threshold BADGE_MAX_CY=300000 EMU has headroom above
+#   the tallest pill at ~210000) for [Pass]-family markers are excluded
+#   so the count is comparable with MD/HTML, where badges are text.
 count_docx() {
   local docx_path=$1 tmpdir=$2
   rm -rf "$tmpdir"
@@ -127,8 +127,10 @@ doc_xml = sys.argv[1]
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 WP = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
 callout_colors = {"C7000B", "ED6D00", "62B230", "30B5C5"}
-# Badge pills are ≤2cm wide (720000 EMU); content images are larger.
-BADGE_MAX_CX = 1000000
+# Badge pills are short one-line pills (≤0.6cm tall, ~210000 EMU);
+# content images are taller.  Pill width varies with label length
+# (auto-fit canvas, up to ~3.6cm), so height is the stable discriminator.
+BADGE_MAX_CY = 300000
 
 tree = ET.parse(doc_xml)
 root = tree.getroot()
@@ -152,10 +154,10 @@ for p in root.iter(f"{{{W}}}p"):
             code_blocks += 1
     else:
         in_code = False
-    # Images: <w:drawing> in paragraph, excluding small badge pill PNGs
+    # Images: <w:drawing> in paragraph, excluding short badge pill PNGs
     for drawing in p.findall(f".//{{{W}}}drawing"):
         extent = drawing.find(f".//{{{WP}}}extent")
-        if extent is None or int(extent.get("cx", "0")) > BADGE_MAX_CX:
+        if extent is None or int(extent.get("cy", "0")) > BADGE_MAX_CY:
             imgs += 1
 
 for tbl in root.findall(f".//{{{W}}}tbl"):
