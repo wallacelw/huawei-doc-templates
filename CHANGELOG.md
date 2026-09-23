@@ -4,6 +4,44 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.14.0 (2026-09-23)
+
+### Converter content-loss fixes + cover restoration + HTML alignment
+
+Top two tiers of the audited improvement backlog. Every fix was
+verified empirically before landing; all rendered formats re-validated.
+
+- **Converter (PDF)**: compound admonitions no longer corrupt nested
+  tables/code (re-escaping bug); definition lists keep their
+  definitions (ListItem#content trap); colspan supported via
+  `\multicolumn` (rowspan warns and renders without the span); block
+  anchors `[[id]]` now emit `\label`/`\hypertarget` on tables, images,
+  and listings (dead cross-references fixed); technical cover setters
+  (`\setreport*`) hoisted to the preamble — the PDF cover now shows
+  Versão/Data/Cenário values (previously empty while DOCX/MD/HTML
+  showed them)
+- **LaTeX**: 10 broken `\ifx\@empty` tests replaced with etoolbox
+  `\ifdefempty` (technical covermeta shows the version; phantom Author
+  row gone when `:authors:` is unset)
+- **HTML/DOCX/MD**: double captions eliminated (`caption=""`
+  injection suppresses asciidoctor's auto-prefix; the bold `Kind N:`
+  label now stands alone, matching PDF); EN admonition titles match
+  PDF (Info/Important/Tip, was Note/Warning); EN TOC title Contents;
+  technical 5-section roles render as language-aware headings (were
+  invisible in DOCX/MD; PT HTML had EN-only titles via CSS — the dead
+  CSS block is removed)
+- **Build**: font-fallback detection fixed (the grep never matched the
+  real warning — brand-font regressions are now detected); install.sh
+  installs asciidoctor-diagram (fresh installs silently lost ALL
+  diagrams) and warns loudly when mermaid-cli is missing
+- **Round-trip**: heading checks restructured from calibrated
+  tolerances to exact like-for-like invariants (md==docx, html level
+  shift) — future samples need no heading calibration
+- **Samples/docs**: colspan documented in all 4 SKILL.mds and
+  demonstrated in guide-pt/guide-en 3.7.0
+- **Tests**: converter 162→201, preprocessor 110→173, round-trip
+  72→99
+
 ## v6.13.0 (2026-09-23)
 
 ### Unified PT test-result vocabulary

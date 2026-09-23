@@ -584,6 +584,253 @@ out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{testcase}{Demo}\n"
 check("pt testcase: Resultado do Teste + **[Atende]**",
       "Resultado do Teste" in out and "**[Atende]**" in out)
 
+print("=== HTML caption suppression (caption=\"\") ===")
+
+# 44. html target: caption="" injected into classified block lines so
+# asciidoctor's auto-numbered prefix is suppressed (FIX A1).  The bold
+# **Kind N:** title from number_block_titles stands alone.
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".My table\n[.hutable]\n|===\n| A | B\n|===\n",
+              'guide', 'html')
+check("html caption: hutable gets caption=\"\"",
+      "[.hutable,caption=\"\"]" in out)
+check("html caption: table title bolded",
+      ".**Table 1:** My table" in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".My figure\nimage::assets/x.png[]\n", 'guide', 'html')
+check("html caption: image[] gets caption=\"\"",
+      'image::assets/x.png[caption=""]' in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".My figure\nimage::assets/x.png[width=50%]\n", 'guide', 'html')
+check("html caption: image[width=50%] appends caption=\"\"",
+      'image::assets/x.png[width=50%,caption=""]' in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Bare table\n|===\n| A | B\n|===\n", 'guide', 'html')
+check("html caption: bare |=== gets [caption=\"\"] line above",
+      '[caption=""]\n|===' in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".My diagram\n[plantuml.diagram,seq1,png]\n....\n@startuml\n"
+              "a -> b\n@enduml\n....\n", 'guide', 'html')
+check("html caption: plantuml appends caption=\"\"",
+      '[plantuml.diagram,seq1,png,caption=""]' in out)
+
+# 45. docx + md targets: NO caption="" injection (pandoc adds no captions)
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".My table\n[.hutable]\n|===\n| A | B\n|===\n",
+              'guide', 'docx')
+check("docx caption: no caption=\"\" injection",
+      'caption=""' not in out)
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".My table\n[.hutable]\n|===\n| A | B\n|===\n",
+              'guide', 'md')
+check("md caption: no caption=\"\" injection",
+      'caption=""' not in out)
+
+print("=== EN HTML caption attributes ===")
+
+# 46. html + en: EN admonition/TOC attributes injected (FIX A3).
+# Labels mirror huawei-lang.sty EN: note→Info, tip→Tip, warning→Important,
+# toc→Contents.
+out = process(":lang: en\n:version: 1.0.0\n\nBody.\n", 'guide', 'html')
+check("en html: :tip-caption: Tip", ":tip-caption: Tip" in out)
+check("en html: :note-caption: Info", ":note-caption: Info" in out)
+check("en html: :warning-caption: Important",
+      ":warning-caption: Important" in out)
+check("en html: :caution-caption: Important",
+      ":caution-caption: Important" in out)
+check("en html: :important-caption: Important",
+      ":important-caption: Important" in out)
+check("en html: :toc-title: Contents", ":toc-title: Contents" in out)
+# EN has no figure/table caption attrs (asciidoctor defaults match PDF EN)
+check("en html: no :figure-caption:", ":figure-caption:" not in out)
+check("en html: no :table-caption:", ":table-caption:" not in out)
+
+# 47. html + pt: PT attrs unchanged (regression for FIX A3)
+out = process(":lang: pt\n:version: 1.0.0\n\nBody.\n", 'guide', 'html')
+check("pt html regression: :tip-caption: Dica", ":tip-caption: Dica" in out)
+check("pt html regression: :note-caption: Informacao",
+      ":note-caption: Informa\u00e7\u00e3o" in out)
+check("pt html regression: :figure-caption: Figura",
+      ":figure-caption: Figura" in out)
+check("pt html regression: :toc-title: Sumario",
+      ":toc-title: Sum\u00e1rio" in out)
+
+# 48. Non-html targets: no caption attrs (regression)
+out = process(":lang: en\n:version: 1.0.0\n\nBody.\n", 'guide', 'docx')
+check("en docx: no caption attrs", ":note-caption:" not in out)
+out = process(":lang: en\n:version: 1.0.0\n\nBody.\n", 'guide', 'md')
+check("en md: no caption attrs", ":note-caption:" not in out)
+
+print("=== Technical section roles → headings ===")
+
+# 49. technical + pt: roles become language-aware headings (FIX B).
+# Main sections → == (level 1), subsections → === (level 2).  Labels
+# mirror technical.cls \lg@* macros byte-for-byte.
+TECH_PT_BODY = (
+    "[.problem]\n====\nProblem content.\n====\n\n"
+    "[.rootcauseanalysis]\n====\nRCA content.\n====\n\n"
+    "[.rootcause]\n====\nRC content.\n====\n\n"
+    "[.triggercondition]\n====\nTC content.\n====\n\n"
+    "[.workaround]\n====\n"
+    "[.impact]\n--\nImpact content.\n--\n\n"
+    "[.backupdata]\n--\nBackup content.\n--\n\n"
+    "[.workaroundsteps]\n--\nSteps content.\n--\n\n"
+    "[.verification]\n--\nVerify content.\n--\n\n"
+    "[.rollback]\n--\nRollback content.\n--\n\n"
+    "[.cleanup]\n--\nCleanup content.\n--\n"
+    "====\n")
+out = process(":lang: pt\n:version: 1.0.0\n\n" + TECH_PT_BODY,
+              'technical', 'md')
+check("tech pt: == Descricao do Problema e Impacto",
+      "== Descri\u00e7\u00e3o do Problema e Impacto" in out)
+check("tech pt: == Analise de Causa Raiz",
+      "== An\u00e1lise de Causa Raiz" in out)
+check("tech pt: == Causa Raiz", "== Causa Raiz" in out)
+check("tech pt: == Condicao de Disparo",
+      "== Condi\u00e7\u00e3o de Disparo" in out)
+check("tech pt: == Solucao Alternativa e Impacto",
+      "== Solu\u00e7\u00e3o Alternativa e Impacto" in out)
+check("tech pt: === Impacto", "=== Impacto" in out)
+check("tech pt: === Backup de dados antes da solucao alternativa",
+      "=== Backup de dados antes da solu\u00e7\u00e3o alternativa" in out)
+check("tech pt: === Solucao Alternativa (subsection)",
+      "=== Solu\u00e7\u00e3o Alternativa" in out)
+check("tech pt: === Verificacao apos a solucao alternativa",
+      "=== Verifica\u00e7\u00e3o ap\u00f3s a solu\u00e7\u00e3o alternativa" in out)
+check("tech pt: === Operacao de Rollback",
+      "=== Opera\u00e7\u00e3o de Rollback" in out)
+check("tech pt: === Operacao de Limpeza",
+      "=== Opera\u00e7\u00e3o de Limpeza" in out)
+# Block delimiters removed (content stays, headings not inside blocks)
+check("tech pt: no ==== delimiter", "====" not in out)
+check("tech pt: no -- open-block delimiter", "\n--\n" not in out)
+# Content preserved
+check("tech pt: content preserved",
+      "Problem content." in out and "Impact content." in out
+      and "Cleanup content." in out)
+
+# 50. technical + en: EN labels
+out = process(":lang: en\n:version: 1.0.0\n\n" + TECH_PT_BODY,
+              'technical', 'md')
+check("tech en: == Problem Description and Impact",
+      "== Problem Description and Impact" in out)
+check("tech en: == Root Cause Analysis",
+      "== Root Cause Analysis" in out)
+check("tech en: == Root Cause", "== Root Cause" in out)
+check("tech en: == Trigger Condition", "== Trigger Condition" in out)
+check("tech en: == Workaround and Impact",
+      "== Workaround and Impact" in out)
+check("tech en: === Impact", "=== Impact" in out)
+check("tech en: === Back up data before the workaround",
+      "=== Back up data before the workaround" in out)
+check("tech en: === Workaround (subsection)",
+      "=== Workaround" in out)
+check("tech en: === Verification after the workaround",
+      "=== Verification after the workaround" in out)
+check("tech en: === Rollback Operation",
+      "=== Rollback Operation" in out)
+check("tech en: === Cleanup Operation",
+      "=== Cleanup Operation" in out)
+
+# 51. guide/testbook/poc: technical roles NOT converted (gated on technical)
+for _tmpl in ('guide', 'testbook', 'poc'):
+    out = process(":lang: en\n:version: 1.0.0\n\n"
+                  "[.problem]\n====\nContent.\n====\n", _tmpl, 'md')
+    check("non-technical " + _tmpl + ": [.problem] untouched",
+          "[.problem]" in out and "== Problem Description" not in out)
+
+# 52. Role without a delimiter: heading emitted, content follows
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              "[.problem]\nPlain paragraph content.\n", 'technical', 'md')
+check("tech no-delim: heading emitted",
+      "== Problem Description and Impact" in out)
+check("tech no-delim: content preserved",
+      "Plain paragraph content." in out)
+
+print("=== Broadened table classification ===")
+
+# 53. [.longhutable] and [.hutable,cols=…] / [cols=…] titled blocks are
+# now classified (FIX A2) — get the bold **Table N:** prefix and, on html,
+# caption="" suppression.
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Long table\n[.longhutable]\n|===\n| A | B\n|===\n",
+              'guide', 'md')
+check("longhutable: classified (**Table 1:**)",
+      ".**Table 1:** Long table" in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Long table\n[.longhutable]\n|===\n| A | B\n|===\n",
+              'guide', 'html')
+check("longhutable html: caption=\"\" injected",
+      "[.longhutable,caption=\"\"]" in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Hutable with cols\n[.hutable,cols=\"1,2\"]\n"
+              "|===\n| A | B\n|===\n", 'guide', 'md')
+check("hutable,cols: classified (**Table 1:**)",
+      ".**Table 1:** Hutable with cols" in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Hutable with cols\n[.hutable,cols=\"1,2\"]\n"
+              "|===\n| A | B\n|===\n", 'guide', 'html')
+check("hutable,cols html: caption=\"\" appended",
+      '[.hutable,cols="1,2",caption=""]' in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Cols table\n[cols=\"1,2\"]\n|===\n| A | B\n|===\n",
+              'guide', 'md')
+check("cols=...: classified (**Table 1:**)",
+      ".**Table 1:** Cols table" in out)
+
+out = process(":lang: en\n:version: 1.0.0\n\n"
+              ".Cols table\n[cols=\"1,2\"]\n|===\n| A | B\n|===\n",
+              'guide', 'html')
+check("cols=... html: caption=\"\" appended",
+      '[cols="1,2",caption=""]' in out)
+
+# PT label for classified longhutable
+out = process(":lang: pt\n:version: 1.0.0\n\n"
+              ".Tabela longa\n[.longhutable]\n|===\n| A | B\n|===\n",
+              'guide', 'md')
+check("pt longhutable: **Tabela 1:**",
+      ".**Tabela 1:** Tabela longa" in out)
+
+print("=== Technical roles: fenced blocks inside role blocks ===")
+
+# 54. technical: a fenced source block inside a [.problem] role block
+# protects its content — a `====` line inside the fence is code (not the
+# role-block closer), a `[.rootcause]` line inside the fence is code (not
+# a heading), and the real closing delimiter still closes the role block.
+FENCE_BODY = (
+    "[.problem]\n"
+    "====\n"
+    "Problem intro.\n"
+    "\n"
+    "[source,text]\n"
+    "----\n"
+    "====\n"
+    "[.rootcause]\n"
+    "----\n"
+    "\n"
+    "Problem outro.\n"
+    "====\n"
+    "\n"
+    "After block.\n")
+out = process(":lang: en\n:version: 1.0.0\n\n" + FENCE_BODY,
+              'technical', 'md')
+check("tech fence: == Problem heading emitted",
+      "== Problem Description and Impact" in out)
+check("tech fence: no bogus == Root Cause heading",
+      "== Root Cause" not in out)
+check("tech fence: code content verbatim (==== and [.rootcause])",
+      "\n====\n[.rootcause]\n" in out)
+check("tech fence: real closer consumed (no dangling delimiter)",
+      "Problem outro.\n\nAfter block." in out)
+
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
 PYEOF

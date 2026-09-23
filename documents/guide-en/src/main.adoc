@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- ECS Quick Start Guide
 :cover-text: Huawei Technologies CO., LTD
-:version: 3.6.1
+:version: 3.7.0
 :header-logo: common-assets/huawei-logo-header.png
 :cover-logo: common-assets/huawei-logo-cover.png
 
@@ -119,6 +119,7 @@ The table below lists recommended ECS flavors for development workloads:
 | ac8.large.2  | 2 vCPU / 4 GB  | Light development
 | ac8.xlarge.2 | 4 vCPU / 8 GB  | Recommended --- full coding stack
 | ac8.2xlarge.2 | 8 vCPU / 16 GB | Heavy workloads + multiple agents
+3+| Flavor availability varies by region --- check the Console flavor list before provisioning.
 |===
 
 pass:[\imageplaceholder{assets/ecs-flavors.png}{Screenshot of the ECS flavor selection page in the Console}]
@@ -295,6 +296,7 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+\changelogentry{3.7.0}{2026-09-23}{\item Added a column-span row (3+| cell prefix) to the recommended flavors table to demonstrate colspan support.}
 \changelogentry{3.6.1}{2026-09-22}{\item Fixed the external code file example: replaced the broken inline passthrough with the [.codefile] block role (the script content now renders) and fixed list continuation indentation.}
 \changelogentry{3.6.0}{2026-09-16}{\item Added authors feature on the cover page.}
 \changelogentry{1.0.0}{2026-08-05}{\item Initial version. \item Added callout boxes, badge, and changelog support.}

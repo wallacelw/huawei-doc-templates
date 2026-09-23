@@ -261,6 +261,10 @@ Recognized language keys for `[source,lang]`: `bash`, `sh`, `shell`,
 The `.hutable` role applies Huawei-red header, alternating body rows,
 and full-grid red borders. The first row is the header (white bold on red).
 
+Column spans are supported via the `n+|` cell prefix (e.g. `3+| cell`,
+rendered through `\multicolumn`). Rowspan (`.n+|`) is not supported —
+the build warns and renders the cell without the span.
+
 ### Page-breaking table (longhutable)
 
 ```asciidoc

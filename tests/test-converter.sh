@@ -497,9 +497,14 @@ OUT=$(convert '= Test
 :template: guide
 
 Term A:: Definition A
-Term B:: Definition B')
+*bold* Term:: Definition B')
 assert_contains "dlist → begin description" '\begin{description}' "$OUT"
 assert_contains "dlist → end description"   '\end{description}'   "$OUT"
+# Definitions were dropped entirely before (ListItem#content is ""; the
+# text lives in ListItem#text) and bold terms were garbage-escaped.
+assert_contains "dlist → definition text present" '\item[Term A] Definition A' "$OUT"
+assert_contains "dlist → bold term renders textbf" '\item[\textbf{bold} Term] Definition B' "$OUT"
+assert_not_contains "dlist → term not over-escaped" '\textbackslash{}textbf' "$OUT"
 
 # ════════════════════════════════════════════════════════════════════════════
 ## 11. Technical template roles
@@ -1055,6 +1060,266 @@ OUT=$(convert '= Test
 assert_contains "standalone stepbystep → label"    '\stepbystep'        "$OUT"
 assert_contains "standalone stepbystep → step one" '\item Solo step one' "$OUT"
 assert_contains "standalone stepbystep → step two" '\item Solo step two' "$OUT"
+
+# ════════════════════════════════════════════════════════════════════════════
+## 24. Audit fixes: compound admonitions, colspan/rowspan, block anchors,
+##      technical cover setters
+# ════════════════════════════════════════════════════════════════════════════
+echo "=== 24. Audit fixes ==="
+
+# --- Compound admonition: delimited [NOTE] with nested table + code block ---
+# The old converter re-escaped the already-converted block LaTeX: the raw &
+# cell delimiters became \& (merging cells into phantom single cells) and
+# # in nested code became literal \#.
+OUT=$(convert '= Test
+:template: guide
+
+[NOTE]
+====
+[.hutable]
+|===
+| H1 | H2
+
+| A & B | C_D
+|===
+
+[source,python]
+----
+# hash comment
+----
+====')
+assert_contains "compound NOTE → infobox env" '\begin{infobox}' "$OUT"
+assert_contains "compound NOTE → nested table present" '\begin{hutable}' "$OUT"
+assert_contains "compound NOTE → cell content escaped once" 'A \& B & C\_D' "$OUT"
+assert_not_contains "compound NOTE → no cell delimiter corruption" 'B \& C\_D' "$OUT"
+assert_contains "compound NOTE → code hash stays raw" '# hash comment' "$OUT"
+assert_not_contains "compound NOTE → code hash not backslash-mangled" '\# hash comment' "$OUT"
+
+# Single-paragraph admonition (NOTE: text) still escapes specials: the
+# admonition node itself is a :simple block holding the text — there is no
+# child paragraph, so escaping must happen in convert_admonition.
+OUT=$(convert '= Test
+:template: guide
+
+NOTE: Rate is 100% of A & B.')
+assert_contains "simple NOTE → specials still escaped" '100\% of A \& B' "$OUT"
+
+# --- DList: definition with text AND continuation blocks keeps both ---
+OUT=$(convert '= Test
+:template: guide
+
+Term B:: Intro text
+* nested item')
+assert_contains "dlist text+blocks → text kept" '\item[Term B] Intro text' "$OUT"
+assert_contains "dlist text+blocks → nested list kept" '\begin{itemize}' "$OUT"
+
+# --- Colspan → \multicolumn (content no longer shifts left) ---
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable]
+|===
+| H1 | H2 | H3
+
+2+| span | last
+| a | b | c
+|===')
+assert_contains "colspan → multicolumn 2" '\multicolumn{2}' "$OUT"
+assert_contains "colspan → hutable col spec in multicolumn" '\multicolumn{2}{|>{\RaggedRight\arraybackslash}m{' "$OUT"
+assert_contains "colspan → span content then remaining cell" '{span} & last' "$OUT"
+# A span NOT reaching the last column must not carry the closing rule
+assert_contains "colspan mid-table → no closing rule" '\relax}}{span}' "$OUT"
+
+# A span reaching the last column keeps the closing vertical rule
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable]
+|===
+| H1 | H2 | H3
+
+| a 2+| wide
+|===')
+assert_contains "colspan to last column → closing rule" '\relax}|}{wide}' "$OUT"
+
+# --- Rowspan → warning (multirow package not loaded), no crash ---
+RS_AD="$TMPDIR/rowspan.adoc"
+printf '%s\n' '= Test
+:template: guide
+
+[.hutable]
+|===
+| H1 | H2 | H3
+
+.2+| tall | b | c
+| d | e
+|===' > "$RS_AD"
+set +e
+asciidoctor -b huawei-latex -r "$CONVERTER" "$RS_AD" -o "$TMPDIR/rowspan.tex" 2>"$TMPDIR/rowspan.log"
+RS_STATUS=$?
+set -e
+if [[ "$RS_STATUS" -eq 0 ]]; then
+  echo "  PASS: rowspan → conversion still succeeds"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: rowspan → conversion still succeeds"
+  echo "        asciidoctor exited $RS_STATUS"
+  FAIL=$((FAIL + 1))
+fi
+RS_LOG="$(<"$TMPDIR/rowspan.log")"
+assert_contains "rowspan → warning emitted" 'rowspan is not supported' "$RS_LOG"
+RS_TEX="$(<"$TMPDIR/rowspan.tex")"
+assert_contains "rowspan → cell content kept" 'tall' "$RS_TEX"
+
+# --- Block anchors: [[id]] before table/image/listing emits \label+\hypertarget ---
+OUT=$(convert '= Test
+:template: guide
+
+[[my-table]]
+[.hutable]
+|===
+| H1 | H2
+|===')
+assert_contains "table anchor → label" '\label{my-table}' "$OUT"
+assert_contains "table anchor → hypertarget" '\hypertarget{my-table}{}' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+
+[[my-img]]
+image::file.png[alt]')
+assert_contains "image anchor → label" '\label{my-img}' "$OUT"
+assert_contains "image anchor → hypertarget" '\hypertarget{my-img}{}' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+
+[[my-code]]
+[source,bash]
+----
+echo hi
+----')
+assert_contains "listing anchor → label" '\label{my-code}' "$OUT"
+
+# Anchor ids are sanitized like section ids, so <<my_table>> xrefs resolve
+OUT=$(convert '= Test
+:template: guide
+
+[[my_table]]
+[.hutable]
+|===
+| H1 | H2
+|===')
+assert_contains "table anchor underscore → sanitized" '\label{my-table}' "$OUT"
+
+# --- Technical cover setters hoisted to the preamble, before \makecover ---
+OUT=$(convert '= Tech Report
+:template: technical
+
+++++
+\setreportversion{HCS 8.5.1}
+\setreportdate{2025-08-13}
+\setreportscenario{Standard Scenario}
+++++
+
+Body text.')
+assert_contains "report setter → version in tex" '\setreportversion{HCS 8.5.1}' "$OUT"
+assert_contains "report setter → date in tex" '\setreportdate{2025-08-13}' "$OUT"
+assert_contains "report setter → scenario in tex" '\setreportscenario{Standard Scenario}' "$OUT"
+
+# Exactly once: hoisted to the preamble, not duplicated in the body
+SETTER_COUNT=$(printf '%s' "$OUT" | grep -c 'setreportversion')
+if [[ "$SETTER_COUNT" -eq 1 ]]; then
+  echo "  PASS: report setter → emitted exactly once"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: report setter → emitted exactly once"
+  echo "        found $SETTER_COUNT lines containing setreportversion"
+  FAIL=$((FAIL + 1))
+fi
+
+# Before \makecover: the cover reads \lg@report* when it renders
+SETTER_LINE=$(printf '%s' "$OUT" | grep -n 'setreportversion' | head -1 | cut -d: -f1)
+COVER_LINE=$(printf '%s' "$OUT" | grep -n '\\makecover' | head -1 | cut -d: -f1)
+if [[ -n "$SETTER_LINE" && -n "$COVER_LINE" && "$SETTER_LINE" -lt "$COVER_LINE" ]]; then
+  echo "  PASS: report setter → before makecover"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: report setter → before makecover"
+  echo "        setter at line ${SETTER_LINE:-none}, makecover at line ${COVER_LINE:-none}"
+  FAIL=$((FAIL + 1))
+fi
+
+# Mixed passthrough: only the setter lines are hoisted; the rest stays put
+OUT=$(convert '= Tech Report
+:template: technical
+
+++++
+\setreportversion{9.9.9}
+\raw{stays}
+++++
+
+End.')
+assert_contains "mixed pass → setter hoisted" '\setreportversion{9.9.9}' "$OUT"
+assert_contains "mixed pass → other content kept in body" '\raw{stays}' "$OUT"
+MIX_SETTER_LINE=$(printf '%s' "$OUT" | grep -n 'setreportversion' | head -1 | cut -d: -f1)
+MIX_RAW_LINE=$(printf '%s' "$OUT" | grep -n 'raw{stays}' | head -1 | cut -d: -f1)
+if [[ -n "$MIX_SETTER_LINE" && -n "$MIX_RAW_LINE" && "$MIX_SETTER_LINE" -lt "$MIX_RAW_LINE" ]]; then
+  echo "  PASS: mixed pass → hoisted setter precedes kept content"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: mixed pass → hoisted setter precedes kept content"
+  echo "        setter at line ${MIX_SETTER_LINE:-none}, raw at line ${MIX_RAW_LINE:-none}"
+  FAIL=$((FAIL + 1))
+fi
+
+# Multiple setter passthroughs: all hoisted
+OUT=$(convert '= Tech Report
+:template: technical
+
+++++
+\setreportversion{1.0.0}
+++++
+
+Body.
+
+++++
+\setreportscenario{Multi}
+++++')
+assert_contains "multiple setter blocks → first hoisted" '\setreportversion{1.0.0}' "$OUT"
+assert_contains "multiple setter blocks → second hoisted" '\setreportscenario{Multi}' "$OUT"
+
+# The changelog passthrough is NOT hoisted — it must stay in the body
+OUT=$(convert '= Tech Report
+:template: technical
+
+++++
+\setreportversion{1.0.0}
+++++
+
+++++
+\begin{changelog}
+\changelogentry{1.0.0}{2026-09-23}{\item Initial version.}
+\end{changelog}
+++++')
+BODY_LINE=$(printf '%s' "$OUT" | grep -n '\\startbody' | head -1 | cut -d: -f1)
+CHANGELOG_LINE=$(printf '%s' "$OUT" | grep -n 'begin{changelog}' | head -1 | cut -d: -f1)
+if [[ -n "$CHANGELOG_LINE" && -n "$BODY_LINE" && "$CHANGELOG_LINE" -gt "$BODY_LINE" ]]; then
+  echo "  PASS: changelog passthrough → stays in body"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: changelog passthrough → stays in body"
+  echo "        startbody at line ${BODY_LINE:-none}, changelog at line ${CHANGELOG_LINE:-none}"
+  FAIL=$((FAIL + 1))
+fi
+assert_contains "changelog passthrough → entry intact" '\changelogentry{1.0.0}' "$OUT"
+
+# Documents without setters: no stray setter lines anywhere
+OUT=$(convert '= Test
+:template: guide
+
+Text.')
+assert_not_contains "no setters → no setreport leak" 'setreport' "$OUT"
 
 # ════════════════════════════════════════════════════════════════════════════
 # Summary

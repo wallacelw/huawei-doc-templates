@@ -389,6 +389,7 @@ for entry in "${SAMPLES[@]}"; do
   # ── Count HTML ─────────────────────────────────────────────────────────
   html_h1=$(count '<h1' "$html_file")
   html_h2=$(count '<h2' "$html_file")
+  html_h3=$(count '<h3' "$html_file")
   html_img=$(count '<img' "$html_file")
   # Code blocks: listing blocks ([source] with or without a language).
   # asciidoctor renders each as <div class="listingblock"> containing
@@ -410,20 +411,22 @@ for entry in "${SAMPLES[@]}"; do
   read -r docx_h1 docx_h2 docx_img docx_code_paras docx_code_blocks docx_tables docx_callouts <<< "$docx_counts"
 
   # ── Cross-format consistency ───────────────────────────────────────────
-  # Tolerances are calibrated per sample to the ACTUAL max pairwise diff
-  # measured with the production pipeline (scripts/build.sh) — the smallest
-  # value that passes, never wider. When a divergence is fixed, or a sample's
-  # content changes, re-run this test, read the measured counts from the
-  # FAIL line / summary table, and update the case entry below.
+  # Heading structure uses EXACT like-for-like checks (no tolerances):
+  # asciidoctor's HTML output shifts headings down one level (the document
+  # title is the only <h1>, chapters become <h2>, sections <h3>), while the
+  # MD/DOCX pipelines put chapters at H1 and sections at H2.  The structural
+  # invariants are: md_h1 == docx_h1, html_h1 == 1, html_h2 == md_h1,
+  # md_h2 == docx_h2, html_h3 == md_h2.  Raw three-way counts with
+  # tolerances would conflate the known level shift with real drift.
+  #
+  # Remaining tolerances are calibrated per sample to the ACTUAL max
+  # pairwise diff measured with the production pipeline (scripts/build.sh)
+  # — the smallest value that passes, never wider. When a divergence is
+  # fixed, or a sample's content changes, re-run this test, read the
+  # measured counts from the FAIL line / summary table, and update the
+  # case entry below.
   #
   # Root causes of the remaining non-zero divergences:
-  #
-  # * H1/H2 — asciidoctor's HTML output shifts headings down one level: the
-  #   document title is the only <h1> and chapters become <h2>, while the
-  #   MD/DOCX pipelines put chapters at H1. So html_h1 is always 1 and
-  #   html_h2 equals the chapter count (= md_h1 = docx_h1). The H1
-  #   divergence is (chapters − 1); the H2 divergence is
-  #   |sections − chapters|. MD and DOCX agree exactly on both levels.
   #
   # * Tables+Callouts — DOCX loses the admonition structure: pandoc's
   #   docbook reader drops the NOTE/TIP/WARNING labels and keeps only the
@@ -443,25 +446,29 @@ for entry in "${SAMPLES[@]}"; do
   #   same diagram images as HTML. Code blocks also map 1:1 (HTML listing
   #   blocks → DOCX SourceCode runs).
   case "$name" in
-    guide-en)     h1_tol=5;  h2_tol=3;  img_tol=0; code_tol=0; tc_tol=9 ;;
-    guide-pt)     h1_tol=5;  h2_tol=2;  img_tol=0; code_tol=0; tc_tol=9 ;;
-    poc-en)       h1_tol=14; h2_tol=10; img_tol=0; code_tol=0; tc_tol=5 ;;
-    poc-pt)       h1_tol=14; h2_tol=10; img_tol=0; code_tol=0; tc_tol=5 ;;
-    technical-en) h1_tol=3;  h2_tol=0;  img_tol=0; code_tol=0; tc_tol=4 ;;
-    technical-pt) h1_tol=3;  h2_tol=0;  img_tol=0; code_tol=0; tc_tol=4 ;;
-    testbook-en)  h1_tol=3;  h2_tol=5;  img_tol=0; code_tol=0; tc_tol=6 ;;
-    testbook-pt)  h1_tol=3;  h2_tol=5;  img_tol=0; code_tol=0; tc_tol=6 ;;
-    setup-guide)  h1_tol=8;  h2_tol=19; img_tol=0; code_tol=0; tc_tol=32 ;;
+    guide-en)     img_tol=0; code_tol=0; tc_tol=9 ;;
+    guide-pt)     img_tol=0; code_tol=0; tc_tol=9 ;;
+    poc-en)       img_tol=0; code_tol=0; tc_tol=5 ;;
+    poc-pt)       img_tol=0; code_tol=0; tc_tol=5 ;;
+    technical-en) img_tol=0; code_tol=0; tc_tol=4 ;;
+    technical-pt) img_tol=0; code_tol=0; tc_tol=4 ;;
+    testbook-en)  img_tol=0; code_tol=0; tc_tol=6 ;;
+    testbook-pt)  img_tol=0; code_tol=0; tc_tol=6 ;;
+    setup-guide)  img_tol=0; code_tol=0; tc_tol=32 ;;
     *)
       # Uncalibrated sample (new template/document): measure its actual
       # diffs and add an entry above. img_tol/code_tol stay 0 (converged
-      # formats); h1/h2/tc carry the known HTML heading shift and DOCX
-      # callout drop, so small documents fit these defaults.
-      h1_tol=5; h2_tol=10; img_tol=0; code_tol=0; tc_tol=5 ;;
+      # formats); tc carries the known DOCX callout drop, so small
+      # documents fit this default.
+      img_tol=0; code_tol=0; tc_tol=5 ;;
   esac
 
-  check_tol3 "H1 count (MD/HTML/DOCX)" "$md_h1" "$html_h1" "$docx_h1" "$h1_tol"
-  check_tol3 "H2 count (MD/HTML/DOCX)" "$md_h2" "$html_h2" "$docx_h2" "$h2_tol"
+  # Heading structure: exact like-for-like (see comment block above).
+  check "H1: MD == DOCX"             "$md_h1" "$docx_h1"
+  check "H1: HTML == 1 (title only)"  1       "$html_h1"
+  check "H2: HTML == MD H1 (shift)"   "$md_h1" "$html_h2"
+  check "H2: MD == DOCX"              "$md_h2" "$docx_h2"
+  check "H3: HTML == MD H2 (shift)"   "$md_h2" "$html_h3"
   check_tol3 "Image count (MD/HTML/DOCX)" "$md_img" "$html_img" "$docx_img" "$img_tol"
 
   # Code blocks: HTML listing blocks vs DOCX contiguous SourceCode runs

@@ -330,11 +330,12 @@ generate_pdf() {
     (cd "$SRC_DIR" && latexmk "${BASENAME}.tex") 2>&1 || rc=$?
     if [ "$rc" -eq 0 ]; then
         RESULTS_OK+=("PDF:$out")
-        # Check for font fallback warnings
+        # Check for font fallback warnings. \lg@warnfont in huawei-fonts.sty
+        # emits (via \PackageWarning): "Package huawei-fonts Warning: Font
+        # "X" not found; using fallback "Y"." — grep for that exact prefix.
         local logfile="${SRC_DIR}/${BASENAME}.log"
         if [ -f "$logfile" ]; then
-            if grep -q "PackageWarning.*Font.*not found" "$logfile" 2>/dev/null || \
-               grep -q "falling back to" "$logfile" 2>/dev/null; then
+            if grep -q 'Package huawei-fonts Warning: Font .* not found' "$logfile" 2>/dev/null; then
                 echo "  ⚠ Warning: PDF built with fallback fonts (brand fonts not found)"
             fi
         fi

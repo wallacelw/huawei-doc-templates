@@ -139,7 +139,7 @@ echo ""
 echo -e "  ${C_BOLD}Installs:${C_RESET}"
 declare -a installs=(
     "• XeLaTeX + latexmk + LaTeX packages"
-    "• AsciiDoc + asciidoctor (source format + converter)"
+    "• AsciiDoc + asciidoctor + asciidoctor-diagram (source format + converter + diagram blocks)"
     "• HarmonyOS Sans (body font, free commercial use)"
     "• Cascadia Code (code font, open source)"
     "• opencode skills (/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook, /skill huawei-template-poc)"
@@ -262,6 +262,50 @@ else
     else
         log_warn "Failed to install asciidoctor — AsciiDoc pipeline unavailable"
         log_dim "Install manually: gem install asciidoctor"
+    fi
+fi
+
+# ── Install asciidoctor-diagram (diagram block support) ──
+# Without this gem, asciidoctor renders [plantuml]/[graphviz]/[mermaid]
+# blocks as plain literal text — exit 0, no warning even under
+# --failure-level WARN. build-adoc.sh only passes -r asciidoctor-diagram
+# when the gem is present, so a fresh install would silently lose ALL
+# diagrams (6 of the compiled samples use diagram blocks).
+log_step "Installing asciidoctor-diagram"
+
+if gem list -e asciidoctor-diagram --installed >/dev/null 2>&1; then
+    log_ok "asciidoctor-diagram: already installed"
+else
+    log_desc "Installing asciidoctor-diagram Ruby gem..."
+    gem install asciidoctor-diagram 2>&1 | grep -v "^$\|Fetching\|Successfully installed\|Parsing\|Installing\|Building" || true
+    if gem list -e asciidoctor-diagram --installed >/dev/null 2>&1; then
+        log_done "asciidoctor-diagram: installed"
+    else
+        log_warn "Failed to install asciidoctor-diagram — [plantuml]/[graphviz]/[mermaid] blocks will render as plain text"
+        log_dim "Install manually: gem install asciidoctor-diagram"
+    fi
+fi
+
+# ── Mermaid CLI (mmdc) — required by asciidoctor-diagram for [mermaid] ──
+# asciidoctor-diagram delegates mermaid rendering to mermaid-cli (npm).
+# Best-effort install: never fail the setup on this — the warning below
+# is the required minimum.
+log_step "Installing mermaid-cli (mermaid diagram support)"
+
+if command -v mmdc &>/dev/null; then
+    log_ok "mermaid-cli: already installed ($(mmdc --version 2>/dev/null | head -1))"
+else
+    if command -v npm &>/dev/null; then
+        log_desc "Installing mermaid-cli via npm (best-effort)..."
+        npm install -g @mermaid-js/mermaid-cli >/dev/null 2>&1 || true
+    fi
+    if command -v mmdc &>/dev/null; then
+        log_done "mermaid-cli: installed ($(mmdc --version 2>/dev/null | head -1))"
+    else
+        echo ""
+        log_warn "mermaid-cli (mmdc) NOT found — [mermaid] diagrams will NOT render!"
+        log_warn "asciidoctor silently renders [mermaid] blocks as plain text (exit 0, no warning)."
+        log_dim "Install manually: npm install -g @mermaid-js/mermaid-cli (requires Node.js/npm)"
     fi
 fi
 
@@ -647,7 +691,7 @@ declare -a summary_rows=(
     "Skills:"             "/skill huawei-template-guide, /skill huawei-template-technical, /skill huawei-template-testbook, /skill huawei-template-poc"
     "VS Code:"            "LaTeX Workshop (local + remote, -cd -xelatex)"
     "Timezone:"           "America/Sao_Paulo (GMT-3, overridable)"
-    "Diagrams:"           "PlantUML + graphviz (optional: mermaid-cli for mermaid)"
+    "Diagrams:"           "PlantUML + graphviz + asciidoctor-diagram (mermaid needs mermaid-cli)"
 )
 for (( i=0; i<${#summary_rows[@]}; i+=2 )); do
     printf "  ${C_DIM}%-24s${C_RESET} %s\n" "${summary_rows[$i]}" "${summary_rows[$i+1]}"

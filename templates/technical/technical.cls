@@ -22,7 +22,7 @@
 %%    Plus an optional Changelog.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/23 Huawei Technical Report template v6.13.0]
+\ProvidesClass{technical}[2026/09/23 Huawei Technical Report template v6.14.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -104,9 +104,9 @@
 % =====================================================================
 % \lg@hour, \lg@min, \lg@tmp are already allocated by huawei-cover.sty
 \renewcommand{\lg@covermeta}{%
-  \ifx\lg@reportversion\@empty\else\textbf{v\lg@reportversion}\fi
-  \ifx\lg@reportversion\@empty\else\ifx\lg@reportdate\@empty\else\ — \fi\fi
-  \ifx\lg@reportdate\@empty\else\lg@reportdate\fi
+  \ifdefempty{\lg@reportversion}{}{\textbf{v\lg@reportversion}}
+  \ifdefempty{\lg@reportversion}{}{\ifdefempty{\lg@reportdate}{}{\ — }}
+  \ifdefempty{\lg@reportdate}{}{\lg@reportdate}
   \if@showtime\ \two@digits{\lg@hour}:\two@digits{\lg@min}\fi%
 }
 
@@ -139,10 +139,10 @@
   \lg@reportscenariolabel & \lg@reportscenario \\
   \hline
   \if@showauthors
-    \ifx\lg@docauthors\@empty\else
+    \ifdefempty{\lg@docauthors}{}{
       \lg@reportauthorlabel & \lg@docauthors \\
       \hline
-    \fi
+    }
   \fi
   \end{tabular}
   \end{center}

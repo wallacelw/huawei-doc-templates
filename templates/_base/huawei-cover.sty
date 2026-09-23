@@ -24,9 +24,9 @@
 \lg@min=\time
 \advance\lg@min by -\lg@tmp
 \newcommand{\lg@covermeta}{%
-  \ifx\lg@docversion\@empty\else\textbf{v\lg@docversion}\fi
-  \ifx\lg@docversion\@empty\else\ifx\lg@docdate\@empty\else\ — \fi\fi
-  \ifx\lg@docdate\@empty\else\lg@docdate\fi
+  \ifdefempty{\lg@docversion}{}{\textbf{v\lg@docversion}}
+  \ifdefempty{\lg@docversion}{}{\ifdefempty{\lg@docdate}{}{\ — }}
+  \ifdefempty{\lg@docdate}{}{\lg@docdate}
   \if@showtime\ \two@digits{\lg@hour}:\two@digits{\lg@min}\fi%
 }
 
@@ -44,11 +44,11 @@
    {\centering
     \fontsize{16}{20}\selectfont \lg@covertext\par}%
    \if@showauthors
-     \ifx\lg@docauthors\@empty\else
+     \ifdefempty{\lg@docauthors}{}{
        \vspace{0.3cm}%
        {\centering
         \fontsize{12}{14}\selectfont \lg@docauthors\par}%
-     \fi
+     }
    \fi
    \vspace{0.5cm}%
    {\centering

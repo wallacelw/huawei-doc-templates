@@ -230,6 +230,16 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     header_title = node.attr('header-title')
     cover_text   = node.attr('cover-text')
 
+    # --- Body content ---
+    # Convert the body FIRST: convert_pass hoists technical-report cover
+    # setters (\setreportversion/date/scenario/type) out of passthrough
+    # blocks into @report_setters. They are emitted in the preamble below
+    # so they run before \makecover — the cover reads \lg@report*, and
+    # setters left in the body (after \startbody) would render the cover's
+    # Version/Date/Scenario fields empty.
+    @report_setters = []
+    body = node.content
+
     # --- Build preamble ---
     lines = []
     lines << "\\documentclass#{class_opt_str}{#{template}}"
@@ -250,6 +260,11 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     if cover_logo
       lines << "\\setcoverlogo{#{cover_logo}}"
     end
+    # Cover setters hoisted from body passthroughs (see above). Reset the
+    # stash so later conversions with the same instance never hoist into
+    # a stale list (embedded mode has no preamble to emit them in).
+    lines.concat(@report_setters)
+    @report_setters = nil
     lines << ''
     lines << '\\begin{document}'
     lines << '\\makecover'
@@ -258,7 +273,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     lines << ''
 
     # --- Body content ---
-    lines << node.content
+    lines << body
 
     # --- Document end ---
     lines << ''
@@ -270,6 +285,27 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # --- EMBEDDED — content without preamble (for includes) ---
   def convert_embedded(node)
     node.content
+  end
+
+  # --- Helper: hyperref anchor for a node with an explicit block id ---
+  # Emits \label + \hypertarget under the sanitized id so \hyperlink
+  # cross-references (<<id>>) resolve. Do NOT promise \ref numbering:
+  # for captioned tables the anchor is emitted before \begin{table}[H],
+  # so \label captures the current section counter — a hand-written
+  # \ref{my-table} yields the section number, not "Table 3".
+  # Returns '' when node.id is unset.
+  def anchor_for(node)
+    return '' unless node.id && !node.id.empty?
+    label = sanitize_label(node.id)
+    "\\label{#{label}}\\hypertarget{#{label}}{}"
+  end
+
+  # --- Helper: prepend a block's anchor (if any) to its converted output ---
+  # Block anchors ([[id]] before a table/image/listing) must be emitted or
+  # \hyperlink xrefs point at a target that never exists (dead reference).
+  def with_anchor(node, output)
+    anchor = anchor_for(node)
+    anchor.empty? ? output : "#{anchor}\n#{output}"
   end
 
   # --- SECTION — \section, \subsection, \subsubsection, \paragraph ---
@@ -285,11 +321,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # The anchor goes AFTER the sectioning command: \section is redefined to
     # \clearpage\lg@origsection (huawei-titles.sty), so an anchor before it
     # would land on the previous page and \label would capture the wrong counter.
-    anchor = ''
-    if node.id && !node.id.empty?
-      label = sanitize_label(node.id)
-      anchor = "\\label{#{label}}\\hypertarget{#{label}}{}"
-    end
+    anchor = anchor_for(node)
     case node.level
     when 1 then "\\section{#{title}}#{anchor}\n#{body}"
     when 2 then "\\subsection{#{title}}#{anchor}\n#{body}"
@@ -322,10 +354,19 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   end
 
   # --- ADMONITION — NOTE/TIP/WARNING/CAUTION/IMPORTANT → callout boxes ---
+  # Two shapes, two paths:
+  # - Single-paragraph form (NOTE: text): the admonition node itself is a
+  #   :simple block with no children — node.content returns the raw subbed
+  #   string WITHOUT converter dispatch, so it must be escaped here.
+  # - Delimited form ([NOTE] + ===): :compound with block children —
+  #   node.content dispatches them through their converters (which escape
+  #   properly, like convert_example/convert_quote). Re-escaping that
+  #   already-converted LaTeX would corrupt nested tables (raw & cell
+  #   delimiters → \&, merging cells) and code blocks (# → \#).
   def convert_admonition(node)
     admon_type = node.attr('name') || 'note'
     env = ADMONITION_MAP[admon_type] || 'infobox'
-    content = escape_inline_content(node)
+    content = node.blocks.any? ? node.content : escape_inline_content(node)
     "\\begin{#{env}}\n#{content}\n\\end{#{env}}"
   end
 
@@ -336,7 +377,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       file = node.attr('file')
       lang = node.attr('lang')
       if file
-        return lang ? "\\codefile[#{lang}]{#{file}}" : "\\codefile{#{file}}"
+        return with_anchor(node, lang ? "\\codefile[#{lang}]{#{file}}" : "\\codefile{#{file}}")
       end
     end
 
@@ -350,9 +391,9 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     code_text = source
 
     if language
-      "\\begin{code}[#{language}]\n#{code_text}\n\\end{code}"
+      with_anchor(node, "\\begin{code}[#{language}]\n#{code_text}\n\\end{code}")
     else
-      "\\begin{code}\n#{code_text}\n\\end{code}"
+      with_anchor(node, "\\begin{code}\n#{code_text}\n\\end{code}")
     end
   end
 
@@ -363,6 +404,48 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   end
 
   # --- TABLE — with .hutable or .longhutable role → Huawei table env ---
+
+  # Column spec for a \multicolumn cell spanning `span` columns starting at
+  # 1-based `col` in a table with `num_cols` equal-width m{} columns (the
+  # per-column spec built in convert_table). The spanned width folds in the
+  # (span - 1) skipped column boundaries — one \arrayrulewidth + two
+  # \tabcolsep each — so the cell fills the covered columns exactly. A span
+  # reaching the last column must keep the closing vertical rule, because
+  # \multicolumn replaces the preamble entries of all covered columns.
+  def table_multicolumn_spec(span, col, num_cols)
+    width_expr = "\\dimexpr((\\linewidth-#{num_cols + 1}\\arrayrulewidth-#{2 * num_cols}\\tabcolsep)*#{span}/#{num_cols}+#{2 * (span - 1)}\\tabcolsep+#{span - 1}\\arrayrulewidth)\\relax"
+    spec = "|>{\\RaggedRight\\arraybackslash}m{#{width_expr}}"
+    spec += '|' if col + span - 1 >= num_cols
+    spec
+  end
+
+  # Convert one table row to its LaTeX cells joined by ' & '.
+  # Colspan cells (2+| in AsciiDoc) are emitted as \multicolumn so the row
+  # keeps the right shape — a 1:1 mapping used to shift content left and
+  # birth phantom cells. Rowspan (.2+) is NOT supported (the multirow
+  # package is not loaded): warn — the cell renders without the span and
+  # every following row shifts left (the next row's first cell lands
+  # under the rowspan cell).
+  def convert_table_row(row, num_cols, header)
+    col = 1
+    cells = row.map do |cell|
+      content = escape_table_cell(cell.content)
+      content = "\\thd{#{content}}" if header
+      if cell.rowspan && cell.rowspan > 1
+        warn 'huawei-latex-converter: rowspan is not supported (the multirow package is not loaded); the cell renders without the span and subsequent rows shift left (the next row starts under the rowspan cell)'
+      end
+      span = cell.colspan || 1
+      out = if span > 1
+              "\\multicolumn{#{span}}{#{table_multicolumn_spec(span, col, num_cols)}}{#{content}}"
+            else
+              content
+            end
+      col += span
+      out
+    end
+    cells.join(' & ')
+  end
+
   def convert_table(node)
     role = node.role
     num_cols = node.columns ? node.columns.size : 1
@@ -384,10 +467,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Header rows
     unless rows_head.empty?
       rows_head.each do |header_row|
-        header_cells = header_row.map do |cell|
-          "\\thd{#{escape_table_cell(cell.content)}}"
-        end
-        lines << "\\rowcolor{huaweired} #{header_cells.join(' & ')} \\\\"
+        lines << "\\rowcolor{huaweired} #{convert_table_row(header_row, num_cols, true)} \\\\"
       end
       if env_name == 'longhutable'
         lines << '\\endhead'
@@ -398,19 +478,13 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     unless rows_body.empty?
       lines << '\\tbody'
       rows_body.each do |row|
-        cells = row.map do |cell|
-          escape_table_cell(cell.content)
-        end
-        lines << "#{cells.join(' & ')} \\\\"
+        lines << "#{convert_table_row(row, num_cols, false)} \\\\"
       end
     end
 
     # Footer rows (rare, but handle them)
     rows_foot.each do |row|
-      cells = row.map do |cell|
-        escape_table_cell(cell.content)
-      end
-      lines << "#{cells.join(' & ')} \\\\"
+      lines << "#{convert_table_row(row, num_cols, false)} \\\\"
     end
 
     lines << "\\end{#{env_name}}"
@@ -423,10 +497,10 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       wrapped += lines
       wrapped << "\\caption{#{caption}}"
       wrapped << '\\end{table}'
-      return "\n#{wrapped.join("\n")}\n"
+      return with_anchor(node, "\n#{wrapped.join("\n")}\n")
     end
 
-    "\n#{lines.join("\n")}\n"
+    with_anchor(node, "\n#{lines.join("\n")}\n")
   end
 
   # --- IMAGE — block image → \image or \imagecap ---
@@ -451,13 +525,14 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     if title && !title.empty?
       # Use \diagramcap for diagram-generated images, \imagecap for regular images
       if node.role && node.role.include?('diagram')
-        "\\diagramcap#{width_opt}{#{target}}{#{escape_text_string(title)}}"
+        result = "\\diagramcap#{width_opt}{#{target}}{#{escape_text_string(title)}}"
       else
-        "\\imagecap#{width_opt}{#{target}}{#{escape_text_string(title)}}"
+        result = "\\imagecap#{width_opt}{#{target}}{#{escape_text_string(title)}}"
       end
     else
-      "\\image#{width_opt}{#{target}}"
+      result = "\\image#{width_opt}{#{target}}"
     end
+    with_anchor(node, result)
   end
 
   # --- UNORDERED LIST → \begin{itemize} ---
@@ -488,14 +563,24 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     end
   end
 
-  # --- DEFINITION LIST → used for changelog entries ---
+  # --- DEFINITION LIST → \begin{description} ---
   def convert_dlist(node)
-    # Default: render as description list
-    # (changelog uses passthrough blocks, not role-based dispatch)
+    # Each item is [terms, desc]: terms is an Array of ListItem, desc a
+    # ListItem (or nil). ListItem#content is always "" — the text lives in
+    # ListItem#text (the trap documented at convert_content_under_label).
+    # ListItem#text resolves inline markup through the converter
+    # (*bold* → \textbf{bold}), so the term and the plain-text definition
+    # must go through the plain-text escape helpers (escape_text_string /
+    # process_text), which never escape backslash or braces; the old
+    # latex_escape(term) mangled converted commands into literal garbage.
+    # A desc may carry text, nested blocks, or both (continuation blocks):
+    # emit the text plus the converted blocks, like convert_ulist does —
+    # desc.content alone would drop the text when blocks are attached.
     items = node.items.map do |terms, desc|
-      term_text = terms.map(&:text).join(', ')
-      desc_text = desc ? escape_text_string(desc.content) : ''
-      "\\item[#{latex_escape(term_text)}] #{desc_text}"
+      term_text = escape_text_string(terms.map(&:text).join(', '))
+      desc_text = desc ? process_text(desc.text) : ''
+      desc_text += "\n#{desc.content}" if desc && desc.blocks.any?
+      "\\item[#{term_text}] #{desc_text}"
     end
     "\\begin{description}\n#{items.join("\n")}\n\\end{description}"
   end
@@ -557,8 +642,34 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   end
 
   # --- PASSTHROUGH BLOCK — raw LaTeX ---
+  # A passthrough block whose lines are technical-report cover setters
+  # (\setreportversion/date/scenario/type{...}) has its setter lines
+  # hoisted into @report_setters — emitted by convert_document in the
+  # preamble, before \makecover — and removed from the body. Any other
+  # content in the block stays in place, so mixed blocks keep their
+  # non-setter lines and the changelog passthrough (\begin{changelog}...)
+  # passes through untouched. Hoisting only happens while convert_document
+  # is collecting the body (@report_setters non-nil); in embedded mode
+  # there is no preamble, so passthroughs pass through unchanged.
+  # A passthrough that mentions \setreport* but has no hoistable line
+  # (trailing text after the closing brace, nested braces, ...) would
+  # silently leave the cover field empty — warn so the author can fix
+  # the line.
+  REPORT_SETTER_LINE_RE = /\A\\setreport(?:version|date|scenario|type)\{[^{}]*\}\z/
+
   def convert_pass(node)
-    node.content
+    content = node.content
+    return content unless @report_setters
+    lines = content.to_s.lines
+    hoisted = lines.select { |line| REPORT_SETTER_LINE_RE.match?(line.strip) }
+    if hoisted.empty?
+      if content.to_s.include?('\\setreport')
+        warn 'huawei-latex-converter: passthrough contains \setreport* but the line could not be hoisted (unsupported form); the cover field will render empty'
+      end
+      return content
+    end
+    @report_setters.concat(hoisted.map(&:strip))
+    lines.reject { |line| REPORT_SETTER_LINE_RE.match?(line.strip) }.join
   end
 
   # --- FLOATING TITLE — unnumbered heading ---

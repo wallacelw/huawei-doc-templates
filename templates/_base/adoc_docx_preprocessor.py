@@ -46,6 +46,19 @@ LABELS = {
         'th_scenario': 'Scenario', 'th_author': 'Author',
         'general_objective': 'General Objective',
         'image_placeholder': 'Image placeholder',
+        # Technical 5-section labels — byte-identical to technical.cls
+        # \lg@* macros (EN branch).
+        'problem': 'Problem Description and Impact',
+        'rootcauseanalysis': 'Root Cause Analysis',
+        'rootcause': 'Root Cause',
+        'triggercondition': 'Trigger Condition',
+        'workaround': 'Workaround and Impact',
+        'impact': 'Impact',
+        'backupdata': 'Back up data before the workaround',
+        'workaroundsteps': 'Workaround',
+        'verification': 'Verification after the workaround',
+        'rollback': 'Rollback Operation',
+        'cleanup': 'Cleanup Operation',
     },
     'pt': {
         'homologated': 'Homologada',
@@ -71,6 +84,19 @@ LABELS = {
         'th_scenario': 'Cenário', 'th_author': 'Autor',
         'general_objective': 'Objetivo Geral',
         'image_placeholder': 'Espaço reservado para imagem',
+        # Technical 5-section labels — byte-identical to technical.cls
+        # \lg@* macros (PT branch).
+        'problem': 'Descrição do Problema e Impacto',
+        'rootcauseanalysis': 'Análise de Causa Raiz',
+        'rootcause': 'Causa Raiz',
+        'triggercondition': 'Condição de Disparo',
+        'workaround': 'Solução Alternativa e Impacto',
+        'impact': 'Impacto',
+        'backupdata': 'Backup de dados antes da solução alternativa',
+        'workaroundsteps': 'Solução Alternativa',
+        'verification': 'Verificação após a solução alternativa',
+        'rollback': 'Operação de Rollback',
+        'cleanup': 'Operação de Limpeza',
     },
 }
 
@@ -794,8 +820,104 @@ def convert_roles(line, lang, template):
     return line
 
 
-def convert_block_roles(content, lang):
+# Technical template section roles — all emit \begin{role}\n...\n\end{role}
+# in the Ruby converter (TECHNICAL_ROLES, huawei-latex-converter.rb).  PDF
+# (technical.cls): each role opens a fixed-title \section (the 5 main
+# sections) or \subsection (the workaround subsections); the language-aware
+# labels mirror the \lg@* macros byte-for-byte (see LABELS above).
+# DOCX/MD/HTML have no such environments — without this conversion the
+# roles pass through and the sections render as bare paragraphs with no
+# titles (the template's defining structure is invisible).  Each role line
+# becomes a real AsciiDoc heading (== for the 5 main sections, === for the
+# workaround subsections); the ==== or -- block delimiters around the
+# content are dropped because headings inside delimited blocks parse as
+# paragraphs (verified with asciidoctor 2.0.26).
+_TECHNICAL_SECTION_ROLES = (
+    'problem', 'rootcauseanalysis', 'rootcause',
+    'triggercondition', 'workaround',
+)
+_TECHNICAL_SUBSECTION_ROLES = (
+    'impact', 'backupdata', 'workaroundsteps',
+    'verification', 'rollback', 'cleanup',
+)
+
+
+def _convert_technical_roles(content, lang):
+    r"""Convert technical section roles to language-aware headings.
+
+    Each ``[.role]`` line becomes an AsciiDoc section heading (``==`` for
+    the 5 main sections, ``===`` for the workaround subsections) using the
+    language-aware label from LABELS (mirroring technical.cls \lg@*).  The
+    ``====`` / ``--`` block delimiters wrapping the content are removed:
+    a heading inside a delimited block parses as a paragraph, so keeping
+    them would hide the subsection titles.  Delimiter removal is
+    stack-based so nested constructs (workaround ==== containing
+    subsection -- blocks) are handled in one top-down pass.
+
+    Fence-aware: fenced verbatim blocks (``----`` source, ``....``
+    literal, ``++++`` passthrough — see ``_FENCE_RES``) are tracked with
+    the same pattern as ``_convert_admonition_sentinels``.  While inside
+    a fence, delimiter and role-line detection is skipped: a ``====`` or
+    ``--`` line inside a fenced block is code (not the role-block
+    closer), and a ``[.role]``-looking line inside a fenced block is code
+    (not a heading).
+    """
+    labels = LABELS.get(lang, LABELS['en'])
+    headings = {}
+    for role in _TECHNICAL_SECTION_ROLES:
+        headings[role] = '== ' + labels[role]
+    for role in _TECHNICAL_SUBSECTION_ROLES:
+        headings[role] = '=== ' + labels[role]
+
+    lines = content.split('\n')
+    out = []
+    pending_closers = []   # delimiters to drop when matched (LIFO)
+    fence = None           # active verbatim fence type (_FENCE_RES key)
+    i = 0
+    while i < len(lines):
+        stripped = lines[i].strip()
+        if fence is not None:
+            # Inside a fenced block: content is verbatim.  Only the
+            # matching fence closes it; delimiter/role detection is
+            # skipped (an ==== or [.role] line here is code).
+            if _FENCE_RES[fence].fullmatch(stripped):
+                fence = None
+            out.append(lines[i])
+            i += 1
+            continue
+        # Drop a closing delimiter we opened for a technical role block.
+        if pending_closers and stripped == pending_closers[-1]:
+            pending_closers.pop()
+            i += 1
+            continue
+        # Enter a fenced block: skip delimiter/role detection inside.
+        opener = next((ftype for ftype, rex in _FENCE_RES.items()
+                       if rex.fullmatch(stripped)), None)
+        if opener is not None:
+            fence = opener
+            out.append(lines[i])
+            i += 1
+            continue
+        m = re.match(r'^\[\.(\w+)\][ \t]*$', lines[i])
+        if m and m.group(1) in headings:
+            out.append(headings[m.group(1)])
+            i += 1
+            # Drop the ==== / -- opener wrapping the block content.
+            if i < len(lines) and lines[i].strip() in ('====', '--'):
+                pending_closers.append(lines[i].strip())
+                i += 1
+            continue
+        out.append(lines[i])
+        i += 1
+    return '\n'.join(out)
+
+
+def convert_block_roles(content, lang, template):
     """Convert block-level custom roles."""
+    # Technical template: section roles → language-aware headings (FIX B).
+    if template == 'technical':
+        content = _convert_technical_roles(content, lang)
+
     # [.evidence] → plain bullet list (checkbox markers removed in
     # v6.5.0 — the PDF now renders standard bullets too).
     content = re.sub(r'\[\.evidence\]\n', '', content)
@@ -1263,6 +1385,41 @@ def inject_cover_block(content, lang, template):
     return '\n'.join(lines)
 
 
+def _inject_empty_caption(lines, j):
+    """Inject caption="" into the classified block line *j* (html target).
+
+    asciidoctor's html5 backend auto-numbers titled blocks ("Figure 1.",
+    "Table 1."), which would double the preprocessor's own **Kind N:**
+    prefix and use a period separator instead of the PDF's colon.  An
+    explicit empty caption attribute suppresses the auto-prefix (verified
+    with asciidoctor 2.0.26 + asciidoctor-diagram 3.2.1 — works for
+    images, tables, and survives asciidoctor-diagram's conversion to
+    image nodes); the bold **Kind N:** title then stands alone, matching
+    the PDF's bold label + colon separator exactly.
+
+    Forms handled:
+      - image::path[]            → image::path[caption=""]
+      - image::path[width=50%]   → image::path[width=50%,caption=""]
+      - [.hutable] / [plantuml,…] → append ,caption="" inside the brackets
+      - bare |=== delimiter       → insert a [caption=""] line above it
+    """
+    line = lines[j].rstrip()
+    # Block image macro: inject inside the attribute brackets.
+    m = re.match(r'^(image::\S+\[)(.*)\]$', line)
+    if m:
+        attrs = m.group(2).strip()
+        lines[j] = (m.group(1)
+                    + (attrs + ',' if attrs else '') + 'caption=""]')
+        return
+    # Attribute-list line ([.hutable], [plantuml,…], [cols=…]): append
+    # inside the closing bracket.
+    if line.lstrip().startswith('[') and line.endswith(']'):
+        lines[j] = line[:-1] + ',caption=""]'
+        return
+    # Bare |=== delimiter: insert an attribute line directly above it.
+    lines[j:j] = ['[caption=""]']
+
+
 def number_block_titles(content, lang):
     """Number block titles to match the PDF caption systems.
 
@@ -1273,6 +1430,11 @@ def number_block_titles(content, lang):
     The symbol part is emitted bold (PDF: \\textbf{label N:} or
     captionsetup labelfont=bf); the description stays plain.
     Counters are per category, document-wide.
+
+    For the html target, caption="" is injected into the classified block
+    line to suppress asciidoctor's own auto-numbered caption prefix (which
+    would otherwise double this preprocessor's **Kind N:** prefix).  DOCX
+    and MD targets are unaffected (pandoc adds no captions).
     """
     labels = LABELS.get(lang, LABELS['en'])
     counters = {'table': 0, 'diagram': 0, 'figure': 0}
@@ -1296,7 +1458,14 @@ def number_block_titles(content, lang):
                 if j < len(lines):
                     nxt = lines[j].strip()
                     kind = None
-                    if nxt.startswith('[.hutable]') or nxt.startswith('|==='):
+                    # Tables: the converter captions EVERY titled table,
+                    # including [.longhutable] and [.hutable,cols=…] /
+                    # [cols=…] forms — classify them all so the bold
+                    # prefix (and html caption="" suppression) applies.
+                    if (nxt.startswith('|===')
+                            or re.match(r'^\[(\.hutable|\.longhutable)\b',
+                                        nxt)
+                            or re.match(r'^\[cols[=,\]]', nxt)):
                         kind = 'table'
                     elif re.match(r'^\[(plantuml|graphviz|mermaid)\b', nxt):
                         kind = 'diagram'
@@ -1307,6 +1476,11 @@ def number_block_titles(content, lang):
                         symbol = ('**' + labels[kind] + ' '
                                   + str(counters[kind]) + ':**')
                         lines[i] = '.' + symbol + ' ' + m.group(1)
+                        # html: suppress asciidoctor's auto caption
+                        # prefix (FIX A1) so only the bold **Kind N:**
+                        # prefix above remains — matching the PDF.
+                        if _TARGET == 'html':
+                            _inject_empty_caption(lines, j)
                         i = j + 1
                         continue
         i += 1
@@ -1409,39 +1583,60 @@ def _convert_admonition_sentinels(content):
     return '\n'.join(out)
 
 
-# PT caption/admonition attributes for asciidoctor html5.  asciidoctor's
-# html5 backend defaults to English admonition titles (Note/Tip/Warning)
-# and caption prefixes (Figure/Table); without these attributes they leak
-# English inside <html lang="pt">.  Values match the PDF PT labels
-# (huawei-lang.sty): tip→Dica, note→Informação (NOTE maps to the infobox
-# callout), warning/caution/important→Importante (all map to the warning
-# callout — see huawei-latex-converter.rb ADMONITION_MAP), figure→Figura,
-# table→Tabela, toc→Sumário.  Only applied for target='html' + lang='pt':
-# DOCX converts admonitions to **TYPE‖** sentinels before asciidoctor and
-# numbers captions itself (number_block_titles); MD renders no such labels
-# (verified), so injecting there is unnecessary and could double-label.
-_PT_HTML_CAPTION_ATTRS = [
-    ':tip-caption: Dica',
-    ':note-caption: Informação',
-    ':warning-caption: Importante',
-    ':caution-caption: Importante',
-    ':important-caption: Importante',
-    ':figure-caption: Figura',
-    ':table-caption: Tabela',
-    ':toc-title: Sumário',
-]
+# Language caption/admonition attributes for asciidoctor html5.  asciidoctor's
+# html5 backend defaults to English admonition titles (Note/Tip/Warning) and
+# caption prefixes (Figure/Table); without these attributes the wrong labels
+# leak into <html lang="…">.  Values match the PDF labels (huawei-lang.sty):
+#   - tip  → \lg@tiplabel     (PT: Dica,        EN: Tip)
+#   - note → \lg@infolabel    (PT: Informação,  EN: Info)  — NOTE maps to the
+#             infobox callout (huawei-latex-converter.rb ADMONITION_MAP)
+#   - warning/caution/important → \lg@warninglabel (PT: Importante, EN: Important)
+#   - toc  → \lg@toc          (PT: Sumário,     EN: Contents)
+# Only applied for target='html': DOCX converts admonitions to **TYPE‖**
+# sentinels before asciidoctor and numbers captions itself
+# (number_block_titles); MD renders no such labels (verified), so injecting
+# there is unnecessary and could double-label.
+#
+# :figure-caption:/:table-caption: are PT-only fallbacks for blocks the
+# classifier in number_block_titles does not recognize; for classified
+# blocks they are dead (caption="" is injected there, FIX A1).  EN needs no
+# figure/table fallback — asciidoctor's defaults ("Figure"/"Table") already
+# match the PDF EN labels.
+_HTML_CAPTION_ATTRS = {
+    'pt': [
+        ':tip-caption: Dica',
+        ':note-caption: Informação',
+        ':warning-caption: Importante',
+        ':caution-caption: Importante',
+        ':important-caption: Importante',
+        ':figure-caption: Figura',
+        ':table-caption: Tabela',
+        ':toc-title: Sumário',
+    ],
+    'en': [
+        ':tip-caption: Tip',
+        ':note-caption: Info',
+        ':warning-caption: Important',
+        ':caution-caption: Important',
+        ':important-caption: Important',
+        ':toc-title: Contents',
+    ],
+}
 
 
-def inject_pt_html_captions(content, lang, target):
-    r"""Inject PT caption attributes into the AsciiDoc header (html+pt only).
+def inject_html_captions(content, lang, target):
+    r"""Inject language caption attributes into the AsciiDoc header (html only).
 
     Inserts the attributes right after the last header attribute line so
-    asciidoctor html5 renders Portuguese admonition titles, figure/table
-    caption prefixes, and the TOC title.  Inert for documents without a
-    TOC or captions.  Returns content unchanged for non-html targets or
-    non-pt languages.
+    asciidoctor html5 renders language-appropriate admonition titles and
+    the TOC title (and, for PT, figure/table caption prefixes).  Inert for
+    documents without a TOC or captions.  Returns content unchanged for
+    non-html targets or languages without a defined attribute set.
     """
-    if target != 'html' or lang != 'pt':
+    if target != 'html':
+        return content
+    attrs = _HTML_CAPTION_ATTRS.get(lang)
+    if attrs is None:
         return content
     lines = content.split('\n')
     last_attr = -1
@@ -1450,7 +1645,7 @@ def inject_pt_html_captions(content, lang, target):
             last_attr = i
     if last_attr == -1:
         return content
-    lines[last_attr + 1:last_attr + 1] = _PT_HTML_CAPTION_ATTRS
+    lines[last_attr + 1:last_attr + 1] = attrs
     return '\n'.join(lines)
 
 
@@ -1503,7 +1698,7 @@ def process_adoc(content, template, target='docx', base_dir=None):
     content = convert_codefile_blocks(content, base_dir)
 
     # 3. Convert block-level roles
-    content = convert_block_roles(content, lang)
+    content = convert_block_roles(content, lang, template)
 
     # 4. Number block titles (Table/Diagram/Figure N: — PDF caption systems)
     content = number_block_titles(content, lang)
@@ -1523,10 +1718,10 @@ def process_adoc(content, template, target='docx', base_dir=None):
     lines = [convert_roles(line, lang, template) for line in lines]
     content = '\n'.join(lines)
 
-    # 6.5. Inject PT caption/admonition attributes for asciidoctor html5
-    # (lang=pt only; inert for docx/md).  Must run before the cover block
+    # 6.5. Inject language caption/admonition attributes for asciidoctor html5
+    # (per-language; inert for docx/md).  Must run before the cover block
     # so the attributes land in the header, before the body content.
-    content = inject_pt_html_captions(content, lang, target)
+    content = inject_html_captions(content, lang, target)
 
     # 7. Inject cover block (logo, cover text, meta line — PDF cover)
     content = inject_cover_block(content, lang, template)

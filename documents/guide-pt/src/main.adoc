@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Guia de acesso ao Console
 :cover-text: Huawei Technologies CO., LTD
-:version: 3.6.3
+:version: 3.7.0
 :header-logo: common-assets/huawei-logo-header.png
 :cover-logo: common-assets/huawei-logo-cover.png
 
@@ -98,6 +98,7 @@ A tabela abaixo lista as regiões suportadas para o Brasil e América Latina:
 
 | São Paulo | Brasil | `sa-brazil-1`
 | Santiago  | Chile | `la-south-2`
+3+| Outras regiões podem ser habilitadas sob demanda no seletor de região do Console.
 |===
 
 pass:[\imageplaceholder{assets/console-regions.png}{Captura de tela do seletor de região no Console}]
@@ -282,6 +283,7 @@ graph TD
 
 ++++
 \begin{changelog}
+\changelogentry{3.7.0}{2026-09-23}{\item Adicionada uma linha com mesclagem de colunas (\texttt{3+|}) na tabela de regiões disponíveis, demonstrando o suporte a \texttt{colspan} do \texttt{hutable}.}
 \changelogentry{3.6.3}{2026-09-22}{\item Revisão de idioma: cabeçalhos de tabela ``Cor''/``Amostra'' (antes ``Color''/``Sample''), ``Infraestrutura como Código'' (antes ``Infrastructure as Code'') e título de seção ``Declarar o provedor'' (antes ``Declarar o provider'').}
 \changelogentry{3.6.2}{2026-09-22}{\item Corrigido o exemplo de código de arquivo externo: o passthrough inline quebrado foi substituído pelo role de bloco \texttt{[.codefile]} (o conteúdo do script agora renderiza) e corrigida a indentação da continuação da lista.}
 \changelogentry{3.6.1}{2026-09-19}{\item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.}
