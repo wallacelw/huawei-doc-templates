@@ -4,6 +4,42 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.15.0 (2026-09-26)
+
+### Visual verification standard + render-pages.sh
+
+A documented standard and support script for visual QA of rendered
+documents — catching layout defects that text-based checks cannot see
+(the v6.14.1 badge overflow shipped with 0 errors, 0 missing glyphs,
+and clean pdftotext output).
+
+- **scripts/render-pages.sh** (new): renders a document's built PDF,
+  DOCX, and HTML outputs to PNG page images at 150 dpi. PDF via
+  pdftoppm; HTML via headless chromium (puppeteer cache) print-to-PDF;
+  DOCX via LibreOffice headless (soffice --convert-to pdf, isolated
+  profile, timeout, output-exists assertion, font transparency via
+  fc-match). Graceful skip when a renderer is missing; hard fail on
+  conversion errors. Stale-page cleanup prevents corrupted QA evidence
+  on re-renders.
+- **AGENTS.md**: new "Visual verification (render -> inspect)" subsection
+  under End-to-End Validation — defines when to run (rendering-affecting
+  changes + new user documents), the 4-step workflow (build -> render ->
+  dispatch @observer -> reconcile), the defect checklist (overflow,
+  overlap, tofu, brand-styling, broken images, blank pages), cross-format
+  rule (L18: semantic not pixel comparison), known DOCX tolerances
+  (LibreOffice pagination drift), severity scale, and an @observer prompt
+  template.
+- **Makefile**: `make render-pages DIR=<path> [FORMATS=pdf,docx,html]
+  [PAGES=all]` convenience target.
+- **.gitignore**: `documents/*/visual-qa/` (render output is build artifact).
+- **README.md**: `make render-pages` added to the Makefile reference.
+- **Validation**: seed-defect regression (old fixed-width badge ->
+  @observer flagged HIGH); known-good run (10 pages across PDF/DOCX/HTML
+  from 3 documents -> 0 HIGH, 0 MEDIUM); oracle quality pass (1 HIGH +
+  8 MEDIUM findings fixed).
+- **Dependency**: LibreOffice headless (libreoffice-writer-nogui, ~120MB)
+  for DOCX rendering; PDF and HTML paths need no new installs.
+
 ## v6.14.1 (2026-09-26)
 
 ### Badge pill auto-expand + testsummary column widths
@@ -29,32 +65,6 @@ and the pill expands to natural width when wider.
 - Oracle quality pass (fresh session, probe-verified measurements):
   core macro change approved; its findings (column widths from
   measured pill sizes, release bookkeeping) are landed here.
-
-## v6.14.1 (2026-09-26)
-
-### Badge pill auto-expand + testsummary column widths
-
-Result badges no longer overflow their pill frames when the label is
-wider than the nominal badge width. The PDF now matches the DOCX PNG
-min-width behavior: text centers at the nominal width when narrower,
-and the pill expands to natural width when wider.
-
-- **huawei-badges.sty**: `\huaweibadge`'s optional argument is now a
-  MINIMUM width (was fixed). Content is measured inside the tcolorbox
-  font group (`fontupper` preserved); narrower content renders
-  dimension-identical to the previous implementation (probe-verified),
-  wider content expands the pill — PT "Atende com ressalvas" (measured
-  4.32cm) previously spilled past its 2cm/1.5cm frame.
-- **testbook.cls**: `testsummary` result column now fits the measured
-  pill widths — 4.5cm under `portuguese`, 2.7cm otherwise (EN pills
-  measure 2.56cm). Eliminates the badge-row Overfull \hbox warnings
-  (3.34pt on testbook-pt; 10 x 1.60pt on testbook-en); remaining
-  sample-log overfulls are pre-existing prose justification.
-- **generate-badges.py**: docstring PDF-reference note updated to the
-  min-width semantics (the PNG generator already implemented them).
-- Oracle quality pass (fresh session, probe-measured widths): core
-  macro change approved; its findings (column widths from measured
-  pill sizes, release bookkeeping) landed here.
 
 ## v6.14.0 (2026-09-23)
 

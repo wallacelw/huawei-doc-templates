@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.14.1
+:version: 6.15.0
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,8 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
-  \changelogentry{6.14.1}{2026-09-26}{\item Badge pills no longer overflow their frames: \textbackslash huaweibadge now auto-expands for labels wider than the nominal width (matching the DOCX PNG min-width behavior), and the testbook testsummary result column widens to the measured pill widths (4.5cm PT, 2.7cm EN), eliminating the badge-row Overfull warnings.}
-  \changelogentry{6.14.1}{2026-09-26}{\item Badge pills no longer overflow their frames: \textbackslash huaweibadge now auto-expands for labels wider than the nominal width (matching the DOCX PNG min-width behavior), and the testbook testsummary result column widens to the measured pill widths (4.5cm PT, 2.7cm EN), eliminating the badge-row Overfull warnings.}
+  \changelogentry{6.15.0}{2026-09-26}{\item Visual verification standard: scripts/render-pages.sh renders PDF/DOCX/HTML to PNG page images; AGENTS.md documents the render -> @observer -> reconcile workflow with a defect checklist, cross-format rule, and known DOCX tolerances.}
   \changelogentry{6.14.1}{2026-09-26}{\item Badge pills no longer overflow their frames: \textbackslash huaweibadge now auto-expands for labels wider than the nominal width (matching the DOCX PNG min-width behavior), and the testbook testsummary result column widens to the measured pill widths (4.5cm PT, 2.7cm EN), eliminating the badge-row Overfull warnings.}
   \changelogentry{6.14.0}{2026-09-23}{\item Converter content-loss fixes: compound admonitions no longer corrupt nested tables and code, definition lists keep their definitions, colspan is supported (rowspan warns), block anchors on tables/images fix dead cross-references, and technical cover values (the setreport commands) now render on the PDF cover. Empty-macro tests fixed with etoolbox's ifdefempty (covermeta shows the version; phantom Author row gone). HTML: double captions eliminated, EN admonition titles match the PDF (Info/Important/Tip), and technical sections render as language-aware headings in DOCX/MD/HTML. Build: font-fallback detection fixed (was dead code); install.sh now installs asciidoctor-diagram so fresh installs no longer lose diagrams silently. Round-trip heading checks are now exact.}
   \changelogentry{6.13.0}{2026-09-23}{\item Test-result vocabulary unified: Portuguese badges now read Atende / Atende com ressalvas / Não atende / Não testado in both testbook and POC (was Aprovado/Reprovado/Bloqueado/Não testado and Atendido/Parcial/Falha/Ignorado). Testbook gains the Partial result (Atende com ressalvas, orange pill); Blocked was dropped (legacy documents render the neutral fallback pill). English display and source enum values unchanged. Existing PT documents render the new names on recompile.}

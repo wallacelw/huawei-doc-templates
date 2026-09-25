@@ -55,6 +55,8 @@ documents/poc-*/main.html
 # Generated LaTeX from AsciiDoc (build artifacts, not source)
 documents/*/src/main.tex
 documents/*/src/setup-guide.tex
+# Visual QA page renders (scripts/render-pages.sh output)
+documents/*/visual-qa/
 # Generated diagram images (build artifacts from asciidoctor-diagram)
 documents/*/src/sequence*.png
 documents/*/src/flowchart*.png

@@ -66,7 +66,8 @@ Before committing, validate the change from **all** relevant perspectives:
    that each format renders correctly (headings, tables, callouts,
    code blocks, images). PDF is the primary reference (L18); DOCX,
    MD, and HTML must match it as closely as possible. Do not commit
-   until all four formats are verified.
+   until all four formats are verified. For rendering-affecting
+   changes, verify visually — see *Visual verification* below.
 
 2. **Cross-file consistency:** If you changed one file, check every file that
    references it:
@@ -100,6 +101,66 @@ Before committing, validate the change from **all** relevant perspectives:
    - `:nochangelog:` attribute? Verify changelog suppression works.
    - Version bump? Check `test-sync.sh` passes (cls version = setup-guide
      version = git tag).
+
+### Visual verification (render → inspect)
+
+Text-based checks (compile logs, `pdftotext`, grep) cannot see layout
+defects: the v6.14.1 badge overflow shipped with 0 errors, 0 missing
+glyphs, and clean text extraction. After any rendering-affecting change
+(`.cls`, `.sty`, `huawei-latex-converter.rb`, `adoc_docx_preprocessor.py`,
+`docx_fix.py`, samples) — and after the first build of any new user
+document — run a visual pass:
+
+1. Build all formats: `./scripts/build.sh --all <doc-dir>` (or
+   `make all-formats` for all template samples).
+2. Render pages to images: `./scripts/render-pages.sh <doc-dir>` —
+   PDF, DOCX, and HTML land in `<doc-dir>/visual-qa/<format>/page-*.png`
+   (use `--samples` for all template samples, `--pages N-M` for a range).
+3. Dispatch the vision-capable agent (@observer) with the image paths and
+   the checklist below (prompt template at the end of this section).
+4. Reconcile findings: fix HIGH and MEDIUM, re-render the affected pages
+   to confirm.
+
+**Checklist** — defects text extraction cannot see:
+
+- Text overflowing its container (badge pill frames, table cells, callout
+  boxes, page margins).
+- Overlapping elements (text over text, badge over rule).
+- Table overflow past the page edge; broken or missing grid rules.
+- Missing glyphs (tofu boxes), broken accented characters.
+- Brand-styling breakage: table header rows not Huawei red with white bold
+  text (PDF/DOCX), callout colors wrong, badge pills missing. (HTML uses
+  centered text headers by design — check table headers and callout colors
+  there, not page header bars.)
+- Images render correctly — no empty boxes or missing figures.
+- Blank or misnumbered pages, stray artifacts.
+
+**Cross-format rule (L18):** each format (PDF, DOCX, HTML) is checked
+against the same brand invariants. Comparison between formats is semantic
+(same section, equivalent styling) — never pixel- or page-aligned,
+because pagination legitimately differs between formats.
+
+**Known tolerances** — expected differences in DOCX renders (LibreOffice)
+that are NOT defects: pagination drift (±1 line reflow, differing page
+counts), table cell padding and border spacing, cell line spacing. Tell
+the inspecting agent to tolerate these.
+
+**Severity** (same scale as the quality pass): HIGH = reader-visible
+defect (overflow, overlap, tofu) · MEDIUM = brand deviation · LOW =
+cosmetic.
+
+**Observer prompt template** (adapt paths and page ranges):
+
+> READ-ONLY visual verification. Inspect these rendered page images:
+> `<paths>`. For each image check: (1) text fully inside its containers —
+> pill frames, table cells, callout boxes, margins; (2) no overlapping
+> elements; (3) tables within the page width, grid rules intact;
+> (4) no tofu or broken accented characters; (5) brand styling — red
+> table header bars with white bold text (PDF/DOCX), correct callout
+> colors, badge pills present; (6) no blank or misnumbered pages. Tolerate pagination drift
+> and cell-padding differences (known LibreOffice behavior). Report per
+> image: PASS or FAIL with findings as HIGH/MEDIUM/LOW and their
+> locations. Be factual.
 
 ---
 

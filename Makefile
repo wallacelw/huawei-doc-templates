@@ -121,6 +121,10 @@ project: ## Compile a specific project (make project DIR=<path> [FILE=<name>.ado
 		cd $(DIR)/src && latexmk $$(basename $${FILE%.adoc}.tex); \
 	fi
 
+render-pages: ## Render a document's built outputs to PNG pages for visual QA (make render-pages DIR=<path> [FORMATS=pdf,docx,html] [PAGES=all])
+	@if [ -z "$(DIR)" ]; then echo "Usage: make render-pages DIR=<path> [FORMATS=pdf,docx,html] [PAGES=all]"; exit 1; fi
+	@./scripts/render-pages.sh $(DIR) --format $(or $(FORMATS),pdf,docx,html) $(if $(PAGES),--pages $(PAGES))
+
 menu: ## Interactive format menu (delegates to build.sh)
 	./scripts/build.sh
 
@@ -220,7 +224,7 @@ TEMPLATE_PHONY := $(foreach tmpl,$(TEMPLATES), \
 TEMPLATE_CLEAN_PHONY := $(foreach tmpl,$(TEMPLATES), \
 	clean-$(tmpl)-pt clean-$(tmpl)-en clean-$(tmpl)-samples)
 
-.PHONY: help all samples setup-guide project menu preview watch
+.PHONY: help all samples setup-guide project render-pages menu preview watch
 .PHONY: $(TEMPLATE_PHONY)
 .PHONY: technical
 .PHONY: test test-converter

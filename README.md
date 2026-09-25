@@ -139,6 +139,7 @@ make technical-samples # compile technical report samples (PT + EN, PDF)
 make technical DIR=documents/my-report  # compile a technical report (latexmk in src/)
 make setup-guide     # compile setup guide only
 make project DIR=documents/my-guide   # compile a specific project (auto-detects .adoc)
+make render-pages DIR=documents/my-guide  # render built outputs to PNG pages for visual QA
 make menu            # interactive format selection (PDF/DOCX/MD/HTML)
 make preview DIR=documents/guide-en  # generate HTML preview and open in browser
 make watch DIR=documents/guide-en    # watch .adoc files and recompile PDF on save (requires entr or inotifywait)
