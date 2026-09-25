@@ -4,6 +4,58 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.14.1 (2026-09-26)
+
+### Badge pill auto-expand + testsummary column widths
+
+Result badges no longer overflow their pill frames when the label is
+wider than the nominal badge width. The PDF now matches the DOCX PNG
+min-width behavior: text centers at the nominal width when narrower,
+and the pill expands to natural width when wider.
+
+- **huawei-badges.sty**: `\huaweibadge`'s optional argument is now a
+  MINIMUM width (was fixed). Content is measured inside the tcolorbox
+  font group (`fontupper` preserved); narrower content renders
+  dimension-identical to the previous implementation (verified by
+  probe), wider content expands the pill — PT "Atende com ressalvas"
+  (measured 4.32cm) previously spilled past its 2cm/1.5cm frame.
+- **testbook.cls**: `testsummary` result column now fits the measured
+  pill widths — 4.5cm under `portuguese`, 2.7cm otherwise (EN pills
+  measure 2.56cm). Eliminates the badge-row Overfull \hbox warnings
+  (3.34pt on testbook-pt; 10 x 1.60pt on testbook-en); remaining
+  overfulls in sample logs are pre-existing prose justification.
+- **generate-badges.py**: docstring PDF-reference note updated to the
+  min-width semantics (the PNG generator already implemented them).
+- Oracle quality pass (fresh session, probe-verified measurements):
+  core macro change approved; its findings (column widths from
+  measured pill sizes, release bookkeeping) are landed here.
+
+## v6.14.1 (2026-09-26)
+
+### Badge pill auto-expand + testsummary column widths
+
+Result badges no longer overflow their pill frames when the label is
+wider than the nominal badge width. The PDF now matches the DOCX PNG
+min-width behavior: text centers at the nominal width when narrower,
+and the pill expands to natural width when wider.
+
+- **huawei-badges.sty**: `\huaweibadge`'s optional argument is now a
+  MINIMUM width (was fixed). Content is measured inside the tcolorbox
+  font group (`fontupper` preserved); narrower content renders
+  dimension-identical to the previous implementation (probe-verified),
+  wider content expands the pill — PT "Atende com ressalvas" (measured
+  4.32cm) previously spilled past its 2cm/1.5cm frame.
+- **testbook.cls**: `testsummary` result column now fits the measured
+  pill widths — 4.5cm under `portuguese`, 2.7cm otherwise (EN pills
+  measure 2.56cm). Eliminates the badge-row Overfull \hbox warnings
+  (3.34pt on testbook-pt; 10 x 1.60pt on testbook-en); remaining
+  sample-log overfulls are pre-existing prose justification.
+- **generate-badges.py**: docstring PDF-reference note updated to the
+  min-width semantics (the PNG generator already implemented them).
+- Oracle quality pass (fresh session, probe-measured widths): core
+  macro change approved; its findings (column widths from measured
+  pill sizes, release bookkeeping) landed here.
+
 ## v6.14.0 (2026-09-23)
 
 ### Converter content-loss fixes + cover restoration + HTML alignment

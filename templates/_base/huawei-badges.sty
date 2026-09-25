@@ -15,14 +15,27 @@
 %%    \huaweibadge{warningbg}{warningfg}{Partial}
 %%    \huaweibadge{red!15}{huaweired}{Fail}
 %%    \huaweibadge{codebg}{ruleblack}{Skip}
+%%
+%%  Sizing: the optional argument (#1, default 2cm) is a MINIMUM width.
+%%  Content narrower than #1 is centered in a #1-wide box, keeping a
+%%  uniform look for short labels; wider content expands the box so long
+%%  labels (e.g. "Atende com ressalvas") never overflow the badge frame.
 %% =====================================================================
-\ProvidesPackage{huawei-badges}[2026/09/18 Huawei shared badge module v6.3.0]
+\ProvidesPackage{huawei-badges}[2026/09/26 Huawei shared badge module v6.14.1]
 
 % Requires tcolorbox (loaded by template class files).
+\newsavebox\lg@badgebox
 \newcommand{\huaweibadge}[4][2cm]{%
   \mbox{\tcbox[on line, colback=#2, colframe=#3,
          boxrule=0.8pt, arc=2pt,
-         fontupper=\bfseries\small]{\makebox[#1][c]{#4}}}%
+         fontupper=\bfseries\small]{%
+    \sbox\lg@badgebox{#4}%
+    \ifdim\wd\lg@badgebox<#1\relax
+      \makebox[#1][c]{\box\lg@badgebox}%
+    \else
+      \box\lg@badgebox
+    \fi
+  }}%
 }
 
 \endinput

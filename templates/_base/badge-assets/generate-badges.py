@@ -6,9 +6,10 @@ PNGs in this directory.  docx_fix.py embeds these images in DOCX output to
 replace the flat character-styled [Pass]/[Fail]/... text runs with rounded
 pill badges matching the PDF.
 
-PDF reference (huawei-badges.sty \\huaweibadge):
+PDF reference (huawei-badges.sty \\huaweibadge, v6.14.1):
     tcbox[on line, colback=BG, colframe=FRAME, boxrule=0.8pt, arc=2pt,
-          fontupper=\\bfseries\\small]{\\makebox[WIDTH][c]{TEXT}}
+          fontupper=\\bfseries\\small]{min-width box: text centered in
+    WIDTH when narrower, natural width when wider}
 
     The PDF sets NO text color → badge text is BLACK on all pills.
     Frame colors: Pass=tipfg(62B230), Partial=warningfg(ED6D00),

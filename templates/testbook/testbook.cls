@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/23 Huawei Test Book template v6.14.0]
+\ProvidesClass{testbook}[2026/09/26 Huawei Test Book template v6.14.1]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in
@@ -224,11 +224,22 @@
 %     \testsummaryrow{TC-002}{Verify OBS bucket}{Pass}
 %   \end{testsummary}
 
+% Result column width: must fit the widest badge the language renders.
+% Measured pill widths (HarmonyOS Sans, \bfseries\small): PT "Atende
+% com ressalvas" = 4.32cm, EN pills = 2.56cm. The widths add slack so
+% no badge touches the cell rules (no Overfull \hbox).
+\newlength{\lg@summaryresultcol}
+\if@portuguese
+  \setlength{\lg@summaryresultcol}{4.5cm}
+\else
+  \setlength{\lg@summaryresultcol}{2.7cm}
+\fi
+
 \newenvironment{testsummary}{%
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  % middle column = \linewidth - (2 x 2.5cm side columns) - 6\tabcolsep - 4\arrayrulewidth
-  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{2.5cm}|>{\RaggedRight\arraybackslash}m{\dimexpr\linewidth-5cm-6\tabcolsep-4\arrayrulewidth\relax}|>{\Centering\arraybackslash}m{2.5cm}|}%
+  % middle column = \linewidth - ID col (2.5cm) - result col - 6\tabcolsep - 4\arrayrulewidth
+  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{2.5cm}|>{\RaggedRight\arraybackslash}m{\dimexpr\linewidth-2.5cm-\lg@summaryresultcol-6\tabcolsep-4\arrayrulewidth\relax}|>{\Centering\arraybackslash}m{\lg@summaryresultcol}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@testcaseid} &
