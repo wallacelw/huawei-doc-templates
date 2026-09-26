@@ -1362,7 +1362,7 @@ def inject_cover_block(content, lang, template):
     else:
         # Non-technical: generic cover text + :version: meta (unchanged).
         cover_text = (m_covertext.group(1) if m_covertext
-                      else 'Huawei Technologies CO., LTD')
+                      else 'Huawei Technologies Co., Ltd.')
         block.append(cover_text)
         block.append('')
         if m_version and not nochangelog:

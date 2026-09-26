@@ -557,7 +557,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       "\\item #{text}#{nested}"
     end
     if node.role == 'activities'
-      "\\begin{enumerate}[label=\\roman*., leftmargin=2.5em, itemsep=0.5em]\n#{items.join("\n")}\n\\end{enumerate}"
+      "\\begin{enumerate}[label=\\roman*., widest=viii, align=left, leftmargin=2.5em, itemsep=0.5em]\n#{items.join("\n")}\n\\end{enumerate}"
     else
       "\\begin{enumerate}\n#{items.join("\n")}\n\\end{enumerate}"
     end

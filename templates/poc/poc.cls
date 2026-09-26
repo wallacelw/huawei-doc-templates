@@ -22,7 +22,7 @@
 %%    - \setdoctitle (shared cover title setter).
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/26 Huawei POC template v6.15.1]
+\ProvidesClass{poc}[2026/09/26 Huawei POC template v6.16.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -147,7 +147,7 @@
   \par
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*15/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*35/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
+  \begin{tabular}{|>{\RaggedRight\hyphenpenalty=10000\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
   \hline
 }{%
   \end{tabular}%
@@ -185,7 +185,7 @@
   \par
 }
 \newcommand{\closingrow}[2]{#1 & #2 \\ \hline}
-\newcommand{\checkbox}[1]{\fbox{\,}~#1}
+\newcommand{\checkbox}[1]{\raisebox{-0.15ex}{\framebox[0.85em][c]{\rule{0pt}{0.72em}}}~#1}
 
 % =====================================================================
 %  SIGNATURES
@@ -208,10 +208,11 @@
 }
 \newcommand{\signaturecell}[4]{%
   \lg@siggreeting \par\medskip
+  \vspace*{1.6cm}\noindent\rule{0.55\linewidth}{0.4pt}\par\smallskip
   \textbf{#1} \par
   #2 \par
   \textbf{\lg@sigemail:} \texttt{\seqsplit{#3}} \par
-  #4 \par\bigskip
+  #4 \par\medskip
 }
 
 \endinput

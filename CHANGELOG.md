@@ -4,6 +4,48 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.16.0 (2026-09-26)
+
+### Visual polish + functional improvements (11 fixes)
+
+Batch of improvements from the v6.15.0 visual audit, focused on shared
+modules impacting POC and testbook templates:
+
+**Shared visual polish (huawei-* modules, pure PDF):**
+- **huawei-cover.sty**: `\vfill` replaces fixed `\vspace{4.5cm}` — cover
+  identity block (logo, company, authors, meta) anchors to the lower
+  third instead of floating high with 45% empty bottom
+- **huawei-cover.sty**: cover text casing "CO., LTD" → "Co., Ltd."
+  (synced across preprocessor + 3 SKILL.mds + test assertion)
+- **huawei-fonts.sty**: `\widowpenalty=10000 \clubpenalty=10000` —
+  prevents stranded lines at page breaks
+- **huawei-titles.sty**: H1 title constrained to right-aligned minipage
+  (0.72\linewidth) — long titles wrap flush-right, not under the 56pt
+  numeral
+- **huawei-code.sty**: `breakindent=1em` — wrapped code lines are
+  visually distinct from new lines
+- **huawei-latex-converter.rb**: activities enumerate `widest=viii,
+  align=left` — roman-numeral item text starts at a uniform left edge
+
+**Testbook functional (testbook.cls):**
+- **\teststep**: `\hangindent=2.5em\hangafter=1` — wrapped step text
+  aligns under the first character, not the margin
+- **testsummary**: `tabular` → `longtable` with `\endhead` (header
+  repeats on page breaks) + per-row `\cellcolor` zebra striping
+
+**POC functional (poc.cls):**
+- **\signaturecell**: signing line (`\rule{0.55\linewidth}{0.4pt}`)
+  added between greeting and name; trailing `\bigskip` → `\medskip`
+- **\checkbox**: `\framebox[0.85em]` replaces 4pt `\fbox{\,}`
+- **stakeholders**: name column widened 15%→20% with
+  `\hyphenpenalty=10000` (names no longer hyphenate); email column
+  narrowed 35%→30%
+
+**Phase 4 (converter/pipeline defects): investigated, all deferred** —
+`menu:` macro leak is guide/technical-only (not POC/testbook); DOCX
+palette swatches and stray `+` need preprocessor work; diagram branding
+is sample content.
+
 ## v6.15.1 (2026-09-26)
 
 ### TOC number-width fix + roman front-matter numbering

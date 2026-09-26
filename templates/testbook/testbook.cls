@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/26 Huawei Test Book template v6.15.1]
+\ProvidesClass{testbook}[2026/09/26 Huawei Test Book template v6.16.0]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in
@@ -237,21 +237,28 @@
 
 \newenvironment{testsummary}{%
   \renewcommand{\arraystretch}{1.3}%
+  \setcounter{lg@summaryrow}{0}%
   \noindent
   % middle column = \linewidth - ID col (2.5cm) - result col - 6\tabcolsep - 4\arrayrulewidth
-  \begin{tabular}{|>{\RaggedRight\arraybackslash}m{2.5cm}|>{\RaggedRight\arraybackslash}m{\dimexpr\linewidth-2.5cm-\lg@summaryresultcol-6\tabcolsep-4\arrayrulewidth\relax}|>{\Centering\arraybackslash}m{\lg@summaryresultcol}|}%
+  \begin{longtable}{|>{\RaggedRight\arraybackslash}m{2.5cm}|>{\RaggedRight\arraybackslash}m{\dimexpr\linewidth-2.5cm-\lg@summaryresultcol-6\tabcolsep-4\arrayrulewidth\relax}|>{\Centering\arraybackslash}m{\lg@summaryresultcol}|}%
   \hline
   \rowcolor{huaweired}
   {\color{white}\bfseries\lg@testcaseid} &
   {\color{white}\bfseries\lg@testcasetitle} &
   {\color{white}\bfseries\lg@teststatus} \\
   \hline
+  \endhead
 }{%
-  \end{tabular}%
-  \vspace{0.5cm}%
+  \end{longtable}%
+  \medskip
 }
 
-\newcommand{\testsummaryrow}[3]{#1 & #2 & #3 \\ \hline}
+\newcounter{lg@summaryrow}
+\newcommand{\testsummaryrow}[3]{%
+  \stepcounter{lg@summaryrow}%
+  \ifodd\value{lg@summaryrow}\gdef\lg@cc{}\else\gdef\lg@cc{\cellcolor{codebg}}\fi
+  \lg@cc #1 & \lg@cc #2 & \lg@cc #3 \\ \hline
+}
 
 % =====================================================================
 %  TEST FIELD ENVIRONMENTS (prerequisites, procedure, expected)
@@ -305,6 +312,7 @@
 \newcommand{\teststep}[1]{%
   \refstepcounter{lg@teststep}%
   \par\smallskip
+  \hangindent=2.5em\hangafter=1
   \noindent\hspace{1em}\textcolor{huaweired}{\bfseries\arabic{lg@teststep}.}\hspace{0.6em}#1\par
 }
 

@@ -97,7 +97,7 @@ all templates:
 | `:date: 2026-09-16` | Document date, shown on the cover page next to the version. | `:date: 2026-09-16` |
 | `:authors: Name` | One or more authors on the cover page. Optional. | `:authors: John Smith, Jane Doe` |
 | `:header-title: ...` | Centered header text on body pages. | `:header-title: Huawei Cloud -- ECS` |
-| `:cover-text: ...` | Line under the cover logo (default `Huawei Technologies CO., LTD`). | `:cover-text: Huawei Technologies CO., LTD` |
+| `:cover-text: ...` | Line under the cover logo (default `Huawei Technologies Co., Ltd.`). | `:cover-text: Huawei Technologies Co., Ltd.` |
 | `:header-logo: path` | Header logo image path (default `common-assets/huawei-logo-header.png`). | `:header-logo: assets/custom-logo.png` |
 | `:cover-logo: path` | Cover logo image path (default `common-assets/huawei-logo-cover.png`). | `:cover-logo: assets/custom-cover.png` |
 | `:nochangelog:` | Suppress changelog section and cover version/date/time. | `:nochangelog:` |

@@ -365,7 +365,7 @@ check("technical authors: | *Author* | Jane Doe",
 out = process(HEADER + "Body.\n", 'guide', 'md')
 check("guide regression: **v1.0.0** meta", "**v1.0.0**" in out)
 check("guide regression: generic cover text",
-      "Huawei Technologies CO., LTD" in out)
+      "Huawei Technologies Co., Ltd." in out)
 
 print("=== Codefile blocks ===")
 

@@ -44,7 +44,7 @@
 % fancyvrb typesets line by line -> contiguous text in PDF -> clean copy.
 
 % Shared fancyvrb options for code blocks (used by code environment and \codefile).
-\newcommand{\lg@codeopts}{fontsize=\fontsize{10}{13}\selectfont, formatcom=\codefont\color{codetext}, frame=single, framerule=0.4pt, rulecolor=\color{codeborder}, backgroundcolor=codebg, xleftmargin=0.7cm, xrightmargin=0.5cm, breaklines=true, breakanywhere=true, breaksymbolleft={}, breaksymbolright={}, breakanywheresymbolpre={}, breakanywheresymbolpost={}}
+\newcommand{\lg@codeopts}{fontsize=\fontsize{10}{13}\selectfont, formatcom=\codefont\color{codetext}, frame=single, framerule=0.4pt, rulecolor=\color{codeborder}, backgroundcolor=codebg, xleftmargin=0.7cm, xrightmargin=0.5cm, breaklines=true, breakanywhere=true, breakindent=1em, breaksymbolleft={}, breaksymbolright={}, breakanywheresymbolpre={}, breakanywheresymbolpost={}}
 
 % Expand \lg@codeopts before passing to fancyvrb (key-value scanner
 % requires pre-expanded options; macros are not expanded during scanning).

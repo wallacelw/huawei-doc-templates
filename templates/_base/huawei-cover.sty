@@ -8,7 +8,7 @@
 % =====================================================================
 %  COVER — shared by guide, technical, testbook, and poc
 % =====================================================================
-\newcommand{\lg@covertext}{Huawei Technologies CO., LTD}
+\newcommand{\lg@covertext}{Huawei Technologies Co., Ltd.}
 \newcommand{\setcovertext}[1]{\renewcommand{\lg@covertext}{#1}}
 \newcommand{\lg@coverlogo}{common-assets/huawei-logo-cover.png}
 \newcommand{\setcoverlogo}[1]{\renewcommand{\lg@coverlogo}{#1}}
@@ -37,7 +37,7 @@
   \vspace*{2.2cm}%
   {\centering
    \fontsize{36}{42}\selectfont\bfseries \lg@doctitle\par}%
-  \vspace{4.5cm}%
+  \vfill
   {\centering
    \includegraphics[width=3.6cm]{\lg@coverlogo}\par}%
   \vspace{0.9cm}%
@@ -53,7 +53,8 @@
    \vspace{0.5cm}%
    {\centering
     \fontsize{12}{14}\selectfont \if@changelog\lg@covermeta\fi\par}%
-   \endgroup
+  \vspace*{2.2cm}%
+  \endgroup
   \clearpage}
 
 \endinput

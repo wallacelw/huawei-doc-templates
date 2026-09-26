@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies CO., LTD
-:version: 6.15.1
+:version: 6.16.0
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.16.0}{2026-09-26}{\item Visual polish and functional improvements: cover composition (\textbackslash vfill anchors identity block to lower third); widow/orphan control; H1 long-title wrap safety (minipage); code block continuation indent; roman-numeral list alignment; cover text casing (Co., Ltd.); teststep hanging indent; testsummary longtable breakability + zebra striping; POC signature signing line; checkbox size; stakeholders name hyphenation fix.}
   \changelogentry{6.15.1}{2026-09-26}{\item TOC fix: two-digit section numbers (10+) no longer collide with titles (widened \textbackslash cftsecnumwidth); front matter now uses roman page numbering (i, ii) so the TOC no longer shows "Page 2" followed by body "Page 1".}
   \changelogentry{6.15.0}{2026-09-26}{\item Visual verification standard: scripts/render-pages.sh renders PDF/DOCX/HTML to PNG page images; AGENTS.md documents the render -> @observer -> reconcile workflow with a defect checklist, cross-format rule, and known DOCX tolerances.}
   \changelogentry{6.14.1}{2026-09-26}{\item Badge pills no longer overflow their frames: \textbackslash huaweibadge now auto-expands for labels wider than the nominal width (matching the DOCX PNG min-width behavior), and the testbook testsummary result column widens to the measured pill widths (4.5cm PT, 2.7cm EN), eliminating the badge-row Overfull warnings.}
