@@ -4,6 +4,23 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.15.1 (2026-09-26)
+
+### TOC number-width fix + roman front-matter numbering
+
+Two shared-module fixes in `templates/_base/` affecting all templates:
+
+- **huawei-toc.sty**: widened `\cftsecnumwidth` to 2.5em (was default
+  ~1.5em) — two-digit section numbers (10–15) no longer collide with
+  the title text in the TOC (was `10Matriz`, now `10 Matriz`).
+  Subsection/subsubsection number widths also widened (3em / 4em).
+- **huawei-toc.sty + huawei-page.sty**: front matter (cover + TOC) now
+  uses roman page numbering (`\pagenumbering{roman}` in `\maketoc`);
+  body restarts at arabic page 1 (`\pagenumbering{arabic}` in
+  `\startbody`). Fixes the "Page 2 → Page 1" backwards numbering.
+- Pure PDF fixes (DOCX/HTML have independent numbering); no secondary-
+  format changes needed.
+
 ## v6.15.0 (2026-09-26)
 
 ### Visual verification standard + render-pages.sh

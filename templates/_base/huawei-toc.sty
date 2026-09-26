@@ -23,12 +23,18 @@
 \setlength{\cftsecindent}{0pt}
 \setlength{\cftsubsecindent}{1.2em}
 \setlength{\cftsubsubsecindent}{2.4em}
+% Number box widths: wide enough for 2-digit section numbers (10-15)
+% and multi-level subsection numbers (7.1, 7.1.1) without colliding
+% with the title text.
+\setlength{\cftsecnumwidth}{2.5em}
+\setlength{\cftsubsecnumwidth}{3em}
+\setlength{\cftsubsubsecnumwidth}{4em}
 \setlength{\cftbeforesecskip}{4pt}
 \renewcommand{\cftdotsep}{1.2}
 % show dotted leaders also at level 1
 \setcounter{tocdepth}{3}
 
 % Convenience command for TOC (resets leftskip)
-\newcommand{\maketoc}{{\leftskip=0pt\relax\pagestyle{plain}\thispagestyle{plain}\tableofcontents}\clearpage}
+\newcommand{\maketoc}{{\leftskip=0pt\relax\pagenumbering{roman}\pagestyle{plain}\thispagestyle{plain}\tableofcontents}\clearpage}
 
 \endinput
