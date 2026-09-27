@@ -5,7 +5,7 @@
 %%  Extracted from guide.cls v2.0.0 decomposition.
 %% =====================================================================
 \ProvidesPackage{huawei-tables}[2026/08/20 Huawei table formatting]
-%% Depends on: huawei-colors (huaweired, codebg, white), xcolor/colortbl (\rowcolors)
+%% Depends on: huawei-colors (huaweired, stripebg, white), xcolor/colortbl (\rowcolors)
 %% Requires: longtable (loaded by class file)
 
 % Table header cell: white bold text (for use with \rowcolor{huaweired})
@@ -38,7 +38,7 @@
 %    ended by \\.
 %  - After the header \\, add \tbody to start alternating body row colors
 %    (white / light gray).
-%  - Body rows: plain cells, black text on alternating white / codebg rows.
+%  - Body rows: plain cells, black text on alternating white / stripebg rows.
 %  - Every row MUST end with \\ (including the last) so the bottom border draws.
 %
 %  Implementation: a scoped redefinition of \@arraycr inserts an \hline after

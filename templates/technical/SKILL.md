@@ -285,6 +285,7 @@ changelog entry.** See the guide SKILL.md for the full workflow.
 | Name | Hex | Use |
 |---|---|---|
 | `codebg` | `#F6F8FA` | Code block background |
+| `stripebg` | `#F0F1F3` | Table zebra stripe background (testsummary; hutable striping is non-functional — see CHANGELOG v6.16.2) |
 | `codetext` | `#1F2328` | Code text |
 | `codeborder` | `#E1E4E8` | Code block border |
 | `linkblue` | `#0000FF` | Links |

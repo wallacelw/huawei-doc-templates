@@ -458,7 +458,7 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do 
 NOTE: Esta seção e a seguinte (``Paleta de Cores da Marca'') são conteúdo
 de demonstração do sample — não fazem parte de um documento de teste real.
 
-Diagramos podem ser usados para visualizar fluxos e arquiteturas de teste.
+Diagramas podem ser usados para visualizar fluxos e arquiteturas de teste.
 
 .Diagrama de sequência da execução de teste
 [plantuml.diagram,test-sequencia,png]

@@ -432,7 +432,7 @@ for entry in "${SAMPLES[@]}"; do
   #   docbook reader drops the NOTE/TIP/WARNING labels and keeps only the
   #   body text as plain paragraphs, so DOCX contributes tables only while
   #   MD/HTML count tables + callout divs. The divergence equals the
-  #   document's callout count (guide 9, poc 5, technical 4, testbook 6,
+  #   document's callout count (guide 9, poc 5, technical 4, testbook 7,
   #   setup-guide 32).
   #
   # * Code blocks converged to 0: the pre-processor now inlines

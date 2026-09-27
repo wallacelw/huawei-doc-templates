@@ -418,6 +418,7 @@ rendered, but the content remains in the `.adoc` file for future reference.
 | Name | Hex | Use |
 |---|---|---|
 | `codebg` | `#F6F8FA` | Code block background |
+| `stripebg` | `#F0F1F3` | Table zebra stripe background (testsummary; hutable striping is non-functional — see CHANGELOG v6.16.2) |
 | `codetext` | `#1F2328` | Code text |
 | `linkblue` | `#0000FF` | Links |
 | `huaweired` | `#C7000B` | Brand red (H1 chapter rules, accents, badge) |

@@ -5,7 +5,7 @@ alt="huawei logo cover" />
 
 Huawei Technologies Co., Ltd.
 
-**v6.16.2** — September 27, 2026 16:55
+**v6.16.2** — September 27, 2026 17:27
 
 # Provision a Flexus X Instance on Huawei Cloud
 
@@ -1302,7 +1302,7 @@ secondary text:
 <td style="text-align: left;"><ul>
 <li><p>SKILL.md (testbook): documented auxiliary LaTeX commands
 available in passthrough blocks (\ menu, \ inlinecode, \ param, \
-weblink, \ note, \ image, \ code, \ warning). Added
+weblink, \ note, \ image, \ imageplaceholder, \ code, \ warning). Added
 <code>stripebg</code> color (#F0F1F3) for visible table zebra striping.
 Documented <code>noanswers</code> option usage. Added sample-only notes
 to testbook demo sections.</p></li>

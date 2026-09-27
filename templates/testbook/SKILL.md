@@ -314,7 +314,7 @@ rendered, but the content remains in the `.adoc` file for future reference.
 | Name | Hex | Use |
 |---|---|---|
 | `codebg` | `#F6F8FA` | Code block background |
-| `stripebg` | `#F0F1F3` | Table zebra stripe background (hutable, testsummary) |
+| `stripebg` | `#F0F1F3` | Table zebra stripe background (testsummary; hutable striping is non-functional — see CHANGELOG v6.16.2) |
 | `codetext` | `#1F2328` | Code text |
 | `linkblue` | `#0000FF` | Links |
 | `huaweired` | `#C7000B` | Brand red (H1 chapter rules, test case left-rule and labels, accents, badge) |
@@ -428,10 +428,10 @@ case using a global counter (1, 2, 3, …). The rendered heading is
 **Testcase *N*:** *title* (English) or **Caso de Teste *N*:** *title* (Portuguese).
 Do **not** include manual prefixes like "TC-001:" in the title argument.
 
-**Field order:** Objective → Prerequisites → Procedure → Expected Result →
-Test Result → Remarks. Test Result and Remarks are filled after execution,
-hence they appear last. The `:noanswers:` attribute hides Test Result and
-Remarks fields.
+**Field order:** Objective → Test Scope → Prerequisites → Procedure →
+Expected Result → Test Result → Remarks. Test Result and Remarks are filled
+after execution, hence they appear last. The `:noanswers:` attribute hides
+Test Result and Remarks fields.
 
 ```asciidoc
 ++++
@@ -504,7 +504,7 @@ formatting that cannot be expressed in AsciiDoc roles.
 | `\note{text}` | huawei-shared | Note callout (bold label + italic text). | `\note{Allow 5 minutes for IAM propagation.}` |
 | `\image[opts]{path}` | huawei-images | Image inside passthrough. | `\image[width=0.8\linewidth]{common-assets/screenshot.png}` |
 | `\imageplaceholder{path}{caption}` | huawei-images | Image placeholder (for missing images). | `\imageplaceholder{assets/dashboard.png}{Test dashboard}` |
-| `\begin{code}[lang]...\end{code}` | huawei-code | Code block inside passthrough. | `\begin{code}[bash] obsutil ls obs://bucket \end{code}` |
+| `\begin{code}[lang]...\end{code}` | huawei-code | Code block inside passthrough (body on separate lines). | `\begin{code}[bash]` then `obsutil ls obs://bucket` then `\end{code}` |
 | `\begin{warning}...\end{warning}` | huawei-callouts | Warning callout (amber box). | `\begin{warning} Do not skip plan review. \end{warning}` |
 
 ### Test summary table

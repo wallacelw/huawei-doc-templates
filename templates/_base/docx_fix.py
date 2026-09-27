@@ -1487,12 +1487,12 @@ def _style_table(table, qn):
                 for run in paragraph.runs:
                     run.font.bold = True
                     run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-        # Alternating body rows (2nd, 4th, ... data rows get #F6F8FA)
+        # Alternating body rows (2nd, 4th, ... data rows get #F0F1F3)
         for i, row in enumerate(table.rows):
             if i == 0 or i % 2 != 0:
                 continue
             for cell in row.cells:
-                shade_cell(cell, 'F6F8FA')
+                shade_cell(cell, 'F0F1F3')
 
 
 def _fix_toc_styles(root, W_NS):
