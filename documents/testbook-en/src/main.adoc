@@ -2,8 +2,8 @@
 :template: testbook
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
-:cover-text: Huawei Technologies CO., LTD
-:version: 2.2.0
+:cover-text: Huawei Technologies Co., Ltd.
+:version: 2.3.0
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -24,16 +24,6 @@ result badges, and changelog.
 POC environment, ensuring that all core services (DataArts Studio, MRS,
 OBS, VPC) are provisioned correctly, accessible, and functioning as
 specified in the solution architecture.#
-
-*Prerequisites:*
-
-- Huawei Cloud account with IAM admin privileges in the `sa-brazil-1` region.
-- VPC, subnet, and security groups already created by the infrastructure team.
-- DataArts Studio instance (Dayu) provisioned and licensed.
-- MRS cluster deployed with the required component stack (HDFS, YARN, Spark, Hive).
-- OBS bucket created and accessible with the designated IAM policy.
-- Test execution environment with network connectivity to the Huawei Cloud Console.
-- `latexmk` and `terraform` CLI tools installed locally.
 ====
 
 === Test Scope
@@ -522,6 +512,10 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.3.0}{2026-09-28}{
+    \item Removed duplicate prerequisites from the objectives block — only the general objective now appears in the block; prerequisites remain in the dedicated ``Preconditions and Preparations'' section.
+    \item Fixed cover text casing: ``CO., LTD'' $\rightarrow$ ``Co., Ltd.''
+  }
   \changelogentry{2.2.0}{2026-09-23}{
     \item Unified result vocabulary: the acceptance criteria table now uses Pass, Partial, Fail, and Untested.
     \item Replaced the Blocked result with Partial: Test Case 8 and its test summary row were converted, with remarks aligned to the partial result.

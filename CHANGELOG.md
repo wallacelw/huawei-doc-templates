@@ -4,6 +4,23 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.16.1 (2026-09-28)
+
+### Fixes
+
+- **H1 red rule full width**: reverted the minipage wrap introduced in
+  v6.16.0 that constrained `\titlerule` to ~33% of the content width.
+  The rule now spans the full text width as before.
+- **Cover text casing**: synced `:cover-text:` in all 5 samples to
+  ``Co., Ltd.'' (was ``CO., LTD'').
+- **Testbook duplicate prerequisites**: removed the prerequisites list
+  from inside the `[.objectives]` block in both testbook samples —
+  prerequisites remain in the dedicated ``Preconditions and
+  Preparations'' section only.
+- **SKILL.md (testbook)**: updated skeleton to match (no prerequisites
+  in objectives block); fixed field order in description to include
+  Test Scope.
+
 ## v6.16.0 (2026-09-26)
 
 ### Visual polish + functional improvements (11 fixes)

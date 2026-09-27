@@ -2,8 +2,8 @@
 :template: testbook
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
-:cover-text: Huawei Technologies CO., LTD
-:version: 2.2.0
+:cover-text: Huawei Technologies Co., Ltd.
+:version: 2.3.0
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -24,16 +24,6 @@ result badges e histórico de versões.
 ambiente POC, garantindo que todos os serviços principais (DataArts Studio, MRS,
 OBS, VPC) estejam provisionados corretamente, acessíveis e funcionando conforme
 especificado na arquitetura da solução.#
-
-*Pré-requisitos:*
-
-- Conta Huawei Cloud com privilégios de administrador IAM na região `sa-brazil-1`.
-- VPC, sub-rede e grupos de segurança já criados pela equipe de infraestrutura.
-- Instância DataArts Studio (Dayu) provisionada e licenciada.
-- Cluster MRS implantado com a pilha de componentes necessária (HDFS, YARN, Spark, Hive).
-- Bucket OBS criado e acessível com a política IAM designada.
-- Ambiente de execução de testes com conectividade de rede ao Console do Huawei Cloud.
-- Ferramentas CLI `latexmk` e `terraform` instaladas localmente.
 ====
 
 === Escopo dos Testes
@@ -522,6 +512,10 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.3.0}{2026-09-28}{
+    \item Removidos os pré-requisitos duplicados do bloco de objetivos — agora apenas o objetivo geral aparece no bloco; os pré-requisitos permanecem na seção dedicada ``Pré-condições e Preparações''.
+    \item Corrigida a capitalização do texto da capa: ``CO., LTD'' $\rightarrow$ ``Co., Ltd.''
+  }
   \changelogentry{2.2.0}{2026-09-23}{
     \item Vocabulário de resultados unificado: a tabela de critérios de aceitação agora usa ``Atende'', ``Atende com ressalvas'', ``Não atende'' e ``Não testado''.
     \item Resultado ``Bloqueado'' substituído por ``Atende com ressalvas'' (Partial): o Caso de Teste 8 e a linha correspondente da tabela de resumo foram convertidos, com observações alinhadas ao resultado parcial.

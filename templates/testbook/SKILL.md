@@ -17,11 +17,11 @@ structure: **Introduction** (objectives, scope, preconditions, acceptance
 method), **Test Cases** (subsections per domain, each containing auto-numbered
 `testcase` environments), and **Conclusion** (test summary table). Each test
 case is rendered as a breakable tcolorbox with stacked fields, each preceded
-by a full-width red mini header bar. Field order: Objective → Prerequisites →
-Procedure → Expected Result → Test Result → Remarks. Content defaults to
-English; set `:lang: pt` for Portuguese labels. Do **not** use this for
-general AsciiDoc documents — the formatting is hard-coded to the Huawei
-house style (AGENTS.md L9).
+by a full-width red mini header bar. Field order: Objective → Test Scope →
+Prerequisites → Procedure → Expected Result → Test Result → Remarks. Content
+defaults to English; set `:lang: pt` for Portuguese labels. Do **not** use
+this for general AsciiDoc documents — the formatting is hard-coded to the
+Huawei house style (AGENTS.md L9).
 
 ## Document lifecycle
 
@@ -116,7 +116,7 @@ all templates:
 
 Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 
-### Objectives / prerequisites block
+### Objectives block
 
 ```asciidoc
 [.objectives]
@@ -124,20 +124,11 @@ Numbering is automatic: `1` / `1.1` / `1.1.1` / `1.1.1.1`.
 [.general-objective]#<general objective>#
 
 [.objective]#<objective>#
-
-**Prerequisites:**
-
-* <prerequisite 1>
-* <prerequisite 2>
-
-**Step by step:**
-
-. <step 1>
-. <step 2>
 ====
 ```
 Closes with a 1.5pt horizontal rule. The role spans and bold labels also
-work outside the objectives block.
+work outside the objectives block. Prerequisites should go in a dedicated
+``Prerequisites and Preparations'' subsection, not inside this block.
 
 Only the roles are language-aware. Bold text is literal — it is never
 translated.
@@ -606,10 +597,6 @@ The source keeps language-neutral enum values (`Pass`/`Partial`/`Fail`/
 [.objectives]
 ====
 **General Objective:** Verify that <system> meets the acceptance criteria.
-
-**Prerequisites:**
-* <precondition 1>
-* <precondition 2>
 ====
 
 === Test Scope
