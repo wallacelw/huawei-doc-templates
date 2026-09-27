@@ -638,11 +638,11 @@ The source keeps language-neutral enum values (`Pass`/`Partial`/`Fail`/
 // Example:
 // [.hutable]
 // |===
-// | Result | Badge | Explanation
-// | Pass | pass:[\testresultbadge{Pass}] | The test case passes fully.
-// | Partial | pass:[\testresultbadge{Partial}] | Passed with restrictions.
-// | Fail | pass:[\testresultbadge{Fail}] | The test case fails.
-// | Untested | pass:[\testresultbadge{Untested}] | Not yet executed.
+// | Result | Explanation
+// | pass:[\testresultbadge{Pass}] | The test case passes fully.
+// | pass:[\testresultbadge{Partial}] | Passed with restrictions.
+// | pass:[\testresultbadge{Fail}] | The test case fails.
+// | pass:[\testresultbadge{Untested}] | Not yet executed.
 // |===
 
 == Test Cases

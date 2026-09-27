@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.4.0
+:version: 2.4.1
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -65,12 +65,12 @@ visualizar as alterações de infraestrutura e evitar modificações indesejadas
 .Critérios de aceitação.
 [.hutable]
 |===
-| Resultado | Amostra | Explicação
+| Resultado | Explicação
 
-| Atende | pass:[\testresultbadge{Pass}] | O caso de teste passa completamente — o comportamento observado corresponde ao resultado esperado sem desvios.
-| Atende com ressalvas | pass:[\testresultbadge{Partial}] | O caso de teste foi executado com sucesso, mas com restrições, dependências ou configuração adicional (documentadas em Observações).
-| Não atende | pass:[\testresultbadge{Fail}] | O caso de teste falha — o comportamento observado não corresponde ao resultado esperado. Um relatório de defeito deve ser registrado.
-| Não testado | pass:[\testresultbadge{Untested}] | O caso de teste não foi executado — a execução permanece pendente e deve ser agendada.
+| pass:[\testresultbadge{Pass}] | O caso de teste passa completamente — o comportamento observado corresponde ao resultado esperado sem desvios.
+| pass:[\testresultbadge{Partial}] | O caso de teste foi executado com sucesso, mas com restrições, dependências ou configuração adicional (documentadas em Observações).
+| pass:[\testresultbadge{Fail}] | O caso de teste falha — o comportamento observado não corresponde ao resultado esperado. Um relatório de defeito deve ser registrado.
+| pass:[\testresultbadge{Untested}] | O caso de teste não foi executado — a execução permanece pendente e deve ser agendada.
 |===
 
 == Casos de Teste
@@ -515,6 +515,9 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.4.1}{2026-09-28}{
+    \item Tabela de critérios de aceitação simplificada para 2 colunas (Resultado | Explicação), com os badges coloridos na coluna Resultado.
+  }
   \changelogentry{2.4.0}{2026-09-28}{
     \item Adicionada coluna ``Amostra'' na tabela de critérios de aceitação, mostrando os badges coloridos (\textbackslash testresultbadge) que correspondem aos usados nos casos de teste e na tabela de resumo.
   }
