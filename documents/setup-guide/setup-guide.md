@@ -5,7 +5,7 @@ alt="huawei logo cover" />
 
 Huawei Technologies Co., Ltd.
 
-**v6.16.2** — September 27, 2026 17:27
+**v6.16.4** — September 27, 2026 17:37
 
 # Provision a Flexus X Instance on Huawei Cloud
 
@@ -1296,6 +1296,25 @@ secondary text:
 </tr>
 </thead>
 <tbody>
+<tr class="odd">
+<td style="text-align: left;"><p>6.16.4</p></td>
+<td style="text-align: left;"><p>2026-09-28</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Testbook: added colored badge column to acceptance criteria
+table, matching badges used in testcases and test summary. Updated
+SKILL.md skeleton with badge example.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>6.16.3</p></td>
+<td style="text-align: left;"><p>2026-09-28</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Oracle review fixes: corrected SKILL.md code example (fancyvrb
+multi-line), fixed typo in testbook-pt, synced stripebg to DOCX/HTML,
+added stripebg to all SKILL.md color tables, fixed stale field order and
+comments.</p></li>
+</ul></td>
+</tr>
 <tr class="odd">
 <td style="text-align: left;"><p>6.16.2</p></td>
 <td style="text-align: left;"><p>2026-09-28</p></td>

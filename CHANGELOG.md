@@ -4,6 +4,28 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.16.4 (2026-09-28)
+
+### Testbook acceptance badges
+
+- **Acceptance criteria table**: added a "Badge" / "Amostra" column showing
+  the actual `\testresultbadge` colored pills (green Pass, orange Partial,
+  red Fail, gray Untested) in both testbook samples. This creates a visual
+  reference that matches the badges used in testcases and the test summary
+  table.
+- **SKILL.md skeleton**: updated with a badge column example in the
+  acceptance method section.
+
+## v6.16.3 (2026-09-28)
+
+### Oracle review fixes
+
+- Fixed `\begin{code}` example in SKILL.md (fancyvrb requires multi-line)
+- Fixed typo "Diagramos" → "Diagramas" in testbook-pt
+- Synced `stripebg` #F0F1F3 to DOCX (`docx_fix.py`) and HTML (`huawei.css`)
+- Added `stripebg` to guide/technical/poc SKILL.md color tables
+- Fixed stale field order, comments, and changelog command list
+
 ## v6.16.2 (2026-09-28)
 
 ### Documentation + stripe color

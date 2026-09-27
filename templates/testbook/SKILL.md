@@ -634,7 +634,16 @@ The source keeps language-neutral enum values (`Pass`/`Partial`/`Fail`/
 
 === Acceptance Method
 
-// ... acceptance criteria table ...
+// ... acceptance criteria table with badge column ...
+// Example:
+// [.hutable]
+// |===
+// | Result | Badge | Explanation
+// | Pass | pass:[\testresultbadge{Pass}] | The test case passes fully.
+// | Partial | pass:[\testresultbadge{Partial}] | Passed with restrictions.
+// | Fail | pass:[\testresultbadge{Fail}] | The test case fails.
+// | Untested | pass:[\testresultbadge{Untested}] | Not yet executed.
+// |===
 
 == Test Cases
 

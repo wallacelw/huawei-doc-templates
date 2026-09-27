@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.3.1
+:version: 2.4.0
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -65,12 +65,12 @@ infrastructure changes and avoid unintended resource modifications.
 .Acceptance criteria.
 [.hutable]
 |===
-| Result | Explanation
+| Result | Badge | Explanation
 
-| Pass | The test case passes fully — observed behavior matches the expected result with no deviations.
-| Partial | The test case was executed successfully, but with restrictions, dependencies, or additional configuration (documented in Remarks).
-| Fail | The test case fails — observed behavior does not match the expected result. A defect report must be filed.
-| Untested | The test case was not executed — execution remains pending and must be scheduled.
+| Pass | pass:[\testresultbadge{Pass}] | The test case passes fully — observed behavior matches the expected result with no deviations.
+| Partial | pass:[\testresultbadge{Partial}] | The test case was executed successfully, but with restrictions, dependencies, or additional configuration (documented in Remarks).
+| Fail | pass:[\testresultbadge{Fail}] | The test case fails — observed behavior does not match the expected result. A defect report must be filed.
+| Untested | pass:[\testresultbadge{Untested}] | The test case was not executed — execution remains pending and must be scheduled.
 |===
 
 == Test Cases
@@ -515,6 +515,9 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.4.0}{2026-09-28}{
+    \item Added ``Badge'' column to the acceptance criteria table, showing the colored badges (\textbackslash testresultbadge) that match those used in test cases and the test summary table.
+  }
   \changelogentry{2.3.1}{2026-09-28}{
     \item Added note indicating that the diagrams and color palette sections are sample demonstration content.
   }

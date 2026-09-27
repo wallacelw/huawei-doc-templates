@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 6.16.3
+:version: 6.16.4
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.16.4}{2026-09-28}{\item Testbook: added colored badge column to acceptance criteria table, matching badges used in testcases and test summary. Updated SKILL.md skeleton with badge example.}
   \changelogentry{6.16.3}{2026-09-28}{\item Oracle review fixes: corrected SKILL.md code example (fancyvrb multi-line), fixed typo in testbook-pt, synced stripebg to DOCX/HTML, added stripebg to all SKILL.md color tables, fixed stale field order and comments.}
   \changelogentry{6.16.2}{2026-09-28}{\item SKILL.md (testbook): documented auxiliary LaTeX commands available in passthrough blocks (\textbackslash menu, \textbackslash inlinecode, \textbackslash param, \textbackslash weblink, \textbackslash note, \textbackslash image, \textbackslash imageplaceholder, \textbackslash code, \textbackslash warning). Added \texttt{stripebg} color (\#F0F1F3) for visible table zebra striping. Documented \texttt{noanswers} option usage. Added sample-only notes to testbook demo sections.}
   \changelogentry{6.16.1}{2026-09-28}{\item Fix: H1 section heading red rule now spans full page width (reverted minipage wrap that constrained \textbackslash titlerule). Cover text casing ``Co., Ltd.'' synced to all samples. Testbook: removed duplicate prerequisites from objectives block.}
