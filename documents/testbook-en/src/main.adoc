@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.4.1
+:version: 2.4.2
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -47,7 +47,7 @@ specified in the solution architecture.#
 - Each tester must have a personal IAM account with the *Dayu_User* role assigned in DataArts Studio.
 - Network firewall rules must allow inbound TCP 22 (SSH) and TCP 443 (HTTPS) from the test execution subnet.
 
-[.note]#Ensure the test execution environment has the correct timezone set to `America/Sao\_Paulo` (GMT-3) so that log timestamps align with the Huawei Cloud Console.#
+[.note]#Ensure the test execution environment has the correct timezone set to `America/Sao_Paulo` (GMT-3) so that log timestamps align with the Huawei Cloud Console.#
 
 [source,bash]
 ----

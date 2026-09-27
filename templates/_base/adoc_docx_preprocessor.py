@@ -682,8 +682,9 @@ def _process_step_list(env_content, lang, out):
                 min_indent = 0
             code_lines = [cl[min_indent:] for cl in code_lines]
             code_content = '\n'.join(code_lines)
-            # Attach to previous step with +
-            out.append('+')
+            # Code block follows the preceding step paragraph.
+            # (No '+' list-continuation marker — steps are paragraphs, not list items.)
+            out.append('')
             out.append('[source,' + code_lang + ']')
             out.append('----')
             out.append(code_content)
