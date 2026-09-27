@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/28 Huawei Test Book template v6.16.1]
+\ProvidesClass{testbook}[2026/09/28 Huawei Test Book template v6.16.2]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in
@@ -256,7 +256,7 @@
 \newcounter{lg@summaryrow}
 \newcommand{\testsummaryrow}[3]{%
   \stepcounter{lg@summaryrow}%
-  \ifodd\value{lg@summaryrow}\gdef\lg@cc{}\else\gdef\lg@cc{\cellcolor{codebg}}\fi
+  \ifodd\value{lg@summaryrow}\gdef\lg@cc{}\else\gdef\lg@cc{\cellcolor{stripebg}}\fi
   \lg@cc #1 & \lg@cc #2 & \lg@cc #3 \\ \hline
 }
 

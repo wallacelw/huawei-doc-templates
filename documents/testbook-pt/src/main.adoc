@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.3.0
+:version: 2.3.1
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -455,7 +455,10 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Captura de tela do 
 
 === Diagramas de Arquitetura de Teste
 
-Diagramas podem ser usados para visualizar fluxos e arquiteturas de teste.
+NOTE: Esta seção e a seguinte (``Paleta de Cores da Marca'') são conteúdo
+de demonstração do sample — não fazem parte de um documento de teste real.
+
+Diagramos podem ser usados para visualizar fluxos e arquiteturas de teste.
 
 .Diagrama de sequência da execução de teste
 [plantuml.diagram,test-sequencia,png]
@@ -512,6 +515,9 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.3.1}{2026-09-28}{
+    \item Adicionada nota indicando que as seções de diagramas e paleta de cores são conteúdo de demonstração do sample.
+  }
   \changelogentry{2.3.0}{2026-09-28}{
     \item Removidos os pré-requisitos duplicados do bloco de objetivos — agora apenas o objetivo geral aparece no bloco; os pré-requisitos permanecem na seção dedicada ``Pré-condições e Preparações''.
     \item Corrigida a capitalização do texto da capa: ``CO., LTD'' $\rightarrow$ ``Co., Ltd.''

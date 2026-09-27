@@ -44,7 +44,7 @@
 %%    <any>       -> passed to the article class.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{huawei-base}[2026/09/28 Huawei Base class v6.16.1]
+\ProvidesClass{huawei-base}[2026/09/28 Huawei Base class v6.16.2]
 
 % ---- Options --------------------------------------------------------
 \newif\if@indentbody \@indentbodyfalse

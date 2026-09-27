@@ -452,8 +452,8 @@ for entry in "${SAMPLES[@]}"; do
     poc-pt)       img_tol=0; code_tol=0; tc_tol=5 ;;
     technical-en) img_tol=0; code_tol=0; tc_tol=4 ;;
     technical-pt) img_tol=0; code_tol=0; tc_tol=4 ;;
-    testbook-en)  img_tol=0; code_tol=0; tc_tol=6 ;;
-    testbook-pt)  img_tol=0; code_tol=0; tc_tol=6 ;;
+    testbook-en)  img_tol=0; code_tol=0; tc_tol=7 ;;
+    testbook-pt)  img_tol=0; code_tol=0; tc_tol=7 ;;
     setup-guide)  img_tol=0; code_tol=0; tc_tol=32 ;;
     *)
       # Uncalibrated sample (new template/document): measure its actual

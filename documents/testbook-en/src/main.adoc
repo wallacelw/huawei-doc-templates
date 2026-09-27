@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.3.0
+:version: 2.3.1
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -455,6 +455,9 @@ pass:[\imageplaceholder{assets/test-execution-dashboard.png}{Screenshot of the t
 
 === Test Architecture Diagrams
 
+NOTE: This section and the following (``Brand Color Palette'') are sample
+demonstration content — they are not part of a real test document.
+
 Diagrams can be used to visualize test flows and architectures.
 
 .Sequence diagram of test execution
@@ -512,6 +515,9 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.3.1}{2026-09-28}{
+    \item Added note indicating that the diagrams and color palette sections are sample demonstration content.
+  }
   \changelogentry{2.3.0}{2026-09-28}{
     \item Removed duplicate prerequisites from the objectives block — only the general objective now appears in the block; prerequisites remain in the dedicated ``Preconditions and Preparations'' section.
     \item Fixed cover text casing: ``CO., LTD'' $\rightarrow$ ``Co., Ltd.''

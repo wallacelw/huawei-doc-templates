@@ -314,6 +314,7 @@ rendered, but the content remains in the `.adoc` file for future reference.
 | Name | Hex | Use |
 |---|---|---|
 | `codebg` | `#F6F8FA` | Code block background |
+| `stripebg` | `#F0F1F3` | Table zebra stripe background (hutable, testsummary) |
 | `codetext` | `#1F2328` | Code text |
 | `linkblue` | `#0000FF` | Links |
 | `huaweired` | `#C7000B` | Brand red (H1 chapter rules, test case left-rule and labels, accents, badge) |
@@ -405,6 +406,12 @@ The following features are specific to the testbook template:
 |---|---|---|
 | `:noanswers:` | Hide Test Result and Remarks fields in all test cases. | `:noanswers:` |
 
+Use `:noanswers:` to produce **blank test books for manual test execution** —
+the Objective, Scope, Prerequisites, Procedure, and Expected Result fields
+are shown, but Test Result and Remarks are hidden. Testers fill in the
+results by hand or in a separate tracking system. Remove `:noanswers:` for
+the final report with all results recorded.
+
 ### Test case environment
 
 The `testcase` environment is the core building block. It uses a LaTeX
@@ -481,6 +488,24 @@ where consistent numbered formatting is needed.
 | Command | Purpose |
 |---|---|
 | `\begin{testlist} ... \end{testlist}` | Numbered list with red bold numbers (1., 2., 3., …). Use inside testcase fields. |
+
+### LaTeX commands inside passthrough blocks
+
+Inside `++++` passthrough blocks (testcase, testsummary, changelog), the
+following LaTeX commands from shared modules are available. Use them for
+formatting that cannot be expressed in AsciiDoc roles.
+
+| Command | Source module | Purpose | Example |
+|---|---|---|---|
+| `\menu{A, B, C}` | huawei-shared | Menu path breadcrumb (▸ separators). | `\menu{Console, MapReduce Service, Clusters}` |
+| `\inlinecode{text}` | huawei-code | Inline monospace code. | `\inlinecode{mrs-poc-cluster}` |
+| `\param{name}` | huawei-code | Parameter/file reference (italic). | `\param{provider.tf}` |
+| `\weblink{URL}{text}` | huawei-shared | Hyperlink (blue, no underline). | `\weblink{https://support.huaweicloud.com/obs/index.html}{OBS Docs}` |
+| `\note{text}` | huawei-shared | Note callout (bold label + italic text). | `\note{Allow 5 minutes for IAM propagation.}` |
+| `\image[opts]{path}` | huawei-images | Image inside passthrough. | `\image[width=0.8\linewidth]{common-assets/screenshot.png}` |
+| `\imageplaceholder{path}{caption}` | huawei-images | Image placeholder (for missing images). | `\imageplaceholder{assets/dashboard.png}{Test dashboard}` |
+| `\begin{code}[lang]...\end{code}` | huawei-code | Code block inside passthrough. | `\begin{code}[bash] obsutil ls obs://bucket \end{code}` |
+| `\begin{warning}...\end{warning}` | huawei-callouts | Warning callout (amber box). | `\begin{warning} Do not skip plan review. \end{warning}` |
 
 ### Test summary table
 

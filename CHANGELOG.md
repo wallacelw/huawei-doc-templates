@@ -4,6 +4,25 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.16.2 (2026-09-28)
+
+### Documentation + stripe color
+
+- **SKILL.md (testbook)**: documented 9 auxiliary LaTeX commands available
+  inside passthrough blocks (`\menu`, `\inlinecode`, `\param`, `\weblink`,
+  `\note`, `\image`, `\imageplaceholder`, `\code`, `\warning`).
+- **`stripebg` color** (`#F0F1F3`): added to `huawei-colors.sty` for visible
+  table zebra striping. Used by `testsummary` (`\cellcolor` per row —
+  confirmed visible). `hutable` (`\rowcolors`) updated to reference
+  `stripebg` but striping remains non-functional due to `\hline`/`\rowcolors`
+  interaction (pre-existing — separate fix needed).
+- **`noanswers` option**: documented use case (blank test books for manual
+  execution) in SKILL.md.
+- **Sample-only notes**: added NOTE admonitions to testbook demo sections
+  (diagrams, color palette) indicating they are sample demonstration content.
+- **round-trip.sh**: bumped testbook tolerance from ±6 to ±7 (extra NOTE
+  admonition increases MD/HTML callout count vs DOCX).
+
 ## v6.16.1 (2026-09-28)
 
 ### Fixes
