@@ -519,6 +519,10 @@ def _process_testcase_inner(inner, lang, labels, out):
                     out.append('')
                     out.append(convert_inline_latex(arg.strip(), lang))
                     out.append('')
+                    out.append('{nbsp}')
+                    out.append('')
+                    out.append('{nbsp}')
+                    out.append('')
                 pos = after
                 continue
 

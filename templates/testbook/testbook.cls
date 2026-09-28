@@ -22,7 +22,7 @@
 %%                   (default: show all rows)
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{testbook}[2026/09/28 Huawei Test Book template v6.16.6]
+\ProvidesClass{testbook}[2026/09/28 Huawei Test Book template v6.16.7]
 
 % ---- Options --------------------------------------------------------
 % noanswers is testbook-specific; the shared options are declared in
@@ -184,7 +184,8 @@
 }
 \newcommand{\testremarks}[1]{%
   \if@showanswers
-    \lg@testfield{\lg@remarks}{#1}
+    \lg@testfield{\lg@remarks}{#1}%
+    \vspace{2\baselineskip}
   \fi
 }
 
