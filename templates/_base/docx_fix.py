@@ -1377,6 +1377,8 @@ def _apply_content_styling(docx_path):
     # --- Table styling (hutable vs plain grid) ---
     for table in doc.tables:
         _style_table(table, qn)
+        _fix_table_layout(table, qn)
+        _set_table_font_size(table, qn, 9)
 
     # --- Captions: match the PDF caption systems ---
     # All captions are centered in the PDF (\caption, \imagecap,
@@ -1416,6 +1418,77 @@ def _apply_content_styling(docx_path):
     _add_header_logo(doc.sections[0], qn)
 
     doc.save(docx_path)
+
+
+def _fix_table_layout(table, qn):
+    """Force fixed table layout so renderers honor the tblGrid widths.
+
+    Pandoc omits w:tblLayout, so Word/LibreOffice default to autofit and
+    re-flow columns by content — long email addresses break mid-column
+    even though tblGrid carries the intended proportional widths (L18:
+    the PDF's proportional columns must survive in DOCX). Fixed layout
+    makes the renderer use the grid as-is. Tables whose gridCol entries
+    lack explicit widths keep autofit — fixed layout without a grid
+    would collapse the columns.
+    """
+    tbl = table._element
+    grid = tbl.find(qn('w:tblGrid'))
+    if grid is None:
+        return
+    widths = []
+    for col in grid.findall(qn('w:gridCol')):
+        val = col.get(qn('w:w'))
+        try:
+            widths.append(int(val))
+        except (TypeError, ValueError):
+            widths.append(0)
+    if not widths or any(w <= 0 for w in widths):
+        return
+    tblPr = tbl.find(qn('w:tblPr'))
+    if tblPr is None:
+        return
+    tblLayout = tblPr.find(qn('w:tblLayout'))
+    if tblLayout is None:
+        tblLayout = etree.SubElement(tblPr, qn('w:tblLayout'))
+        # Schema order: tblLayout precedes tblCellMar/tblLook/tblCaption/
+        # tblDescription — reposition after creation, like tblBorders in
+        # _style_table.
+        anchor = None
+        for tag in ('w:tblCellMar', 'w:tblLook', 'w:tblCaption',
+                    'w:tblDescription'):
+            el = tblPr.find(qn(tag))
+            if el is not None:
+                anchor = el
+                break
+        if anchor is not None:
+            anchor.addprevious(tblLayout)
+    tblLayout.set(qn('w:type'), 'fixed')
+
+
+def _set_table_font_size(table, qn, size_pt):
+    """Set header-marked tables' text to size_pt, matching the PDF.
+
+    The PDF renders hutable/longhutable at \\small (huawei-tables.sty);
+    pandoc emits body-size runs, so long cell content (e.g. email
+    addresses) re-flows and splits even with fixed column widths.
+    Header detection mirrors _style_table (w:tblHeader on row 0).
+    Plain grids without a header row (signatures) keep body size,
+    matching the PDF. Known deviation: the POC closing record is
+    emitted by the preprocessor as a header-marked hutable, so it gets
+    9pt here while its PDF counterpart (poc.cls tabular) renders at
+    body size.
+    """
+    from docx.shared import Pt
+    if len(table.rows) == 0:
+        return
+    trPr = table.rows[0]._tr.find(qn('w:trPr'))
+    if trPr is None or trPr.find(qn('w:tblHeader')) is None:
+        return
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(size_pt)
 
 
 def _style_table(table, qn):

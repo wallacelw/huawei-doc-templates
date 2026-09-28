@@ -350,7 +350,12 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def convert_paragraph(node)
     content = escape_inline_content(node)
     return '' if content.nil? || content.strip.empty?
-    content
+    # Trailing newline: sibling block outputs are joined with a single
+    # "\n", so a bare paragraph would land on the line directly above the
+    # next block — LaTeX reads adjacent lines as ONE paragraph and
+    # \parskip never applies between them. The extra newline yields a
+    # blank line (\par) so consecutive paragraphs actually separate.
+    "#{content}\n"
   end
 
   # --- ADMONITION — NOTE/TIP/WARNING/CAUTION/IMPORTANT → callout boxes ---

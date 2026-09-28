@@ -4,6 +4,33 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.16.11 (2026-09-28)
+
+### PDF paragraph separation + DOCX table fidelity
+
+- **PDF paragraphs now separate correctly** (converter): consecutive
+  AsciiDoc paragraphs were emitted on adjacent LaTeX lines — a single
+  newline, which LaTeX reads as ONE paragraph, so `\parskip` never
+  applied and prose blocks rendered glued together. `convert_paragraph`
+  now emits a trailing newline so the block join produces a blank line
+  (`\par`) between paragraphs. Affects all templates; sample PDFs
+  recompiled.
+- **DOCX tables use fixed layout** (`docx_fix.py`): pandoc omits
+  `w:tblLayout`, so Word/LibreOffice autofit re-flowed columns by
+  content, breaking long email addresses mid-column even with correct
+  `tblGrid` widths. Tables with explicit gridCol widths now carry
+  `tblLayout type="fixed"`, honoring the intended proportions (L18).
+- **DOCX table text at 9pt** (`docx_fix.py`): header-marked tables now
+  render their runs at 9pt, matching the PDF's `\small`
+  hutable/longhutable (L18). Plain grids without a header row
+  (signatures) keep body size. Known deviation: the POC closing record
+  renders as a header-marked table in DOCX (9pt) while its PDF
+  counterpart is body size.
+- **POC closing record column widths** (`adoc_docx_preprocessor.py`):
+  the DOCX closing record now carries `cols="3,7"`, matching the PDF's
+  30/70 label/value split (previously autofit, then locked at 50/50 by
+  the fixed-layout change).
+
 ## v6.16.10 (2026-09-28)
 
 ### Documentation

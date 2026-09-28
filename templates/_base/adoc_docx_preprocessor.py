@@ -346,8 +346,9 @@ def convert_closingrecord(content, lang):
     r"""Convert \begin{closingrecord}...\end{closingrecord} to AsciiDoc table."""
     labels = LABELS.get(lang, LABELS['en'])
     # Header mirrors the cls labels (poc.cls: Item | Record / Item | Registro).
+    # cols 3:7 mirrors the PDF's 30/70 label/value split (poc.cls tabular).
     header = '| ' + labels['th_item'] + ' | ' + labels['th_record']
-    lines = ['[.hutable]', '|===', header, '']
+    lines = ['[.hutable,cols="3,7"]', '|===', header, '']
     for line in content.split('\n'):
         line = line.strip()
         if not line:

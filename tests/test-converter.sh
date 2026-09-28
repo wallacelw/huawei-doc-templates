@@ -124,6 +124,27 @@ assert_contains "Has makecover"      '\makecover'       "$OUT"
 assert_contains "Has maketoc"        '\maketoc'         "$OUT"
 assert_contains "Has startbody"     '\startbody'       "$OUT"
 
+# Consecutive paragraphs → blank line between them (\par, so \parskip
+# applies). Regression guard: a bare convert_paragraph return glued
+# consecutive paragraphs into ONE LaTeX paragraph. Newlines are
+# flattened to '@' so the multi-line shape is checkable with grep -F.
+OUT=$(convert '= Test
+:template: guide
+
+== Section
+
+First paragraph.
+
+Second paragraph.')
+if printf '%s' "$OUT" | tr '\n' '@' | grep -qF 'First paragraph.@@Second paragraph.'; then
+  echo "  PASS: consecutive paragraphs → blank line between them"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: consecutive paragraphs → blank line between them"
+  echo "        expected a blank line (\\par) between the two paragraphs"
+  FAIL=$((FAIL + 1))
+fi
+
 # ════════════════════════════════════════════════════════════════════════════
 ## 2. Inline formatting
 # ════════════════════════════════════════════════════════════════════════════
@@ -539,6 +560,26 @@ OUT=$(convert '= Test
 assert_contains "ulist → begin itemize" '\begin{itemize}' "$OUT"
 assert_contains "ulist → end itemize"   '\end{itemize}'   "$OUT"
 assert_contains "ulist → item"          '\item Item one'  "$OUT"
+
+# List continuation stays attached to its item: no blank line between
+# the item text and the continuation paragraph (newlines flattened
+# to '@' for the fixed-string check).
+OUT=$(convert '= Test
+:template: guide
+
+. Item one
++
+Continuation text.
+
+. Item two')
+if printf '%s' "$OUT" | tr '\n' '@' | grep -qF '\item Item one@Continuation text.'; then
+  echo "  PASS: list continuation → attached to item text"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: list continuation → attached to item text"
+  echo "        expected \\item text directly followed by the continuation"
+  FAIL=$((FAIL + 1))
+fi
 
 OUT=$(convert '= Test
 :template: guide

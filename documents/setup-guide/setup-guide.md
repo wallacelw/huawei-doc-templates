@@ -5,7 +5,7 @@ alt="huawei logo cover" />
 
 Huawei Technologies Co., Ltd.
 
-**v6.16.10** — September 28, 2026 01:24
+**v6.16.11** — September 28, 2026 11:55
 
 # Provision a Flexus X Instance on Huawei Cloud
 
