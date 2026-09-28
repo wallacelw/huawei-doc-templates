@@ -1,7 +1,7 @@
 = [Analysis Report] The Enterprise Project List Is Not Displayed on the ECS Creation Page in 8.5.1 at the Brazil Site
 :template: technical
 :lang: en
-:version: 3.6.1
+:version: 3.6.2
 :header-title: Huawei Cloud --- Technical Report
 
 ++++
@@ -118,6 +118,17 @@ kubectl logs -f deployment/api-gateway -n production
 | Cache | 7.0 | Degraded
 |===
 
+Column widths can be set with the `cols` attribute (numeric weights,
+proportional to the table width):
+
+[.hutable,cols="2,1,1"]
+|===
+| Service | Region | Zone
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
+|===
+
 === Inline commands
 
 [.note]#Always verify the backup before starting the workaround.#
@@ -202,6 +213,7 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+\changelogentry{3.6.2}{2026-09-28}{\item Added a cols column-width example table (proportional widths).}
 \changelogentry{3.6.1}{2026-09-19}{\item Fixed changelog dates — replaced \inlinecode{\textbackslash today} with the actual historical release dates.}
 \changelogentry{3.6.0}{2026-09-11}{\item Added \inlinecode{\textbackslash setdocauthors} to demonstrate the authors feature on the cover page.}
 \changelogentry{1.3.0}{2026-09-10}{\item Updated to base template v3.0.1 — minor fixes (test auto-discovery, help text, comments, CI).}

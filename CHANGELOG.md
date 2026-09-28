@@ -4,6 +4,59 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.16.10 (2026-09-28)
+
+### Documentation
+
+- Documented `cols` column widths for `hutable`/`longhutable` in all
+  four SKILL.mds (guide, technical, testbook, poc).
+- Backfilled changelog entries for v6.16.5–v6.16.9.
+
+## v6.16.9 (2026-09-28)
+
+### Paragraph spacing + table column widths
+
+- **Paragraph spacing** increased from 4pt to `0.5\baselineskip`
+  (`huawei-fonts.sty`) — paragraphs were visually glued together.
+- **`hutable`/`longhutable` respect the AsciiDoc `cols` attribute**:
+  comma-separated numeric weights produce proportional column widths
+  (e.g. `[.longhutable,cols="19,37,10,17,17"]`). Tables without `cols`
+  keep equal widths — existing documents are unaffected. Colspan cells
+  (`n+|`) fold the covered weighted columns; unusable `cols` values are
+  ignored with a converter warning and fall back to equal widths.
+
+## v6.16.8 (2026-09-28)
+
+### POC stakeholders email wrapping
+
+- Rebalanced `stakeholders` column widths (Name 16%, Email 34%, Phone
+  20%, Role 30%) — emails fit on one line, phone numbers no longer
+  break mid-digit.
+
+## v6.16.7 (2026-09-28)
+
+### Testbook remarks note space
+
+- Added two empty lines after `\testremarks` content (PDF) and two
+  {nbsp} paragraphs (DOCX/MD/HTML) — visible space for handwritten
+  notes in printed documents.
+
+## v6.16.6 (2026-09-28)
+
+### DOCX output fixes
+
+- Removed stray `+` markers leaked into DOCX/MD/HTML by the
+  preprocessor.
+- Fixed `America/Sao\_Paulo` → `America/Sao_Paulo` in both testbook
+  samples.
+
+## v6.16.5 (2026-09-28)
+
+### Testbook acceptance table
+
+- Simplified acceptance criteria table to 2 columns: Result (badge) |
+  Explanation.
+
 ## v6.16.4 (2026-09-28)
 
 ### Testbook acceptance badges

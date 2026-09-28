@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- ECS Quick Start Guide
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 3.7.1
+:version: 3.7.2
 :header-logo: common-assets/huawei-logo-header.png
 :cover-logo: common-assets/huawei-logo-cover.png
 
@@ -123,6 +123,17 @@ The table below lists recommended ECS flavors for development workloads:
 |===
 
 pass:[\imageplaceholder{assets/ecs-flavors.png}{Screenshot of the ECS flavor selection page in the Console}]
+
+Column widths can be set with the `cols` attribute (numeric weights,
+proportional to the table width):
+
+[.hutable,cols="2,1,1"]
+|===
+| Service | Region | Zone
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
+|===
 
 NOTE: This is an English sample that exercises every command and
 environment provided by the `guide` class. Use it as a reference
@@ -296,6 +307,7 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+\changelogentry{3.7.2}{2026-09-28}{\item Added a cols column-width example table (proportional widths).}
 \changelogentry{3.7.1}{2026-09-28}{\item Fixed cover text casing: ``CO., LTD'' $\rightarrow$ ``Co., Ltd.''}
 \changelogentry{3.7.0}{2026-09-23}{\item Added a column-span row (3+| cell prefix) to the recommended flavors table to demonstrate colspan support.}
 \changelogentry{3.6.1}{2026-09-22}{\item Fixed the external code file example: replaced the broken inline passthrough with the [.codefile] block role (the script content now renders) and fixed list continuation indentation.}

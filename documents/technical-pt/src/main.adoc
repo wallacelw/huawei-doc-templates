@@ -1,7 +1,7 @@
 = [Relatório de Análise] A lista de projetos empresariais não é exibida na página de criação do ECS na 8.5.1 no site do Brasil
 :template: technical
 :lang: pt
-:version: 3.6.2
+:version: 3.6.3
 :header-title: Huawei Cloud --- Relatório Técnico
 
 ++++
@@ -120,6 +120,17 @@ kubectl logs -f deployment/api-gateway -n production
 | Cache | 7.0 | Degradado
 |===
 
+Larguras de coluna podem ser definidas com o atributo `cols` (pesos
+numéricos, proporcionais à largura da tabela):
+
+[.hutable,cols="2,1,1"]
+|===
+| Serviço | Região | Zona
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
+|===
+
 === Comandos inline
 
 [.note]#Sempre verifique o backup antes de iniciar a solução alternativa.#
@@ -204,6 +215,7 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+\changelogentry{3.6.3}{2026-09-28}{\item Adicionada tabela exemplo de larguras de coluna com cols (larguras proporcionais).}
 \changelogentry{3.6.2}{2026-09-22}{\item Revisão de idioma: cabeçalhos de tabela ``Cor''/``Amostra'' (antes ``Color''/``Sample'').}
 \changelogentry{3.6.1}{2026-09-19}{\item Corrigidas as datas do histórico de versões — \inlinecode{\textbackslash today} substituído pelas datas reais de lançamento.}
 \changelogentry{3.6.0}{2026-09-11}{\item Adicionado \inlinecode{\textbackslash setdocauthors} para demonstrar o recurso de autores na capa.}

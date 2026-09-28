@@ -276,6 +276,63 @@ OUT=$(convert '= Test
 assert_contains "hutable no header → tbody" '\tbody' "$OUT"
 assert_not_contains "hutable no header → no rowcolor" '\rowcolor{huaweired}' "$OUT"
 
+# Column widths via cols attribute (numeric weights → proportional widths)
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable,cols="2,1,1"]
+|===
+| Col A | Col B | Col C
+
+| Data 1 | Data 2 | Data 3
+|===')
+assert_contains "cols weights → weighted col spec" 'm{\dimexpr(\linewidth-4\arrayrulewidth-6\tabcolsep)*2/4\relax}' "$OUT"
+assert_contains "cols weights → proportional weight per column" '*1/4\relax' "$OUT"
+
+# Unusable cols (repeat syntax "2*" → arity mismatch) → warning + equal-width fallback
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable,cols="2*"]
+|===
+| Col A | Col B
+
+| Data 1 | Data 2
+|===')
+assert_contains "cols repeat syntax → equal-width fallback" 'm{\dimexpr(\linewidth-3\arrayrulewidth-4\tabcolsep)/2\relax}' "$OUT"
+if grep -qF 'ignoring cols attribute' "$CONVERT_ERR" 2>/dev/null; then
+  echo "  PASS: cols repeat syntax → converter warning"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: cols repeat syntax → converter warning"
+  echo "        expected stderr to contain: ignoring cols attribute"
+  FAIL=$((FAIL + 1))
+fi
+
+# Non-numeric cols → equal-width fallback
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable,cols="a,b,c"]
+|===
+| Col A | Col B | Col C
+
+| Data 1 | Data 2 | Data 3
+|===')
+assert_contains "cols non-numeric → equal-width fallback" 'm{\dimexpr(\linewidth-4\arrayrulewidth-6\tabcolsep)/3\relax}' "$OUT"
+
+# Weighted table with colspan → multicolumn folds covered weights
+OUT=$(convert '= Test
+:template: guide
+
+[.hutable,cols="2,1,1"]
+|===
+| Col A | Col B | Col C
+
+2+| Spanning cell | Data 3
+|===')
+assert_contains "cols + colspan → covered weights in multicolumn" '\multicolumn{2}{|>{\RaggedRight\arraybackslash}m{\dimexpr((\linewidth-4\arrayrulewidth-6\tabcolsep)*3/4+2\tabcolsep+1\arrayrulewidth)\relax}' "$OUT"
+
 # ════════════════════════════════════════════════════════════════════════════
 ## 6. Code blocks
 # ════════════════════════════════════════════════════════════════════════════

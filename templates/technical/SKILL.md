@@ -188,6 +188,25 @@ Column spans are supported via the `n+|` cell prefix (e.g. `3+| cell`,
 rendered through `\multicolumn`). Rowspan (`.n+|`) is not supported —
 the build warns and renders the cell without the span.
 
+Column widths can be set with the standard `cols` attribute — comma-separated
+numeric weights, proportional to the available table width. Omit it for equal
+widths (the default):
+
+```asciidoc
+[.hutable,cols="2,1,1"]
+|===
+| Name | Value | Unit
+
+| Disk | 512 | GB
+|===
+```
+
+A `cols` list that does not match the column count, contains non-numeric,
+zero, or negative entries, or uses weights with more than 3 decimal places,
+is ignored with a build warning and the table falls back to equal widths.
+AsciiDoc repeat syntax (`2*`) is not supported — write weights out in full.
+The same attribute works on `[.longhutable]`.
+
 ### Page-breaking table (longhutable)
 
 ```asciidoc

@@ -1,7 +1,7 @@
 = Roteiro de Homologação
 :template: poc
 :lang: pt
-:version: 1.1.0
+:version: 1.1.1
 :authors: Carlos Santos
 :nochangelog:
 
@@ -71,6 +71,17 @@ image::common-assets/exemplo-menu.png[width=80%]
 | Monitoramento | CES (Cloud Eye Service) | Métricas, alarmes e dashboards
 | Registro de Contêineres | SWR (Software Repository for Containers) | Armazenamento e gestão de imagens
 | Balanceamento | ELB (Elastic Load Balance) | Distribuição de tráfego entre nós
+|===
+
+Larguras de coluna podem ser definidas com o atributo `cols` (pesos
+numéricos, proporcionais à largura da tabela):
+
+[.hutable,cols="2,1,1"]
+|===
+| Serviço | Região | Zona
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
 |===
 
 == Escopo

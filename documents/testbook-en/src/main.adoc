@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- POC Test Cases
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.5.0
+:version: 2.5.1
 
 NOTE: This document demonstrates the `testbook` template (`testbook.cls`) for
 Huawei Cloud POC/acceptance test case documents. It exercises all available
@@ -37,6 +37,17 @@ specified in the solution architecture.#
 | Data Engineering | DataArts Studio pipelines can ingest, transform, and load data into the target storage.
 | Data Storage | OBS buckets and MRS HDFS accept writes/reads with correct permissions.
 | Security | IAM policies, VPC isolation, and security group rules enforce the intended access control.
+|===
+
+Column widths can be set with the `cols` attribute (numeric weights,
+proportional to the table width):
+
+[.hutable,cols="2,1,1"]
+|===
+| Service | Region | Zone
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
 |===
 
 === Preconditions and Preparations
@@ -515,6 +526,9 @@ Brand Guidelines:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.5.1}{2026-09-28}{
+    \item Added a cols column-width example table (proportional widths).
+  }
   \changelogentry{2.4.1}{2026-09-28}{
     \item Acceptance criteria table simplified to 2 columns (Result | Explanation), with colored badges in the Result column.
   }

@@ -3,7 +3,7 @@
 :lang: pt
 :header-title: Huawei Cloud -- Casos de Teste POC
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 2.5.0
+:version: 2.5.1
 
 NOTE: Este documento demonstra o template `testbook` (`testbook.cls`) para
 documentos de casos de teste POC/aceitação do Huawei Cloud. Ele exercita todos os
@@ -37,6 +37,17 @@ especificado na arquitetura da solução.#
 | Engenharia de Dados | Pipelines do DataArts Studio conseguem ingerir, transformar e carregar dados no armazenamento de destino.
 | Armazenamento de Dados | Buckets OBS e HDFS do MRS aceitam escritas/leituras com permissões corretas.
 | Segurança | Políticas IAM, isolamento VPC e regras de grupo de segurança impõem o controle de acesso pretendido.
+|===
+
+Larguras de coluna podem ser definidas com o atributo `cols` (pesos
+numéricos, proporcionais à largura da tabela):
+
+[.hutable,cols="2,1,1"]
+|===
+| Serviço | Região | Zona
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
 |===
 
 === Pré-condições e Preparações
@@ -515,6 +526,9 @@ Diretrizes de Marca da Huawei Cloud:
 
 ++++
 \begin{changelog}
+  \changelogentry{2.5.1}{2026-09-28}{
+    \item Adicionada tabela exemplo de larguras de coluna com cols (larguras proporcionais).
+  }
   \changelogentry{2.4.1}{2026-09-28}{
     \item Tabela de critérios de aceitação simplificada para 2 colunas (Resultado | Explicação), com os badges coloridos na coluna Resultado.
   }

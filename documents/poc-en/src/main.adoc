@@ -1,7 +1,7 @@
 = Proof of Concept
 :template: poc
 :lang: en
-:version: 1.0.0
+:version: 1.0.1
 :authors: Jane Doe
 :nochangelog:
 
@@ -72,6 +72,17 @@ The target architecture on Huawei Cloud includes the following components:
 | Encryption | KMS (Key Management Service) | Encryption key management
 | Monitoring | CES (Cloud Eye Service) | Metrics, alarms, and dashboards
 | Container Registry | SWR (Software Repository for Containers) | Container image storage and management
+|===
+
+Column widths can be set with the `cols` attribute (numeric weights,
+proportional to the table width):
+
+[.hutable,cols="2,1,1"]
+|===
+| Service | Region | Zone
+
+| OBS | sa-brazil-1 | 1
+| DWS | sa-brazil-1 | 2
 |===
 
 == Scope

@@ -408,13 +408,15 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # Parse the AsciiDoc `cols` attribute into relative column weights for
   # hutable/longhutable (e.g. "19,37,10,17,17"). Style or alignment
   # suffixes after a number are ignored. Returns nil when the attribute is
-  # absent, lists a different number of specs than columns, or contains a
-  # non-numeric or non-positive spec — callers then fall back to equal
-  # widths. Weights are scaled to integers (1.5 -> 15) for \dimexpr
-  # arithmetic.
+  # absent, lists a different number of specs than columns, contains a
+  # non-numeric, zero, or negative spec, or uses weights with more than 3
+  # decimal places — callers then fall back to equal widths. Weights are
+  # scaled to integers (1.5 -> 15) for \dimexpr arithmetic. AsciiDoc
+  # repeat syntax ("2*") is not supported — write weights out in full.
   def table_column_weights(node, num_cols)
     cols_attr = node.attr('cols')
     return nil unless cols_attr
+    # reject: tolerate trailing commas ("1,2,") — empty specs are not columns
     parts = cols_attr.to_s.split(',').map(&:strip).reject(&:empty?)
     return nil unless parts.size == num_cols
     weights = parts.map do |part|
@@ -445,7 +447,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def table_multicolumn_spec(span, col, num_cols, weights)
     avail = "(\\linewidth-#{num_cols + 1}\\arrayrulewidth-#{2 * num_cols}\\tabcolsep)"
     covered = weights ? weights[(col - 1), span].to_a.sum : 0
-    if weights && covered.positive?
+    if covered.positive?
       width_expr = "\\dimexpr(#{avail}*#{covered}/#{weights.sum}+#{2 * (span - 1)}\\tabcolsep+#{span - 1}\\arrayrulewidth)\\relax"
     else
       width_expr = "\\dimexpr(#{avail}*#{span}/#{num_cols}+#{2 * (span - 1)}\\tabcolsep+#{span - 1}\\arrayrulewidth)\\relax"
@@ -487,7 +489,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     num_cols = node.columns ? node.columns.size : 1
     weights = table_column_weights(node, num_cols)
     if node.attr('cols') && weights.nil?
-      warn "huawei-latex-converter: ignoring cols attribute #{node.attr('cols').inspect} (expected #{num_cols} positive numeric weights); using equal column widths"
+      warn "huawei-latex-converter: ignoring cols attribute #{node.attr('cols').inspect} (expected #{num_cols} positive numeric weights with at most 3 decimal places each); using equal column widths"
     end
     # Use m{...} columns with auto-wrap instead of l (natural width).
     # Available body width shared by all columns (rules + padding removed);
