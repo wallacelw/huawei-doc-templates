@@ -405,15 +405,51 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
 
   # --- TABLE — with .hutable or .longhutable role → Huawei table env ---
 
+  # Parse the AsciiDoc `cols` attribute into relative column weights for
+  # hutable/longhutable (e.g. "19,37,10,17,17"). Style or alignment
+  # suffixes after a number are ignored. Returns nil when the attribute is
+  # absent, lists a different number of specs than columns, or contains a
+  # non-numeric or non-positive spec — callers then fall back to equal
+  # widths. Weights are scaled to integers (1.5 -> 15) for \dimexpr
+  # arithmetic.
+  def table_column_weights(node, num_cols)
+    cols_attr = node.attr('cols')
+    return nil unless cols_attr
+    parts = cols_attr.to_s.split(',').map(&:strip).reject(&:empty?)
+    return nil unless parts.size == num_cols
+    weights = parts.map do |part|
+      m = part.match(/\A(\d+(?:\.\d+)?)/)
+      return nil unless m
+      w = m[1].to_f
+      return nil unless w.positive?
+      w
+    end
+    decimals = weights.map do |w|
+      s = w.to_s
+      s.include?('.') && w != w.truncate ? s.split('.').last.length : 0
+    end.max
+    return nil if decimals > 3
+    scale = 10**decimals
+    weights.map { |w| (w * scale).round }
+  end
+
   # Column spec for a \multicolumn cell spanning `span` columns starting at
-  # 1-based `col` in a table with `num_cols` equal-width m{} columns (the
-  # per-column spec built in convert_table). The spanned width folds in the
-  # (span - 1) skipped column boundaries — one \arrayrulewidth + two
-  # \tabcolsep each — so the cell fills the covered columns exactly. A span
-  # reaching the last column must keep the closing vertical rule, because
-  # \multicolumn replaces the preamble entries of all covered columns.
-  def table_multicolumn_spec(span, col, num_cols)
-    width_expr = "\\dimexpr((\\linewidth-#{num_cols + 1}\\arrayrulewidth-#{2 * num_cols}\\tabcolsep)*#{span}/#{num_cols}+#{2 * (span - 1)}\\tabcolsep+#{span - 1}\\arrayrulewidth)\\relax"
+  # 1-based `col` in a table whose per-column specs are built in
+  # convert_table — equal-width by default, or proportional to `weights`
+  # (scaled integer column weights from a usable `cols` attribute). The
+  # spanned width folds in the (span - 1) skipped column boundaries — one
+  # \arrayrulewidth + two \tabcolsep each — so the cell fills the covered
+  # columns exactly. A span reaching the last column must keep the closing
+  # vertical rule, because \multicolumn replaces the preamble entries of
+  # all covered columns.
+  def table_multicolumn_spec(span, col, num_cols, weights)
+    avail = "(\\linewidth-#{num_cols + 1}\\arrayrulewidth-#{2 * num_cols}\\tabcolsep)"
+    covered = weights ? weights[(col - 1), span].to_a.sum : 0
+    if weights && covered.positive?
+      width_expr = "\\dimexpr(#{avail}*#{covered}/#{weights.sum}+#{2 * (span - 1)}\\tabcolsep+#{span - 1}\\arrayrulewidth)\\relax"
+    else
+      width_expr = "\\dimexpr(#{avail}*#{span}/#{num_cols}+#{2 * (span - 1)}\\tabcolsep+#{span - 1}\\arrayrulewidth)\\relax"
+    end
     spec = "|>{\\RaggedRight\\arraybackslash}m{#{width_expr}}"
     spec += '|' if col + span - 1 >= num_cols
     spec
@@ -426,7 +462,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   # package is not loaded): warn — the cell renders without the span and
   # every following row shifts left (the next row's first cell lands
   # under the rowspan cell).
-  def convert_table_row(row, num_cols, header)
+  def convert_table_row(row, num_cols, header, weights)
     col = 1
     cells = row.map do |cell|
       content = escape_table_cell(cell.content)
@@ -436,7 +472,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
       end
       span = cell.colspan || 1
       out = if span > 1
-              "\\multicolumn{#{span}}{#{table_multicolumn_spec(span, col, num_cols)}}{#{content}}"
+              "\\multicolumn{#{span}}{#{table_multicolumn_spec(span, col, num_cols, weights)}}{#{content}}"
             else
               content
             end
@@ -449,10 +485,19 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
   def convert_table(node)
     role = node.role
     num_cols = node.columns ? node.columns.size : 1
-    # Use p{...} columns with auto-wrap instead of l (natural width)
-    # Equal-width columns computed from \linewidth
-    width_expr = "\\dimexpr(\\linewidth-#{num_cols+1}\\arrayrulewidth-#{2*num_cols}\\tabcolsep)/#{num_cols}\\relax"
-    col_spec = "|>{\\RaggedRight\\arraybackslash}m{#{width_expr}}" * num_cols + "|"
+    weights = table_column_weights(node, num_cols)
+    if node.attr('cols') && weights.nil?
+      warn "huawei-latex-converter: ignoring cols attribute #{node.attr('cols').inspect} (expected #{num_cols} positive numeric weights); using equal column widths"
+    end
+    # Use m{...} columns with auto-wrap instead of l (natural width).
+    # Available body width shared by all columns (rules + padding removed);
+    # columns are proportional to `cols` weights, equal-width by default.
+    avail = "(\\linewidth-#{num_cols + 1}\\arrayrulewidth-#{2 * num_cols}\\tabcolsep)"
+    col_spec = if weights
+                 weights.map { |w| "|>{\\RaggedRight\\arraybackslash}m{\\dimexpr#{avail}*#{w}/#{weights.sum}\\relax}" }.join + '|'
+               else
+                 "|>{\\RaggedRight\\arraybackslash}m{\\dimexpr#{avail}/#{num_cols}\\relax}" * num_cols + "|"
+               end
 
     env_name = role == 'longhutable' ? 'longhutable' : 'hutable'
 
@@ -467,7 +512,7 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     # Header rows
     unless rows_head.empty?
       rows_head.each do |header_row|
-        lines << "\\rowcolor{huaweired} #{convert_table_row(header_row, num_cols, true)} \\\\"
+        lines << "\\rowcolor{huaweired} #{convert_table_row(header_row, num_cols, true, weights)} \\\\"
       end
       if env_name == 'longhutable'
         lines << '\\endhead'
@@ -478,13 +523,13 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     unless rows_body.empty?
       lines << '\\tbody'
       rows_body.each do |row|
-        lines << "#{convert_table_row(row, num_cols, false)} \\\\"
+        lines << "#{convert_table_row(row, num_cols, false, weights)} \\\\"
       end
     end
 
     # Footer rows (rare, but handle them)
     rows_foot.each do |row|
-      lines << "#{convert_table_row(row, num_cols, false)} \\\\"
+      lines << "#{convert_table_row(row, num_cols, false, weights)} \\\\"
     end
 
     lines << "\\end{#{env_name}}"
