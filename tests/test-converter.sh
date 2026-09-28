@@ -507,6 +507,59 @@ OUT=$(convert '= Test
 Text.')
 assert_contains "noanswers → class option" '\documentclass[noanswers]{testbook}' "$OUT"
 
+# Extra logos (multi-logo support): :extra-logo-1: / :extra-logo-2: /
+# :cover-logo-height: header attributes.
+OUT=$(convert '= Test
+:template: guide
+:extra-logo-1: assets/a.png
+
+Text.')
+assert_contains "extra-logo-1 → setextralogoi" '\setextralogoi{assets/a.png}' "$OUT"
+
+OUT=$(convert '= Test
+:template: guide
+:extra-logo-2: assets/b.png
+
+Text.')
+assert_contains "extra-logo-2 → setextralogoii" '\setextralogoii{assets/b.png}' "$OUT"
+
+# Both extras → 3 logos total → auto cover row height 2.2cm
+OUT=$(convert '= Test
+:template: guide
+:extra-logo-1: assets/a.png
+:extra-logo-2: assets/b.png
+
+Text.')
+assert_contains "both extras → auto height 2.2cm" '\setcoverlogoheight{2.2cm}' "$OUT"
+
+# Only extra1 → 2 logos total → auto cover row height 2.6cm
+OUT=$(convert '= Test
+:template: guide
+:extra-logo-1: assets/a.png
+
+Text.')
+assert_contains "only extra1 → auto height 2.6cm" '\setcoverlogoheight{2.6cm}' "$OUT"
+
+# Explicit :cover-logo-height: wins over the auto-scaled value
+OUT=$(convert '= Test
+:template: guide
+:extra-logo-1: assets/a.png
+:extra-logo-2: assets/b.png
+:cover-logo-height: 3cm
+
+Text.')
+assert_contains "explicit cover-logo-height wins" '\setcoverlogoheight{3cm}' "$OUT"
+assert_not_contains "explicit height → no auto 2.2cm" '\setcoverlogoheight{2.2cm}' "$OUT"
+
+# Backward compat: no logo attributes → none of the new setters emitted
+OUT=$(convert '= Test
+:template: guide
+
+Text.')
+assert_not_contains "no extras → no setextralogoi" '\setextralogoi' "$OUT"
+assert_not_contains "no extras → no setextralogoii" '\setextralogoii' "$OUT"
+assert_not_contains "no extras → no setcoverlogoheight" '\setcoverlogoheight' "$OUT"
+
 # ════════════════════════════════════════════════════════════════════════════
 ## 9. Edge cases
 # ════════════════════════════════════════════════════════════════════════════

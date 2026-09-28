@@ -4,6 +4,32 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.17.0 (2026-09-29)
+
+### Multi-logo support (header + cover, all templates)
+
+- **Up to two extra logos** (`:extra-logo-1:`, `:extra-logo-2:`): render in
+  the page header right corner (Huawei logo stays left, title centered) and
+  on the cover as an equal-height row with the main logo. Default (unset)
+  is unchanged — Huawei logo only, rendering identical.
+- **`:cover-logo-height:`** overrides the cover row height; auto default
+  scales by logo count (2.6cm for 2 logos, 2.2cm for 3).
+- **DOCX parity**: header renders logo | title | extras as a borderless
+  3-cell table; cover logos sized to equal heights with fit-to-width
+  shrink; document-relative asset paths (`assets/...`) now resolve in the
+  DOCX pipeline (previously only template-dir paths worked).
+- **Fixed**: bare `:cover-text:` no longer swallows the next source line —
+  it now suppresses the cover text line, matching the PDF (`\setcovertext{}`).
+- **Fixed**: `technical.cls` hardcoded the cover logo path — `:cover-logo:`
+  now works for the technical template.
+- **Fixed**: LibreOffice rendered header images with phantom padding
+  (absent `wp:inline` `dist*` attributes default to 0.3175cm per side) —
+  `dist*=0` is now set explicitly on header logos.
+- The new attributes are documented in all four SKILL.md files; the
+  samples keep the default Huawei-only look (consistent with the
+  existing `:header-logo:`/`:cover-logo:` documentation convention).
+- Tests: converter 218, preprocessor 185, DOCX fix 80 assertions.
+
 ## v6.16.11 (2026-09-28)
 
 ### PDF paragraph separation + DOCX table fidelity

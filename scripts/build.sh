@@ -387,6 +387,24 @@ generate_pandoc_format() {
     fi
 }
 
+# ── Document asset resolver ────────────────────────────────────────────────
+# Resolve a logo/image attribute value to an absolute path: the project
+# dir first (document-relative paths, e.g. assets/foo.png), then the
+# template dir (e.g. common-assets/*.png).  Echoes the first existing
+# path; empty when the value is empty or unresolvable.
+# Usage: resolve_doc_asset <value>
+resolve_doc_asset() {
+    if [ -n "$1" ]; then
+        if [ -f "${PROJECT_DIR}/$1" ]; then
+            echo "${PROJECT_DIR}/$1"
+        elif [ -f "${REPO_ROOT}/templates/${TEMPLATE}/$1" ]; then
+            echo "${REPO_ROOT}/templates/${TEMPLATE}/$1"
+        else
+            echo "  ⚠ Warning: asset not found, skipping: $1" >&2
+        fi
+    fi
+}
+
 generate_docx() {
     local out="${BASENAME}.docx"
     if [ "$DRY_RUN" -eq 1 ]; then
@@ -468,12 +486,29 @@ generate_docx() {
     fi
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
     if [ -f "${PROJECT_DIR}/$out" ]; then
-        local header_logo=""
-        if grep -q '^:header-logo:' "$ADOC_FILE" 2>/dev/null; then
-            header_logo=$(grep -oP '^:header-logo:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
+        # Logo + cover-height attributes → --fix args.  Logo paths
+        # (header-logo, extra-logo-1/2) resolve against the project dir
+        # first (document-relative, e.g. assets/foo.png), then the
+        # template dir (e.g. common-assets/*.png); unresolvable paths
+        # are skipped (no logo inserted).  cover-logo-height is a length
+        # (e.g. 2.4cm) — passed through with no file check.
+        local attr val resolved
+        for attr in header-logo extra-logo-1 extra-logo-2; do
+            val=""
+            if grep -q "^:${attr}:" "$ADOC_FILE" 2>/dev/null; then
+                val=$(grep -oP "^:${attr}:\s*\K.*" "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
+            fi
+            resolved=$(resolve_doc_asset "$val")
+            if [ -n "$resolved" ]; then
+                fix_args+=("--${attr}" "$resolved")
+            fi
+        done
+        val=""
+        if grep -q '^:cover-logo-height:' "$ADOC_FILE" 2>/dev/null; then
+            val=$(grep -oP '^:cover-logo-height:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
         fi
-        if [ -n "$header_logo" ] && [ -f "${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}" ]; then
-            fix_args+=(--header-logo "${REPO_ROOT}/templates/${TEMPLATE}/${header_logo}")
+        if [ -n "$val" ]; then
+            fix_args+=(--cover-logo-height "$val")
         fi
         if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" "${fix_args[@]}" 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2

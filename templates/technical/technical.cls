@@ -22,7 +22,7 @@
 %%    Plus an optional Changelog.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/28 Huawei Technical Report template v6.16.11]
+\ProvidesClass{technical}[2026/09/29 Huawei Technical Report template v6.17.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -115,9 +115,11 @@
   \leftskip=0pt\relax
   \thispagestyle{empty}%
   \vspace*{2cm}%
-  % Logo
+  % Logo (single logo, or multi-logo row when extra logos are set —
+  % \lg@coverlogorow from huawei-cover.sty; single-logo rendering is
+  % unchanged: \lg@coverlogo defaults to common-assets/huawei-logo-cover.png)
   {\centering
-   \includegraphics[width=3.6cm]{common-assets/huawei-logo-cover.png}\par}%
+   \lg@coverlogorow\par}%
   \vspace{1.2cm}%
   % Report type label
   {\centering

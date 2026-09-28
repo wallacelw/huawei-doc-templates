@@ -1293,6 +1293,12 @@ def inject_cover_block(content, lang, template):
       docx_fix), and a meta line using the REPORT version/date (not the
       document :version:).  Authors appear as a table row when set.
 
+    The cover logo row: :extra-logo-1:/:extra-logo-2: add up to two
+    logos next to the main :cover-logo: — emitted as ONE paragraph of
+    inline images (docx_fix enforces the PDF row heights).  A bare
+    :cover-text: (present but empty) suppresses the cover text line
+    (PDF parity: \\setcovertext{} empties it).
+
     Pandoc already renders title, authors, and date; docx_fix reorders
     (title → logo → cover text/label [+ table] → authors → meta) and
     deletes the redundant date paragraph.  The meta line is skipped
@@ -1310,7 +1316,13 @@ def inject_cover_block(content, lang, template):
         return content
 
     m_logo = re.search(r'^:cover-logo:\s*(\S+)', content, re.MULTILINE)
+    # [ \t]* (not \s*): a bare ":extra-logo-N:" line must not cross the
+    # newline and swallow the next line's first word (same bug class as
+    # the bare :cover-text: handling below).
+    m_extra1 = re.search(r'^:extra-logo-1:[ \t]*(\S+)', content, re.MULTILINE)
+    m_extra2 = re.search(r'^:extra-logo-2:[ \t]*(\S+)', content, re.MULTILINE)
     m_covertext = re.search(r'^:cover-text:\s*(.+?)\s*$', content, re.MULTILINE)
+    m_covertext_bare = re.search(r'^:cover-text:\s*$', content, re.MULTILINE)
     m_version = re.search(r'^:version:\s*(\S+)', content, re.MULTILINE)
     m_date = re.search(r'^:date:\s*(.+?)\s*$', content, re.MULTILINE)
     m_authors = re.search(r'^:authors:\s*(.+?)\s*$', content, re.MULTILINE)
@@ -1320,7 +1332,19 @@ def inject_cover_block(content, lang, template):
 
     logo = m_logo.group(1) if m_logo else 'common-assets/huawei-logo-cover.png'
 
-    block = ['image::' + logo + '[]', '']
+    if m_extra1 or m_extra2:
+        # Main + extra logos as ONE horizontal row (single-colon inline
+        # macros in a single paragraph) — pandoc lands them in one DOCX
+        # paragraph and docx_fix enforces equal heights (PDF cover row:
+        # 2 logos → 2.6cm, 3 → 2.2cm; :cover-logo-height: overrides).
+        row = ['image:' + logo + '[]']
+        if m_extra1:
+            row.append('image:' + m_extra1.group(1) + '[]')
+        if m_extra2:
+            row.append('image:' + m_extra2.group(1) + '[]')
+        block = [' '.join(row), '']
+    else:
+        block = ['image::' + logo + '[]', '']
 
     if template == 'technical':
         labels = LABELS.get(lang, LABELS['en'])
@@ -1367,10 +1391,19 @@ def inject_cover_block(content, lang, template):
                 block.append('')
     else:
         # Non-technical: generic cover text + :version: meta (unchanged).
-        cover_text = (m_covertext.group(1) if m_covertext
-                      else 'Huawei Technologies Co., Ltd.')
-        block.append(cover_text)
-        block.append('')
+        # Bare :cover-text: (present but empty) suppresses the line —
+        # PDF parity (\setcovertext{} empties it).  The bare check must
+        # run FIRST: the value regex above can match across the newline
+        # into the next non-blank line when the attribute is empty.
+        # Non-empty value → use it; absent → default company line.
+        if m_covertext_bare:
+            pass  # suppressed — no cover-text line at all
+        elif m_covertext:
+            block.append(m_covertext.group(1))
+            block.append('')
+        else:
+            block.append('Huawei Technologies Co., Ltd.')
+            block.append('')
         if m_version and not nochangelog:
             if m_date:
                 date_str = m_date.group(1)

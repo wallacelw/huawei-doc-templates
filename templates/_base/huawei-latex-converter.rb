@@ -260,6 +260,31 @@ class HuaweiLatexConverter < Asciidoctor::Converter::Base
     if cover_logo
       lines << "\\setcoverlogo{#{cover_logo}}"
     end
+    # Extra logos (multi-logo support): up to two extra logos rendered in
+    # the page header right corner and on the cover row.
+    # Bare (valueless) attributes read as "" — treat them as unset so a
+    # bare :extra-logo-N: neither emits an empty setter nor miscounts
+    # the auto cover height below.
+    extra_logo1 = node.attr('extra-logo-1')
+    extra_logo1 = nil if extra_logo1.to_s.empty?
+    if extra_logo1
+      lines << "\\setextralogoi{#{extra_logo1}}"
+    end
+    extra_logo2 = node.attr('extra-logo-2')
+    extra_logo2 = nil if extra_logo2.to_s.empty?
+    if extra_logo2
+      lines << "\\setextralogoii{#{extra_logo2}}"
+    end
+    # Cover row height: explicit :cover-logo-height: wins; otherwise
+    # auto-scale to the logo count (2 logos total -> 2.6cm, 3 -> 2.2cm).
+    # Nothing is emitted when no extra logos are set (default docs unchanged).
+    cover_logo_height = node.attr('cover-logo-height')
+    cover_logo_height = nil if cover_logo_height.to_s.empty?
+    if cover_logo_height
+      lines << "\\setcoverlogoheight{#{cover_logo_height}}"
+    elsif extra_logo1 || extra_logo2
+      lines << "\\setcoverlogoheight{#{extra_logo1 && extra_logo2 ? '2.2cm' : '2.6cm'}}"
+    end
     # Cover setters hoisted from body passthroughs (see above). Reset the
     # stash so later conversions with the same instance never hoist into
     # a stale list (embedded mode has no preamble to emit them in).

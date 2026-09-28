@@ -100,6 +100,9 @@ all templates:
 | `:cover-text: ...` | Line under the cover logo (default `Huawei Technologies Co., Ltd.`). | `:cover-text: Huawei Technologies Co., Ltd.` |
 | `:header-logo: path` | Header logo image path (default `common-assets/huawei-logo-header.png`). | `:header-logo: assets/custom-logo.png` |
 | `:cover-logo: path` | Cover logo image path (default `common-assets/huawei-logo-cover.png`). | `:cover-logo: assets/custom-cover.png` |
+| `:extra-logo-1: path` | First extra logo — header right corner + cover row (default: none). | `:extra-logo-1: assets/partner.png` |
+| `:extra-logo-2: path` | Second extra logo — header right corner + cover row (default: none). | `:extra-logo-2: assets/partner2.png` |
+| `:cover-logo-height: len` | Cover row height when extra logos are set (auto: 2.6cm for 2 logos, 2.2cm for 3). | `:cover-logo-height: 2.4cm` |
 | `:nochangelog:` | Suppress changelog section and cover version/date/time. | `:nochangelog:` |
 | `:noauthors:` | Hide authors on the cover page. | `:noauthors:` |
 | `:notime:` | Hide compilation time on cover page. | `:notime:` |

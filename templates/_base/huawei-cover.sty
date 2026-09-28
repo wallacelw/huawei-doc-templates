@@ -2,7 +2,9 @@
 %% Provides \makecover with title, logo, cover text, authors, version/date/time.
 %% Used by guide, technical, testbook, and poc.
 %% Depends on: \lg@doctitle, \lg@docversion, \lg@docdate (from huawei-changelog.sty),
-%%             \if@showtime, \if@changelog, \if@showauthors (from class file).
+%%             \if@showtime, \if@changelog, \if@showauthors (from class file),
+%%             \lg@extralogoi, \lg@extralogoii (from huawei-page.sty, loaded
+%%             before this module — consumed by \lg@coverlogorow).
 \ProvidesPackage{huawei-cover}[2026/09/14 Huawei cover page]
 
 % =====================================================================
@@ -12,6 +14,11 @@
 \newcommand{\setcovertext}[1]{\renewcommand{\lg@covertext}{#1}}
 \newcommand{\lg@coverlogo}{common-assets/huawei-logo-cover.png}
 \newcommand{\setcoverlogo}[1]{\renewcommand{\lg@coverlogo}{#1}}
+% Cover row height — used only in multi-logo mode (extra logos set).  The
+% converter auto-scales the row: 2 logos total -> 2.6cm, 3 -> 2.2cm; the
+% :cover-logo-height: AsciiDoc attribute overrides both via \setcoverlogoheight.
+\newcommand{\lg@coverlogoheight}{2.2cm}
+\newcommand{\setcoverlogoheight}[1]{\renewcommand{\lg@coverlogoheight}{#1}}
 % Compilation time from \time primitive (minutes since midnight, respects TZ)
 % \two@digits is provided by the LaTeX kernel
 \newcount\lg@hour
@@ -30,6 +37,43 @@
   \if@showtime\ \two@digits{\lg@hour}:\two@digits{\lg@min}\fi%
 }
 
+% Cover logo row: with no extra logos set this renders the single main logo
+% exactly as before (width=3.6cm); with one or two extra logos set (state
+% from huawei-page.sty) it renders main + extras side by side, each scaled
+% to \lg@coverlogoheight and separated by 0.5cm, skipping unset extras.
+\newcommand{\lg@coverlogorow}{%
+  \ifdefempty{\lg@extralogoi}{%
+    \ifdefempty{\lg@extralogoii}{%
+      \includegraphics[width=3.6cm]{\lg@coverlogo}%
+    }{\lg@coverlogomulti}%
+  }{\lg@coverlogomulti}%
+}
+% Multi-logo row: main + extras, each scaled to \lg@coverlogoheight and
+% separated by 0.5cm, skipping unset extras.  A missing extra-logo file is
+% a one-time compile-time warning, not a hard error (same graceful
+% behavior as the header logo box in huawei-page.sty); the separator sits
+% inside the guard so a missing logo leaves no stray gap in the row.
+\newcommand{\lg@coverextrawarn}{%
+  \typeout{Warning: extra cover logo not found — skipped}%
+  \global\let\lg@coverextrawarn\relax}
+\newcommand{\lg@coverlogomulti}{%
+  \includegraphics[height=\lg@coverlogoheight]{\lg@coverlogo}%
+  \ifdefempty{\lg@extralogoi}{}{%
+    \IfFileExists{\lg@extralogoi}{%
+      \hspace{0.5cm}\includegraphics[height=\lg@coverlogoheight]{\lg@extralogoi}%
+    }{%
+      \lg@coverextrawarn
+    }%
+  }%
+  \ifdefempty{\lg@extralogoii}{}{%
+    \IfFileExists{\lg@extralogoii}{%
+      \hspace{0.5cm}\includegraphics[height=\lg@coverlogoheight]{\lg@extralogoii}%
+    }{%
+      \lg@coverextrawarn
+    }%
+  }%
+}
+
 \newcommand{\makecover}{%
   \begingroup
   \leftskip=0pt\relax
@@ -39,7 +83,7 @@
    \fontsize{36}{42}\selectfont\bfseries \lg@doctitle\par}%
   \vfill
   {\centering
-   \includegraphics[width=3.6cm]{\lg@coverlogo}\par}%
+   \lg@coverlogorow\par}%
   \vspace{0.9cm}%
    {\centering
     \fontsize{16}{20}\selectfont \lg@covertext\par}%

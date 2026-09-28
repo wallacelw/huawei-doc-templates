@@ -49,6 +49,16 @@ _LANG = 'en'
 # it from :header-logo:).  None = no logo in header.
 _HEADER_LOGO = None
 
+# Optional extra logos (from --extra-logo-1/--extra-logo-2 CLI args,
+# build.sh injects them from :extra-logo-1:/:extra-logo-2:).  Shown in
+# the page header right corner and on the cover row.  None = not set.
+_EXTRA_LOGO_1 = None
+_EXTRA_LOGO_2 = None
+
+# Optional cover logo row height in cm (from --cover-logo-height, e.g.
+# "2.4cm").  None = PDF defaults (2 logos → 2.6cm, 3 logos → 2.2cm).
+_COVER_LOGO_HEIGHT_CM = None
+
 
 def check_pandoc_version():
     """Warn when pandoc is outside the tested range (non-fatal).
@@ -832,6 +842,81 @@ def _resize_drawing(paragraph, qn, width_cm):
             continue
 
 
+def _parse_cm_length(value, flag):
+    """Parse a CLI length value ("2.4cm"; a bare number is cm) to a float.
+
+    Exits loudly on anything else — an invalid length must not silently
+    fall back to a default (fail-loud contract, like --lang/--template).
+    """
+    m = re.match(r'^\s*(\d+(?:\.\d+)?)\s*(?:cm)?\s*$', value)
+    if not m:
+        print(f"error: {flag} expects a length in cm (e.g. 2.4cm), "
+              f"got: {value}")
+        sys.exit(1)
+    return float(m.group(1))
+
+
+def _resize_drawing_height(drawing, qn, height_cm):
+    """Scale *drawing* to *height_cm*, keeping aspect (cover logo row).
+
+    Returns the new width in EMU (None when the drawing has no usable
+    extent).  Mirrors _resize_drawing but anchors on the height — the
+    cover row logos share one height, widths follow their aspect ratios.
+    """
+    emu_per_cm = 360000
+    target_cy = int(height_cm * emu_per_cm)
+    # wp:extent lives inside wp:inline/wp:anchor, not directly under w:drawing
+    extent = drawing.find('.//' + qn('wp:extent'))
+    if extent is None:
+        return None
+    try:
+        cx = int(extent.get('cx', '0'))
+        cy = int(extent.get('cy', '0'))
+    except (TypeError, ValueError):
+        return None
+    if cx <= 0 or cy <= 0:
+        return None
+    new_cx = int(cx * target_cy / cy)
+    extent.set('cx', str(new_cx))
+    extent.set('cy', str(target_cy))
+    # Keep the inner shape transform (a:ext) in sync with the outer extent
+    for ext in drawing.findall('.//' + qn('a:ext')):
+        try:
+            if int(ext.get('cx', '0')) == cx:
+                ext.set('cx', str(new_cx))
+                ext.set('cy', str(target_cy))
+        except (TypeError, ValueError):
+            continue
+    return new_cx
+
+
+def _shrink_cover_row_to_fit(doc, qn, drawings, height_cm, widths):
+    """Shrink a cover logo row proportionally so it fits the text width.
+
+    Heights are equal; widths follow each logo's aspect ratio, so a wide
+    trio could exceed the text width.  Scales every drawing by the same
+    factor (equal heights preserved) until the row + spacer gaps fit.
+    """
+    section = doc.sections[0]
+    text_width = (section.page_width - section.left_margin
+                  - section.right_margin)
+    emu_per_cm = 360000
+    # Spacer budget per gap: the space runs (~0.1cm) PLUS LibreOffice's
+    # phantom wp:inline padding (pandoc emits bare <wp:inline>, which LO
+    # pads by 0.3175cm per side — ~0.64cm per gap).  0.75cm keeps the
+    # shrink honest in LO; Word (dist defaults 0) just gets a little
+    # extra safety margin.
+    gaps_emu = int(0.75 * emu_per_cm) * (len(drawings) - 1)
+    sum_widths = sum(w for w in widths if w)
+    if sum_widths <= 0 or sum_widths + gaps_emu <= text_width:
+        return
+    scale = (int(text_width) - gaps_emu) / sum_widths
+    if scale <= 0:
+        return
+    for d in drawings:
+        _resize_drawing_height(d, qn, height_cm * scale)
+
+
 def _assemble_cover(doc, qn, docx_path):
     """Reorder + style the cover region to match the PDF.
 
@@ -846,6 +931,11 @@ def _assemble_cover(doc, qn, docx_path):
                       version table (red label column), meta.
         Author paragraphs are deleted — authors live inside the version
         table (the preprocessor adds the Author row when :authors: is set).
+
+    Cover logos: the main + extra logos merge into ONE centered row with
+    equal heights (2 logos → 2.6cm, 3 → 2.2cm; --cover-logo-height
+    overrides; the row shrinks to fit the text width).  A single logo
+    keeps the 3.6cm width sizing unchanged.
     """
     _tmpl = _TEMPLATE or ('technical' if 'technical' in docx_path else '')
     _is_technical = (_tmpl == 'technical')
@@ -859,21 +949,40 @@ def _assemble_cover(doc, qn, docx_path):
         sid = p.style.style_id or ''
         return sid.startswith('Heading') or sid.startswith('TOC')
 
-    # Logo = first paragraph with a drawing in the cover region
-    logo_p = None
+    # Logo row: every image-bearing paragraph in the cover region (the
+    # pre-processor emits the main + extra cover logos; pandoc usually
+    # lands them in one paragraph — stacked blocks would produce several).
+    logo_ps = []
     for p in paras:
         if p is title_p:
             continue
         if is_boundary(p):
             break
         if p._p.find('.//' + qn('w:drawing')) is not None:
-            logo_p = p
-            break
-    if logo_p is None:
+            logo_ps.append(p)
+    if not logo_ps:
         return  # pre-processor did not inject a cover block
 
+    # Merge stacked logo paragraphs into the first one — the cover logos
+    # render as ONE centered row (main + extra1 + extra2), like the PDF.
+    logo_p = logo_ps[0]
+    for extra_p in logo_ps[1:]:
+        spacer = logo_p.add_run('  ')
+        spacer.font.size = Pt(10)
+        for child in list(extra_p._p):
+            if child.tag == qn('w:pPr'):
+                continue  # keep logo_p's own paragraph properties
+            logo_p._p.append(child)
+        extra_p._p.getparent().remove(extra_p._p)
+
     idx = paras.index(logo_p)
-    cover_text_p = paras[idx + 1] if idx + 1 < len(paras) else None
+    # Cover text/type label = paragraph after the logo row.  Boundary
+    # guard: with a suppressed cover text (bare :cover-text:) the next
+    # paragraph may be the first Heading — never hijack it as cover text.
+    next_idx = paras.index(logo_ps[-1]) + 1
+    cover_text_p = None
+    if next_idx < len(paras) and not is_boundary(paras[next_idx]):
+        cover_text_p = paras[next_idx]
 
     # Date paragraphs: scan the full cover region (pandoc emits Date
     # before the logo, in the metadata block).
@@ -983,7 +1092,20 @@ def _assemble_cover(doc, qn, docx_path):
     # Styling (PDF huawei-cover.sty: 3.6cm logo, 16pt cover text,
     # 12pt authors, 12pt meta with bold version run)
     logo_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    _resize_drawing(logo_p, qn, width_cm=3.6)
+    row_drawings = logo_p._p.findall('.//' + qn('w:drawing'))
+    if len(row_drawings) <= 1:
+        # Single logo: width-based 3.6cm (unchanged behavior).
+        _resize_drawing(logo_p, qn, width_cm=3.6)
+    else:
+        # Logo row: all logos at one height (PDF parity: 2 logos →
+        # 2.6cm, 3 → 2.2cm; --cover-logo-height overrides), shrunk
+        # proportionally when the row would overflow the text width.
+        row_height = _COVER_LOGO_HEIGHT_CM
+        if row_height is None:
+            row_height = 2.6 if len(row_drawings) == 2 else 2.2
+        widths = [_resize_drawing_height(d, qn, row_height)
+                  for d in row_drawings]
+        _shrink_cover_row_to_fit(doc, qn, row_drawings, row_height, widths)
     if cover_text_p is not None:
         cover_text_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         for run in cover_text_p.runs:
@@ -1203,35 +1325,242 @@ def _strip_testcase_markers(docx_path):
     doc.save(docx_path)
 
 
+def _image_width_at_height_cm(path, height_cm):
+    """Natural width (cm) of the image at *path* scaled to *height_cm*.
+
+    Reads the pixel dimensions from the image header (no PIL needed).
+    Returns None when the header cannot be parsed.
+    """
+    try:
+        from docx.image.image import Image
+        img = Image.from_file(path)
+        if not img.px_height:
+            return None
+        return height_cm * img.px_width / img.px_height
+    except Exception:
+        return None
+
+
+def _flush_inline_images(element, qn):
+    """Zero the wp:inline dist* attributes on every image under *element*.
+
+    python-docx omits distT/distB/distL/distR; LibreOffice defaults the
+    absent attributes to 114300 EMU (0.3175cm) per side, so every image
+    silently carries ~0.63cm of phantom horizontal padding — enough to
+    wrap a near-full header line and to push logos off the text margins
+    (measured: header logo rendered at 2.32cm instead of the 2.0cm
+    margin).  Word defaults the absent attributes to 0, so this is a
+    no-op there and makes both renderers agree with the PDF.
+    """
+    for inline in element.iter(qn('wp:inline')):
+        for attr in ('distT', 'distB', 'distL', 'distR'):
+            inline.set(attr, '0')
+
+
+def _add_header_logo_table(section, qn, header, text_width, left_ok, extras):
+    """Borderless 3-cell header table: logo | title | extra logos.
+
+    Replaces the tab-based single-paragraph layout when extra logos are
+    set — a ~full tab line wraps in LibreOffice (wider fallback font
+    metrics than Word), stacking the last logo under the left one and
+    roughly doubling the header band height (MEDIUM defect).  A
+    fixed-layout table cannot wrap across cells.
+
+    - Side cells share ONE width (max of left/right content + slack) so
+      the center cell — and with it the STYLEREF title — stays centered
+      on the page axis like the PDF.
+    - The extras pair shrinks proportionally (both logos, equal scale)
+      when it would exceed the side-cell cap (40% of the text width);
+      the pair never wraps.
+    - The STYLEREF field runs move INTACT into the center cell; the old
+      header paragraph stays after the table (a table cannot be a
+      header's last block), rebuilt minimal (~1pt) so it adds no
+      visible height.
+    - All images get dist*=0 (_flush_inline_images): LibreOffice pads
+      bare wp:inline by 0.3175cm per side, which alone wraps a full
+      pair (the original MEDIUM defect was aggravated by this).
+    """
+    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+    emu_per_cm = 360000
+    logo_h = 1.05
+    spacer_cm = 0.15   # single space between the extra logos
+    slack_cm = 0.3     # cell slack over the natural content width
+
+    def img_w(path, h):
+        # Conservative over-estimate on parse failure: a wider side
+        # cell only narrows the center; an under-estimate would wrap.
+        w = _image_width_at_height_cm(path, h)
+        return w if w is not None else 2.0
+
+    left_w = img_w(_HEADER_LOGO, logo_h) if left_ok else 0.0
+    extra_h = logo_h
+    pair_w = (sum(img_w(p, extra_h) for p in extras)
+              + spacer_cm * (len(extras) - 1))
+
+    text_cm = int(text_width) / emu_per_cm
+    side_cm = max(left_w, pair_w) + slack_cm
+    max_side = text_cm * 0.4
+    if side_cm > max_side and pair_w > 0:
+        # Cap the side cells; shrink the extras pair (equal scale for
+        # both — heights stay equal) so it fits the capped cell.
+        side_cm = max_side
+        avail = side_cm - slack_cm
+        if pair_w > avail:
+            extra_h = logo_h * avail / pair_w
+            pair_w = (sum(img_w(p, extra_h) for p in extras)
+                      + spacer_cm * (len(extras) - 1))
+    center_cm = text_cm - 2 * side_cm
+    if center_cm < 1.0:
+        center_cm = 1.0
+        side_cm = (text_cm - center_cm) / 2.0
+
+    hp = header.paragraphs[0]
+    tbl = header.add_table(rows=1, cols=3, width=text_width)
+    # Table first, paragraph after (see docstring).
+    hp._p.addprevious(tbl._tbl)
+
+    # Table properties, rebuilt in schema order: full width, flush
+    # left, borderless, zero cell margins, fixed layout.
+    twips = int(int(text_width) / 635)  # EMU -> twentieths of a point
+    old_tblPr = tbl._tbl.find(qn('w:tblPr'))
+    if old_tblPr is not None:
+        tbl._tbl.remove(old_tblPr)
+    tblPr = etree.Element(qn('w:tblPr'))
+    tbl._tbl.insert(0, tblPr)
+    tblW = etree.SubElement(tblPr, qn('w:tblW'))
+    tblW.set(qn('w:w'), str(twips))
+    tblW.set(qn('w:type'), 'dxa')
+    tblInd = etree.SubElement(tblPr, qn('w:tblInd'))
+    tblInd.set(qn('w:w'), '0')
+    tblInd.set(qn('w:type'), 'dxa')
+    tblBorders = etree.SubElement(tblPr, qn('w:tblBorders'))
+    for side in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+        border = etree.SubElement(tblBorders, qn(f'w:{side}'))
+        border.set(qn('w:val'), 'none')
+        border.set(qn('w:sz'), '0')
+        border.set(qn('w:space'), '0')
+    tblLayout = etree.SubElement(tblPr, qn('w:tblLayout'))
+    tblLayout.set(qn('w:type'), 'fixed')
+    tblCellMar = etree.SubElement(tblPr, qn('w:tblCellMar'))
+    for side in ('top', 'left', 'bottom', 'right'):
+        mar = etree.SubElement(tblCellMar, qn(f'w:{side}'))
+        mar.set(qn('w:w'), '0')
+        mar.set(qn('w:type'), 'dxa')
+
+    # Column grid: symmetric side cells, center takes the rest (twips
+    # add up to tblW exactly — no flooring drift).
+    side_tw = int(side_cm * emu_per_cm) // 635
+    center_tw = twips - 2 * side_tw
+    grid_cols = tbl._tbl.findall(qn('w:tblGrid') + '/' + qn('w:gridCol'))
+    for i, w_tw in enumerate((side_tw, center_tw, side_tw)):
+        grid_cols[i].set(qn('w:w'), str(w_tw))
+        cell = tbl.cell(0, i)
+        cell.width = Emu(w_tw * 635)
+        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        for p in cell.paragraphs:
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(0)
+
+    # Left cell: the left logo (empty when only extras are set).
+    if left_ok:
+        lp = tbl.cell(0, 0).paragraphs[0]
+        lp.add_run().add_picture(_HEADER_LOGO, height=Cm(logo_h))
+
+    # Center cell: move the STYLEREF title field intact, centered.
+    cp = tbl.cell(0, 1).paragraphs[0]
+    cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    for child in list(hp._p):
+        if child.tag == qn('w:pPr'):
+            continue
+        hp._p.remove(child)
+        cp._p.append(child)
+
+    # Right cell: extra logos right-aligned, thin spacer between them.
+    rp = tbl.cell(0, 2).paragraphs[0]
+    rp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    for i, path in enumerate(extras):
+        if i > 0:
+            spacer_run = rp.add_run(' ')
+            spacer_run.font.size = Pt(10)
+            spacer_run.font.name = "HarmonyOS Sans"
+        rp.add_run().add_picture(path, height=Cm(extra_h))
+
+    # Flush the images against the cell edges (see _flush_inline_images).
+    _flush_inline_images(tbl._tbl, qn)
+
+    # The old header paragraph, rebuilt minimal (~1pt): it must stay as
+    # the block after the table but may not add visible header height.
+    old_pPr = hp._p.find(qn('w:pPr'))
+    if old_pPr is not None:
+        hp._p.remove(old_pPr)
+    pPr = etree.Element(qn('w:pPr'))
+    hp._p.insert(0, pPr)
+    spacing = etree.SubElement(pPr, qn('w:spacing'))
+    spacing.set(qn('w:before'), '0')
+    spacing.set(qn('w:after'), '0')
+    spacing.set(qn('w:line'), '20')
+    spacing.set(qn('w:lineRule'), 'exact')
+    rPr = etree.SubElement(pPr, qn('w:rPr'))
+    for tag in ('w:sz', 'w:szCs'):
+        sz = etree.SubElement(rPr, qn(tag))
+        sz.set(qn('w:val'), '2')
+
+
 def _add_header_logo(section, qn):
-    """Insert the header logo (left) + center tab into the header paragraph.
+    """Insert header logos: left logo | centered title | extra logos.
 
     Shared by the --fix path (_apply_content_styling) and
-    regenerate_reference.  The logo run pair is moved to the front of
-    the paragraph (after pPr) so it precedes any existing header
-    content (e.g. the STYLEREF title field).  Returns True when the
-    logo was inserted; False when --header-logo is unset or missing.
+    regenerate_reference.  Layout mirrors the PDF header
+    (huawei-page.sty): left logo, centered STYLEREF title, extra logos
+    in the right corner.
+
+    - No logos set: nothing is inserted; returns False (callers center
+      the title paragraph — full backward compat).
+    - Left logo only: tab-based layout (logo run pair prepended before
+      the title, center tab stop) — byte-identical to the long-standing
+      single-logo behavior; that line holds logo + centered title only,
+      so the LibreOffice wrap defect cannot occur there.
+    - Extra logos set (with or without left logo): borderless 3-cell
+      table via _add_header_logo_table — the tab-based line runs ~full
+      with right-corner logos and wraps under LibreOffice's wider
+      fallback font metrics.
+
+    Returns True when ANY logo was inserted.
     """
-    if not (_HEADER_LOGO and os.path.isfile(_HEADER_LOGO)):
+    left_ok = bool(_HEADER_LOGO and os.path.isfile(_HEADER_LOGO))
+    extras = []
+    for _p in (_EXTRA_LOGO_1, _EXTRA_LOGO_2):
+        if _p and not os.path.isfile(_p):
+            log_warn("extra logo not found (skipped): %s" % _p)
+        elif _p:
+            extras.append(_p)
+    if not left_ok and not extras:
         return False
     header = section.header
-    hp = header.paragraphs[0]
     text_width = section.page_width - section.left_margin - section.right_margin
-    hp.paragraph_format.tab_stops.add_tab_stop(
-        text_width // 2, WD_TAB_ALIGNMENT.CENTER)
-    hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    logo_run = hp.add_run()
-    logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
-    tab_run = hp.add_run('\t')
-    tab_run.font.size = Pt(10)
-    tab_run.font.name = "HarmonyOS Sans"
-    # Move logo + tab to the beginning (after pPr)
-    p_elem = hp._element
-    pPr = p_elem.find(qn('w:pPr'))
-    insert_pos = 1 if pPr is not None else 0
-    for run_elem in [tab_run._element, logo_run._element]:
-        p_elem.remove(run_elem)
-        p_elem.insert(insert_pos, run_elem)
+    if not extras:
+        # Left logo only — tab-based layout (unchanged behavior).
+        hp = header.paragraphs[0]
+        hp.paragraph_format.tab_stops.add_tab_stop(
+            text_width // 2, WD_TAB_ALIGNMENT.CENTER)
+        hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        logo_run = hp.add_run()
+        logo_run.add_picture(_HEADER_LOGO, height=Cm(1.05))
+        tab_run = hp.add_run('\t')
+        tab_run.font.size = Pt(10)
+        tab_run.font.name = "HarmonyOS Sans"
+        # Move logo + tab to the beginning (after pPr)
+        p_elem = hp._element
+        pPr = p_elem.find(qn('w:pPr'))
+        insert_pos = 1 if pPr is not None else 0
+        for run_elem in [tab_run._element, logo_run._element]:
+            p_elem.remove(run_elem)
+            p_elem.insert(insert_pos, run_elem)
+        # Flush against the left margin (LibreOffice pads bare
+        # wp:inline by 0.3175cm per side — see _flush_inline_images).
+        _flush_inline_images(p_elem, qn)
+        return True
+    _add_header_logo_table(section, qn, header, text_width, left_ok, extras)
     return True
 
 
@@ -2083,9 +2412,6 @@ def regenerate_reference(docx_path):
     hp = header.paragraphs[0]
     for run in list(hp.runs):
         run._element.getparent().remove(run._element)
-    # Optional header logo (left) + document title (center) — PDF huawei-page.sty
-    if not _add_header_logo(section, qn):
-        hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in [hp.add_run(), hp.add_run(), hp.add_run(), hp.add_run("Document Title"), hp.add_run()]:
         run.font.size = Pt(10)
         run.font.name = "HarmonyOS Sans"
@@ -2103,6 +2429,13 @@ def regenerate_reference(docx_path):
     fld_end = OxmlElement('w:fldChar')
     fld_end.set(qn('w:fldCharType'), 'end')
     hp.runs[-1]._r.append(fld_end)
+
+    # Optional header logos (left logo + right-corner extras — PDF
+    # huawei-page.sty).  Called AFTER the title runs: the table layout
+    # moves the STYLEREF field intact into the table's center cell;
+    # the left-only tab layout prepends the logo in front of the title.
+    if not _add_header_logo(section, qn):
+        hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     # ── Footer: page number (10pt, centered) ──────────────────────────────
     footer = section.footer
@@ -2142,9 +2475,15 @@ def main(argv=None, reference_name=None):
     global _TEMPLATE
     global _LANG
     global _HEADER_LOGO
+    global _EXTRA_LOGO_1
+    global _EXTRA_LOGO_2
+    global _COVER_LOGO_HEIGHT_CM
     _TEMPLATE = None  # reset between in-process main() calls
     _LANG = 'en'      # reset between in-process main() calls
     _HEADER_LOGO = None  # reset between in-process main() calls
+    _EXTRA_LOGO_1 = None  # reset between in-process main() calls
+    _EXTRA_LOGO_2 = None  # reset between in-process main() calls
+    _COVER_LOGO_HEIGHT_CM = None  # reset between in-process main() calls
     if argv is None:
         argv = sys.argv[1:]
 
@@ -2203,6 +2542,29 @@ def main(argv=None, reference_name=None):
                 print("error: --header-logo requires a file path")
                 sys.exit(1)
             _HEADER_LOGO = argv[i + 1]
+            i += 2
+            continue
+        if argv[i] == '--extra-logo-1':
+            if i + 1 >= len(argv):
+                print("error: --extra-logo-1 requires a file path")
+                sys.exit(1)
+            _EXTRA_LOGO_1 = argv[i + 1]
+            i += 2
+            continue
+        if argv[i] == '--extra-logo-2':
+            if i + 1 >= len(argv):
+                print("error: --extra-logo-2 requires a file path")
+                sys.exit(1)
+            _EXTRA_LOGO_2 = argv[i + 1]
+            i += 2
+            continue
+        if argv[i] == '--cover-logo-height':
+            if i + 1 >= len(argv):
+                print("error: --cover-logo-height requires a length "
+                      "(e.g. 2.4cm)")
+                sys.exit(1)
+            _COVER_LOGO_HEIGHT_CM = _parse_cm_length(
+                argv[i + 1], '--cover-logo-height')
             i += 2
             continue
         args.append(argv[i])

@@ -831,6 +831,93 @@ check("tech fence: code content verbatim (==== and [.rootcause])",
 check("tech fence: real closer consumed (no dangling delimiter)",
       "Problem outro.\n\nAfter block." in out)
 
+print("=== Cover logo row (extra logos) ===")
+
+# 55. :extra-logo-1:/:extra-logo-2: → main + extras as ONE inline-image
+# row (single paragraph); docx_fix enforces the PDF row heights.
+out = process(":lang: en\n:version: 1.0.0\n"
+              ":extra-logo-1: assets/partner-a.png\n"
+              ":extra-logo-2: assets/partner-b.png\n\nBody.\n",
+              'guide', 'md')
+check("cover row: one paragraph, 3 inline images",
+      "image:common-assets/huawei-logo-cover.png[] "
+      "image:assets/partner-a.png[] image:assets/partner-b.png[]" in out)
+check("cover row: no stacked block image",
+      "image::common-assets/huawei-logo-cover.png[]" not in out)
+
+# 56. Only one extra → 2-image row
+out = process(":lang: en\n:version: 1.0.0\n"
+              ":extra-logo-1: assets/partner-a.png\n\nBody.\n",
+              'guide', 'md')
+check("cover row: main + 1 extra = 2 inline images",
+      "image:common-assets/huawei-logo-cover.png[] "
+      "image:assets/partner-a.png[]" in out)
+
+# 57. Custom :cover-logo: leads the row
+out = process(":lang: en\n:version: 1.0.0\n"
+              ":cover-logo: assets/main.png\n"
+              ":extra-logo-1: assets/e1.png\n\nBody.\n", 'guide', 'md')
+check("cover row: custom :cover-logo: leads",
+      "image:assets/main.png[] image:assets/e1.png[]" in out)
+
+# 58. No extras → single block image, byte-identical (regression)
+out = process(HEADER + "Body.\n", 'guide', 'md')
+check("cover regression: single block image (no extras)",
+      "image::common-assets/huawei-logo-cover.png[]" in out)
+check("cover regression: no inline row",
+      "image:common-assets/huawei-logo-cover.png[]" not in out)
+
+# 59. Technical branch emits the row too (same block header)
+TECH_ROW_PASS = ("++++\n\\setreportversion{HCS 8.5.1}\n"
+                 "\\setreportdate{2025-08-13}\n"
+                 "\\setreportscenario{Standard Scenario}\n++++\n")
+out = process(":lang: en\n:version: 3.6.1\n:notime:\n"
+              ":extra-logo-1: assets/e1.png\n\n"
+              + TECH_ROW_PASS + "Body.\n", 'technical', 'md')
+check("technical cover row: inline images",
+      "image:common-assets/huawei-logo-cover.png[] "
+      "image:assets/e1.png[]" in out)
+
+print("=== Cover text (bare / custom / absent) ===")
+
+# 60. Bare :cover-text: (present but empty) → line omitted entirely —
+# PDF parity (\setcovertext{} empties it).  Must NOT swallow the next
+# non-blank line as the value (the value regex can match across the
+# newline when the attribute is empty).
+out = process(":lang: en\n:version: 1.0.0\n:cover-text:\n\nBody.\n",
+              'guide', 'md')
+check("bare cover-text: company line omitted",
+      "Huawei Technologies Co., Ltd." not in out)
+# If the value regex swallowed the next line, "Body." would appear twice
+# (once as cover text, once as body content).
+check("bare cover-text: next line not swallowed",
+      out.count("Body.") == 1)
+
+# 61. Non-empty :cover-text: → custom line
+out = process(":lang: en\n:version: 1.0.0\n"
+              ":cover-text: Custom Cover Text\n\nBody.\n", 'guide', 'md')
+check("custom cover-text: custom line used",
+      "Custom Cover Text" in out)
+check("custom cover-text: default absent",
+      "Huawei Technologies Co., Ltd." not in out)
+
+# 62. Absent → default company line (regression guard)
+out = process(HEADER + "Body.\n", 'guide', 'md')
+check("absent cover-text: default company line",
+      "Huawei Technologies Co., Ltd." in out)
+
+# 63. Bare :extra-logo-1: (present but empty) → treated as unset; the
+# [ \t]* value regex must not cross the newline and swallow the next
+# line's first word as the logo path.
+out = process(":lang: en\n:version: 1.0.0\n:extra-logo-1:\n\nBody.\n",
+              'guide', 'md')
+check("bare extra-logo: next line not swallowed",
+      "image:Body.[]" not in out)
+check("bare extra-logo: single block image (default)",
+      "image::common-assets/huawei-logo-cover.png[]" in out)
+check("bare extra-logo: body intact",
+      out.count("Body.") == 1)
+
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
 PYEOF

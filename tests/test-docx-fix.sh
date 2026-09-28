@@ -506,6 +506,359 @@ PYEOF
   else
     fail "$TEMPLATE_NAME: --lang pt footer label is not Página"
   fi
+
+  # ── Multi-logo header + cover row (guide only — shared docx_fix code) ──
+  if [ "$TEMPLATE_NAME" = "guide" ]; then
+    local LOGO_DIR="$REPO_ROOT/templates/guide/common-assets"
+
+    # 26. Header logos: --header-logo + --extra-logo-1/--extra-logo-2 →
+    # borderless 3-cell TABLE in the header (logo | title | extras —
+    # PDF huawei-page.sty).  The tab-based single-paragraph layout wraps
+    # in LibreOffice when the line is ~full; the fixed table cannot.
+    # Asserts: 3 cells, borderless, zero cell margins, fixed layout,
+    # symmetric side columns summing to tblW, STYLEREF field in the
+    # center cell, 1 drawing left + 2 right at 1.05cm (cy=378000), and
+    # a minimal paragraph after the table (a table cannot end a header).
+    local HDR_DOCX="$TMPDIR_FIX/guide-header-logos.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HDR_DOCX"
+    python3 "$FIX_SCRIPT" --fix \
+      --header-logo "$LOGO_DIR/huawei-logo-header.png" \
+      --extra-logo-1 "$LOGO_DIR/huawei-logo-cover.png" \
+      --extra-logo-2 "$LOGO_DIR/huawei-logo-header.png" \
+      "$HDR_DOCX" 2>/dev/null
+    local HDR_UNZIP="$TMPDIR_FIX/guide-header-unzipped"
+    unzip -o -q "$HDR_DOCX" -d "$HDR_UNZIP"
+    if python3 - "$HDR_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    tbls = root.findall(f"{{{W}}}tbl")
+    if len(tbls) != 1:
+        continue
+    tbl = tbls[0]
+    cells = tbl.findall(f"{{{W}}}tr/{{{W}}}tc")
+    if len(cells) != 3:
+        continue
+    tblPr = tbl.find(f"{{{W}}}tblPr")
+    # Fixed layout + full-width dxa table
+    layout = tblPr.find(f"{{{W}}}tblLayout")
+    tblW = tblPr.find(f"{{{W}}}tblW")
+    if (layout is None or layout.get(f"{{{W}}}type") != "fixed"
+            or tblW is None or tblW.get(f"{{{W}}}type") != "dxa"):
+        continue
+    # Borderless (all six sides val="none")
+    borders = tblPr.find(f"{{{W}}}tblBorders")
+    if borders is None or any(
+            b.get(f"{{{W}}}val") != "none"
+            for b in borders):
+        continue
+    # Zero left/right cell margins
+    mar = tblPr.find(f"{{{W}}}tblCellMar")
+    if mar is None or any(
+            mar.find(f"{{{W}}}{s}").get(f"{{{W}}}w") != "0"
+            for s in ("left", "right")):
+        continue
+    # Symmetric side columns summing to tblW
+    cols = [int(c.get(f"{{{W}}}w"))
+            for c in tbl.findall(f"{{{W}}}tblGrid/{{{W}}}gridCol")]
+    if (len(cols) != 3 or cols[0] != cols[2]
+            or sum(cols) != int(tblW.get(f"{{{W}}}w"))):
+        continue
+    # STYLEREF field intact in the CENTER cell (paragraph centered)
+    instr = [t.text or "" for t in cells[1].iter(f"{{{W}}}instrText")]
+    if not any("STYLEREF" in t for t in instr):
+        continue
+    jc = cells[1].find(f"{{{W}}}p/{{{W}}}pPr/{{{W}}}jc")
+    if jc is None or jc.get(f"{{{W}}}val") != "center":
+        continue
+    # 1 drawing in the left cell, 2 in the right, all 1.05cm tall
+    def dr_cys(tc):
+        out = []
+        for d in tc.findall(f".//{{{W}}}drawing"):
+            ext = d.find(".//{http://schemas.openxmlformats.org/"
+                         "drawingml/2006/wordprocessingDrawing}extent")
+            if ext is not None:
+                out.append(ext.get("cy"))
+        return out
+    left_cys, right_cys = dr_cys(cells[0]), dr_cys(cells[2])
+    if (len(left_cys) != 1 or len(right_cys) != 2
+            or set(left_cys + right_cys) != {"378000"}):
+        continue
+    # Images flush: dist*=0 on every wp:inline (LibreOffice pads bare
+    # wp:inline by 0.3175cm/side — the wrap root cause).  The dist*
+    # attributes are unprefixed (unqualified, per the OOXML schema).
+    WP = ("http://schemas.openxmlformats.org/drawingml/2006/"
+          "wordprocessingDrawing")
+    inlines = tbl.findall(f".//{{{WP}}}inline")
+    if len(inlines) != 3 or any(
+            any(il.get(a) != "0"
+                for a in ("distT", "distB", "distL", "distR"))
+            for il in inlines):
+        continue
+    # A paragraph must follow the table (tables cannot end a header)
+    if tbl.getnext() is None or tbl.getnext().tag != f"{{{W}}}p":
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: header logos: borderless 3-cell table, field centered, 1+2 drawings"
+    else
+      fail "$TEMPLATE_NAME: header logos: table structure wrong"
+    fi
+
+    # 27. Extras only (no --header-logo): same 3-cell table with an
+    # EMPTY left cell — side columns stay symmetric, so the title in
+    # the center cell stays centered on the page axis.
+    local HDR2_DOCX="$TMPDIR_FIX/guide-header-extras-only.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HDR2_DOCX"
+    python3 "$FIX_SCRIPT" --fix \
+      --extra-logo-1 "$LOGO_DIR/huawei-logo-cover.png" \
+      "$HDR2_DOCX" 2>/dev/null
+    local HDR2_UNZIP="$TMPDIR_FIX/guide-header2-unzipped"
+    unzip -o -q "$HDR2_DOCX" -d "$HDR2_UNZIP"
+    if python3 - "$HDR2_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    tbls = root.findall(f"{{{W}}}tbl")
+    if len(tbls) != 1:
+        continue
+    tbl = tbls[0]
+    cells = tbl.findall(f"{{{W}}}tr/{{{W}}}tc")
+    if len(cells) != 3:
+        continue
+    cols = [int(c.get(f"{{{W}}}w"))
+            for c in tbl.findall(f"{{{W}}}tblGrid/{{{W}}}gridCol")]
+    if len(cols) != 3 or cols[0] != cols[2]:
+        continue
+    if cells[0].find(f".//{{{W}}}drawing") is not None:
+        continue  # left cell must be empty
+    if len(cells[2].findall(f".//{{{W}}}drawing")) != 1:
+        continue
+    instr = [t.text or "" for t in cells[1].iter(f"{{{W}}}instrText")]
+    if not any("STYLEREF" in t for t in instr):
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: extras-only header: table, empty left cell, symmetric sides"
+    else
+      fail "$TEMPLATE_NAME: extras-only header: table structure wrong"
+    fi
+
+    # 28. Left logo only: NO table — the long-standing tab-based layout
+    # is kept for this case (backward compat: existing documents with
+    # only :header-logo: render exactly as before).
+    local HDR3_DOCX="$TMPDIR_FIX/guide-header-left-only.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HDR3_DOCX"
+    python3 "$FIX_SCRIPT" --fix \
+      --header-logo "$LOGO_DIR/huawei-logo-header.png" \
+      "$HDR3_DOCX" 2>/dev/null
+    local HDR3_UNZIP="$TMPDIR_FIX/guide-header3-unzipped"
+    unzip -o -q "$HDR3_DOCX" -d "$HDR3_UNZIP"
+    if python3 - "$HDR3_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    if root.findall(f"{{{W}}}tbl"):
+        continue  # no table in the left-only case
+    if len(root.findall(f".//{{{W}}}drawing")) != 1:
+        continue
+    vals = {t.get(f"{{{W}}}val")
+            for t in root.findall(f".//{{{W}}}tab")}
+    if "center" not in vals:
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: left-only header: tab layout kept (no table)"
+    else
+      fail "$TEMPLATE_NAME: left-only header: tab layout regressed"
+    fi
+
+    # 29. No logos at all: header untouched — no table, no drawings,
+    # the STYLEREF title field stays in the header paragraph.
+    local HDR4_DOCX="$TMPDIR_FIX/guide-header-nologo.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HDR4_DOCX"
+    python3 "$FIX_SCRIPT" --fix "$HDR4_DOCX" 2>/dev/null
+    local HDR4_UNZIP="$TMPDIR_FIX/guide-header4-unzipped"
+    unzip -o -q "$HDR4_DOCX" -d "$HDR4_UNZIP"
+    if python3 - "$HDR4_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    if root.findall(f"{{{W}}}tbl"):
+        continue
+    if root.findall(f".//{{{W}}}drawing"):
+        continue
+    instr = [t.text or "" for t in root.iter(f"{{{W}}}instrText")]
+    if not any("STYLEREF" in t for t in instr):
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: no-logo header: untouched (no table, field intact)"
+    else
+      fail "$TEMPLATE_NAME: no-logo header: unexpectedly modified"
+    fi
+
+    # 30. Cover logo row: :extra-logo-1:/:extra-logo-2: → main + extras
+    # in ONE centered cover paragraph at equal heights (PDF: 3 logos →
+    # 2.2cm), and the row fits the text width.  The logos live in
+    # <tmpdir>/assets/ and the .adoc references them document-relatively
+    # (assets/...), resolved via pandoc --resource-path — same contract
+    # as a real project folder.
+    local COVER_ASSETS="$TMPDIR_FIX/assets"
+    mkdir -p "$COVER_ASSETS"
+    cp "$LOGO_DIR/huawei-logo-cover.png" "$COVER_ASSETS/main.png"
+    cp "$LOGO_DIR/huawei-logo-header.png" "$COVER_ASSETS/extra1.png"
+    cp "$LOGO_DIR/exemplo-login.png" "$COVER_ASSETS/extra2.png"
+    local COVER_ADOC="$TMPDIR_FIX/guide-cover-row.adoc"
+    cat > "$COVER_ADOC" <<'ADOC'
+= Cover Row Test
+:lang: en
+:version: 1.0.0
+:cover-logo: assets/main.png
+:extra-logo-1: assets/extra1.png
+:extra-logo-2: assets/extra2.png
+
+Body.
+ADOC
+    local COVER_PRE="$TMPDIR_FIX/guide-cover-pre.adoc"
+    python3 "$REPO_ROOT/templates/_base/adoc_docx_preprocessor.py" \
+      --template "$TEMPLATE_NAME" "$COVER_ADOC" -o "$COVER_PRE" 2>/dev/null
+    local COVER_DBK
+    COVER_DBK=$(mktemp --suffix=.dbk)
+    asciidoctor -b docbook "$COVER_PRE" -o "$COVER_DBK" 2>/dev/null
+    local COVER_PREFIX="$TMPDIR_FIX/guide-cover-prefix.docx"
+    pandoc -f docbook --reference-doc="$REF_DOCX" --number-sections \
+      --resource-path="$TMPDIR_FIX:$SAMPLE_DIR:$COMMON_ASSETS" \
+      "$COVER_DBK" -o "$COVER_PREFIX" 2>/dev/null
+    rm -f "$COVER_DBK"
+    local COVER_DEFAULT="$TMPDIR_FIX/guide-cover-default.docx"
+    cp "$COVER_PREFIX" "$COVER_DEFAULT"
+    python3 "$FIX_SCRIPT" --fix "$COVER_DEFAULT" 2>/dev/null
+    if python3 - "$COVER_DEFAULT" << 'PYEOF' 2>/dev/null; then
+import sys
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml.ns import qn
+EMU_PER_CM = 360000
+doc = Document(sys.argv[1])
+cover_paras = []
+for p in doc.paragraphs:
+    sid = p.style.style_id or ''
+    if sid.startswith('Heading') or sid.startswith('TOC'):
+        break
+    cover_paras.append(p)
+img_paras = [p for p in cover_paras
+             if p._p.find('.//' + qn('w:drawing')) is not None]
+if len(img_paras) != 1:
+    sys.exit(1)  # logos must share ONE paragraph
+drawings = img_paras[0]._p.findall('.//' + qn('w:drawing'))
+if len(drawings) != 3:
+    sys.exit(1)
+cys = []
+for d in drawings:
+    ext = d.find('.//' + qn('wp:extent'))
+    if ext is None:
+        sys.exit(1)
+    cys.append(int(ext.get('cy', '0')))
+# Equal heights at the 3-logo default (2.2cm)
+if len(set(cys)) != 1 or cys[0] != int(2.2 * EMU_PER_CM):
+    sys.exit(1)
+# Row (with spacer gaps) fits the text width
+section = doc.sections[0]
+text_width = section.page_width - section.left_margin - section.right_margin
+cxs = []
+for d in drawings:
+    ext = d.find('.//' + qn('wp:extent'))
+    cxs.append(int(ext.get('cx', '0')))
+gaps = int(0.6 * EMU_PER_CM) * (len(drawings) - 1)
+if sum(cxs) + gaps > text_width:
+    sys.exit(1)
+# Centered row
+if img_paras[0].alignment != WD_ALIGN_PARAGRAPH.CENTER:
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+      pass "$TEMPLATE_NAME: cover row: 3 logos, one paragraph, equal 2.2cm heights"
+    else
+      fail "$TEMPLATE_NAME: cover row: logos not merged or heights wrong"
+    fi
+
+    # 31. --cover-logo-height overrides the row height (2.4cm)
+    local COVER_H_DOCX="$TMPDIR_FIX/guide-cover-height.docx"
+    cp "$COVER_PREFIX" "$COVER_H_DOCX"
+    python3 "$FIX_SCRIPT" --fix --cover-logo-height 2.4cm \
+      "$COVER_H_DOCX" 2>/dev/null
+    if python3 - "$COVER_H_DOCX" << 'PYEOF' 2>/dev/null; then
+import sys
+from docx import Document
+from docx.oxml.ns import qn
+EMU_PER_CM = 360000
+doc = Document(sys.argv[1])
+for p in doc.paragraphs:
+    sid = p.style.style_id or ''
+    if sid.startswith('Heading') or sid.startswith('TOC'):
+        sys.exit(1)  # no cover drawing found before the first heading
+    drawings = p._p.findall('.//' + qn('w:drawing'))
+    if drawings:
+        cys = set()
+        for d in drawings:
+            ext = d.find('.//' + qn('wp:extent'))
+            cys.add(int(ext.get('cy', '0')))
+        sys.exit(0 if cys == {int(2.4 * EMU_PER_CM)} else 1)
+sys.exit(1)
+PYEOF
+      pass "$TEMPLATE_NAME: cover row: --cover-logo-height 2.4cm honored"
+    else
+      fail "$TEMPLATE_NAME: cover row: --cover-logo-height not honored"
+    fi
+
+    # 32. Single-logo cover regression: the main sample's cover logo
+    # keeps the 3.6cm width sizing (multi-logo logic must not touch it).
+    if python3 - "$DOCX_OUT" << 'PYEOF' 2>/dev/null; then
+import sys
+from docx import Document
+from docx.oxml.ns import qn
+doc = Document(sys.argv[1])
+for p in doc.paragraphs:
+    sid = p.style.style_id or ''
+    if sid.startswith('Heading') or sid.startswith('TOC'):
+        sys.exit(1)  # no cover drawing found before the first heading
+    d = p._p.find('.//' + qn('w:drawing'))
+    if d is not None:
+        ext = d.find('.//' + qn('wp:extent'))
+        sys.exit(0 if (ext is not None
+                       and int(ext.get('cx', '0')) == 1296000) else 1)
+sys.exit(1)
+PYEOF
+      pass "$TEMPLATE_NAME: single-logo cover keeps 3.6cm width"
+    else
+      fail "$TEMPLATE_NAME: single-logo cover sizing changed"
+    fi
+  fi
 }
 
 # ── Auto-discover templates and run DOCX fix tests for each ──────────────
