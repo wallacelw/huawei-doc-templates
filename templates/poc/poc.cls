@@ -22,7 +22,7 @@
 %%    - \setdoctitle (shared cover title setter).
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/28 Huawei POC template v6.16.7]
+\ProvidesClass{poc}[2026/09/28 Huawei POC template v6.16.8]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -147,7 +147,7 @@
   \par
   \renewcommand{\arraystretch}{1.3}%
   \noindent
-  \begin{tabular}{|>{\RaggedRight\hyphenpenalty=10000\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
+  \begin{tabular}{|>{\RaggedRight\hyphenpenalty=10000\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*16/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*34/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*20/100\relax}|>{\RaggedRight\arraybackslash}m{\dimexpr(\linewidth-5\arrayrulewidth-8\tabcolsep)*30/100\relax}|}
   \hline
 }{%
   \end{tabular}%
