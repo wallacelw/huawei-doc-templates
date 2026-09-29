@@ -88,7 +88,7 @@ all templates:
 | `:version: 1.0.0` | Document version for changelog. | `:version: 1.0.0` |
 | `:date: 2026-09-16` | Document date for changelog. | `:date: 2026-09-16` |
 | `:authors: Name` | One or more authors on the cover page. Optional. | `:authors: John Smith, Jane Doe` |
-| `:header-title: ...` | Centered header text on body pages. | `:header-title: Huawei Cloud -- ECS` |
+| `:header-title: ...` | Centered header text on body pages (default: the document title). | `:header-title: Huawei Cloud -- ECS` |
 | `:header-logo: path` | Header logo image path (default `common-assets/huawei-logo-header.png`). | `:header-logo: assets/custom-logo.png` |
 | `:cover-logo: path` | Cover logo image path (default `common-assets/huawei-logo-cover.png`). | `:cover-logo: assets/custom-cover.png` |
 | `:extra-logo-1: path` | First extra logo — header right corner + cover row (default: none). | `:extra-logo-1: assets/partner.png` |

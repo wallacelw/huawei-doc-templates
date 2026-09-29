@@ -486,17 +486,19 @@ generate_docx() {
     fi
     # Post-process: fix heading styles (pandoc overrides reference doc styles)
     if [ -f "${PROJECT_DIR}/$out" ]; then
-        # Logo + cover-height attributes → --fix args.  Logo paths
-        # (header-logo, extra-logo-1/2) resolve against the project dir
-        # first (document-relative, e.g. assets/foo.png), then the
-        # template dir (e.g. common-assets/*.png); unresolvable paths
-        # are skipped (no logo inserted).  cover-logo-height is a length
-        # (e.g. 2.4cm) — passed through with no file check.
+        # Header attributes → --fix args.  Logo paths (header-logo,
+        # extra-logo-1/2) resolve against the project dir first
+        # (document-relative, e.g. assets/foo.png), then the template
+        # dir (e.g. common-assets/*.png); unresolvable paths are skipped
+        # (no logo inserted).  cover-logo-height is a length (e.g.
+        # 2.4cm) and header-title is literal text — both pass through
+        # with no file check (fix_args is an array, so values with
+        # spaces stay single arguments).
         local attr val resolved
         for attr in header-logo extra-logo-1 extra-logo-2; do
             val=""
             if grep -q "^:${attr}:" "$ADOC_FILE" 2>/dev/null; then
-                val=$(grep -oP "^:${attr}:\s*\K.*" "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
+                val=$(grep -oP "^:${attr}:\s*\K.*" "$ADOC_FILE" 2>/dev/null | head -1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             fi
             resolved=$(resolve_doc_asset "$val")
             if [ -n "$resolved" ]; then
@@ -505,10 +507,17 @@ generate_docx() {
         done
         val=""
         if grep -q '^:cover-logo-height:' "$ADOC_FILE" 2>/dev/null; then
-            val=$(grep -oP '^:cover-logo-height:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | xargs)
+            val=$(grep -oP '^:cover-logo-height:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         fi
         if [ -n "$val" ]; then
             fix_args+=(--cover-logo-height "$val")
+        fi
+        val=""
+        if grep -q '^:header-title:' "$ADOC_FILE" 2>/dev/null; then
+            val=$(grep -oP '^:header-title:\s*\K.*' "$ADOC_FILE" 2>/dev/null | head -1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        fi
+        if [ -n "$val" ]; then
+            fix_args+=(--header-title "$val")
         fi
         if ! python3 "${REPO_ROOT}/templates/${TEMPLATE}/create-${TEMPLATE}-reference-docx.py" --fix "${PROJECT_DIR}/$out" "${fix_args[@]}" 2>&1; then
             echo "  ⚠ Warning: DOCX post-processing failed (heading styles may not match PDF)" >&2

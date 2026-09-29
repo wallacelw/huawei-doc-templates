@@ -38,8 +38,15 @@
 %  HEADER AND FOOTER
 % =====================================================================
 % Configurable header title: \setheadertitle{...}
-\newcommand{\lg@headertitle}{Huawei Cloud}
+\newcommand{\lg@headertitle}{}
 \newcommand{\setheadertitle}[1]{\renewcommand{\lg@headertitle}{#1}}
+% Header title text: \lg@headertitle when set (via \setheadertitle, from
+% the :header-title: attribute), otherwise the document title
+% (\lg@doctitle, from \setdoctitle in huawei-base.cls).  \lg@doctitle is
+% only expanded at page-shipout time, so its \setdoctitle setter living
+% later in the class body (after the module loads) is fine.
+\newcommand{\lg@headertitletext}{%
+  \ifdefempty{\lg@headertitle}{\lg@doctitle}{\lg@headertitle}}
 \newcommand{\lg@headerlogo}{common-assets/huawei-logo-header.png}
 \newcommand{\setheaderlogo}[1]{\renewcommand{\lg@headerlogo}{#1}}
 % Extra logos (multi-logo support): up to two additional logos rendered in
@@ -94,7 +101,7 @@
   }%
 }
 \fancyhead[L]{\lg@headerlogobox}
-\fancyhead[C]{\normalfont\fontsize{10}{12}\selectfont \lg@headertitle}
+\fancyhead[C]{\normalfont\fontsize{10}{12}\selectfont \lg@headertitletext}
 \fancyhead[R]{\lg@headerextrabox}
 \fancyfoot[C]{\normalfont\fontsize{10}{12}\selectfont \lg@pagelabel~\thepage}
 

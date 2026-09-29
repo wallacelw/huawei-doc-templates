@@ -4,6 +4,26 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.18.0 (2026-09-29)
+
+### Header title defaults to the document title (all templates)
+
+- **PDF**: the page-header title now shows the document title when
+  `:header-title:` is not set (previously a hardcoded "Huawei Cloud"
+  default). `:header-title:` remains an explicit override — documents
+  that set it are unchanged. This restores the intent documented in
+  `huawei-base.cls` ("\setdoctitle ... and default header") and aligns
+  the PDF with the DOCX, which already showed the document title.
+- **DOCX**: the header now honors `:header-title:` when set (previously
+  ignored — the STYLEREF document title always won). Both formats now
+  behave identically: default = document title, `:header-title:` =
+  custom text.
+- The poc-en/poc-pt samples (which never set `:header-title:`) now show
+  their document titles in the header; the other six samples and
+  setup-guide set the attribute and are unchanged.
+- Tests: DOCX fix 83 (3 new header-title cases); converter and
+  preprocessor suites unchanged and green.
+
 ## v6.17.0 (2026-09-29)
 
 ### Multi-logo support (header + cover, all templates)

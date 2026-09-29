@@ -5,7 +5,7 @@ alt="huawei logo cover" />
 
 Huawei Technologies Co., Ltd.
 
-**v6.16.11** — September 28, 2026 11:55
+**v6.18.0** — September 28, 2026 23:10
 
 # Provision a Flexus X Instance on Huawei Cloud
 
@@ -1296,6 +1296,26 @@ secondary text:
 </tr>
 </thead>
 <tbody>
+<tr class="odd">
+<td style="text-align: left;"><p>6.18.0</p></td>
+<td style="text-align: left;"><p>2026-09-29</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Header title now defaults to the document title when
+:header-title: is unset (PDF); the DOCX header honors :header-title:
+(literal text replaces the STYLEREF field), so both formats behave
+identically.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><p>6.17.0</p></td>
+<td style="text-align: left;"><p>2026-09-29</p></td>
+<td style="text-align: left;"><ul>
+<li><p>Multi-logo support: :extra-logo-1: and :extra-logo-2: render in
+the header right corner and on the cover as an equal-height row;
+:cover-logo-height: overrides the row height; DOCX parity including
+document-relative asset paths.</p></li>
+</ul></td>
+</tr>
 <tr class="odd">
 <td style="text-align: left;"><p>6.16.4</p></td>
 <td style="text-align: left;"><p>2026-09-28</p></td>

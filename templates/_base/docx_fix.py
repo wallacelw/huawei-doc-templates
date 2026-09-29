@@ -59,6 +59,12 @@ _EXTRA_LOGO_2 = None
 # "2.4cm").  None = PDF defaults (2 logos → 2.6cm, 3 logos → 2.2cm).
 _COVER_LOGO_HEIGHT_CM = None
 
+# Optional literal header title (from --header-title CLI arg, build.sh
+# injects it from :header-title:).  When set, the --fix path replaces
+# the header's STYLEREF field with this text (PDF parity — the PDF
+# honors :header-title:).  None = keep the STYLEREF document title.
+_HEADER_TITLE = None
+
 
 def check_pandoc_version():
     """Warn when pandoc is outside the tested range (non-fatal).
@@ -1511,8 +1517,11 @@ def _add_header_logo(section, qn):
 
     Shared by the --fix path (_apply_content_styling) and
     regenerate_reference.  Layout mirrors the PDF header
-    (huawei-page.sty): left logo, centered STYLEREF title, extra logos
-    in the right corner.
+    (huawei-page.sty): left logo, centered title, extra logos in the
+    right corner.  The title is the STYLEREF document-title field —
+    except when :header-title: is set, in which case the --fix path
+    later swaps the field for the literal text via
+    _apply_header_title (the reference docx keeps the generic field).
 
     - No logos set: nothing is inserted; returns False (callers center
       the title paragraph — full backward compat).
@@ -1562,6 +1571,87 @@ def _add_header_logo(section, qn):
         return True
     _add_header_logo_table(section, qn, header, text_width, left_ok, extras)
     return True
+
+
+def _apply_header_title(section, qn):
+    """Replace the STYLEREF header field with literal --header-title text.
+
+    The PDF honors :header-title: (literal header text); the DOCX header
+    shows the document title via a STYLEREF field copied from the
+    reference docx.  When --header-title is set (build.sh injects it
+    from :header-title:), the WHOLE field — fldChar begin → end,
+    wherever it lives after the logo layout: the header paragraph (no
+    logos / left-logo tab layout) or the 3-cell table's center cell
+    (extra logos) — is replaced by ONE literal run styled like the
+    field's own runs (HarmonyOS Sans 10pt, mirroring the reference
+    header).  The paragraph/cell (alignment, tab stops) stays intact,
+    so the text centers exactly where the field did.
+
+    --fix path ONLY (called from _apply_content_styling):
+    regenerate_reference must keep the generic STYLEREF field — one
+    reference docx serves all documents.  No-op when --header-title is
+    unset (field intact — full backward compat) or when no field is
+    found (custom reference doc; nothing to override).
+    """
+    if not _HEADER_TITLE:
+        return
+    header = section.header
+    # Locate the run carrying the STYLEREF instrText — the field's
+    # begin/separate/end fldChars are its sibling runs in the same
+    # paragraph (header paragraph or the table's center cell).
+    instr_run = None
+    for r_elem in header._element.iter(qn('w:r')):
+        instr = r_elem.find(qn('w:instrText'))
+        if instr is not None and 'STYLEREF' in (instr.text or ''):
+            instr_run = r_elem
+            break
+    if instr_run is None:
+        return
+    p_elem = instr_run.getparent()
+    runs = [r for r in p_elem if r.tag == qn('w:r')]
+    idx = runs.index(instr_run)
+    # Walk back/forward to the enclosing begin/end fldChar runs.
+    begin_idx = None
+    j = idx - 1
+    while j >= 0:
+        fld = runs[j].find(qn('w:fldChar'))
+        if fld is not None and fld.get(qn('w:fldCharType')) == 'begin':
+            begin_idx = j
+            break
+        j -= 1
+    end_idx = None
+    j = idx + 1
+    while j < len(runs):
+        fld = runs[j].find(qn('w:fldChar'))
+        if fld is not None and fld.get(qn('w:fldCharType')) == 'end':
+            end_idx = j
+            break
+        j += 1
+    if begin_idx is None or end_idx is None:
+        # Partial/malformed field — removing only the located half would
+        # leave the stale cached field text on screen. Leave the header
+        # untouched (no-op).
+        return
+    # Literal run, styled like the reference header's field runs
+    # (rFonts HarmonyOS Sans + sz 20 — byte-mirrored).
+    new_r = OxmlElement('w:r')
+    rPr = OxmlElement('w:rPr')
+    rFonts = OxmlElement('w:rFonts')
+    rFonts.set(qn('w:ascii'), 'HarmonyOS Sans')
+    rFonts.set(qn('w:hAnsi'), 'HarmonyOS Sans')
+    rPr.append(rFonts)
+    sz = OxmlElement('w:sz')
+    sz.set(qn('w:val'), '20')
+    rPr.append(sz)
+    new_r.append(rPr)
+    t = OxmlElement('w:t')
+    t.set(qn('xml:space'), 'preserve')
+    t.text = _HEADER_TITLE
+    new_r.append(t)
+    # Swap: literal run at the field's position, field runs removed.
+    runs[begin_idx].addprevious(new_r)
+    for r in runs[begin_idx:end_idx + 1]:
+        p_elem.remove(r)
 
 
 def _apply_content_styling(docx_path):
@@ -1745,6 +1835,12 @@ def _apply_content_styling(docx_path):
 
     # Add header logo (optional, from --header-logo CLI arg)
     _add_header_logo(doc.sections[0], qn)
+
+    # Literal header title override (optional, from --header-title) —
+    # swaps the STYLEREF field for :header-title: text on the GENERATED
+    # doc only; the reference docx keeps the generic field
+    # (regenerate_reference never calls this).
+    _apply_header_title(doc.sections[0], qn)
 
     doc.save(docx_path)
 
@@ -2478,12 +2574,14 @@ def main(argv=None, reference_name=None):
     global _EXTRA_LOGO_1
     global _EXTRA_LOGO_2
     global _COVER_LOGO_HEIGHT_CM
+    global _HEADER_TITLE
     _TEMPLATE = None  # reset between in-process main() calls
     _LANG = 'en'      # reset between in-process main() calls
     _HEADER_LOGO = None  # reset between in-process main() calls
     _EXTRA_LOGO_1 = None  # reset between in-process main() calls
     _EXTRA_LOGO_2 = None  # reset between in-process main() calls
     _COVER_LOGO_HEIGHT_CM = None  # reset between in-process main() calls
+    _HEADER_TITLE = None  # reset between in-process main() calls
     if argv is None:
         argv = sys.argv[1:]
 
@@ -2565,6 +2663,13 @@ def main(argv=None, reference_name=None):
                 sys.exit(1)
             _COVER_LOGO_HEIGHT_CM = _parse_cm_length(
                 argv[i + 1], '--cover-logo-height')
+            i += 2
+            continue
+        if argv[i] == '--header-title':
+            if i + 1 >= len(argv):
+                print("error: --header-title requires a text value")
+                sys.exit(1)
+            _HEADER_TITLE = argv[i + 1]
             i += 2
             continue
         args.append(argv[i])

@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 6.17.0
+:version: 6.18.0
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,8 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.18.0}{2026-09-29}{\item Header title now defaults to the document title when :header-title: is unset (PDF); the DOCX header honors :header-title: (literal text replaces the STYLEREF field), so both formats behave identically.}
+  \changelogentry{6.17.0}{2026-09-29}{\item Multi-logo support: :extra-logo-1: and :extra-logo-2: render in the header right corner and on the cover as an equal-height row; :cover-logo-height: overrides the row height; DOCX parity including document-relative asset paths.}
   \changelogentry{6.16.4}{2026-09-28}{\item Testbook: added colored badge column to acceptance criteria table, matching badges used in testcases and test summary. Updated SKILL.md skeleton with badge example.}
   \changelogentry{6.16.3}{2026-09-28}{\item Oracle review fixes: corrected SKILL.md code example (fancyvrb multi-line), fixed typo in testbook-pt, synced stripebg to DOCX/HTML, added stripebg to all SKILL.md color tables, fixed stale field order and comments.}
   \changelogentry{6.16.2}{2026-09-28}{\item SKILL.md (testbook): documented auxiliary LaTeX commands available in passthrough blocks (\textbackslash menu, \textbackslash inlinecode, \textbackslash param, \textbackslash weblink, \textbackslash note, \textbackslash image, \textbackslash imageplaceholder, \textbackslash code, \textbackslash warning). Added \texttt{stripebg} color (\#F0F1F3) for visible table zebra striping. Documented \texttt{noanswers} option usage. Added sample-only notes to testbook demo sections.}

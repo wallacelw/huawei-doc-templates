@@ -858,6 +858,125 @@ PYEOF
     else
       fail "$TEMPLATE_NAME: single-logo cover sizing changed"
     fi
+
+    # 33. --header-title: the STYLEREF field is replaced by ONE literal
+    # run (styled like the field's own runs) — no fldChar/instrText may
+    # remain anywhere in the header.
+    local HT_DOCX="$TMPDIR_FIX/guide-header-title.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HT_DOCX"
+    python3 "$FIX_SCRIPT" --fix --header-title "Custom Header" \
+      "$HT_DOCX" 2>/dev/null
+    local HT_UNZIP="$TMPDIR_FIX/guide-header-title-unzipped"
+    unzip -o -q "$HT_DOCX" -d "$HT_UNZIP"
+    if python3 - "$HT_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    if root.findall(f".//{{{W}}}fldChar"):
+        continue  # field must be gone
+    if any("STYLEREF" in (t.text or "")
+           for t in root.iter(f"{{{W}}}instrText")):
+        continue
+    # Exactly one literal run with the custom text, styled 10pt
+    hits = [t for t in root.iter(f"{{{W}}}t")
+            if t.text == "Custom Header"]
+    if len(hits) != 1:
+        continue
+    rPr = hits[0].getparent().find(f"{{{W}}}rPr")
+    sz = rPr.find(f"{{{W}}}sz") if rPr is not None else None
+    fonts = rPr.find(f"{{{W}}}rFonts") if rPr is not None else None
+    if (sz is None or sz.get(f"{{{W}}}val") != "20"
+            or fonts is None
+            or fonts.get(f"{{{W}}}ascii") != "HarmonyOS Sans"):
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: --header-title: literal run replaces STYLEREF field"
+    else
+      fail "$TEMPLATE_NAME: --header-title: field remains or run unstyled"
+    fi
+
+    # 34. No --header-title flag: the STYLEREF field stays intact
+    # (regression guard — unset :header-title: keeps today's behavior).
+    local HT2_DOCX="$TMPDIR_FIX/guide-header-title-off.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HT2_DOCX"
+    python3 "$FIX_SCRIPT" --fix "$HT2_DOCX" 2>/dev/null
+    local HT2_UNZIP="$TMPDIR_FIX/guide-header-title-off-unzipped"
+    unzip -o -q "$HT2_DOCX" -d "$HT2_UNZIP"
+    if python3 - "$HT2_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    if not any("STYLEREF" in (t.text or "")
+               for t in root.iter(f"{{{W}}}instrText")):
+        continue
+    if not root.findall(f".//{{{W}}}fldChar"):
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: no --header-title: STYLEREF field intact"
+    else
+      fail "$TEMPLATE_NAME: no --header-title: field lost"
+    fi
+
+    # 35. --header-title + extra logos (table path): the literal text
+    # lands in the CENTER cell (not a side cell), the field is gone,
+    # and the logo drawings stay in their side cells.
+    local HT3_DOCX="$TMPDIR_FIX/guide-header-title-table.docx"
+    cp "$TMPDIR_FIX/${TEMPLATE_NAME}-prefix.docx" "$HT3_DOCX"
+    python3 "$FIX_SCRIPT" --fix --header-title "Custom Header" \
+      --header-logo "$LOGO_DIR/huawei-logo-header.png" \
+      --extra-logo-1 "$LOGO_DIR/huawei-logo-cover.png" \
+      --extra-logo-2 "$LOGO_DIR/huawei-logo-header.png" \
+      "$HT3_DOCX" 2>/dev/null
+    local HT3_UNZIP="$TMPDIR_FIX/guide-header-title-table-unzipped"
+    unzip -o -q "$HT3_DOCX" -d "$HT3_UNZIP"
+    if python3 - "$HT3_UNZIP" << 'PYEOF' 2>/dev/null; then
+import sys, glob
+from lxml import etree
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+unzip_dir = sys.argv[1]
+ok = False
+for f in sorted(glob.glob(unzip_dir + "/word/header*.xml")):
+    root = etree.parse(f).getroot()
+    if root.findall(f".//{{{W}}}fldChar"):
+        continue
+    tbl = root.find(f"{{{W}}}tbl")
+    if tbl is None:
+        continue
+    cells = tbl.findall(f"{{{W}}}tr/{{{W}}}tc")
+    if len(cells) != 3:
+        continue
+    # Literal text in the CENTER cell only
+    center_texts = [t.text for t in cells[1].iter(f"{{{W}}}t")
+                    if t.text]
+    if center_texts != ["Custom Header"]:
+        continue
+    # Logos intact: 1 drawing left, 2 right
+    if len(cells[0].findall(f".//{{{W}}}drawing")) != 1:
+        continue
+    if len(cells[2].findall(f".//{{{W}}}drawing")) != 2:
+        continue
+    ok = True
+    break
+sys.exit(0 if ok else 1)
+PYEOF
+      pass "$TEMPLATE_NAME: --header-title + extras: literal in center cell, logos intact"
+    else
+      fail "$TEMPLATE_NAME: --header-title + extras: layout broken"
+    fi
   fi
 }
 
