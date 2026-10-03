@@ -1,7 +1,7 @@
 = Roteiro de Homologação
 :template: poc
 :lang: pt
-:version: 1.1.1
+:version: 1.2.0
 :authors: Carlos Santos
 :nochangelog:
 
@@ -302,8 +302,8 @@ NOTE: Os critérios acima são uma proposta operacional para a homologação. A 
 
 ++++
 \begin{signatures}
-\signaturecell{Pedro Oliveira}{Arquiteto de Soluções Cloud}{pedro.oliveira@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Carlos Santos}{Responsável Técnico}{carlos.santos@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
-\signaturecell{Mariana Costa}{Gerente de Contas Técnico}{mariana.costa@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Ana Lima}{Gerente de Projeto}{ana.lima@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
+\signedcell{Pedro Oliveira}{Arquiteto de Soluções Cloud}{pedro.oliveira@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Carlos Santos}{Responsável Técnico}{carlos.santos@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
+\signedcell{Mariana Costa}{Gerente de Contas Técnico}{mariana.costa@huawei.com}{Huawei Cloud, Av. Nuvem 123, Sala 100} & \signaturecell{Ana Lima}{Gerente de Projeto}{ana.lima@exemplo.com}{Exemplo Corp, R. Negócios 456} \\ \hline
 \end{signatures}
 ++++
 

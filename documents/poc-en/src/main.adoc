@@ -1,7 +1,7 @@
 = Proof of Concept
 :template: poc
 :lang: en
-:version: 1.0.1
+:version: 1.1.0
 :authors: Jane Doe
 :nochangelog:
 
@@ -303,7 +303,7 @@ NOTE: The criteria above are an operational proposal for the PoC evaluation. The
 
 ++++
 \begin{signatures}
-\signaturecell{Jane Doe}{Cloud Solutions Architect}{jane.doe@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{John Smith}{Technical Lead}{john.smith@example.com}{Example Corp, 456 Business Street} \\ \hline
-\signaturecell{Alice Brown}{Technical Account Manager}{alice.brown@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{Robert Wilson}{Project Manager}{robert.wilson@example.com}{Example Corp, 456 Business Street} \\ \hline
+\signedcell{Jane Doe}{Cloud Solutions Architect}{jane.doe@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{John Smith}{Technical Lead}{john.smith@example.com}{Example Corp, 456 Business Street} \\ \hline
+\signedcell{Alice Brown}{Technical Account Manager}{alice.brown@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{Robert Wilson}{Project Manager}{robert.wilson@example.com}{Example Corp, 456 Business Street} \\ \hline
 \end{signatures}
 ++++

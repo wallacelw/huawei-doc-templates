@@ -4,6 +4,26 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.19.0 (2026-10-02)
+
+### Pre-signed signature cells (POC template)
+
+- **New `\signedcell` macro** (`poc.cls`): signature cell for signatories
+  whose sign-off is already recorded (e.g., electronic signature). Renders
+  the language-aware label ("Signed by" / "Assinado por") followed directly
+  by the name block — no manual signature area (no blank space, no signing
+  rule). `\signaturecell` is unchanged: greeting ("Sincerely," / "At.te,")
+  plus the manual signing blank.
+- **DOCX/MD/HTML parity** (`adoc_docx_preprocessor.py`): the signatures
+  handler parses both macros; `\signedcell` cells render the "Signed by" /
+  "Assinado por" label. Single-cell rows keep the empty-cell padding
+  (2-column grid) for both cell types.
+- Both POC samples now demonstrate the mixed grid (vendor pre-signed,
+  customer manual signature); SKILL.md documents the new macro with a
+  mixed-grid example.
+- Tests: preprocessor suite gains 3 signed-cell cases (label + bold name,
+  mixed block, single-cell padding).
+
 ## v6.18.0 (2026-09-29)
 
 ### Header title defaults to the document title (all templates)

@@ -22,7 +22,7 @@
 %%    - \setdoctitle (shared cover title setter).
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/09/29 Huawei POC template v6.18.0]
+\ProvidesClass{poc}[2026/10/02 Huawei POC template v6.19.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -50,6 +50,7 @@
   % Signature labels
   \newcommand{\lg@siggreeting}{At.te,}
   \newcommand{\lg@sigemail}{E-mail}
+  \newcommand{\lg@sigesigned}{Assinado por}
   % POC classification
   \newcommand{\lg@pochomologated}{Homologada}
   \newcommand{\lg@pocwithreservations}{Homologada com ressalvas}
@@ -70,6 +71,7 @@
   % Signature labels
   \newcommand{\lg@siggreeting}{Sincerely,}
   \newcommand{\lg@sigemail}{E-mail}
+  \newcommand{\lg@sigesigned}{Signed by}
   % POC classification
   \newcommand{\lg@pochomologated}{Homologated}
   \newcommand{\lg@pocwithreservations}{With reservations}
@@ -191,11 +193,12 @@
 %  SIGNATURES
 % =====================================================================
 % Formal sign-off block — 2x2 grid.
-% Use \signaturecell for each cell, with & and \\ \hline explicitly.
+% Use \signaturecell (manual signature blank) or \signedcell (pre-signed,
+% no manual signature area) for each cell, with & and \\ \hline explicitly.
 % Usage (passthrough block):
 %   \begin{signatures}
 %   \signaturecell{Name}{Title}{email}{Address} & \signaturecell{Name}{Title}{email}{Address} \\ \hline
-%   \signaturecell{Name}{Title}{email}{Address} & \signaturecell{Name}{Title}{email}{Address} \\ \hline
+%   \signedcell{Name}{Title}{email}{Address} & \signaturecell{Name}{Title}{email}{Address} \\ \hline
 %   \end{signatures}
 
 \newenvironment{signatures}{%
@@ -209,6 +212,19 @@
 \newcommand{\signaturecell}[4]{%
   \lg@siggreeting \par\medskip
   \vspace*{1.6cm}\noindent\rule{0.55\linewidth}{0.4pt}\par\smallskip
+  \textbf{#1} \par
+  #2 \par
+  \textbf{\lg@sigemail:} \texttt{\seqsplit{#3}} \par
+  #4 \par\medskip
+}
+
+% Pre-signed signature cell — no manual signature area (no blank space,
+% no rule). Use for signatories whose sign-off is already recorded
+% (e.g., electronic signature). Renders the language-aware label
+% ("Assinado por" / "Signed by") followed by the name block.
+%   \signedcell{Name}{Title}{email}{Address}
+\newcommand{\signedcell}[4]{%
+  \lg@sigesigned \par\medskip
   \textbf{#1} \par
   #2 \par
   \textbf{\lg@sigemail:} \texttt{\seqsplit{#3}} \par

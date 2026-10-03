@@ -22,7 +22,7 @@
 %%    Plus an optional Changelog.
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{technical}[2026/09/29 Huawei Technical Report template v6.18.0]
+\ProvidesClass{technical}[2026/10/02 Huawei Technical Report template v6.19.0]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}

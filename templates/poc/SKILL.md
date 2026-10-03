@@ -691,8 +691,29 @@ Formal sign-off block in a 2x2 grid.
 ++++
 ```
 
-Use `\signaturecell` for each cell, with `&` between columns and `\\ \hline`
-at the end of each row.
+Use one cell macro per cell, with `&` between columns and `\\ \hline` at the
+end of each row.
+
+- `\signaturecell{Name}{Title}{email}{Address}` — manual signature cell:
+  renders the greeting (*Sincerely,* / *At.te,*) followed by a blank signing
+  area with a rule. Use for signatories who sign the printed document by hand.
+- `\signedcell{Name}{Title}{email}{Address}` — pre-signed signature cell:
+  for signatories whose sign-off is already recorded (e.g., electronic
+  signature). No manual signature area is rendered (no blank space, no
+  rule) — the language-aware label *Signed by* (PT: *Assinado por*) is
+  followed directly by the name block.
+
+Both cell types can be mixed in one `signatures` block — e.g., vendor
+pre-signed, customer manual signature:
+
+```asciidoc
+++++
+\begin{signatures}
+\signedcell{Jane Doe}{Cloud Solutions Architect}{jane.doe@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{John Smith}{Technical Lead}{john.smith@example.com}{Example Corp, 456 Business Street} \\ \hline
+\signedcell{Alice Brown}{Technical Account Manager}{alice.brown@huawei.com}{Huawei Cloud, 123 Cloud Avenue, Suite 100} & \signaturecell{Robert Wilson}{Project Manager}{robert.wilson@example.com}{Example Corp, 456 Business Street} \\ \hline
+\end{signatures}
+++++
+```
 
 ### Quick start — creating a new document
 
@@ -876,7 +897,7 @@ Observations and caveats.
 
 ++++
 \begin{signatures}
-\signaturecell{Name}{Title}{email}{Address} & \signaturecell{Name}{Title}{email}{Address} \\ \hline
+\signedcell{Name}{Title}{email}{Address} & \signaturecell{Name}{Title}{email}{Address} \\ \hline
 \end{signatures}
 ++++
 
@@ -901,7 +922,7 @@ with the language. Only class-driven labels switch automatically: the TOC
 title (*Sumário*), the changelog heading (*Histórico de versões*), result
 badges (*Atende* / *Atende com ressalvas* / *Não atende* / *Não testado*),
 closing record labels (*Homologada* / *Homologada com ressalvas* /
-*Não homologada*), and the signature greeting (*At.te,*).
+*Não homologada*), and the signature labels (*At.te,* / *Assinado por*).
 
 **Accent verification (PT-BR).** After compiling a Portuguese document,
 confirm no glyphs are missing:

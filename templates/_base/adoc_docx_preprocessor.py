@@ -39,6 +39,7 @@ LABELS = {
         'figure': 'Figure',
         'changelog': 'Changelog',
         'sincerely': 'Sincerely,',
+        'signed_by': 'Signed by',
         'th_name': 'Name', 'th_email': 'E-mail', 'th_phone': 'Phone', 'th_role': 'Role',
         'th_item': 'Item', 'th_record': 'Record',
         'th_id': 'ID', 'th_title': 'Title', 'th_status': 'Status',
@@ -77,6 +78,7 @@ LABELS = {
         'figure': 'Figura',
         'changelog': 'Histórico de versões',
         'sincerely': 'At.te,',
+        'signed_by': 'Assinado por',
         'th_name': 'Nome', 'th_email': 'E-mail', 'th_phone': 'Telefone', 'th_role': 'Papel',
         'th_item': 'Item', 'th_record': 'Registro',
         'th_id': 'ID', 'th_title': 'Título', 'th_status': 'Status',
@@ -378,11 +380,18 @@ def convert_signatures(content, lang):
             part = part.strip()
             # Strip trailing \\ \hline
             part = re.sub(r'\\\\\s*\\hline\s*$', '', part).strip()
-            sig_pos = part.find(r'\signaturecell')
+            # \signedcell (pre-signed) and \signaturecell (manual blank):
+            # neither string contains the other, so both finds are safe.
+            # The two cells differ only in the leading label.
+            if part.find(r'\signedcell') != -1:
+                macro, greeting = r'\signedcell', labels['signed_by']
+            else:
+                macro, greeting = r'\signaturecell', labels['sincerely']
+            sig_pos = part.find(macro)
             if sig_pos != -1:
-                # Parse four {...} args after \signaturecell
+                # Parse four {...} args after the macro
                 args = []
-                p = sig_pos + len(r'\signaturecell')
+                p = sig_pos + len(macro)
                 for _ in range(4):
                     if p < len(part) and part[p] == '{':
                         arg, p = extract_brace_arg(part, p + 1)
@@ -397,7 +406,7 @@ def convert_signatures(content, lang):
                 email = _esc_cell(convert_inline_latex(args[2], lang))
                 address = _esc_cell(convert_inline_latex(args[3], lang))
                 cell = (
-                    labels['sincerely'] + ' +\n'
+                    greeting + ' +\n'
                     + '**' + name + '**' + ' +\n' + title + ' +\n'
                     + labels['th_email'] + ': `' + email + '` +\n' + address
                 )

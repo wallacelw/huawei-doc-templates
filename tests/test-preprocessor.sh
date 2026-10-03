@@ -918,6 +918,33 @@ check("bare extra-logo: single block image (default)",
 check("bare extra-logo: body intact",
       out.count("Body.") == 1)
 
+print("=== Signed signature cells (\\signedcell) ===")
+
+# 64. \signedcell → table cell with the signed_by label and bold name
+SIGNED1 = ("++++\n\\begin{signatures}\n"
+           "\\signedcell{Alice}{Dev}{a@x}{City}\n"
+           "\\end{signatures}\n++++\n")
+out = process(HEADER + SIGNED1, 'poc', 'md')
+check("signedcell: Signed by label", "Signed by" in out)
+check("signedcell: bold name", "**Alice**" in out)
+check("signedcell: no greeting label", "Sincerely," not in out)
+
+# 65. Mixed block: one \signaturecell + one \signedcell → both labels
+SIGNED2 = ("++++\n\\begin{signatures}\n"
+           "\\signedcell{Alice}{Dev}{a@x}{City} & "
+           "\\signaturecell{Bob}{Lead}{b@x}{Town}\n"
+           "\\end{signatures}\n++++\n")
+out = process(HEADER + SIGNED2, 'poc', 'md')
+check("mixed cells: greeting label present", "Sincerely," in out)
+check("mixed cells: signed_by label present", "Signed by" in out)
+check("mixed cells: both names present",
+      "Alice" in out and "Bob" in out)
+
+# 66. Single-\signedcell row: empty-cell padding keeps the 2-column grid
+out = process(HEADER + SIGNED1, 'poc', 'md')
+check("signedcell 1-cell row: empty second cell",
+      any(line == "|" for line in out.split("\n")))
+
 print(f"\nResults: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
 PYEOF

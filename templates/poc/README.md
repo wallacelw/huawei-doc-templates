@@ -92,6 +92,7 @@ scripts/build-adoc.sh src/main.adoc -o src/main.tex && latexmk src/main.tex
 | Fail | Fail | Não atende |
 | Skip | Skip | Não testado |
 | Signature greeting | Sincerely, | At.te, |
+| Signed-by label | Signed by | Assinado por |
 | Closing item | Item | Item |
 | Closing record | Record | Registro |
 
