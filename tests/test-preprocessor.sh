@@ -529,15 +529,18 @@ check("pt testbook badge: unknown passes through", "**[Custom]**" in out)
 print("=== Signatures E-mail label (lang-aware) ===")
 
 # 39. signatures E-mail label routed through labels['th_email']
-# (PDF \lg@sigemail is 'E-mail' for both en and pt)
+# (PDF \lg@sigemail is 'E-mail' for both en and pt). The address sits
+# on its own line below the label (v6.19.1 layout).
 out = process(HEADER + "++++\n\\begin{signatures}\n"
               "\\signaturecell{Alice}{Dev}{a@x}{City}\n"
               "\\end{signatures}\n++++\n", 'poc', 'md')
-check("en signature: E-mail: label", "E-mail: `a@x`" in out)
+check("en signature: E-mail label line + address line",
+      "E-mail: +\n`a@x`" in out)
 out = process(":lang: pt\n:version: 1.0.0\n\n++++\n\\begin{signatures}\n"
               "\\signaturecell{Alice}{Dev}{a@x}{City}\n"
               "\\end{signatures}\n++++\n", 'poc', 'md')
-check("pt signature: E-mail: label", "E-mail: `a@x`" in out)
+check("pt signature: E-mail label line + address line",
+      "E-mail: +\n`a@x`" in out)
 
 print("=== PT image placeholder ===")
 
@@ -927,6 +930,8 @@ SIGNED1 = ("++++\n\\begin{signatures}\n"
 out = process(HEADER + SIGNED1, 'poc', 'md')
 check("signedcell: Signed by label", "Signed by" in out)
 check("signedcell: bold name", "**Alice**" in out)
+check("signedcell: E-mail label line + address line",
+      "E-mail: +\n`a@x`" in out)
 check("signedcell: no greeting label", "Sincerely," not in out)
 
 # 65. Mixed block: one \signaturecell + one \signedcell → both labels

@@ -4,6 +4,23 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.19.1 (2026-10-02)
+
+### Signature cell e-mail layout (POC template)
+
+- **PDF** (`poc.cls`): in both `\signaturecell` and `\signedcell`, the
+  e-mail address now sits on its own line below the "E-mail:" label,
+  giving the address the full column width. Previously the label prefix
+  consumed part of the line and `\seqsplit` (which allows breaks at any
+  character) split long addresses mid-token — a 34-character address
+  broke as `…serpro.gov.b` / `r`. `\seqsplit` remains as the safety net
+  for pathological addresses.
+- **DOCX/MD/HTML parity** (`adoc_docx_preprocessor.py`): the signatures
+  handler emits the same two-line layout (label line, then address line)
+  for both cell types.
+- Tests: preprocessor signature assertions updated to the two-line
+  e-mail layout (signaturecell EN/PT + signedcell).
+
 ## v6.19.0 (2026-10-02)
 
 ### Pre-signed signature cells (POC template)

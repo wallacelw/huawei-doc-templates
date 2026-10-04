@@ -22,7 +22,7 @@
 %%    - \setdoctitle (shared cover title setter).
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/10/02 Huawei POC template v6.19.0]
+\ProvidesClass{poc}[2026/10/02 Huawei POC template v6.19.1]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -214,7 +214,7 @@
   \vspace*{1.6cm}\noindent\rule{0.55\linewidth}{0.4pt}\par\smallskip
   \textbf{#1} \par
   #2 \par
-  \textbf{\lg@sigemail:} \texttt{\seqsplit{#3}} \par
+  \textbf{\lg@sigemail:} \par \texttt{\seqsplit{#3}} \par
   #4 \par\medskip
 }
 
@@ -227,7 +227,7 @@
   \lg@sigesigned \par\medskip
   \textbf{#1} \par
   #2 \par
-  \textbf{\lg@sigemail:} \texttt{\seqsplit{#3}} \par
+  \textbf{\lg@sigemail:} \par \texttt{\seqsplit{#3}} \par
   #4 \par\medskip
 }
 

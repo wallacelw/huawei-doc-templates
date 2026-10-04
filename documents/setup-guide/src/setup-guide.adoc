@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 6.19.0
+:version: 6.19.1
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.19.1}{2026-10-02}{\item POC signature cells: the e-mail address now sits on its own line below the E-mail label (both \textbackslash signaturecell and \textbackslash signedcell), giving long addresses the full column width and fixing mid-token breaks; DOCX/MD/HTML parity.}
   \changelogentry{6.19.0}{2026-10-02}{\item POC template: new \textbackslash signedcell macro for pre-signed signature cells (sign-off already recorded, for example an electronic signature -- no manual signature blank), alongside the existing \textbackslash signaturecell. Language-aware label (Signed by / Assinado por); DOCX/MD/HTML parity; demonstrated in both POC samples.}
   \changelogentry{6.18.0}{2026-09-29}{\item Header title now defaults to the document title when :header-title: is unset (PDF); the DOCX header honors :header-title: (literal text replaces the STYLEREF field), so both formats behave identically.}
   \changelogentry{6.17.0}{2026-09-29}{\item Multi-logo support: :extra-logo-1: and :extra-logo-2: render in the header right corner and on the cover as an equal-height row; :cover-logo-height: overrides the row height; DOCX parity including document-relative asset paths.}

@@ -408,7 +408,8 @@ def convert_signatures(content, lang):
                 cell = (
                     greeting + ' +\n'
                     + '**' + name + '**' + ' +\n' + title + ' +\n'
-                    + labels['th_email'] + ': `' + email + '` +\n' + address
+                    + labels['th_email'] + ':' + ' +\n'
+                    + '`' + email + '` +\n' + address
                 )
                 cells.append(cell)
         if cells:
