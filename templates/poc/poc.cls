@@ -22,7 +22,7 @@
 %%    - \setdoctitle (shared cover title setter).
 %% =====================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{poc}[2026/10/02 Huawei POC template v6.19.1]
+\ProvidesClass{poc}[2026/10/02 Huawei POC template v6.19.2]
 
 % ---- Base class (options, article, packages, shared modules) ---------
 \LoadClassWithOptions{huawei-base}
@@ -209,13 +209,26 @@
   \end{tabular}%
   \par
 }
+% E-mail line: label and address share one line when they fit the cell
+% width; otherwise the address moves to its own full-width line. A
+% mid-token break can only occur if the address alone exceeds the cell
+% width (seqsplit safety net).
+\newsavebox{\lg@sigemailbox}
+\newcommand{\lg@sigemailline}[1]{%
+  \sbox{\lg@sigemailbox}{\textbf{\lg@sigemail:} \texttt{#1}}%
+  \ifdim\wd\lg@sigemailbox>\linewidth
+    \textbf{\lg@sigemail:} \par \texttt{\seqsplit{#1}}\par
+  \else
+    \textbf{\lg@sigemail:} \texttt{\seqsplit{#1}}\par
+  \fi
+}
 \newcommand{\signaturecell}[4]{%
-  \lg@siggreeting \par\medskip
-  \vspace*{1.6cm}\noindent\rule{0.55\linewidth}{0.4pt}\par\smallskip
+  \lg@siggreeting \par\smallskip
+  \vspace*{1.0cm}\noindent\rule{0.55\linewidth}{0.4pt}\par\smallskip
   \textbf{#1} \par
   #2 \par
-  \textbf{\lg@sigemail:} \par \texttt{\seqsplit{#3}} \par
-  #4 \par\medskip
+  \lg@sigemailline{#3}
+  #4 \par\smallskip
 }
 
 % Pre-signed signature cell — no manual signature area (no blank space,
@@ -224,11 +237,11 @@
 % ("Assinado por" / "Signed by") followed by the name block.
 %   \signedcell{Name}{Title}{email}{Address}
 \newcommand{\signedcell}[4]{%
-  \lg@sigesigned \par\medskip
+  \lg@sigesigned \par\smallskip
   \textbf{#1} \par
   #2 \par
-  \textbf{\lg@sigemail:} \par \texttt{\seqsplit{#3}} \par
-  #4 \par\medskip
+  \lg@sigemailline{#3}
+  #4 \par\smallskip
 }
 
 \endinput

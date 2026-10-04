@@ -4,6 +4,28 @@ All notable changes to the huawei-doc-template project are documented here.
 Per-document changelogs are maintained via `\changelogentry` in each `.adoc` file
   (inside passthrough blocks).
 
+## v6.19.2 (2026-10-02)
+
+### Compact signature cells + conditional e-mail line (POC template)
+
+- **PDF** (`poc.cls`): signature cells are more compact — the manual
+  signing blank in `\signaturecell` is reduced from 1.6cm to 1.0cm and
+  the leading/trailing cell padding is tightened (`\smallskip`, was
+  `\medskip`). A full 5-row mixed signature grid now shares one page
+  with its section heading (the homologation document drops from 26 to
+  25 pages).
+- **Conditional e-mail line** (`poc.cls`): new `\lg@sigemailline` macro
+  measures the "E-mail: address" width — label and address share one
+  line when they fit the cell; otherwise the address moves to its own
+  full-width line (keeping the v6.19.1 mid-token-break fix; `\seqsplit`
+  remains the safety net for pathological addresses).
+- **DOCX/MD/HTML** (`adoc_docx_preprocessor.py`): the signatures
+  handler emits the inline form (label + address on one line) for both
+  cell types, matching the PDF's common case; over-long addresses wrap
+  in the renderer where it supports word-breaking (DOCX does; HTML
+  table cells may overflow in pathological cases).
+- Tests: preprocessor e-mail assertions reverted to the inline form.
+
 ## v6.19.1 (2026-10-02)
 
 ### Signature cell e-mail layout (POC template)

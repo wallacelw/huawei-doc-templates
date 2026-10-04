@@ -3,7 +3,7 @@
 :lang: en
 :header-title: Huawei Cloud -- Flexus X + SSH + MaaS Gateway Setup
 :cover-text: Huawei Technologies Co., Ltd.
-:version: 6.19.1
+:version: 6.19.2
 
 == Provision a Flexus X Instance on Huawei Cloud
 
@@ -1127,6 +1127,7 @@ secondary text:
 
 ++++
 \begin{changelog}
+  \changelogentry{6.19.2}{2026-10-02}{\item POC signature cells are more compact: the manual signing blank shrinks from 1.6cm to 1.0cm and cell padding is tighter, so a full 5-row signature grid shares one page with its section heading. The e-mail line is now conditional: label and address share a line when they fit the cell, otherwise the address moves to its own full-width line (keeping the mid-token-break fix).}
   \changelogentry{6.19.1}{2026-10-02}{\item POC signature cells: the e-mail address now sits on its own line below the E-mail label (both \textbackslash signaturecell and \textbackslash signedcell), giving long addresses the full column width and fixing mid-token breaks; DOCX/MD/HTML parity.}
   \changelogentry{6.19.0}{2026-10-02}{\item POC template: new \textbackslash signedcell macro for pre-signed signature cells (sign-off already recorded, for example an electronic signature -- no manual signature blank), alongside the existing \textbackslash signaturecell. Language-aware label (Signed by / Assinado por); DOCX/MD/HTML parity; demonstrated in both POC samples.}
   \changelogentry{6.18.0}{2026-09-29}{\item Header title now defaults to the document title when :header-title: is unset (PDF); the DOCX header honors :header-title: (literal text replaces the STYLEREF field), so both formats behave identically.}
